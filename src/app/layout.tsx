@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
@@ -22,6 +22,10 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "NovelFusion AI",
   description: "多源小说智能分析与变体生成平台",
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0a0a0b",
 };
 
 export default function RootLayout({

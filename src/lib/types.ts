@@ -111,6 +111,18 @@ export const GenerateConfigSchema = z.object({
 });
 export type GenerateConfig = z.infer<typeof GenerateConfigSchema>;
 
+export const VariantResultSchema = z.object({
+  title: z.string().default(""),
+  content: z.string().min(1),
+});
+export type VariantResult = z.infer<typeof VariantResultSchema>;
+
+export type GenerateAnalyses = {
+  worldview: WorldviewResult;
+  characters: CharactersResult;
+  narrative: NarrativeResult;
+};
+
 // ============================================================================
 // Supabase Database types (minimal, hand-rolled — replace with generated types later)
 // ============================================================================
@@ -252,3 +264,8 @@ export type Database = {
     CompositeTypes: Record<string, never>;
   };
 };
+
+export type SessionRow = Database["public"]["Tables"]["sessions"]["Row"];
+export type BookRow = Database["public"]["Tables"]["books"]["Row"];
+export type AnalysisRow = Database["public"]["Tables"]["analyses"]["Row"];
+export type VariantRow = Database["public"]["Tables"]["variants"]["Row"];

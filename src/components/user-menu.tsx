@@ -45,7 +45,7 @@ export function UserMenu({ email }: { email: string }) {
           disabled={pending}
           onClick={() => start(() => signOut())}
         >
-          <LogOut />
+          <LogOut aria-hidden="true" />
           {pending ? "登出中…" : "登出"}
         </DropdownMenuItem>
       </DropdownMenuContent>

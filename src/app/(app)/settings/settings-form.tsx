@@ -80,16 +80,26 @@ export function SettingsForm({
   };
 
   return (
-    <div className="mx-auto max-w-3xl">
-      <Card className="border-border/60 bg-card/60">
+    <div className="mx-auto flex w-full max-w-[1120px] flex-col gap-8 px-4 py-8 sm:px-6 md:px-8 md:py-10">
+      <div className="max-w-2xl space-y-2">
+        <p className="text-[12px] font-medium uppercase tracking-[0.14em] text-muted-foreground/70">
+          模型设置
+        </p>
+        <h1 className="text-[26px] font-medium tracking-tight sm:text-[30px]">
+          配置分析模型
+        </h1>
+        <p className="text-[14px] leading-6 text-muted-foreground sm:text-[15px]">
+          每个账号保留一套模型配置，用于后续小说分析与生成。
+        </p>
+      </div>
+
+      <Card className="max-w-3xl border-border/60 bg-card/40 shadow-none">
         <CardHeader>
           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/15 text-primary ring-1 ring-primary/30">
-            <Bot className="h-5 w-5" />
+            <Bot aria-hidden="true" className="h-5 w-5" />
           </div>
           <CardTitle>LLM 配置</CardTitle>
-          <CardDescription>
-            每个账号保留一套模型配置，用于后续小说分析与生成。
-          </CardDescription>
+          <CardDescription>保存后即可在工作台继续分析任务。</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={onSubmit} className="space-y-5">
