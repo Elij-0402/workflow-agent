@@ -1,0 +1,77 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 220 9% 13%;
+    --card: 0 0% 100%;
+    --card-foreground: 220 9% 13%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 9% 13%;
+    --primary: 232 53% 60%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 14% 96%;
+    --secondary-foreground: 220 9% 13%;
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 6% 42%;
+    --accent: 220 14% 96%;
+    --accent-foreground: 220 9% 13%;
+    --destructive: 0 70% 50%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 232 53% 60%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 240 6% 4%;
+    --foreground: 210 4% 96%;
+    --card: 220 6% 7%;
+    --card-foreground: 210 4% 96%;
+    --popover: 220 6% 8%;
+    --popover-foreground: 210 4% 96%;
+    --primary: 232 53% 60%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 5% 12%;
+    --secondary-foreground: 210 4% 96%;
+    --muted: 220 5% 11%;
+    --muted-foreground: 218 7% 57%;
+    --accent: 220 5% 13%;
+    --accent-foreground: 210 4% 96%;
+    --destructive: 0 60% 50%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 220 6% 14%;
+    --input: 220 6% 14%;
+    --ring: 232 53% 60%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1, "ss01" 1, "ss03" 1;
+    text-rendering: optimizeLegibility;
+  }
+  ::selection {
+    background: hsl(var(--primary) / 0.25);
+    color: hsl(var(--foreground));
+  }
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--border)) transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-up {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
