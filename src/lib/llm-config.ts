@@ -11,6 +11,8 @@ export const LLM_CONFIG_REQUIRED_MESSAGE = "请先在设置页完成兼容模型
 export const LLM_BASE_URL_FORMAT_MESSAGE = "Base URL 格式错误。";
 export const LLM_INCOMPATIBLE_BASE_URL_MESSAGE =
   "该 Base URL 不属于 OpenAI-compatible 接口，请改用兼容端点。";
+export const LLM_BASE_URL_NOT_ALLOWED_MESSAGE =
+  "该 Base URL 不被允许，请使用 https 公网端点。";
 export const LLM_SAVED_API_KEY_DECRYPT_FAILED_MESSAGE =
   "已保存的 API Key 无法解密，请重新填写。";
 
@@ -93,13 +95,39 @@ export function deriveProvider(baseUrl: string): LLMProvider {
 }
 
 export function validateCompatibleBaseUrl(baseUrl: string) {
-  let host: string;
+  let parsed: URL;
   try {
-    host = new URL(baseUrl).hostname.toLowerCase();
+    parsed = new URL(baseUrl);
   } catch {
     return {
       ok: false as const,
       message: LLM_BASE_URL_FORMAT_MESSAGE,
+    };
+  }
+
+  if (parsed.protocol !== "https:") {
+    return {
+      ok: false as const,
+      message: LLM_BASE_URL_NOT_ALLOWED_MESSAGE,
+    };
+  }
+
+  const host = parsed.hostname.toLowerCase();
+
+  // Reject IP literals — without DNS we can't allowlist hosts; refusing literals
+  // closes the most common SSRF + metadata-endpoint vectors.
+  if (IPV4_LITERAL_REGEX.test(host) || host.includes(":")) {
+    return {
+      ok: false as const,
+      message: LLM_BASE_URL_NOT_ALLOWED_MESSAGE,
+    };
+  }
+
+  // Reject internal / loopback hostname suffixes that don't resolve to public IPs.
+  if (PRIVATE_HOSTNAME_REGEX.test(host)) {
+    return {
+      ok: false as const,
+      message: LLM_BASE_URL_NOT_ALLOWED_MESSAGE,
     };
   }
 
@@ -116,10 +144,15 @@ export function validateCompatibleBaseUrl(baseUrl: string) {
   };
 }
 
+const IPV4_LITERAL_REGEX = /^(\d{1,3}\.){3}\d{1,3}$/;
+const PRIVATE_HOSTNAME_REGEX =
+  /^(localhost|.+\.local|.+\.localhost|.+\.internal|.+\.lan|.+\.home|.+\.home\.arpa)$/i;
+
 export function isUserFixableLLMConfigMessage(message: string) {
   return (
     message === LLM_CONFIG_REQUIRED_MESSAGE ||
     message === LLM_INCOMPATIBLE_BASE_URL_MESSAGE ||
+    message === LLM_BASE_URL_NOT_ALLOWED_MESSAGE ||
     message === LLM_SAVED_API_KEY_DECRYPT_FAILED_MESSAGE
   );
 }
