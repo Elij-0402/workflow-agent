@@ -113,8 +113,9 @@ export default async function SessionDetailPage({ params }: SessionPageProps) {
   ) : undefined;
 
   return (
-    <div className="mx-auto flex w-full max-w-[1040px] flex-col gap-8 px-4 py-8 sm:px-6 md:px-8 md:py-10">
+    <div className="app-page">
       <PageHeader
+        label="Session"
         title={book.title}
         description={currentStepDescription}
         action={headerAction}
@@ -139,31 +140,54 @@ export default async function SessionDetailPage({ params }: SessionPageProps) {
         ]}
       />
 
-      {hasCompleteAnalysis ? (
-        <>
-          <GeneratePanel
-            sessionId={session.id}
-            sessionStatus={session.status}
-            llmConfigured={Boolean(llmConfig)}
-            hasCompleteAnalysis={hasCompleteAnalysis}
-            variantCount={safeVariants.length}
-          />
-          {hasVariants ? <VariantList variants={safeVariants} /> : null}
+      <section className="grid gap-8">
+        <div className="surface-panel p-5">
+          <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_280px]">
+            <div>
+              <p className="eyebrow-label">Overview</p>
+              <h2 className="mt-2 text-[18px] font-medium text-foreground">任务概览</h2>
+              <p className="mt-2 max-w-3xl text-[13px] leading-6 text-muted-foreground">
+                当前版本先围绕单份文本建立完整的研究与生成路径。后续多书对比、双视角分析和来源映射会接入同一块结构。
+              </p>
+            </div>
+            <div className="surface-subtle p-4">
+              <p className="data-label">当前状态</p>
+              <p className="mt-2 text-[14px] font-medium text-foreground">
+                {getStageSummary(hasCompleteAnalysis, hasVariants)}
+              </p>
+              <p className="mt-2 text-[12px] leading-6 text-muted-foreground">
+                已完成分析 {safeAnalyses.length} / 3，已保存版本 {safeVariants.length}。
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {hasCompleteAnalysis ? (
+          <>
+            <GeneratePanel
+              sessionId={session.id}
+              sessionStatus={session.status}
+              llmConfigured={Boolean(llmConfig)}
+              hasCompleteAnalysis={hasCompleteAnalysis}
+              variantCount={safeVariants.length}
+            />
+            {hasVariants ? <VariantList variants={safeVariants} /> : null}
+            <AnalysisPanel
+              sessionId={session.id}
+              analyses={safeAnalyses}
+              llmConfigured={Boolean(llmConfig)}
+              sessionStatus={session.status}
+            />
+          </>
+        ) : (
           <AnalysisPanel
             sessionId={session.id}
             analyses={safeAnalyses}
             llmConfigured={Boolean(llmConfig)}
             sessionStatus={session.status}
           />
-        </>
-      ) : (
-        <AnalysisPanel
-          sessionId={session.id}
-          analyses={safeAnalyses}
-          llmConfigured={Boolean(llmConfig)}
-          sessionStatus={session.status}
-        />
-      )}
+        )}
+      </section>
     </div>
   );
 }
@@ -203,4 +227,10 @@ function getStageItems({
       state: hasResults ? "done" : hasCompleteAnalysis ? "current" : "upcoming",
     },
   ];
+}
+
+function getStageSummary(hasCompleteAnalysis: boolean, hasVariants: boolean) {
+  if (hasVariants) return "结果已生成";
+  if (hasCompleteAnalysis) return "等待生成";
+  return "等待分析完成";
 }

@@ -20,39 +20,46 @@ export default async function AppLayout({
   if (!user) redirect("/login");
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="min-h-screen bg-background">
       <a
         href="#main-content"
         className="sr-only z-50 rounded-md bg-background px-3 py-2 text-sm text-foreground focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:outline-none focus:ring-2 focus:ring-ring"
       >
         跳转到主要内容
       </a>
-      <Sidebar />
-      <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-30 flex h-14 items-center border-b border-border/60 bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/80 md:px-6">
-          <div className="flex min-w-0 flex-1 items-center gap-3">
-            <MobileNav />
-            <div className="min-w-0 md:hidden">
-              <div className="truncate text-[13px] font-medium">NovelFusion</div>
-              <div className="truncate text-[11px] text-muted-foreground">
-                创作工作台
+      <div className="app-shell-grid min-h-screen">
+        <Sidebar />
+        <div className="flex min-w-0 flex-1 flex-col">
+          <header className="sticky top-0 z-30 flex h-16 items-center border-b border-border/70 bg-background/90 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/75 md:px-6">
+            <div className="flex min-w-0 flex-1 items-center gap-3">
+              <MobileNav />
+              <div className="min-w-0">
+                <div className="truncate text-[13px] font-medium">NovelFusion</div>
+                <div className="truncate text-[11px] text-muted-foreground">
+                  多源小说分析与融合创作
+                </div>
               </div>
             </div>
-          </div>
 
-          <div className="flex items-center gap-2">
-            <Button asChild variant="outline" size="sm" className="hidden sm:inline-flex">
-              <Link href="/upload">
-                <Plus aria-hidden="true" />
-                新建任务
-              </Link>
-            </Button>
-            <UserMenu email={user.email ?? "anonymous"} />
-          </div>
-        </header>
-        <main id="main-content" className="min-w-0 flex-1">
-          {children}
-        </main>
+            <div className="flex items-center gap-2">
+              <Button
+                asChild
+                variant="outline"
+                size="sm"
+                className="hidden sm:inline-flex"
+              >
+                <Link href="/upload">
+                  <Plus aria-hidden="true" />
+                  新建任务
+                </Link>
+              </Button>
+              <UserMenu email={user.email ?? "anonymous"} />
+            </div>
+          </header>
+          <main id="main-content" className="min-w-0 flex-1">
+            {children}
+          </main>
+        </div>
       </div>
     </div>
   );
