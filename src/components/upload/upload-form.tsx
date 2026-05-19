@@ -1,11 +1,13 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { FileText, Loader2, UploadCloud } from "lucide-react";
 import { toast } from "sonner";
 
-import { uploadNovel } from "@/lib/upload/actions";
+import { finalizeNovelUpload, initNovelUpload } from "@/lib/upload/actions";
+import { MAX_UPLOAD_BYTES, validateUploadFile } from "@/lib/upload/shared";
+import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -18,29 +20,85 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { formatBytes } from "@/lib/utils";
 
-const MAX_UPLOAD_BYTES = 50 * 1024 * 1024;
-
 export function UploadForm() {
   const router = useRouter();
-  const [pending, startTransition] = useTransition();
+  const supabase = useMemo(() => createClient(), []);
+  const [pending, setPending] = useState(false);
   const [filename, setFilename] = useState("");
   const [filesize, setFilesize] = useState<number | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [statusText, setStatusText] = useState<string | null>(null);
 
-  const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const formData = new FormData(event.currentTarget);
 
-    startTransition(async () => {
-      const result = await uploadNovel(formData);
-      if ("error" in result) {
-        toast.error(result.error);
+    if (!selectedFile) {
+      toast.error("请选择要上传的小说文件。");
+      return;
+    }
+
+    const fileError = validateUploadFile({
+      name: selectedFile.name,
+      size: selectedFile.size,
+      type: selectedFile.type,
+    });
+
+    if (fileError) {
+      toast.error(fileError);
+      return;
+    }
+
+    setPending(true);
+    setStatusText("正在初始化上传任务...");
+
+    try {
+      const initResult = await initNovelUpload({
+        filename: selectedFile.name,
+        size: selectedFile.size,
+        contentType: selectedFile.type,
+      });
+
+      if ("error" in initResult) {
+        toast.error(initResult.error);
         return;
       }
 
-      toast.success(result.message ?? "上传成功。");
-      router.push(result.redirectTo);
+      setStatusText("正在直传原始文件到私有存储...");
+      const { error: uploadError } = await supabase.storage
+        .from("novels")
+        .upload(initResult.storageObjectPath, selectedFile, {
+          contentType: selectedFile.type || "text/plain",
+          upsert: false,
+        });
+
+      if (uploadError) {
+        toast.error("上传原始文件失败，请稍后重试。");
+        return;
+      }
+
+      setStatusText("正在解析文本并写入分析会话...");
+      const finalizeResult = await finalizeNovelUpload({
+        sessionId: initResult.sessionId,
+        storageObjectPath: initResult.storageObjectPath,
+        filename: selectedFile.name,
+        size: selectedFile.size,
+        contentType: selectedFile.type,
+      });
+
+      if ("error" in finalizeResult) {
+        toast.error(finalizeResult.error);
+        return;
+      }
+
+      toast.success(finalizeResult.message ?? "上传成功。");
+      router.push(finalizeResult.redirectTo);
       router.refresh();
-    });
+    } catch {
+      toast.error("上传失败，请稍后重试。");
+    } finally {
+      setPending(false);
+      setStatusText(null);
+    }
   };
 
   return (
@@ -51,11 +109,11 @@ export function UploadForm() {
         </div>
         <CardTitle>上传小说文本</CardTitle>
         <CardDescription>
-          仅支持 `.txt`。上传后会自动识别编码、清洗文本并切分章节元数据。
+          仅支持 `.txt`。原始文件会先直传私有存储，再由服务端识别编码、清洗文本并切分章节元数据。
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={onSubmit} className="space-y-5">
+        <form onSubmit={(event) => void onSubmit(event)} className="space-y-5">
           <div className="rounded-lg border border-dashed border-border/70 bg-background/40 p-4">
             <div className="space-y-3">
               <Label htmlFor="file">小说文件</Label>
@@ -68,6 +126,7 @@ export function UploadForm() {
                 disabled={pending}
                 onChange={(event) => {
                   const file = event.target.files?.[0] ?? null;
+                  setSelectedFile(file);
                   setFilename(file?.name ?? "");
                   setFilesize(file?.size ?? null);
                 }}
@@ -100,9 +159,15 @@ export function UploadForm() {
             </div>
           ) : null}
 
+          {statusText ? (
+            <div className="rounded-lg border border-border/60 bg-background/30 px-4 py-3 text-[13px] leading-6 text-muted-foreground">
+              {statusText}
+            </div>
+          ) : null}
+
           <div className="flex flex-col gap-3 border-t border-border/60 pt-5 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-xs leading-5 text-muted-foreground">
-              原始文件会保存到私有存储，清洗后的文本会写入数据库，供后续分析直接读取。
+              原始文件会先直传到私有存储，清洗后的文本再写入数据库，供后续分析直接读取。
             </p>
             <Button type="submit" disabled={pending}>
               {pending ? (

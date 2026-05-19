@@ -11,7 +11,7 @@ export default function UploadPage() {
           新建分析任务
         </h1>
         <p className="text-[14px] leading-6 text-muted-foreground sm:text-[15px]">
-          上传 `.txt` 小说后，系统会识别编码、清洗文本并写入章节元数据，然后进入三维度分析详情页。
+          上传 `.txt` 小说后，原始文件会先直传私有存储，系统再识别编码、清洗文本并写入章节元数据，然后进入三维度分析详情页。
         </p>
       </div>
 
