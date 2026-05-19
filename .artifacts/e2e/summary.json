@@ -1,0 +1,29 @@
+{
+  "finalUrl": "http://127.0.0.1:3001/sessions/fa33ec71-d79d-4df6-9a2f-2345e4d2744b",
+  "fetchedModels": true,
+  "resultTitle": "黄枫谷试炼",
+  "readingPanelVisible": true,
+  "analysisComplete": true,
+  "generatedVisible": true,
+  "consoleErrors": [
+    "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ],
+  "requestFailures": [
+    "GET http://127.0.0.1:3001/dashboard?_rsc=nmyFLQq3sV5huFjw :: net::ERR_ABORTED",
+    "GET http://127.0.0.1:3001/dashboard?_rsc=YARl45dmeVER7bRN :: net::ERR_ABORTED",
+    "GET http://127.0.0.1:3001/dashboard?_rsc=0emvZ8YlOZ3v4i2x :: net::ERR_ABORTED",
+    "GET http://127.0.0.1:3001/upload?_rsc=0emvZ8YlOZ3v4i2x :: net::ERR_ABORTED",
+    "GET http://127.0.0.1:3001/sessions?_rsc=0emvZ8YlOZ3v4i2x :: net::ERR_ABORTED",
+    "GET http://127.0.0.1:3001/sessions/435dadd0-f124-4031-9c78-a9523af277ab?_rsc=0emvZ8YlOZ3v4i2x :: net::ERR_ABORTED",
+    "GET http://127.0.0.1:3001/settings?_rsc=0emvZ8YlOZ3v4i2x :: net::ERR_ABORTED",
+    "GET http://127.0.0.1:3001/upload?_rsc=b2bxedLQ7kHqn9lG :: net::ERR_ABORTED",
+    "GET http://127.0.0.1:3001/settings?_rsc=HSbsenLvs-5CmGCX :: net::ERR_ABORTED",
+    "GET http://127.0.0.1:3001/dashboard?_rsc=qu-xFbmP8J_zCBVJ :: net::ERR_ABORTED",
+    "GET http://127.0.0.1:3001/sessions?_rsc=qu-xFbmP8J_zCBVJ :: net::ERR_ABORTED",
+    "GET http://127.0.0.1:3001/settings?_rsc=qu-xFbmP8J_zCBVJ :: net::ERR_ABORTED",
+    "GET http://127.0.0.1:3001/sessions/fa33ec71-d79d-4df6-9a2f-2345e4d2744b?_rsc=VmkxrDREEe6mVrIJ :: net::ERR_ABORTED",
+    "GET http://127.0.0.1:3001/sessions/fa33ec71-d79d-4df6-9a2f-2345e4d2744b?_rsc=E-81o78utRQTeC6O :: net::ERR_ABORTED",
+    "GET http://127.0.0.1:3001/sessions/fa33ec71-d79d-4df6-9a2f-2345e4d2744b?_rsc=E-81o78utRQTeC6O :: net::ERR_ABORTED"
+  ],
+  "pageErrors": []
+}

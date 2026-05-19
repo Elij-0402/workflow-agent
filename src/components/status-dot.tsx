@@ -5,7 +5,7 @@ export const SESSION_STATUS_META: Record<
   { dot: string; label: string; tone: string }
 > = {
   draft: { dot: "bg-zinc-500", label: "草稿", tone: "text-zinc-300" },
-  uploaded: { dot: "bg-blue-400", label: "已上传", tone: "text-blue-300" },
+  uploaded: { dot: "bg-sky-400", label: "已导入", tone: "text-sky-300" },
   analyzing: {
     dot: "bg-amber-400 animate-pulse",
     label: "分析中",
@@ -46,7 +46,7 @@ export function StatusDot({
   return (
     <span
       className={cn(
-        "inline-block h-1.5 w-1.5 shrink-0 rounded-full",
+        "inline-block h-2 w-2 shrink-0 rounded-full shadow-[0_0_0_2px_hsl(var(--background))]",
         meta.dot,
         className
       )}

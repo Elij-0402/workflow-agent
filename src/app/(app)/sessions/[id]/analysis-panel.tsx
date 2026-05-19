@@ -224,6 +224,7 @@ export function AnalysisPanel({
     <section id="analysis-panel" className="space-y-5">
       <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div className="space-y-2">
+          <p className="eyebrow-label">Analysis</p>
           <h2 className="text-[20px] font-medium tracking-tight text-foreground">
             分析结果
           </h2>
@@ -263,7 +264,7 @@ export function AnalysisPanel({
         ) : null}
       </div>
 
-      <div className="overflow-hidden rounded-lg border border-border/60 bg-background/20">
+      <div className="overflow-hidden rounded-[8px] border border-border/70 bg-card/58">
         {ANALYSIS_DIMENSIONS.map((dimension, index) => {
           const item = items[dimension];
           const canShowDetail = Boolean(item.result);
@@ -274,13 +275,13 @@ export function AnalysisPanel({
               key={dimension}
               className={cn(
                 "px-5 py-4",
-                index > 0 ? "border-t border-border/60" : ""
+                index > 0 ? "border-t border-border/70" : ""
               )}
             >
               <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                 <div className="min-w-0 space-y-2">
                   <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                    <h3 className="text-[15px] font-medium text-foreground">
+                    <h3 className="text-[14px] font-medium text-foreground">
                       {DIMENSION_LABELS[dimension]}
                     </h3>
                     <span className={cn("text-[13px]", statusCopy.className)}>
@@ -354,7 +355,7 @@ export function AnalysisPanel({
               </div>
 
               {canShowDetail && expanded[dimension] ? (
-                <div className="mt-4 border-t border-border/60 pt-4">
+                <div className="mt-4 border-t border-border/70 pt-4">
                   <AnalysisDetail dimension={dimension} result={item.result} />
                 </div>
               ) : null}

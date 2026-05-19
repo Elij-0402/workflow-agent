@@ -4,12 +4,14 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background">
+    <div className="relative min-h-screen overflow-hidden bg-background">
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,hsl(252_80%_64%/0.15),transparent_45%),radial-gradient(circle_at_80%_70%,hsl(178_100%_40%/0.12),transparent_50%)]"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,hsl(233_77%_67%/0.10),transparent_30%)]"
       />
-      <main className="relative z-10 w-full max-w-md px-6">{children}</main>
+      <main className="relative z-10 mx-auto flex min-h-screen w-full max-w-[1240px] items-center px-6 py-10">
+        {children}
+      </main>
     </div>
   );
 }

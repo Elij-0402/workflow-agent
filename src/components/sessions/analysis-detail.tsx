@@ -1,6 +1,14 @@
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
   CharactersResultSchema,
   NarrativeResultSchema,
   WorldviewResultSchema,
@@ -23,7 +31,7 @@ export function AnalysisDetail({ dimension, result }: AnalysisDetailProps) {
     const data = parsed.data;
 
     return (
-      <div className="space-y-4 text-[13px] leading-6 text-muted-foreground">
+      <div className="space-y-5 text-[13px] leading-6 text-muted-foreground">
         <div className="grid gap-3 md:grid-cols-2">
           <DetailBlock label="世界类型" value={data.type} />
           <DetailBlock
@@ -60,7 +68,7 @@ export function AnalysisDetail({ dimension, result }: AnalysisDetailProps) {
               {data.rules.map((rule) => (
                 <li
                   key={rule}
-                  className="rounded-md bg-background/40 px-3 py-2 text-foreground"
+                  className="rounded-[7px] border border-border/70 bg-background/40 px-3 py-2 text-foreground"
                 >
                   {rule}
                 </li>
@@ -84,7 +92,7 @@ export function AnalysisDetail({ dimension, result }: AnalysisDetailProps) {
     const data = parsed.data;
 
     return (
-      <div className="space-y-4 text-[13px] leading-6 text-muted-foreground">
+      <div className="space-y-5 text-[13px] leading-6 text-muted-foreground">
         <div className="space-y-3">
           <SectionTitle title="主要人物" />
           {data.characters.length > 0 ? (
@@ -111,7 +119,7 @@ export function AnalysisDetail({ dimension, result }: AnalysisDetailProps) {
               {data.relationships.map((relationship) => (
                 <div
                   key={`${relationship.from}-${relationship.to}-${relationship.type}`}
-                  className="rounded-md bg-background/40 px-3 py-3"
+                  className="rounded-[7px] border border-border/70 bg-background/40 px-3 py-3"
                 >
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="font-medium text-foreground">
@@ -146,7 +154,7 @@ export function AnalysisDetail({ dimension, result }: AnalysisDetailProps) {
   const data = parsed.data;
 
   return (
-    <div className="space-y-4 text-[13px] leading-6 text-muted-foreground">
+      <div className="space-y-5 text-[13px] leading-6 text-muted-foreground">
       <div className="grid gap-3 md:grid-cols-3">
         <DetailBlock label="叙事结构" value={data.structure} />
         <DetailBlock label="叙事视角" value={data.viewpoint} />
@@ -183,7 +191,7 @@ export function AnalysisDetail({ dimension, result }: AnalysisDetailProps) {
                 {data.conflicts.map((conflict) => (
                   <li
                     key={conflict}
-                    className="rounded-md bg-background/40 px-3 py-2 text-foreground"
+                    className="rounded-[7px] border border-border/70 bg-background/40 px-3 py-2 text-foreground"
                   >
                     {conflict}
                   </li>
@@ -219,7 +227,7 @@ export function AnalysisDetail({ dimension, result }: AnalysisDetailProps) {
 
 function InvalidResultNotice() {
   return (
-    <p className="rounded-md bg-background/40 px-3 py-3 text-[13px] leading-6 text-muted-foreground">
+    <p className="rounded-[7px] border border-border/70 bg-background/40 px-3 py-3 text-[13px] leading-6 text-muted-foreground">
       当前结果结构不完整，请重新运行该维度分析。
     </p>
   );
@@ -236,10 +244,10 @@ function DetailBlock({
 }) {
   return (
     <div className={className}>
-      <p className="text-[12px] uppercase tracking-[0.12em] text-muted-foreground/70">
+      <p className="data-label">
         {label}
       </p>
-      <p className="mt-2 rounded-md bg-background/40 px-3 py-2 text-foreground">
+      <p className="mt-2 rounded-[7px] border border-border/70 bg-background/40 px-3 py-2 text-foreground">
         {value}
       </p>
     </div>
@@ -248,9 +256,7 @@ function DetailBlock({
 
 function SectionTitle({ title }: { title: string }) {
   return (
-    <h4 className="text-[12px] font-medium uppercase tracking-[0.12em] text-muted-foreground/70">
-      {title}
-    </h4>
+    <h4 className="data-label">{title}</h4>
   );
 }
 
@@ -266,32 +272,32 @@ function OverflowTable({
   rows: string[][];
 }) {
   return (
-    <div className="overflow-x-auto rounded-md bg-background/20">
-      <table className="min-w-full border-collapse text-left text-[13px]">
-        <thead className="text-muted-foreground">
-          <tr>
+    <div className="overflow-x-auto rounded-[8px] border border-border/70 bg-background/20">
+      <Table className="text-[13px]">
+        <TableHeader>
+          <TableRow className="hover:bg-transparent">
             {headers.map((header) => (
-              <th key={header} className="px-3 py-2 font-medium">
+              <TableHead key={header} className="px-3 py-2 text-[12px] font-medium">
                 {header}
-              </th>
+              </TableHead>
             ))}
-          </tr>
-        </thead>
-        <tbody>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
           {rows.map((row, index) => (
-            <tr key={`${row[0]}-${index}`} className="border-t border-border/60">
+            <TableRow key={`${row[0]}-${index}`} className="hover:bg-background/20">
               {row.map((cell, cellIndex) => (
-                <td
+                <TableCell
                   key={`${row[0]}-${cellIndex}`}
-                  className="px-3 py-2 align-top text-foreground"
+                  className="px-3 py-2 align-top text-[13px] text-foreground"
                 >
                   {cell}
-                </td>
+                </TableCell>
               ))}
-            </tr>
+            </TableRow>
           ))}
-        </tbody>
-      </table>
+        </TableBody>
+      </Table>
     </div>
   );
 }
