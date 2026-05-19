@@ -87,5 +87,47 @@ Rotating `ENCRYPTION_KEY` invalidates every stored `api_key_encrypted` and force
 
 ## V0.1 status — what's wired vs stubbed
 
-Wired: email/password auth, route gating, sidebar shell, `llm_config` CRUD + AES-GCM encryption.
-Stubbed: `/upload`, `/sessions`, `/dashboard` (placeholder cards). LLM dispatch routes and `.txt` cleaning are not yet implemented; that's the next slice of work.
+Wired: email/password auth, route gating, sidebar shell, `llm_config` CRUD + AES-GCM encryption, `/upload` form (`src/components/upload/upload-form.tsx` + `src/lib/upload/actions.ts`), `/sessions` list, `/dashboard` (queries `llm_config` + `sessions` + `variants`), `src/lib/llm/dispatch.ts` (`getUserLLMClient`), `src/lib/text/clean.ts` + `decode.ts`, three dimension prompts (`src/lib/prompts/{worldview,characters,narrative}.ts`) and the variant generate prompt (`src/lib/prompts/generate.ts`), API routes `src/app/api/analyze/route.ts` and `src/app/api/generate/route.ts`.
+Stubbed / V2: variant UI polish, cards/export, multi-session selection, payment/pricing experiment, dedicated chunking layer for >150 万字 novels.
+
+## gstack
+
+Use gstack's `/browse` skill for ALL web browsing. NEVER use `mcp__claude-in-chrome__*` tools.
+
+Available skills:
+
+- `/office-hours`
+- `/plan-ceo-review`
+- `/plan-eng-review`
+- `/plan-design-review`
+- `/design-consultation`
+- `/design-shotgun`
+- `/design-html`
+- `/review`
+- `/ship`
+- `/land-and-deploy`
+- `/canary`
+- `/benchmark`
+- `/browse`
+- `/connect-chrome`
+- `/qa`
+- `/qa-only`
+- `/design-review`
+- `/setup-browser-cookies`
+- `/setup-deploy`
+- `/setup-gbrain`
+- `/retro`
+- `/investigate`
+- `/document-release`
+- `/document-generate`
+- `/codex`
+- `/cso`
+- `/autoplan`
+- `/plan-devex-review`
+- `/devex-review`
+- `/careful`
+- `/freeze`
+- `/guard`
+- `/unfreeze`
+- `/gstack-upgrade`
+- `/learn`
