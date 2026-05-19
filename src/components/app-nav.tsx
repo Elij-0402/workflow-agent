@@ -7,10 +7,10 @@ import { History, LayoutDashboard, Settings, Upload } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export const APP_NAV_ITEMS = [
-  { href: "/dashboard", label: "仪表盘", icon: LayoutDashboard },
-  { href: "/upload", label: "上传小说", icon: Upload },
-  { href: "/sessions", label: "会话历史", icon: History },
-  { href: "/settings", label: "模型设置", icon: Settings },
+  { href: "/dashboard", label: "工作台", icon: LayoutDashboard },
+  { href: "/upload", label: "新建任务", icon: Upload },
+  { href: "/sessions", label: "任务记录", icon: History },
+  { href: "/settings", label: "设置", icon: Settings },
 ] as const;
 
 type AppNavProps = {

@@ -7,15 +7,7 @@ import { toast } from "sonner";
 
 import { AnalysisDetail } from "@/components/sessions/analysis-detail";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
+import { cn } from "@/lib/utils";
 import {
   ANALYSIS_DIMENSIONS,
   DIMENSION_LABELS,
@@ -42,21 +34,65 @@ type DimensionStatus = {
 
 function summarizeResult(dimension: AnalysisDimension, result: unknown) {
   if (!result || typeof result !== "object") {
-    return "暂无结果。";
+    return "还没有可用结果。";
   }
 
   const data = result as Record<string, unknown>;
 
   switch (dimension) {
     case "worldview":
-      return String(data.summary ?? "已生成世界观分析结果。");
+      return String(data.summary ?? "世界观分析已完成。");
     case "characters":
-      return String(data.summary ?? "已生成人物分析结果。");
+      return String(data.summary ?? "人物分析已完成。");
     case "narrative":
-      return String(data.summary ?? "已生成叙事分析结果。");
+      return String(data.summary ?? "叙事分析已完成。");
     default:
       return "分析已完成。";
   }
+}
+
+function getDimensionActionLabel(state: AnalysisState) {
+  if (state === "loading") return "处理中";
+  if (state === "done") return "重新分析";
+  if (state === "error") return "重试";
+  return "单独分析";
+}
+
+function getDimensionSummary(
+  dimension: AnalysisDimension,
+  item: DimensionStatus
+) {
+  if (item.state === "loading") {
+    return `正在生成${DIMENSION_LABELS[dimension]}分析，请稍候。`;
+  }
+
+  if (item.state === "error") {
+    return item.result
+      ? "本次重试失败，当前仍保留上一次结果。"
+      : "当前维度分析失败，可以单独重试。";
+  }
+
+  if (item.state === "done") {
+    return summarizeResult(dimension, item.result);
+  }
+
+  return "还没有开始。";
+}
+
+function getStatusCopy(state: AnalysisState) {
+  if (state === "done") {
+    return { label: "已完成", className: "text-emerald-300" };
+  }
+
+  if (state === "loading") {
+    return { label: "分析中", className: "text-amber-300" };
+  }
+
+  if (state === "error") {
+    return { label: "失败", className: "text-rose-300" };
+  }
+
+  return { label: "待开始", className: "text-muted-foreground" };
 }
 
 export function AnalysisPanel({
@@ -111,7 +147,7 @@ export function AnalysisPanel({
         ...current[dimension],
         state: "loading",
       },
-      }));
+    }));
 
     try {
       const response = await fetch("/api/analyze", {
@@ -160,98 +196,88 @@ export function AnalysisPanel({
   }
 
   async function runAll() {
-    await Promise.allSettled(ANALYSIS_DIMENSIONS.map((dimension) => runDimension(dimension)));
+    await Promise.allSettled(
+      ANALYSIS_DIMENSIONS.map((dimension) => runDimension(dimension))
+    );
   }
 
   const hasLoading = ANALYSIS_DIMENSIONS.some(
     (dimension) => items[dimension].state === "loading"
   );
-
-  const allDone = ANALYSIS_DIMENSIONS.every(
+  const doneCount = ANALYSIS_DIMENSIONS.filter(
     (dimension) => items[dimension].state === "done"
-  );
+  ).length;
+  const allDone = doneCount === ANALYSIS_DIMENSIONS.length;
 
   return (
-    <section className="space-y-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <h2 className="text-[18px] font-medium text-foreground">三维度分析</h2>
-          <p className="mt-1 text-[13px] leading-6 text-muted-foreground">
-            世界观、人物、叙事三个维度会并发执行。失败维度可单独重试。
+    <section id="analysis-panel" className="space-y-5">
+      <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+        <div className="space-y-2">
+          <h2 className="text-[20px] font-medium tracking-tight text-foreground">
+            分析结果
+          </h2>
+          <p className="max-w-2xl text-[14px] leading-6 text-muted-foreground">
+            {allDone
+              ? "三项分析已经完成。需要时可以单独重跑某一项。"
+              : `先完成三项基础分析。当前已完成 ${doneCount} / ${ANALYSIS_DIMENSIONS.length}。`}
           </p>
+          {!llmConfigured ? (
+            <p className="text-[13px] leading-6 text-amber-200">
+              开始分析前，先完成模型设置。
+            </p>
+          ) : null}
         </div>
-        <Button onClick={runAll} disabled={!llmConfigured || hasLoading || allDone}>
-          {hasLoading ? (
-            <>
-              <Loader2 className="animate-spin" />
-              分析中
-            </>
-          ) : (
-            <>
-              <Sparkles />
-              {allDone ? "分析已完成" : "开始分析"}
-            </>
-          )}
-        </Button>
+
+        {!allDone ? (
+          <Button onClick={runAll} disabled={!llmConfigured || hasLoading}>
+            {hasLoading ? (
+              <>
+                <Loader2 className="animate-spin" />
+                分析中
+              </>
+            ) : (
+              <>
+                <Sparkles />
+                {doneCount > 0 ? "继续分析" : "开始分析"}
+              </>
+            )}
+          </Button>
+        ) : null}
       </div>
 
-      {!llmConfigured ? (
-        <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-[13px] text-amber-100">
-          当前还没有可用的模型配置。请先到设置页保存 LLM 配置，再开始分析。
-        </div>
-      ) : null}
-
-      <div className="grid gap-4 lg:grid-cols-3">
-        {ANALYSIS_DIMENSIONS.map((dimension) => {
+      <div className="overflow-hidden rounded-lg border border-border/60 bg-background/20">
+        {ANALYSIS_DIMENSIONS.map((dimension, index) => {
           const item = items[dimension];
           const canShowDetail = Boolean(item.result);
+          const statusCopy = getStatusCopy(item.state);
 
           return (
-            <Card
+            <div
               key={dimension}
-              className="border-border/60 bg-card/35 shadow-none"
+              className={cn(
+                "px-5 py-4",
+                index > 0 ? "border-t border-border/60" : ""
+              )}
             >
-              <CardHeader className="space-y-3">
-                <div className="flex items-center justify-between gap-3">
-                  <CardTitle className="text-[16px]">
-                    {DIMENSION_LABELS[dimension]}
-                  </CardTitle>
-                  <StatusBadge state={item.state} />
-                </div>
-                <CardDescription>
-                  {item.state === "done"
-                    ? "结果已保存，可直接继续下一步。"
-                    : "基于上传文本前约 8 万字符生成结构化结果。"}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="min-h-28 rounded-lg border border-border/60 bg-background/30 p-3 text-[13px] leading-6 text-muted-foreground">
-                  {item.state === "loading" ? (
-                    <div className="flex items-center gap-2 text-foreground">
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      正在生成 {DIMENSION_LABELS[dimension]} 分析...
-                    </div>
-                  ) : item.state === "error" ? (
-                    item.result ? (
-                      <p className="text-foreground">
-                        重新分析失败，当前仍保留上次结果。请稍后重试。
-                      </p>
-                    ) : (
-                      "本维度分析失败，请重试。已有成功维度不会受影响。"
-                    )
-                  ) : item.state === "done" ? (
-                    <p className="text-foreground">
-                      {summarizeResult(dimension, item.result)}
-                    </p>
-                  ) : (
-                    "尚未开始分析。"
-                  )}
+              <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                <div className="min-w-0 space-y-2">
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                    <h3 className="text-[15px] font-medium text-foreground">
+                      {DIMENSION_LABELS[dimension]}
+                    </h3>
+                    <span className={cn("text-[13px]", statusCopy.className)}>
+                      {statusCopy.label}
+                    </span>
+                  </div>
+                  <p className="max-w-2xl text-[13px] leading-6 text-muted-foreground">
+                    {getDimensionSummary(dimension, item)}
+                  </p>
                 </div>
 
-                <div className="flex flex-col gap-2 sm:flex-row">
+                <div className="flex shrink-0 flex-wrap items-center gap-1">
                   <Button
-                    variant={item.state === "done" ? "outline" : "default"}
-                    className="flex-1"
+                    variant="ghost"
+                    size="sm"
                     onClick={() => void runDimension(dimension)}
                     disabled={!llmConfigured || item.state === "loading"}
                   >
@@ -260,25 +286,18 @@ export function AnalysisPanel({
                         <Loader2 className="animate-spin" />
                         处理中
                       </>
-                    ) : item.state === "done" ? (
-                      <>
-                        <RefreshCw />
-                        重新分析
-                      </>
-                    ) : item.state === "error" ? (
-                      <>
-                        <RefreshCw />
-                        重试分析
-                      </>
                     ) : (
-                      "分析此维度"
+                      <>
+                        <RefreshCw />
+                        {getDimensionActionLabel(item.state)}
+                      </>
                     )}
                   </Button>
 
                   {canShowDetail ? (
                     <Button
                       variant="ghost"
-                      className="sm:w-auto"
+                      size="sm"
                       onClick={() =>
                         setExpanded((current) => ({
                           ...current,
@@ -294,40 +313,23 @@ export function AnalysisPanel({
                       ) : (
                         <>
                           <ChevronDown />
-                          展开详情
+                          查看详情
                         </>
                       )}
                     </Button>
                   ) : null}
                 </div>
+              </div>
 
-                {canShowDetail && expanded[dimension] ? (
-                  <>
-                    <Separator className="bg-border/60" />
-                    <AnalysisDetail dimension={dimension} result={item.result} />
-                  </>
-                ) : null}
-              </CardContent>
-            </Card>
+              {canShowDetail && expanded[dimension] ? (
+                <div className="mt-4 border-t border-border/60 pt-4">
+                  <AnalysisDetail dimension={dimension} result={item.result} />
+                </div>
+              ) : null}
+            </div>
           );
         })}
       </div>
     </section>
   );
-}
-
-function StatusBadge({ state }: { state: AnalysisState }) {
-  if (state === "done") {
-    return <Badge variant="success">已完成</Badge>;
-  }
-
-  if (state === "loading") {
-    return <Badge variant="secondary">分析中</Badge>;
-  }
-
-  if (state === "error") {
-    return <Badge variant="destructive">失败</Badge>;
-  }
-
-  return <Badge variant="outline">待开始</Badge>;
 }

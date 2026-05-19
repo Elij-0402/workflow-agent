@@ -1,15 +1,17 @@
-import type { ReactNode } from "react";
 import { notFound } from "next/navigation";
-import { BookOpenText, BrainCircuit, FileType2, TextQuote } from "lucide-react";
+import Link from "next/link";
+import { Settings2 } from "lucide-react";
 
 import { AnalysisPanel } from "./analysis-panel";
 import { GeneratePanel } from "@/components/sessions/generate-panel";
 import { VariantList } from "@/components/sessions/variant-list";
-import { Badge } from "@/components/ui/badge";
+import { MetaRow } from "@/components/meta-row";
+import { PageHeader } from "@/components/page-header";
+import { WorkflowStageBar, type WorkflowStageItem } from "@/components/workflow-stage-bar";
+import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
 import type { AnalysisDimension, VariantRow } from "@/lib/types";
-import { formatDate } from "@/lib/utils";
-import { getSessionStatusMeta, StatusDot } from "@/components/status-dot";
+import { formatDate, formatRelativeTime } from "@/lib/utils";
 
 type SessionPageProps = {
   params: Promise<{
@@ -67,7 +69,6 @@ export default async function SessionDetailPage({ params }: SessionPageProps) {
     .eq("user_id", user.id)
     .order("created_at", { ascending: false });
 
-  const status = getSessionStatusMeta(session.status);
   const metadata = (book.metadata ?? {}) as BookMetadata;
   const chapterCount =
     book.chapter_count ?? (Array.isArray(metadata.chapters) ? metadata.chapters.length : 0);
@@ -81,85 +82,114 @@ export default async function SessionDetailPage({ params }: SessionPageProps) {
     Pick<VariantRow, "id" | "title" | "config" | "content" | "word_count" | "created_at">
   >;
   const hasCompleteAnalysis = safeAnalyses.length === 3;
+  const hasVariants = safeVariants.length > 0;
+  const currentStepDescription = !hasCompleteAnalysis
+    ? Boolean(llmConfig)
+      ? "先完成三项分析，再进入生成。"
+      : "当前还不能开始分析，先去补上模型设置。"
+    : hasVariants
+      ? "结果已经生成完成。你可以继续查看，或再生成一个版本。"
+      : "分析已经准备好，下一步直接生成结果。";
+  const stageItems = getStageItems({
+    hasCompleteAnalysis,
+    variantCount: safeVariants.length,
+  });
+  const headerAction = !llmConfig ? (
+    <Button asChild>
+      <Link href="/settings">
+        <Settings2 aria-hidden="true" />
+        前往设置
+      </Link>
+    </Button>
+  ) : undefined;
 
   return (
-    <div className="mx-auto flex w-full max-w-[1120px] flex-col gap-8 px-4 py-8 sm:px-6 md:px-8 md:py-10">
-      <div className="max-w-3xl space-y-3">
-        <div className="flex flex-wrap items-center gap-3">
-          <p className="text-[12px] font-medium uppercase tracking-[0.14em] text-muted-foreground/70">
-            会话详情
-          </p>
-          <Badge variant="outline" className="gap-2 border-border/70 bg-background/30">
-            <StatusDot status={session.status} />
-            <span className={status.tone}>{status.label}</span>
-          </Badge>
-        </div>
-        <h1 className="text-[28px] font-medium tracking-tight text-foreground sm:text-[32px]">
-          {book.title}
-        </h1>
-        <p className="text-[14px] leading-6 text-muted-foreground sm:text-[15px]">
-          上传时间 {formatDate(book.created_at)}。当前分析固定基于前约 8 万字符，适合先验证整体质量与可用性。
-        </p>
-      </div>
-
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <InfoCard
-          icon={<TextQuote className="h-4 w-4" />}
-          label="字数"
-          value={book.word_count?.toLocaleString("zh-CN") ?? "0"}
-        />
-        <InfoCard
-          icon={<BookOpenText className="h-4 w-4" />}
-          label="章节数"
-          value={String(chapterCount)}
-        />
-        <InfoCard
-          icon={<FileType2 className="h-4 w-4" />}
-          label="编码"
-          value={metadata.encoding ?? "未知"}
-        />
-        <InfoCard
-          icon={<BrainCircuit className="h-4 w-4" />}
-          label="已完成维度"
-          value={`${analyses?.length ?? 0} / 3`}
-        />
-      </section>
-
-      <AnalysisPanel
-        sessionId={session.id}
-        analyses={safeAnalyses}
-        llmConfigured={Boolean(llmConfig)}
+    <div className="mx-auto flex w-full max-w-[1040px] flex-col gap-8 px-4 py-8 sm:px-6 md:px-8 md:py-10">
+      <PageHeader
+        title={book.title}
+        description={currentStepDescription}
+        action={headerAction}
+        meta={
+          <MetaRow
+            items={[
+              { label: "上传时间", value: formatDate(book.created_at) },
+              { label: "最近更新", value: formatRelativeTime(session.updated_at) },
+            ]}
+          />
+        }
       />
 
-      <GeneratePanel
-        sessionId={session.id}
-        sessionStatus={session.status}
-        llmConfigured={Boolean(llmConfig)}
-        hasCompleteAnalysis={hasCompleteAnalysis}
-        variantCount={safeVariants.length}
+      <WorkflowStageBar items={stageItems} />
+
+      <MetaRow
+        items={[
+          { label: "字数", value: book.word_count?.toLocaleString("zh-CN") ?? "0" },
+          { label: "章节", value: String(chapterCount) },
+          { label: "编码", value: metadata.encoding ?? "未知" },
+          { label: "分析进度", value: `${safeAnalyses.length} / 3` },
+        ]}
       />
 
-      <VariantList sessionStatus={session.status} variants={safeVariants} />
+      {hasCompleteAnalysis ? (
+        <>
+          <GeneratePanel
+            sessionId={session.id}
+            sessionStatus={session.status}
+            llmConfigured={Boolean(llmConfig)}
+            hasCompleteAnalysis={hasCompleteAnalysis}
+            variantCount={safeVariants.length}
+          />
+          {hasVariants ? <VariantList variants={safeVariants} /> : null}
+          <AnalysisPanel
+            sessionId={session.id}
+            analyses={safeAnalyses}
+            llmConfigured={Boolean(llmConfig)}
+          />
+        </>
+      ) : (
+        <AnalysisPanel
+          sessionId={session.id}
+          analyses={safeAnalyses}
+          llmConfigured={Boolean(llmConfig)}
+        />
+      )}
     </div>
   );
 }
 
-function InfoCard({
-  icon,
-  label,
-  value,
+function getStageItems({
+  hasCompleteAnalysis,
+  variantCount,
 }: {
-  icon: ReactNode;
-  label: string;
-  value: string;
-}) {
-  return (
-    <div className="rounded-lg border border-border/70 bg-card/30 px-5 py-4">
-      <div className="flex items-center gap-2 text-[12px] font-medium uppercase tracking-[0.12em] text-muted-foreground/70">
-        <span className="text-muted-foreground">{icon}</span>
-        {label}
-      </div>
-      <div className="mt-3 text-[24px] font-medium text-foreground">{value}</div>
-    </div>
-  );
+  hasCompleteAnalysis: boolean;
+  variantCount: number;
+}): WorkflowStageItem[] {
+  const hasResults = variantCount > 0;
+
+  return [
+    {
+      key: "upload",
+      label: "文本已导入",
+      description: "文件已经进入当前任务。",
+      state: "done",
+    },
+    {
+      key: "analysis",
+      label: "完成分析",
+      description: hasCompleteAnalysis
+        ? "三项分析已经准备好。"
+        : "先完成世界观、人物和叙事分析。",
+      state: hasCompleteAnalysis ? "done" : "current",
+    },
+    {
+      key: "generate",
+      label: "生成结果",
+      description: hasResults
+        ? `已保存 ${variantCount} 个版本。`
+        : hasCompleteAnalysis
+          ? "现在可以生成第一个版本。"
+          : "等待分析完成后再开始。",
+      state: hasResults ? "done" : hasCompleteAnalysis ? "current" : "upcoming",
+    },
+  ];
 }

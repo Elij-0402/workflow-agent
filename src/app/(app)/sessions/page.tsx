@@ -1,6 +1,7 @@
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 
+import { PageHeader } from "@/components/page-header";
 import { createClient } from "@/lib/supabase/server";
 import { formatDate, formatRelativeTime } from "@/lib/utils";
 import { getSessionStatusMeta, StatusDot } from "@/components/status-dot";
@@ -13,21 +14,14 @@ export default async function SessionsPage() {
     .order("updated_at", { ascending: false });
 
   return (
-    <div className="mx-auto flex w-full max-w-[1120px] flex-col gap-8 px-4 py-8 sm:px-6 md:px-8 md:py-10">
-      <div className="max-w-2xl space-y-2">
-        <p className="text-[12px] font-medium uppercase tracking-[0.14em] text-muted-foreground/70">
-          会话历史
-        </p>
-        <h1 className="text-[26px] font-medium tracking-tight sm:text-[30px]">
-          所有分析工作流
-        </h1>
-        <p className="text-[14px] leading-6 text-muted-foreground sm:text-[15px]">
-          每次上传、分析与生成都会保存为一条会话，方便你回到最近的工作上下文。
-        </p>
-      </div>
+    <div className="mx-auto flex w-full max-w-[1040px] flex-col gap-8 px-4 py-8 sm:px-6 md:px-8 md:py-10">
+      <PageHeader
+        title="任务记录"
+        description="所有导入、分析和生成结果都会保留在这里。"
+      />
 
       {sessions && sessions.length > 0 ? (
-        <ul className="divide-y divide-border/60 rounded-lg border border-border/70 bg-card/30">
+        <ul className="divide-y divide-border/60 overflow-hidden rounded-lg border border-border/60 bg-card/40">
           {sessions.map((session) => {
             const status = getSessionStatusMeta(session.status);
 

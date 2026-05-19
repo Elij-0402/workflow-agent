@@ -60,7 +60,7 @@ export function AnalysisDetail({ dimension, result }: AnalysisDetailProps) {
               {data.rules.map((rule) => (
                 <li
                   key={rule}
-                  className="rounded-md border border-border/60 bg-background/40 px-3 py-2 text-foreground"
+                  className="rounded-md bg-background/40 px-3 py-2 text-foreground"
                 >
                   {rule}
                 </li>
@@ -111,7 +111,7 @@ export function AnalysisDetail({ dimension, result }: AnalysisDetailProps) {
               {data.relationships.map((relationship) => (
                 <div
                   key={`${relationship.from}-${relationship.to}-${relationship.type}`}
-                  className="rounded-md border border-border/60 bg-background/40 px-3 py-3"
+                  className="rounded-md bg-background/40 px-3 py-3"
                 >
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="font-medium text-foreground">
@@ -183,7 +183,7 @@ export function AnalysisDetail({ dimension, result }: AnalysisDetailProps) {
                 {data.conflicts.map((conflict) => (
                   <li
                     key={conflict}
-                    className="rounded-md border border-border/60 bg-background/40 px-3 py-2 text-foreground"
+                    className="rounded-md bg-background/40 px-3 py-2 text-foreground"
                   >
                     {conflict}
                   </li>
@@ -219,7 +219,7 @@ export function AnalysisDetail({ dimension, result }: AnalysisDetailProps) {
 
 function InvalidResultNotice() {
   return (
-    <p className="rounded-md border border-border/60 bg-background/40 px-3 py-3 text-[13px] leading-6 text-muted-foreground">
+    <p className="rounded-md bg-background/40 px-3 py-3 text-[13px] leading-6 text-muted-foreground">
       当前结果结构不完整，请重新运行该维度分析。
     </p>
   );
@@ -239,7 +239,7 @@ function DetailBlock({
       <p className="text-[12px] uppercase tracking-[0.12em] text-muted-foreground/70">
         {label}
       </p>
-      <p className="mt-2 rounded-md border border-border/60 bg-background/40 px-3 py-2 text-foreground">
+      <p className="mt-2 rounded-md bg-background/40 px-3 py-2 text-foreground">
         {value}
       </p>
     </div>
@@ -266,9 +266,9 @@ function OverflowTable({
   rows: string[][];
 }) {
   return (
-    <div className="overflow-x-auto rounded-md border border-border/60">
+    <div className="overflow-x-auto rounded-md bg-background/20">
       <table className="min-w-full border-collapse text-left text-[13px]">
-        <thead className="bg-background/60 text-muted-foreground">
+        <thead className="text-muted-foreground">
           <tr>
             {headers.map((header) => (
               <th key={header} className="px-3 py-2 font-medium">

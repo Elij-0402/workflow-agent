@@ -44,7 +44,7 @@ export default async function AppLayout({
             <Button asChild variant="outline" size="sm" className="hidden sm:inline-flex">
               <Link href="/upload">
                 <Plus aria-hidden="true" />
-                上传小说
+                新建任务
               </Link>
             </Button>
             <UserMenu email={user.email ?? "anonymous"} />
