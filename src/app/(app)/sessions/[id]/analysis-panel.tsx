@@ -296,7 +296,17 @@ export function AnalysisPanel({
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => void runDimension(dimension)}
+                    onClick={() => {
+                      // Cost guard: re-running a finished dimension burns BYOK
+                      // tokens. Confirm before re-spending the user's quota.
+                      if (item.state === "done" && typeof window !== "undefined") {
+                        const ok = window.confirm(
+                          `重新分析「${DIMENSION_LABELS[dimension]}」会再次调用模型并消耗你的 BYOK 配额。继续？`
+                        );
+                        if (!ok) return;
+                      }
+                      void runDimension(dimension);
+                    }}
                     disabled={
                       !llmConfigured ||
                       blockedByGenerating ||

@@ -116,6 +116,15 @@ export function GeneratePanel({
   }, [pending, startedAt]);
 
   async function onSubmit(values: GenerateConfig) {
+    // Cost guard: each re-generation hits the LLM and burns BYOK tokens.
+    // Confirm if the session already has variants.
+    if (variantCount > 0 && typeof window !== "undefined") {
+      const ok = window.confirm(
+        `再生成一个版本会再次调用模型并消耗你的 BYOK 配额。当前已有 ${variantCount} 个版本，继续？`
+      );
+      if (!ok) return;
+    }
+
     setPending(true);
     setStartedAt(Date.now());
 

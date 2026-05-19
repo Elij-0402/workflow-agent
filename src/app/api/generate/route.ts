@@ -29,6 +29,9 @@ import {
   type GenerateAnalyses,
 } from "@/lib/types";
 
+export const runtime = "nodejs";
+export const maxDuration = 300;
+
 const requestSchema = z.object({
   sessionId: z.string().uuid(),
   config: GenerateConfigSchema,

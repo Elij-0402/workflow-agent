@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 import {
   LLMConfigFormSchema,
   deriveProvider,
+  LLM_BASE_URL_NOT_ALLOWED_MESSAGE,
   LLM_INCOMPATIBLE_BASE_URL_MESSAGE,
   normalizeModelsPayload,
   selectLegacyPresetForMigration,
@@ -88,6 +89,62 @@ test("validateCompatibleBaseUrl keeps custom OpenAI-compatible gateways", () => 
     ok: true,
     provider: "custom",
   });
+});
+
+test("validateCompatibleBaseUrl requires https (rejects http)", () => {
+  const result = validateCompatibleBaseUrl("http://my-proxy.example.com/v1");
+  assert.equal(result.ok, false);
+  if (!result.ok) {
+    assert.equal(result.message, LLM_BASE_URL_NOT_ALLOWED_MESSAGE);
+  }
+});
+
+test("validateCompatibleBaseUrl rejects IPv4 literals (SSRF + metadata-endpoint vector)", () => {
+  const cases = [
+    "https://127.0.0.1/v1",
+    "https://192.168.1.1/v1",
+    "https://10.0.0.1/v1",
+    "https://169.254.169.254/latest/meta-data/", // AWS instance metadata
+    "https://172.16.0.1/v1",
+    "https://1.2.3.4/v1", // any IPv4 literal, even public, is rejected — DNS allowlist is the boundary
+  ];
+  for (const url of cases) {
+    const result = validateCompatibleBaseUrl(url);
+    assert.equal(result.ok, false, `expected ${url} to be rejected`);
+    if (!result.ok) {
+      assert.equal(result.message, LLM_BASE_URL_NOT_ALLOWED_MESSAGE);
+    }
+  }
+});
+
+test("validateCompatibleBaseUrl rejects IPv6 literals", () => {
+  const cases = ["https://[::1]/v1", "https://[fe80::1]/v1"];
+  for (const url of cases) {
+    const result = validateCompatibleBaseUrl(url);
+    assert.equal(result.ok, false, `expected ${url} to be rejected`);
+    if (!result.ok) {
+      assert.equal(result.message, LLM_BASE_URL_NOT_ALLOWED_MESSAGE);
+    }
+  }
+});
+
+test("validateCompatibleBaseUrl rejects internal hostname suffixes", () => {
+  const cases = [
+    "https://localhost/v1",
+    "https://api.local/v1",
+    "https://proxy.localhost/v1",
+    "https://gw.internal/v1",
+    "https://router.lan/v1",
+    "https://nas.home/v1",
+    "https://router.home.arpa/v1",
+  ];
+  for (const url of cases) {
+    const result = validateCompatibleBaseUrl(url);
+    assert.equal(result.ok, false, `expected ${url} to be rejected`);
+    if (!result.ok) {
+      assert.equal(result.message, LLM_BASE_URL_NOT_ALLOWED_MESSAGE);
+    }
+  }
 });
 
 test("normalizeModelsPayload handles the OpenAI shape with sort and dedupe", () => {
