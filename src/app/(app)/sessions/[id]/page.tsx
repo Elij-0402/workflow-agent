@@ -9,6 +9,7 @@ import { MetaRow } from "@/components/meta-row";
 import { PageHeader } from "@/components/page-header";
 import { WorkflowStageBar, type WorkflowStageItem } from "@/components/workflow-stage-bar";
 import { Button } from "@/components/ui/button";
+import { ANALYSIS_DIMENSION_CONFIG } from "@/lib/prompts";
 import { createClient } from "@/lib/supabase/server";
 import type { AnalysisDimension, VariantRow } from "@/lib/types";
 import { formatDate, formatRelativeTime } from "@/lib/utils";
@@ -72,12 +73,20 @@ export default async function SessionDetailPage({ params }: SessionPageProps) {
   const metadata = (book.metadata ?? {}) as BookMetadata;
   const chapterCount =
     book.chapter_count ?? (Array.isArray(metadata.chapters) ? metadata.chapters.length : 0);
-  const safeAnalyses = ((analyses ?? []).filter(
-    (item) => item.dimension && item.result
-  ) as {
+  // Validate each stored analysis row against its current dimension schema.
+  // Rows that fail safeParse (schema drift, partial writes, garbage from a
+  // misbehaving model) are dropped here so the UI treats them as "not yet
+  // analyzed" — the user can re-run the dimension cleanly instead of seeing
+  // half-rendered or "undefined" copy from a stale shape.
+  const safeAnalyses = ((analyses ?? []).filter((item): item is {
     dimension: AnalysisDimension;
     result: unknown;
-  }[]);
+  } => {
+    if (!item.dimension || !item.result) return false;
+    const config = ANALYSIS_DIMENSION_CONFIG[item.dimension as AnalysisDimension];
+    if (!config) return false;
+    return config.schema.safeParse(item.result).success;
+  }));
   const safeVariants = (variants ?? []) as Array<
     Pick<VariantRow, "id" | "title" | "config" | "content" | "word_count" | "created_at">
   >;

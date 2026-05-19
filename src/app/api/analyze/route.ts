@@ -5,6 +5,7 @@ import { z } from "zod";
 import { getUserLLMClient } from "@/lib/llm/dispatch";
 import { isUserFixableLLMConfigMessage } from "@/lib/llm-config";
 import { ANALYSIS_TEXT_CHAR_LIMIT, ANALYSIS_DIMENSION_CONFIG } from "@/lib/prompts";
+import { wrapUntrustedNovel } from "@/lib/prompts/safety";
 import { createClient } from "@/lib/supabase/server";
 import {
   getSessionStatusAfterAnalysis,
@@ -117,7 +118,7 @@ export async function POST(request: Request) {
       model: llm.openai(llm.model),
       schema: promptConfig.schema,
       system: promptConfig.systemPrompt,
-      prompt: excerpt,
+      prompt: wrapUntrustedNovel(excerpt),
       temperature: llm.temperature,
       maxTokens: llm.maxTokens,
     });
