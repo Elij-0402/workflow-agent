@@ -37,7 +37,7 @@ Tests are colocated as `*.test.ts` next to the file they cover and use `node:tes
 - `src/lib/supabase/server.ts` → `createServiceClient()` — **service role**, bypasses RLS. Only in trusted server contexts and only with an explicit `.eq("user_id", user.id)` filter. Never import into a client bundle.
 
 ### BYOK + single-model pattern (load-bearing — do not redesign)
-Every LLM call (the 3 analysis dimensions and variant generation) reads the user's single `llm_config` row, decrypts the API key, and dispatches to a user-provided OpenAI-compatible endpoint via `@ai-sdk/openai`'s `createOpenAI({ baseURL })`. There is one model per user; tasks differ only by system prompt. Do not add per-task model selection or expand to a multi-preset UI — that was migration 0002's whole point.
+Every LLM call (the 3 analysis dimensions and variant generation) reads the user's single `llm_config` row, decrypts the API key, and dispatches to a user-provided OpenAI-compatible endpoint via `@ai-sdk/openai`'s `createOpenAI({ baseURL })`. Supported endpoints are OpenAI, DeepSeek, and custom OpenAI-compatible gateways. Anthropic native endpoints are out of scope here. There is one model per user; tasks differ only by system prompt. Do not add per-task model selection or expand to a multi-preset UI — that was migration 0002's whole point.
 
 - `src/lib/crypto.ts` — AES-GCM (`webcrypto`) wrapper. `ENCRYPTION_KEY` is a 32-byte base64 secret loaded from env. **Server-only**; the module would crash in a browser bundle, but the bigger reason is the threat model: the key must never reach the client. Exposes `encrypt`, `decrypt`, `maskApiKey`.
 - `src/lib/llm-config.ts` — Zod `LLMConfigFormSchema` + the `LLMConfig` row type + `parseLLMConfigFormData` (with `allowEmptyApiKey` so the settings form lets users edit other fields without re-typing the key) + `selectLegacyPresetForMigration` (used by migration 0002's data move).
@@ -49,6 +49,7 @@ API keys must never appear in: client bundles, component props, URLs, server log
 Schema in `supabase/migrations/`. Run them in order in the SQL Editor.
 - `0001_init.sql` — initial schema with **`llm_presets`** (multiple per user) plus `sessions`, `books`, `analyses`, `variants`, the `novels` storage bucket, the `touch_updated_at` trigger, and RLS policies `auth.uid() = user_id` on every table.
 - `0002_simplify_auth_and_llm_config.sql` — collapses presets into a single **`llm_config`** row per user (uniqueness via `user_id unique`), data-migrates from `llm_presets` preferring `is_default=true` then oldest, renames `preset_id` → `llm_config_id` on `analyses`/`variants`, drops `llm_presets`. Any new code must target `llm_config` / `llm_config_id`, not the legacy `llm_presets` / `preset_id` names.
+- `0003_restrict_llm_providers_to_openai_compatible.sql` — rewrites legacy `anthropic` rows to `custom` and tightens `llm_config.provider` to `openai | deepseek | custom`.
 
 Domain enums (mirror these in `src/lib/types.ts` if you change the SQL):
 - `sessions.status`: `draft | uploaded | analyzing | analyzed | generating | done`

@@ -3,14 +3,21 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { getUserLLMClient } from "@/lib/llm/dispatch";
+import { isUserFixableLLMConfigMessage } from "@/lib/llm-config";
 import { ANALYSIS_TEXT_CHAR_LIMIT, ANALYSIS_DIMENSION_CONFIG } from "@/lib/prompts";
-import { ANALYSIS_DIMENSIONS, type AnalysisDimension } from "@/lib/types";
 import { createClient } from "@/lib/supabase/server";
+import {
+  getSessionStatusAfterAnalysis,
+  shouldEnterAnalyzingStatus,
+} from "@/lib/session-status";
+import { ANALYSIS_DIMENSIONS, type AnalysisDimension } from "@/lib/types";
 
 const requestSchema = z.object({
   sessionId: z.string().uuid(),
   dimension: z.enum(ANALYSIS_DIMENSIONS as [AnalysisDimension, ...AnalysisDimension[]]),
 });
+
+const ANALYSIS_LOCKED_MESSAGE = "当前正在生成，暂不可重新分析。";
 
 function jsonError(message: string, status: number) {
   return NextResponse.json({ error: message }, { status });
@@ -48,6 +55,10 @@ export async function POST(request: Request) {
     return jsonError("未找到对应会话。", 404);
   }
 
+  if (session.status === "generating") {
+    return jsonError(ANALYSIS_LOCKED_MESSAGE, 409);
+  }
+
   const { data: book, error: bookError } = await supabase
     .from("books")
     .select("id, cleaned_content")
@@ -63,20 +74,28 @@ export async function POST(request: Request) {
     return jsonError("当前书籍内容不可用。", 400);
   }
 
-  if (session.status === "uploaded") {
-    await supabase
-      .from("sessions")
-      .update({ status: "analyzing" })
-      .eq("id", session.id)
-      .eq("user_id", user.id)
-      .eq("status", "uploaded");
-  }
-
   const promptConfig = ANALYSIS_DIMENSION_CONFIG[parsedBody.dimension];
   const excerpt = book.cleaned_content.slice(0, ANALYSIS_TEXT_CHAR_LIMIT);
+  let currentStatus = session.status;
 
   try {
     const llm = await getUserLLMClient(supabase);
+
+    if (shouldEnterAnalyzingStatus(currentStatus)) {
+      const { error: statusError } = await supabase
+        .from("sessions")
+        .update({ status: "analyzing" })
+        .eq("id", session.id)
+        .eq("user_id", user.id)
+        .eq("status", "uploaded");
+
+      if (statusError) {
+        return jsonError("更新会话状态失败，请稍后再试。", 500);
+      }
+
+      currentStatus = "analyzing";
+    }
+
     const result = await generateObject({
       model: llm.openai(llm.model),
       schema: promptConfig.schema,
@@ -109,18 +128,42 @@ export async function POST(request: Request) {
       return jsonError("保存分析结果失败，请稍后再试。", 500);
     }
 
-    const { count } = await supabase
-      .from("analyses")
-      .select("*", { count: "exact", head: true })
-      .eq("book_id", book.id)
-      .eq("user_id", user.id);
+    const [
+      { count: analysisCount, error: analysisCountError },
+      { count: variantCount, error: variantCountError },
+    ] = await Promise.all([
+      supabase
+        .from("analyses")
+        .select("*", { count: "exact", head: true })
+        .eq("book_id", book.id)
+        .eq("user_id", user.id),
+      supabase
+        .from("variants")
+        .select("*", { count: "exact", head: true })
+        .eq("session_id", session.id)
+        .eq("user_id", user.id),
+    ]);
 
-    if (count === ANALYSIS_DIMENSIONS.length) {
-      await supabase
+    if (analysisCountError || variantCountError) {
+      return jsonError("更新会话状态失败，请稍后再试。", 500);
+    }
+
+    const nextStatus = getSessionStatusAfterAnalysis({
+      analysisCount: analysisCount ?? 0,
+      totalAnalyses: ANALYSIS_DIMENSIONS.length,
+      variantCount: variantCount ?? 0,
+    });
+
+    if (nextStatus !== currentStatus) {
+      const { error: statusError } = await supabase
         .from("sessions")
-        .update({ status: "analyzed" })
+        .update({ status: nextStatus })
         .eq("id", session.id)
         .eq("user_id", user.id);
+
+      if (statusError) {
+        return jsonError("更新会话状态失败，请稍后再试。", 500);
+      }
     }
 
     return NextResponse.json({
@@ -130,9 +173,9 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     const message =
-      error instanceof Error && error.message === "请先在设置页保存模型配置。"
+      error instanceof Error && isUserFixableLLMConfigMessage(error.message)
         ? error.message
         : "分析失败，请稍后重试。";
-    return jsonError(message, 500);
+    return jsonError(message, message === "分析失败，请稍后重试。" ? 500 : 409);
   }
 }

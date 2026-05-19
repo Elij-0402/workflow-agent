@@ -7,7 +7,7 @@
 ## 功能（v0.1）
 
 - 邮箱密码注册 / 登录
-- BYOK：每个用户保存一套 DeepSeek / OpenAI 兼容 API Key + Base URL
+- BYOK：每个用户保存一套 DeepSeek / OpenAI-compatible API Key + Base URL（不支持 Anthropic 原生接口）
 - 上传 `.txt` 小说（≤ 50 MB），浏览器直传私有存储后由服务端清洗
 - 三维度结构化分析：世界观 / 人物 / 叙事
 - 流式生成变体小说
@@ -34,8 +34,9 @@ npm install
 1. 访问 https://supabase.com 创建新项目
 2. 在 SQL Editor 中运行 `supabase/migrations/0001_init.sql`
 3. 再运行 `supabase/migrations/0002_simplify_auth_and_llm_config.sql`
-4. 在 Authentication → Providers 启用 Email
-5. 在 Authentication → Email 中关闭 Confirm email，确保密码注册后可直接进入应用
+4. 再运行 `supabase/migrations/0003_restrict_llm_providers_to_openai_compatible.sql`
+5. 在 Authentication → Providers 启用 Email
+6. 在 Authentication → Email 中关闭 Confirm email，确保密码注册后可直接进入应用
 
 ### 3. 配置环境变量
 

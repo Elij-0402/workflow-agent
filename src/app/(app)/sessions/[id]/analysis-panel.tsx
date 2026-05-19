@@ -12,6 +12,7 @@ import {
   ANALYSIS_DIMENSIONS,
   DIMENSION_LABELS,
   type AnalysisDimension,
+  type SessionStatus,
 } from "@/lib/types";
 
 type AnalysisState = "pending" | "loading" | "done" | "error";
@@ -25,6 +26,7 @@ type PanelProps = {
   sessionId: string;
   analyses: AnalysisRecord[];
   llmConfigured: boolean;
+  sessionStatus: SessionStatus;
 };
 
 type DimensionStatus = {
@@ -99,6 +101,7 @@ export function AnalysisPanel({
   sessionId,
   analyses,
   llmConfigured,
+  sessionStatus,
 }: PanelProps) {
   const router = useRouter();
   const initialMap = useMemo<Record<AnalysisDimension, DimensionStatus>>(() => {
@@ -140,7 +143,10 @@ export function AnalysisPanel({
     });
   }, [initialMap]);
 
-  async function runDimension(dimension: AnalysisDimension) {
+  async function runDimension(
+    dimension: AnalysisDimension,
+    options?: { refresh?: boolean }
+  ) {
     setItems((current) => ({
       ...current,
       [dimension]: {
@@ -182,7 +188,9 @@ export function AnalysisPanel({
           result: payload.result,
         },
       }));
-      router.refresh();
+      if (options?.refresh !== false) {
+        router.refresh();
+      }
     } catch {
       setItems((current) => ({
         ...current,
@@ -196,14 +204,17 @@ export function AnalysisPanel({
   }
 
   async function runAll() {
-    await Promise.allSettled(
-      ANALYSIS_DIMENSIONS.map((dimension) => runDimension(dimension))
-    );
+    for (const dimension of ANALYSIS_DIMENSIONS) {
+      // Keep single-dimension failures isolated, but avoid provider burst and status races.
+      await runDimension(dimension, { refresh: false });
+    }
+    router.refresh();
   }
 
   const hasLoading = ANALYSIS_DIMENSIONS.some(
     (dimension) => items[dimension].state === "loading"
   );
+  const blockedByGenerating = sessionStatus === "generating";
   const doneCount = ANALYSIS_DIMENSIONS.filter(
     (dimension) => items[dimension].state === "done"
   ).length;
@@ -225,11 +236,18 @@ export function AnalysisPanel({
             <p className="text-[13px] leading-6 text-amber-200">
               开始分析前，先完成模型设置。
             </p>
+          ) : blockedByGenerating ? (
+            <p className="text-[13px] leading-6 text-amber-200">
+              当前正在生成，暂不可重新分析。
+            </p>
           ) : null}
         </div>
 
         {!allDone ? (
-          <Button onClick={runAll} disabled={!llmConfigured || hasLoading}>
+          <Button
+            onClick={() => void runAll()}
+            disabled={!llmConfigured || hasLoading || blockedByGenerating}
+          >
             {hasLoading ? (
               <>
                 <Loader2 className="animate-spin" />
@@ -279,7 +297,11 @@ export function AnalysisPanel({
                     variant="ghost"
                     size="sm"
                     onClick={() => void runDimension(dimension)}
-                    disabled={!llmConfigured || item.state === "loading"}
+                    disabled={
+                      !llmConfigured ||
+                      blockedByGenerating ||
+                      item.state === "loading"
+                    }
                   >
                     {item.state === "loading" ? (
                       <>

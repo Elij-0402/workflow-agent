@@ -144,6 +144,7 @@ export default async function SessionDetailPage({ params }: SessionPageProps) {
             sessionId={session.id}
             analyses={safeAnalyses}
             llmConfigured={Boolean(llmConfig)}
+            sessionStatus={session.status}
           />
         </>
       ) : (
@@ -151,6 +152,7 @@ export default async function SessionDetailPage({ params }: SessionPageProps) {
           sessionId={session.id}
           analyses={safeAnalyses}
           llmConfigured={Boolean(llmConfig)}
+          sessionStatus={session.status}
         />
       )}
     </div>

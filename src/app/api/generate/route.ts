@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { getUserLLMClient } from "@/lib/llm/dispatch";
+import { isUserFixableLLMConfigMessage } from "@/lib/llm-config";
 import {
   buildGenerateUserPrompt,
   GENERATE_SYSTEM_PROMPT,
@@ -10,6 +11,11 @@ import {
   GENERATE_TITLE_FALLBACK,
   scopeToMaxTokens,
 } from "@/lib/prompts/generate";
+import {
+  getSessionStatusAfterGenerateFailure,
+  getSessionStatusAfterGenerateSuccess,
+  shouldEnterGeneratingStatus,
+} from "@/lib/session-status";
 import { createClient } from "@/lib/supabase/server";
 import { countWords } from "@/lib/text/clean";
 import {
@@ -66,10 +72,7 @@ async function getLLMOrThrow(supabase: Awaited<ReturnType<typeof createClient>>)
   try {
     return await getUserLLMClient(supabase);
   } catch (error) {
-    if (
-      error instanceof Error &&
-      error.message === "请先在设置页保存模型配置。"
-    ) {
+    if (error instanceof Error && isUserFixableLLMConfigMessage(error.message)) {
       throw new RouteError(error.message, 409);
     }
 
@@ -174,7 +177,7 @@ export async function POST(request: Request) {
   try {
     const llm = await getLLMOrThrow(supabase);
 
-    if (session.status === "analyzed") {
+    if (shouldEnterGeneratingStatus(session.status)) {
       const { error: statusError } = await supabase
         .from("sessions")
         .update({ status: "generating" })
@@ -232,10 +235,10 @@ export async function POST(request: Request) {
 
     variantCreated = true;
 
-    if (session.status === "analyzed") {
+    if (shouldEnterGeneratingStatus(session.status)) {
       const { error: doneError } = await supabase
         .from("sessions")
-        .update({ status: "done" })
+        .update({ status: getSessionStatusAfterGenerateSuccess() })
         .eq("id", session.id)
         .eq("user_id", user.id);
 
@@ -252,8 +255,9 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     if (statusFlipped) {
-      const restoreStatus =
-        variantCreated || existingVariantCount > 0 ? "done" : "analyzed";
+      const restoreStatus = getSessionStatusAfterGenerateFailure(
+        existingVariantCount + (variantCreated ? 1 : 0)
+      );
 
       await supabase
         .from("sessions")
