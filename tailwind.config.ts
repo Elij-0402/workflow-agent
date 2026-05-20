@@ -43,6 +43,11 @@ const config: Config = {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
+        flash: "hsl(var(--flash))",
+        brass: {
+          DEFAULT: "hsl(var(--primary))",
+          soft: "hsl(var(--brass-soft) / 0.18)",
+        },
         chart: {
           "1": "hsl(var(--chart-1))",
           "2": "hsl(var(--chart-2))",
@@ -53,12 +58,29 @@ const config: Config = {
       },
       borderRadius: {
         lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
+        md: "calc(var(--radius) - 1px)",
+        sm: "calc(var(--radius) - 2px)",
       },
       fontFamily: {
+        display: [
+          "var(--font-display)",
+          "var(--font-zh-serif)",
+          '"Songti SC"',
+          '"Noto Serif SC"',
+          "Georgia",
+          "serif",
+        ],
+        serif: [
+          "var(--font-display)",
+          "var(--font-zh-serif)",
+          '"Songti SC"',
+          '"Noto Serif SC"',
+          "Georgia",
+          "serif",
+        ],
         sans: [
-          "var(--font-geist-sans)",
+          "var(--font-sans)",
+          "var(--font-zh-sans)",
           '"PingFang SC"',
           '"Microsoft YaHei"',
           '"Noto Sans SC"',
@@ -66,12 +88,21 @@ const config: Config = {
           "sans-serif",
         ],
         mono: [
-          "var(--font-geist-mono)",
+          "var(--font-mono)",
+          '"JetBrains Mono"',
+          '"IBM Plex Mono"',
           "ui-monospace",
           "SFMono-Regular",
           "Menlo",
           "monospace",
         ],
+      },
+      boxShadow: {
+        "brass-soft":
+          "inset 0 0 0 1px hsl(var(--brass-soft) / 0.45), 0 8px 32px -16px hsl(var(--brass-soft) / 0.45)",
+        "brass-glow":
+          "inset 0 0 0 1px hsl(var(--brass-soft) / 0.65), 0 0 32px -10px hsl(var(--brass-soft) / 0.55)",
+        terminal: "0 0 0 1px hsl(var(--border))",
       },
       keyframes: {
         "accordion-down": {
@@ -86,11 +117,30 @@ const config: Config = {
           from: { opacity: "0", transform: "translateY(4px)" },
           to: { opacity: "1", transform: "translateY(0)" },
         },
+        blink: {
+          "0%, 100%": { opacity: "1" },
+          "50%": { opacity: "0" },
+        },
+        "brass-shimmer": {
+          "0%": { backgroundPosition: "-200% 0" },
+          "100%": { backgroundPosition: "200% 0" },
+        },
+        "brass-pulse": {
+          "0%, 100%": {
+            boxShadow: "0 0 0 0 hsl(var(--primary) / 0.45)",
+          },
+          "50%": {
+            boxShadow: "0 0 0 6px hsl(var(--primary) / 0)",
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "fade-up": "fade-up 220ms cubic-bezier(0.16, 1, 0.3, 1) both",
+        blink: "blink 1.06s steps(2) infinite",
+        "brass-shimmer": "brass-shimmer 2.4s ease-in-out infinite",
+        "brass-pulse": "brass-pulse 1.8s ease-in-out infinite",
       },
     },
   },

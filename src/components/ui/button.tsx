@@ -5,20 +5,23 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[7px] text-[13px] font-medium ring-offset-background transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[3px] text-[13px] font-medium tracking-[-0.005em] ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-3.5 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
         default:
-          "bg-primary text-primary-foreground shadow-[inset_0_1px_0_hsl(0_0%_100%/0.08)] hover:bg-primary/92",
+          "bg-primary text-primary-foreground shadow-[inset_0_1px_0_hsl(0_0%_100%/0.18)] hover:bg-primary/95 hover:shadow-brass-soft",
         destructive:
-          "bg-destructive text-destructive-foreground hover:bg-destructive/92",
+          "bg-destructive text-destructive-foreground hover:bg-destructive/95",
         outline:
-          "border border-border/80 bg-background/70 text-foreground hover:border-border hover:bg-accent/60 hover:text-accent-foreground",
+          "border border-border bg-transparent text-foreground hover:border-primary/70 hover:text-primary hover:shadow-brass-soft",
         secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        ghost: "text-muted-foreground hover:bg-accent/80 hover:text-foreground",
+          "border border-border bg-secondary text-secondary-foreground hover:border-border hover:bg-accent hover:text-foreground",
+        ghost:
+          "text-muted-foreground hover:bg-accent/80 hover:text-foreground",
         link: "text-primary underline-offset-4 hover:underline",
+        terminal:
+          "font-mono uppercase tracking-[0.10em] border border-border bg-transparent text-primary hover:border-primary/80 hover:bg-primary/8 hover:shadow-brass-soft",
       },
       size: {
         default: "h-9 px-4",

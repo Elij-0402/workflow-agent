@@ -31,26 +31,30 @@ export function VariantComparison({ variants, confirmedAt }: Props) {
 
   if (!left || !right) {
     return (
-      <p className="text-[13px] text-muted-foreground">
-        至少生成 2 个变体才能进入比较。
-      </p>
+      <p className="font-mono text-[12px] uppercase tracking-[0.08em] text-muted-foreground">
+        {"// 至少生成 2 个变体才能进入比较"}</p>
     );
   }
 
   return (
-    <section className="space-y-3">
-      <header className="flex items-center justify-between">
-        <h2 className="text-[16px] font-medium">结果对比</h2>
-        <div className="flex gap-3 text-[13px]">
+    <section className="space-y-4">
+      <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="eyebrow-label">compare variants</p>
+          <h2 className="mt-2 font-display italic text-[24px] leading-tight text-foreground">
+            结果对比
+          </h2>
+        </div>
+        <div className="flex flex-wrap gap-3 font-mono text-[12px]">
           <Picker
-            label="左"
+            label="A"
             value={leftId}
             options={variants}
             confirmedAt={confirmedAt}
             onChange={setLeftId}
           />
           <Picker
-            label="右"
+            label="B"
             value={rightId}
             options={variants}
             confirmedAt={confirmedAt}
@@ -58,7 +62,7 @@ export function VariantComparison({ variants, confirmedAt }: Props) {
           />
         </div>
       </header>
-      <Card title="元信息">
+      <Card title="元信息" token="meta">
         <VariantDiffMeta
           left={{
             title: left.title,
@@ -72,10 +76,10 @@ export function VariantComparison({ variants, confirmedAt }: Props) {
           }}
         />
       </Card>
-      <Card title="章节结构">
+      <Card title="章节结构" token="structure">
         <VariantDiffStructure left={left.content} right={right.content} />
       </Card>
-      <Card title="关键段落">
+      <Card title="关键段落" token="paragraphs">
         <VariantDiffParagraphs left={left.content} right={right.content} />
       </Card>
     </section>
@@ -97,9 +101,11 @@ function Picker({
 }) {
   return (
     <label className="flex items-center gap-2">
-      <span className="text-muted-foreground">{label}</span>
+      <span className="font-mono text-[10.5px] uppercase tracking-[0.12em] text-primary/85">
+        {`// ${label}`}
+      </span>
       <select
-        className="rounded-[6px] border border-border/60 bg-background/40 px-2 py-1"
+        className="h-8 rounded-[3px] border border-border bg-background/40 px-2 font-mono text-[12px] text-foreground focus:border-primary focus:outline-none"
         value={value}
         onChange={(e) => onChange(e.target.value)}
       >
@@ -108,7 +114,7 @@ function Picker({
           return (
             <option key={v.id} value={v.id}>
               {v.title}
-              {stale ? "（旧蓝图）" : ""}
+              {stale ? " · (stale)" : ""}
             </option>
           );
         })}
@@ -122,10 +128,25 @@ function isStale(v: Variant, confirmedAt: string | null) {
   return new Date(v.created_at).getTime() < new Date(confirmedAt).getTime();
 }
 
-function Card({ title, children }: { title: string; children: React.ReactNode }) {
+function Card({
+  title,
+  token,
+  children,
+}: {
+  title: string;
+  token: string;
+  children: React.ReactNode;
+}) {
   return (
-    <div className="surface-panel p-3">
-      <h3 className="mb-2 text-[13px] font-medium">{title}</h3>
+    <div className="surface-panel p-4">
+      <div className="mb-3 flex items-baseline gap-3">
+        <h3 className="font-display italic text-[16px] text-foreground">
+          {title}
+        </h3>
+        <span className="font-mono text-[10.5px] uppercase tracking-[0.12em] text-primary/70">
+          {`// ${token}`}
+        </span>
+      </div>
       {children}
     </div>
   );

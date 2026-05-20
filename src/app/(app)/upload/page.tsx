@@ -24,7 +24,7 @@ export default async function UploadPage({
   return (
     <div className="app-page">
       <PageHeader
-        label="Import"
+        label="import"
         title={addingSecondBook ? "上传第 2 本书" : "开始新任务"}
         description={
           addingSecondBook
@@ -44,11 +44,13 @@ export default async function UploadPage({
 
 function ModePicker({ current }: { current: "single" | "dual" }) {
   return (
-    <div className="surface-panel mb-3 flex gap-2 p-2 text-[12px]">
-      <Tab href="/upload?mode=single" active={current === "single"} label="单书任务" />
-      <Tab href="/upload?mode=dual" active={current === "dual"} label="双书对照" />
-      <p className="ml-auto self-center pr-2 text-muted-foreground">
-        {current === "dual" ? "首次上传会创建空双书任务，到工作台再追加第 2 本。" : "标准三维分析 + 一键生成。"}
+    <div className="surface-panel flex items-center gap-1 border-b border-border px-4 py-2.5">
+      <Tab href="/upload?mode=single" active={current === "single"} label="single" />
+      <Tab href="/upload?mode=dual" active={current === "dual"} label="dual" />
+      <p className="ml-auto pr-2 font-mono text-[10.5px] uppercase tracking-[0.10em] text-muted-foreground">
+        {current === "dual"
+          ? "// dual · 首次上传创建空双书任务"
+          : "// single · 标准三维分析 + 一键生成"}
       </p>
     </div>
   );
@@ -66,13 +68,10 @@ function Tab({
   return (
     <Link
       href={href}
-      className={
-        active
-          ? "rounded-[6px] bg-accent px-3 py-1 text-foreground"
-          : "px-3 py-1 text-muted-foreground hover:text-foreground"
-      }
+      data-active={active}
+      className="terminal-tab"
     >
-      {label}
+      [ {label} ]
     </Link>
   );
 }

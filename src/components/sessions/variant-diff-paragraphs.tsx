@@ -20,15 +20,19 @@ export function VariantDiffParagraphs({
   }, [left, right]);
 
   return (
-    <div className="grid grid-cols-2 gap-3 text-[12.5px]">
+    <div className="grid grid-cols-2 gap-4 text-[13px]">
       <Column
-        title={`仅在左侧（${data.aOnly.length}）`}
+        label="left only"
+        count={data.aOnly.length}
         items={data.aOnly}
+        tone="destructive"
         onOpen={(index) => setOpen({ side: "a", index })}
       />
       <Column
-        title={`仅在右侧（${data.bOnly.length}）`}
+        label="right only"
+        count={data.bOnly.length}
         items={data.bOnly}
+        tone="flash"
         onOpen={(index) => setOpen({ side: "b", index })}
       />
       {open ? (
@@ -42,28 +46,42 @@ export function VariantDiffParagraphs({
 }
 
 function Column({
-  title,
+  label,
+  count,
   items,
+  tone,
   onOpen,
 }: {
-  title: string;
+  label: string;
+  count: number;
   items: { index: number; paragraph: string }[];
+  tone: "destructive" | "flash";
   onOpen: (index: number) => void;
 }) {
   return (
     <div>
-      <h4 className="mb-1 text-[11px] uppercase text-muted-foreground">{title}</h4>
+      <h4 className="mb-2 font-mono text-[10.5px] uppercase tracking-[0.12em] text-primary/80">
+        {`// ${label} · ${count}`}
+      </h4>
       <ul className="space-y-1">
         {items.length === 0 ? (
-          <li className="text-muted-foreground">无差异段落。</li>
+          <li className="font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
+            {"// no diff"}</li>
         ) : null}
         {items.map((it) => (
           <li
             key={it.index}
-            className="cursor-pointer truncate rounded-[6px] border border-border/40 bg-background/30 px-2 py-1.5 hover:bg-accent/30"
+            className={`cursor-pointer truncate rounded-[2px] border px-2 py-1.5 transition-colors font-mono text-[12px] ${
+              tone === "destructive"
+                ? "border-destructive/30 bg-destructive/8 hover:bg-destructive/15"
+                : "border-flash/30 bg-flash/8 hover:bg-flash/15"
+            }`}
             onClick={() => onOpen(it.index)}
           >
-            #{it.index + 1} {it.paragraph.slice(0, 80)}
+            <span className="mr-2 text-primary/70">
+              #{String(it.index + 1).padStart(3, "0")}
+            </span>
+            {it.paragraph.slice(0, 80)}
             {it.paragraph.length > 80 ? "…" : ""}
           </li>
         ))}
@@ -80,15 +98,19 @@ function Drawer({
   onClose: () => void;
 }) {
   return (
-    <div className="fixed inset-y-0 right-0 z-30 w-[420px] overflow-auto border-l border-border/70 bg-background/95 p-4">
-      <button
-        type="button"
-        className="mb-3 text-[12px] text-muted-foreground hover:text-foreground"
-        onClick={onClose}
-      >
-        关闭
-      </button>
-      <pre className="whitespace-pre-wrap text-[12.5px] leading-6 text-foreground">
+    <div className="surface-panel fixed inset-y-0 right-0 z-30 w-[460px] overflow-auto bg-background p-5">
+      <div className="flex items-center justify-between border-b border-dashed border-border/70 pb-3">
+        <p className="font-mono text-[10.5px] uppercase tracking-[0.12em] text-primary/80">
+          {"// paragraph"}</p>
+        <button
+          type="button"
+          className="font-mono text-[11px] uppercase tracking-[0.10em] text-muted-foreground hover:text-primary"
+          onClick={onClose}
+        >
+          $ close
+        </button>
+      </div>
+      <pre className="mt-4 whitespace-pre-wrap font-mono text-[12.5px] leading-7 text-foreground">
         {paragraph}
       </pre>
     </div>

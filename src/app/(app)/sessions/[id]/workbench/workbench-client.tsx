@@ -204,7 +204,7 @@ export function WorkbenchClient(props: Props) {
   return (
     <div className="app-page">
       <PageHeader
-        label="Workbench"
+        label="workbench"
         title={props.session.name}
         description={
           a && b
@@ -215,7 +215,7 @@ export function WorkbenchClient(props: Props) {
         }
       />
 
-      <div className="flex h-[calc(100vh-220px)] min-h-[640px] flex-col gap-3">
+      <div className="flex h-[calc(100vh-260px)] min-h-[640px] flex-col gap-4">
         <PipelineBar
           importedCount={props.books.length}
           chapterTotals={chapterTotals}
@@ -226,10 +226,11 @@ export function WorkbenchClient(props: Props) {
           blueprintStatus={blueprintStatus}
           variantCount={props.variants.length}
         />
-        <div className="grid flex-1 grid-cols-2 gap-3 overflow-hidden">
+        <div className="grid flex-1 grid-cols-2 gap-4 overflow-hidden">
           {a ? (
             <ChapterTree
               book={a}
+              position="A"
               chapters={props.chapters.filter((c) => c.book_id === a.id)}
               briefs={props.briefs.filter((br) => br.book_id === a.id)}
               chapterStatus={chapterStatus}
@@ -247,11 +248,12 @@ export function WorkbenchClient(props: Props) {
               }
             />
           ) : (
-            <EmptySlot label="还未上传 A 书" sessionId={props.session.id} position={0} />
+            <EmptySlot position="A" sessionId={props.session.id} positionIndex={0} />
           )}
           {b ? (
             <ChapterTree
               book={b}
+              position="B"
               chapters={props.chapters.filter((c) => c.book_id === b.id)}
               briefs={props.briefs.filter((br) => br.book_id === b.id)}
               chapterStatus={chapterStatus}
@@ -269,7 +271,7 @@ export function WorkbenchClient(props: Props) {
               }
             />
           ) : (
-            <EmptySlot label="还未上传 B 书" sessionId={props.session.id} position={1} />
+            <EmptySlot position="B" sessionId={props.session.id} positionIndex={1} />
           )}
         </div>
         <BlueprintEditor
@@ -321,25 +323,32 @@ export function WorkbenchClient(props: Props) {
 }
 
 function EmptySlot({
-  label,
-  sessionId,
   position,
+  sessionId,
+  positionIndex,
 }: {
-  label: string;
+  position: "A" | "B";
   sessionId: string;
-  position: 0 | 1;
+  positionIndex: 0 | 1;
 }) {
   return (
-    <div className="surface-panel flex items-center justify-center p-6">
-      <div className="text-center text-[13px] text-muted-foreground">
-        <p>{label}</p>
-        <Link
-          href={`/upload?mode=dual&sessionId=${sessionId}&position=${position}`}
-          className="mt-3 inline-flex h-9 items-center rounded-[7px] border border-border/70 bg-background/60 px-4 text-foreground hover:bg-accent/40"
-        >
-          上传文本
-        </Link>
-      </div>
+    <div className="surface-panel flex flex-col items-center justify-center gap-4 p-6">
+      <p className="font-mono text-[10.5px] uppercase tracking-[0.14em] text-primary">
+        [ {position} ]
+      </p>
+      <pre className="whitespace-pre text-center font-mono text-[11px] leading-6 text-muted-foreground">
+{`┌──── slot · ${position.toLowerCase()} · empty ────┐
+│                              │
+│   还未上传 ${position} 书                   │
+│                              │
+└──────────────────────────────┘`}
+      </pre>
+      <Link
+        href={`/upload?mode=dual&sessionId=${sessionId}&position=${positionIndex}`}
+        className="inline-flex h-9 items-center rounded-[3px] border border-border bg-transparent px-4 font-mono text-[12px] uppercase tracking-[0.10em] text-primary transition-colors hover:border-primary hover:bg-primary/8 hover:shadow-brass-soft"
+      >
+        $ upload book {position.toLowerCase()}
+      </Link>
     </div>
   );
 }

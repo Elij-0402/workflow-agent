@@ -55,3 +55,7 @@ next-env.d.ts
 # local test fixtures (sample novels for upload testing)
 samples/
 !samples/README.md
+
+# playwright MCP / local visual verification artifacts
+.playwright-mcp/
+/login-*.png

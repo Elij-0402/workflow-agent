@@ -19,6 +19,7 @@ type Brief = { chapter_id: string; result: ChapterBriefResult };
 
 type Props = {
   book: { id: string; title: string; chapter_count: number | null };
+  position?: "A" | "B";
   chapters: Chapter[];
   briefs: Brief[];
   chapterStatus: Record<string, "idle" | "running" | "done" | "error">;
@@ -31,6 +32,7 @@ type Props = {
 
 export function ChapterTree({
   book,
+  position,
   chapters,
   briefs,
   chapterStatus,
@@ -49,6 +51,7 @@ export function ChapterTree({
   const allChaptersAnalyzed =
     chapters.length > 0 && chapters.every((c) => briefByChapter.has(c.id));
   const pendingCount = chapters.filter((c) => !briefByChapter.has(c.id)).length;
+  const analyzedCount = chapters.length - pendingCount;
 
   const filterOptions = useMemo(() => {
     const characters = new Set<string>();
@@ -97,26 +100,36 @@ export function ChapterTree({
 
   return (
     <div className="surface-panel flex h-full flex-col">
-      <header className="flex items-center justify-between gap-2 border-b border-border/70 p-3">
-        <div className="min-w-0">
-          <div className="truncate text-[13px] font-medium">{book.title}</div>
-          <div className="text-[11px] text-muted-foreground">
-            {chapters.length} 章 · 已分析 {chapters.length - pendingCount}
+      <header className="flex items-center justify-between gap-2 border-b border-dashed border-border/70 px-4 py-3">
+        <div className="min-w-0 flex-1">
+          <div className="flex items-baseline gap-2">
+            {position ? (
+              <span className="font-mono text-[10.5px] uppercase tracking-[0.14em] text-primary">
+                [ {position} ]
+              </span>
+            ) : null}
+            <h3 className="truncate font-display italic text-[16px] leading-tight text-foreground">
+              {book.title}
+            </h3>
+          </div>
+          <div className="mt-1 font-mono text-[10.5px] uppercase tracking-[0.10em] text-muted-foreground">
+            {chapters.length} ch · {analyzedCount} analyzed
           </div>
         </div>
-        <div className="flex shrink-0 gap-1">
+        <div className="flex shrink-0 gap-1.5">
           {pendingCount > 0 ? (
-            <Button size="sm" variant="outline" onClick={onRunBatch}>
-              分析未完成 ({pendingCount})
+            <Button size="sm" variant="terminal" onClick={onRunBatch}>
+              $ analyze ({pendingCount})
             </Button>
           ) : null}
           {allChaptersAnalyzed ? (
             <Button
               size="sm"
               variant={synthesisDone ? "ghost" : "default"}
+              className="font-mono uppercase tracking-[0.08em]"
               onClick={onSynthesize}
             >
-              {synthesisDone ? "重做汇总" : "整书汇总"}
+              {synthesisDone ? "$ rerun synth" : "$ synthesize"}
             </Button>
           ) : null}
         </div>
@@ -124,8 +137,10 @@ export function ChapterTree({
       <FilterBar options={filterOptions} value={filter} onChange={setFilter} />
       <div className="flex-1 overflow-auto">
         {visibleChapters.length === 0 ? (
-          <p className="p-3 text-[12px] text-muted-foreground">
-            {chapters.length === 0 ? "还没有章节。" : "筛选未命中任何章节。"}
+          <p className="p-4 font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
+            {chapters.length === 0
+              ? "// empty — no chapters"
+              : "// no chapters match filter"}
           </p>
         ) : (
           visibleChapters.map((c) => (

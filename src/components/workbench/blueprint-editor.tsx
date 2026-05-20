@@ -21,14 +21,14 @@ import {
 
 type Status = BlueprintStatus;
 
-const TABS: Array<{ key: BlueprintSection; label: string }> = [
-  { key: "characters", label: "人物" },
-  { key: "relationships", label: "人物关系" },
-  { key: "world_rules", label: "世界规则" },
-  { key: "conflicts", label: "核心冲突" },
-  { key: "plot_beats", label: "章节节点" },
-  { key: "viewpoint", label: "视角与节奏" },
-  { key: "themes", label: "主题" },
+const TABS: Array<{ key: BlueprintSection; label: string; token: string }> = [
+  { key: "characters", label: "人物", token: "characters" },
+  { key: "relationships", label: "人物关系", token: "relationships" },
+  { key: "world_rules", label: "世界规则", token: "world" },
+  { key: "conflicts", label: "核心冲突", token: "conflicts" },
+  { key: "plot_beats", label: "章节节点", token: "beats" },
+  { key: "viewpoint", label: "视角与节奏", token: "viewpoint" },
+  { key: "themes", label: "主题", token: "themes" },
 ];
 
 type Props = {
@@ -64,7 +64,6 @@ export function BlueprintEditor({
   const [showGenerate, setShowGenerate] = useState(false);
   const disabled = status === "confirmed";
 
-  // Apply any pending candidate from the chapter cards.
   useEffect(() => {
     if (!pendingCandidate) return;
     if (disabled) {
@@ -133,7 +132,6 @@ export function BlueprintEditor({
 
   async function generateVariant(config: GenerateConfig) {
     if (!bpId) {
-      // Server hasn't returned the blueprint row id yet — save first to create it.
       toast.error("请先保存蓝图。");
       return;
     }
@@ -157,7 +155,6 @@ export function BlueprintEditor({
     }
   }
 
-  // Keep bp/state in sync when the parent reloads.
   useEffect(() => {
     setBp(blueprint);
     setBpUpdatedAt(updatedAt);
@@ -165,42 +162,51 @@ export function BlueprintEditor({
   }, [blueprint, updatedAt, blueprintId]);
 
   return (
-    <div className="surface-panel flex h-[360px] flex-col">
-      <div className="flex items-center justify-between border-b border-border/60 px-3 py-2">
-        <nav className="flex gap-1 text-[12px]">
+    <div className="surface-panel flex h-[380px] flex-col">
+      <div className="flex items-center justify-between gap-3 border-b border-dashed border-border/60 px-4 py-2.5">
+        <nav className="flex flex-wrap gap-0.5">
           {TABS.map((t) => (
             <button
               key={t.key}
+              data-active={active === t.key}
               onClick={() => setActive(t.key)}
-              className={`rounded-[6px] px-2 py-1 ${
-                active === t.key
-                  ? "bg-accent text-foreground"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
+              className="terminal-tab"
+              title={t.label}
             >
-              {t.label}
+              [ {t.token} ]
             </button>
           ))}
         </nav>
-        <div className="flex items-center gap-2 text-[12px] text-muted-foreground">
-          状态：{status === "confirmed" ? "已确认" : "草稿"}
+        <div className="flex shrink-0 items-center gap-2">
+          <span
+            className={`font-mono text-[10.5px] uppercase tracking-[0.12em] ${
+              status === "confirmed" ? "text-flash" : "text-primary/85"
+            }`}
+          >
+            {status === "confirmed" ? "// confirmed" : "// draft"}
+          </span>
           {status === "confirmed" ? (
             <>
               <Button size="sm" variant="ghost" onClick={() => void unlock()}>
-                解锁
+                $ unlock
               </Button>
               <Button
                 size="sm"
                 disabled={generating}
+                className="font-mono uppercase tracking-[0.10em]"
                 onClick={() => setShowGenerate(true)}
               >
                 {generating ? <Loader2 className="animate-spin" /> : <Sparkles />}
-                生成变体
+                $ generate
               </Button>
             </>
           ) : (
-            <Button size="sm" onClick={() => void confirm()}>
-              确认蓝图
+            <Button
+              size="sm"
+              className="font-mono uppercase tracking-[0.10em]"
+              onClick={() => void confirm()}
+            >
+              $ confirm
             </Button>
           )}
         </div>
@@ -244,21 +250,24 @@ function ViewpointEditor({
   onSave: (patch: Partial<Blueprint["viewpoint"]>) => void;
 }) {
   return (
-    <div className="grid gap-2 p-3 text-[12.5px]">
+    <div className="grid gap-3 p-4 text-[13px]">
       <Field
-        label="视角模式"
+        label="// mode"
+        zh="视角模式"
         value={bp.viewpoint.mode}
         disabled={disabled}
         onChange={(mode) => onSave({ mode })}
       />
       <Field
-        label="节奏"
+        label="// pacing"
+        zh="节奏"
         value={bp.viewpoint.pacing}
         disabled={disabled}
         onChange={(pacing) => onSave({ pacing })}
       />
       <Field
-        label="备注"
+        label="// notes"
+        zh="备注"
         value={bp.viewpoint.notes}
         disabled={disabled}
         onChange={(notes) => onSave({ notes })}
@@ -269,20 +278,29 @@ function ViewpointEditor({
 
 function Field({
   label,
+  zh,
   value,
   disabled,
   onChange,
 }: {
   label: string;
+  zh: string;
   value: string;
   disabled: boolean;
   onChange: (v: string) => void;
 }) {
   return (
-    <label className="flex items-center gap-2">
-      <span className="w-20 text-muted-foreground">{label}</span>
+    <label className="flex items-start gap-3">
+      <span className="w-32 shrink-0 pt-2">
+        <span className="block font-mono text-[10.5px] uppercase tracking-[0.12em] text-primary/85">
+          {label}
+        </span>
+        <span className="block font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground/70">
+          {zh}
+        </span>
+      </span>
       <input
-        className="flex-1 rounded-[6px] border border-border/60 bg-background/40 px-2 py-1"
+        className="flex-1 rounded-[2px] border border-border bg-background/40 px-2 py-1.5 font-mono text-[12.5px] text-foreground focus:border-primary focus:outline-none"
         value={value}
         disabled={disabled}
         onChange={(e) => onChange(e.target.value)}
@@ -370,12 +388,17 @@ function GenerateConfigDialog({
     GenerateConfigSchema.parse({})
   );
   return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40">
-      <div className="surface-panel w-[440px] space-y-3 p-5 text-[13px]">
-        <h3 className="text-[15px] font-medium">生成变体参数</h3>
-        <div className="grid grid-cols-2 gap-2">
+    <div className="fixed inset-0 z-40 flex items-center justify-center bg-background/72 backdrop-blur-[2px]">
+      <div className="surface-panel w-[480px] space-y-4 bg-card p-6 text-[13px]">
+        <div>
+          <p className="eyebrow-label">generate config</p>
+          <h3 className="mt-2 font-display italic text-[22px] leading-tight text-foreground">
+            生成变体参数
+          </h3>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
           <Select
-            label="策略"
+            label="strategy"
             value={config.strategy}
             options={["a-dominant", "balanced", "theme-graft"]}
             onChange={(strategy) =>
@@ -383,7 +406,7 @@ function GenerateConfigDialog({
             }
           />
           <Select
-            label="视角"
+            label="viewpoint"
             value={config.viewpoint}
             options={["keep", "first-person", "third-limited", "omniscient"]}
             onChange={(viewpoint) =>
@@ -394,7 +417,7 @@ function GenerateConfigDialog({
             }
           />
           <Select
-            label="文风"
+            label="style"
             value={config.style}
             options={["keep", "modern", "classical", "web-novel"]}
             onChange={(style) =>
@@ -402,7 +425,7 @@ function GenerateConfigDialog({
             }
           />
           <Select
-            label="输出范围"
+            label="scope"
             value={config.output_scope}
             options={["single-chapter", "outline", "three-chapters"]}
             onChange={(output_scope) =>
@@ -412,8 +435,9 @@ function GenerateConfigDialog({
               })
             }
           />
-          <label className="col-span-2 flex items-center gap-2">
-            <span className="w-20 text-muted-foreground">创新强度</span>
+          <label className="col-span-2 flex items-center gap-3">
+            <span className="w-24 font-mono text-[10.5px] uppercase tracking-[0.12em] text-primary/85">
+              {"// innov"}</span>
             <input
               type="number"
               min={1}
@@ -422,28 +446,34 @@ function GenerateConfigDialog({
               onChange={(e) =>
                 setConfig({ ...config, innovation: Number(e.target.value) })
               }
-              className="w-20 rounded-[6px] border border-border/60 bg-background/40 px-2 py-1"
+              className="w-20 rounded-[2px] border border-border bg-background/40 px-2 py-1.5 font-mono text-[13px] text-foreground focus:border-primary focus:outline-none"
             />
+            <span className="font-mono text-[11px] text-muted-foreground">/ 10</span>
           </label>
-          <label className="col-span-2 flex items-start gap-2">
-            <span className="w-20 pt-1 text-muted-foreground">额外要求</span>
+          <label className="col-span-2 flex items-start gap-3">
+            <span className="w-24 pt-1 font-mono text-[10.5px] uppercase tracking-[0.12em] text-primary/85">
+              {"// extra"}</span>
             <textarea
               value={config.extra_instructions}
               onChange={(e) =>
                 setConfig({ ...config, extra_instructions: e.target.value })
               }
-              className="min-h-[80px] flex-1 rounded-[6px] border border-border/60 bg-background/40 px-2 py-1"
+              className="min-h-[88px] flex-1 rounded-[2px] border border-border bg-background/40 px-2 py-1.5 font-mono text-[12.5px] text-foreground focus:border-primary focus:outline-none"
               maxLength={800}
             />
           </label>
         </div>
-        <div className="flex justify-end gap-2">
+        <div className="flex justify-end gap-2 border-t border-dashed border-border/70 pt-4">
           <Button variant="ghost" onClick={onCancel} disabled={generating}>
-            取消
+            $ cancel
           </Button>
-          <Button onClick={() => onSubmit(config)} disabled={generating}>
+          <Button
+            onClick={() => onSubmit(config)}
+            disabled={generating}
+            className="font-mono uppercase tracking-[0.10em]"
+          >
             {generating ? <Loader2 className="animate-spin" /> : null}
-            生成
+            $ generate
           </Button>
         </div>
       </div>
@@ -463,10 +493,12 @@ function Select({
   onChange: (v: string) => void;
 }) {
   return (
-    <label className="flex items-center gap-2">
-      <span className="w-20 text-muted-foreground">{label}</span>
+    <label className="flex items-center gap-3">
+      <span className="w-20 font-mono text-[10.5px] uppercase tracking-[0.12em] text-primary/85">
+        {`// ${label}`}
+      </span>
       <select
-        className="flex-1 rounded-[6px] border border-border/60 bg-background/40 px-2 py-1"
+        className="flex-1 rounded-[2px] border border-border bg-background/40 px-2 py-1.5 font-mono text-[12.5px] text-foreground focus:border-primary focus:outline-none"
         value={value}
         onChange={(e) => onChange(e.target.value)}
       >

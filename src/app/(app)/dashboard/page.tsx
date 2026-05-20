@@ -42,14 +42,14 @@ export default async function DashboardPage() {
     : null;
   const latestActionLabel = latestSession
     ? latestSession.mode === "dual"
-      ? "打开工作台"
+      ? "$ open workbench"
       : getSessionActionLabel(latestSession.status, latestVariantCount)
     : null;
 
   return (
     <div className="app-page">
       <PageHeader
-        label="Workspace"
+        label="workspace"
         title={`${username}，回到你的创作任务`}
         description={
           llmConfig
@@ -58,20 +58,26 @@ export default async function DashboardPage() {
         }
       />
 
-      <section className="grid gap-4 xl:grid-cols-[minmax(0,1.45fr)_320px]">
-        <div className="surface-panel p-6">
-          <div className="flex flex-col gap-5">
+      <section className="grid gap-5 xl:grid-cols-[minmax(0,1.45fr)_340px]">
+        <div className="surface-panel p-7">
+          <div className="flex flex-col gap-6">
             {latestSession ? (
               <>
-                <div className="flex flex-col gap-2">
-                  <div className="flex items-center gap-2 text-[12px] text-muted-foreground">
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.10em]">
                     <StatusDot status={latestSession.status} />
-                    <span className={latestStatus?.tone}>{latestStatus?.label}</span>
+                    <span className={latestStatus?.tone}>
+                      {latestStatus?.label}
+                    </span>
+                    <span className="text-muted-foreground/50">·</span>
+                    <span className="text-muted-foreground/80">
+                      session · {latestSession.id.slice(0, 6)}
+                    </span>
                   </div>
-                  <h2 className="text-[24px] font-medium tracking-tight text-foreground">
+                  <h2 className="font-display italic text-[32px] leading-[1.08] tracking-[-0.005em] text-foreground">
                     {latestSession.name}
                   </h2>
-                  <p className="max-w-2xl text-[14px] leading-6 text-muted-foreground">
+                  <p className="max-w-2xl text-[14px] leading-7 text-muted-foreground">
                     {latestVariantCount > 0
                       ? "最近一次结果已经完成。继续查看分析、阅读结果，或再生成一个版本。"
                       : latestSession.status === "analyzed"
@@ -83,59 +89,66 @@ export default async function DashboardPage() {
                 <MetaRow
                   items={[
                     {
-                      label: "结果",
+                      label: "results",
                       value:
                         latestVariantCount > 0
                           ? `${latestVariantCount} 个版本`
                           : "尚未生成",
                     },
                     {
-                      label: "最近更新",
+                      label: "updated",
                       value: formatRelativeTime(latestSession.updated_at),
                     },
                     {
-                      label: "创建时间",
+                      label: "created",
                       value: formatDate(latestSession.created_at),
                     },
                   ]}
                 />
 
-                <div className="grid gap-3 border-t border-border/70 pt-5 sm:grid-cols-[auto_auto_1fr] sm:items-center">
-                  <Button asChild className="h-10 px-4">
-                    <Link href={latestSession.mode === "dual" ? `/sessions/${latestSession.id}/workbench` : `/sessions/${latestSession.id}`}>
+                <div className="flex flex-col gap-3 border-t border-dashed border-border/70 pt-5 sm:flex-row sm:items-center">
+                  <Button asChild className="h-10 px-5 font-mono uppercase tracking-[0.08em]">
+                    <Link
+                      href={
+                        latestSession.mode === "dual"
+                          ? `/sessions/${latestSession.id}/workbench`
+                          : `/sessions/${latestSession.id}`
+                      }
+                    >
                       {latestActionLabel}
                       <ArrowRight aria-hidden="true" />
                     </Link>
                   </Button>
                   <Link
                     href="/sessions"
-                    className="text-[13px] text-muted-foreground transition-colors hover:text-foreground"
+                    className="brass-underline font-mono text-[12px] uppercase tracking-[0.10em] text-muted-foreground transition-colors hover:text-primary"
                   >
-                    查看任务记录
+                    $ view all sessions
                   </Link>
-                  <div className="hidden sm:block" />
                 </div>
               </>
             ) : (
               <>
-                <div className="flex flex-col gap-2">
-                  <h2 className="text-[24px] font-medium tracking-tight text-foreground">
+                <div className="flex flex-col gap-3">
+                  <p className="eyebrow-label">empty</p>
+                  <h2 className="font-display italic text-[32px] leading-[1.08] text-foreground">
                     还没有任务
                   </h2>
-                  <p className="max-w-2xl text-[14px] leading-6 text-muted-foreground">
+                  <p className="max-w-2xl text-[14px] leading-7 text-muted-foreground">
                     从一部小说开始。导入文本后，分析进度、生成结果和后续研究路径都会保留下来。
                   </p>
                 </div>
-                <div className="surface-subtle flex min-h-[180px] items-center justify-center p-6">
-                  <div className="max-w-sm text-center">
-                    <p className="text-[14px] font-medium text-foreground">
-                      当前工作区为空
-                    </p>
-                    <p className="mt-2 text-[13px] leading-6 text-muted-foreground">
-                      先导入第一份文本，工作台就会开始积累任务状态、分析记录和结果阅读面板。
-                    </p>
-                  </div>
-                </div>
+                <pre className="surface-subtle whitespace-pre overflow-x-auto p-6 font-mono text-[12px] leading-6 text-muted-foreground">
+{`┌──── workspace · empty ─────────────┐
+│                                    │
+│   no session yet                   │
+│                                    │
+│   $ upload your first .txt         │
+│   $ run three-dimension analysis   │
+│   $ generate a variant             │
+│                                    │
+└────────────────────────────────────┘`}
+                </pre>
               </>
             )}
           </div>
@@ -143,18 +156,19 @@ export default async function DashboardPage() {
 
         <div className="flex flex-col gap-4">
           <section className="surface-panel p-5">
-            <p className="eyebrow-label">Actions</p>
-            <h2 className="mt-2 text-[18px] font-medium text-foreground">开始新任务</h2>
+            <p className="eyebrow-label">actions</p>
+            <h3 className="mt-3 font-display italic text-[20px] text-foreground">
+              开始新任务
+            </h3>
             <p className="mt-2 text-[13px] leading-6 text-muted-foreground">
               上传新的小说文本，直接进入分析页。
             </p>
             {!llmConfig ? (
               <p className="mt-2 text-[13px] leading-6 text-muted-foreground">
-                开始分析前，先去
-                {" "}
+                先去
                 <Link
                   href="/settings"
-                  className="text-foreground underline decoration-border underline-offset-4"
+                  className="mx-1 text-primary underline decoration-primary/30 underline-offset-4 hover:decoration-primary"
                 >
                   设置
                 </Link>
@@ -166,17 +180,21 @@ export default async function DashboardPage() {
               <Button
                 asChild
                 variant={latestSession ? "outline" : "default"}
-                className="h-10 justify-center"
+                className="h-10 justify-center font-mono uppercase tracking-[0.08em]"
               >
                 <Link href="/upload">
                   <Plus aria-hidden="true" />
-                  {latestSession ? "新建任务" : "开始第一个任务"}
+                  {latestSession ? "$ new task" : "$ first task"}
                 </Link>
               </Button>
-              <Button asChild variant="ghost" className="h-10 justify-center">
+              <Button
+                asChild
+                variant="ghost"
+                className="h-10 justify-center font-mono uppercase tracking-[0.08em]"
+              >
                 <Link href="/settings">
                   <Settings2 aria-hidden="true" />
-                  模型设置
+                  $ model config
                 </Link>
               </Button>
             </div>
@@ -184,31 +202,34 @@ export default async function DashboardPage() {
 
           <section className="surface-subtle p-5">
             <div className="flex items-center gap-3">
-              <div className="flex size-8 items-center justify-center rounded-[7px] border border-border/80 bg-background/80 text-primary">
-                <Waypoints className="h-4 w-4" />
-              </div>
-              <div>
-                <p className="text-[13px] font-medium text-foreground">研究方向</p>
-                <p className="text-[12px] text-muted-foreground">为下一轮功能铺路</p>
-              </div>
+              <Waypoints className="h-4 w-4 text-primary" />
+              <p className="font-mono text-[10.5px] uppercase tracking-[0.14em] text-primary/85">
+                {"// research"}</p>
             </div>
-            <p className="mt-4 text-[13px] leading-6 text-muted-foreground">
+            <p className="mt-1 font-display italic text-[16px] text-foreground">
+              研究方向
+            </p>
+            <p className="mt-3 text-[12.5px] leading-6 text-muted-foreground">
               当前版本先围绕单书分析与生成闭环展开，后续会在同一套工作台里接入多文本对照、双视角总结与更强的长文本处理能力。
             </p>
           </section>
 
           <section className="surface-subtle p-5">
             <div className="flex items-center gap-3">
-              <div className="flex size-8 items-center justify-center rounded-[7px] border border-border/80 bg-background/80 text-primary">
-                <Sparkles className="h-4 w-4" />
-              </div>
-              <div>
-                <p className="text-[13px] font-medium text-foreground">模型状态</p>
-                <p className="text-[12px] text-muted-foreground">
-                  {llmConfig ? `${llmConfig.provider} · ${llmConfig.model}` : "尚未配置"}
-                </p>
-              </div>
+              <Sparkles className="h-4 w-4 text-primary" />
+              <p className="font-mono text-[10.5px] uppercase tracking-[0.14em] text-primary/85">
+                {"// model"}</p>
             </div>
+            <p className="mt-2 font-mono text-[12px] text-foreground">
+              {llmConfig
+                ? `${llmConfig.provider} · ${llmConfig.model}`
+                : "未配置"}
+            </p>
+            {llmConfig ? (
+              <p className="mt-1 font-mono text-[10.5px] uppercase tracking-[0.10em] text-muted-foreground/70">
+                updated · {formatRelativeTime(llmConfig.updated_at)}
+              </p>
+            ) : null}
           </section>
         </div>
       </section>
@@ -218,12 +239,12 @@ export default async function DashboardPage() {
 
 function getSessionActionLabel(status: string, variantCount: number) {
   if (variantCount > 0 || status === "done") {
-    return "查看结果";
+    return "$ view results";
   }
 
   if (status === "analyzed") {
-    return "生成结果";
+    return "$ generate";
   }
 
-  return "继续分析";
+  return "$ continue";
 }

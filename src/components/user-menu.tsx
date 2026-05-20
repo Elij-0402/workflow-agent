@@ -27,26 +27,32 @@ export function UserMenu({ email }: { email: string }) {
           className="size-9 rounded-full p-0"
           aria-label="账户菜单"
         >
-          <span className="flex size-9 items-center justify-center rounded-full border border-border/80 bg-accent/60 text-[11px] font-medium text-foreground">
+          <span className="flex size-9 items-center justify-center rounded-full border border-primary/50 bg-card font-mono text-[11px] uppercase text-primary">
             {initials}
           </span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56 border-border/80 bg-popover/95">
-        <DropdownMenuLabel className="font-normal">
-          <div className="flex flex-col">
-            <span className="text-xs text-muted-foreground">已登录</span>
-            <span className="truncate text-sm">{email}</span>
+      <DropdownMenuContent align="end" className="w-60">
+        <DropdownMenuLabel>{"// account"}</DropdownMenuLabel>
+        <DropdownMenuItem
+          disabled
+          className="cursor-default opacity-100 focus:bg-transparent focus:text-foreground"
+        >
+          <div className="flex flex-col gap-0.5">
+            <span className="font-mono text-[10.5px] uppercase tracking-[0.10em] text-muted-foreground">
+              signed in as
+            </span>
+            <span className="truncate text-[13px] text-foreground">{email}</span>
           </div>
-        </DropdownMenuLabel>
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
-          className="text-destructive focus:text-destructive"
+          className="font-mono text-[12px] uppercase tracking-[0.06em] text-destructive focus:text-destructive"
           disabled={pending}
           onClick={() => start(() => signOut())}
         >
-          <LogOut aria-hidden="true" />
-          {pending ? "登出中…" : "登出"}
+          <LogOut aria-hidden="true" className="text-destructive" />
+          {pending ? "$ signing out…" : "$ sign out"}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

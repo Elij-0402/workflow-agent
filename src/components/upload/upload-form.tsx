@@ -50,7 +50,7 @@ export function UploadForm({
     }
 
     setPending(true);
-    setStatusText("正在初始化上传任务...");
+    setStatusText("// init upload session…");
 
     try {
       const initResult = await initNovelUpload({
@@ -67,7 +67,7 @@ export function UploadForm({
         return;
       }
 
-      setStatusText("正在直传原始文件到私有存储...");
+      setStatusText("// streaming to private storage…");
       const { error: uploadError } = await supabase.storage
         .from("novels")
         .upload(initResult.storageObjectPath, selectedFile, {
@@ -80,7 +80,7 @@ export function UploadForm({
         return;
       }
 
-      setStatusText("正在解析文本并写入分析会话...");
+      setStatusText("// parsing text + writing session…");
       const finalizeResult = await finalizeNovelUpload({
         sessionId: initResult.sessionId,
         storageObjectPath: initResult.storageObjectPath,
@@ -106,20 +106,25 @@ export function UploadForm({
   };
 
   return (
-    <form onSubmit={(event) => void onSubmit(event)} className="grid gap-4 xl:grid-cols-[minmax(0,1.35fr)_320px]">
-      <section className="surface-panel p-6">
-        <div className="flex flex-col gap-5">
+    <form
+      onSubmit={(event) => void onSubmit(event)}
+      className="grid gap-5 xl:grid-cols-[minmax(0,1.4fr)_340px]"
+    >
+      <section className="surface-panel p-7">
+        <div className="flex flex-col gap-6">
           <div>
-            <p className="eyebrow-label">Source Text</p>
-            <h2 className="mt-2 text-[20px] font-medium tracking-tight text-foreground">
+            <p className="eyebrow-label">source text</p>
+            <h2 className="mt-2 font-display italic text-[24px] leading-[1.1] text-foreground">
               选择小说文本
             </h2>
-            <p className="mt-2 text-[14px] leading-6 text-muted-foreground">
-              当前版本支持单个 `.txt` 文件。导入后会直接创建任务并进入分析页。
+            <p className="mt-2 text-[13.5px] leading-7 text-muted-foreground">
+              当前版本支持单个 .txt 文件。导入后会直接创建任务并进入分析页。
             </p>
           </div>
 
-          <div className="rounded-[8px] border border-dashed border-border/80 bg-background/35 p-5">
+          <div className="frame-corners relative rounded-[3px] border border-dashed border-border bg-background/40 p-6">
+            <span className="frame-tr" aria-hidden />
+            <span className="frame-bl" aria-hidden />
             <input
               ref={fileInputRef}
               id="file"
@@ -139,10 +144,10 @@ export function UploadForm({
             <div className="flex flex-col gap-6">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <div className="text-[14px] font-medium text-foreground">
-                    {filename ? "已选择文件" : "还没有选择文件"}
+                  <div className="font-mono text-[11px] uppercase tracking-[0.12em] text-primary/85">
+                    {filename ? "// file ready" : "// awaiting file"}
                   </div>
-                  <p className="mt-2 text-[13px] leading-6 text-muted-foreground">
+                  <p className="mt-2 text-[13px] leading-7 text-muted-foreground">
                     {filename
                       ? "确认文件无误后，直接开始创建任务。"
                       : "先选择文件，再进入分析流程。"}
@@ -151,73 +156,75 @@ export function UploadForm({
 
                 <Button
                   type="button"
-                  variant="outline"
+                  variant="terminal"
                   disabled={pending}
                   onClick={() => fileInputRef.current?.click()}
                 >
                   <UploadCloud />
-                  {filename ? "重新选择" : "选择文件"}
+                  {filename ? "$ replace" : "$ select"}
                 </Button>
               </div>
 
-              <div className="surface-subtle min-h-[172px] p-5">
-                {filename ? (
-                  <div className="flex h-full flex-col justify-between gap-6">
-                    <div className="flex items-start gap-4">
-                      <div className="flex size-10 items-center justify-center rounded-[8px] border border-border/70 bg-background/65 text-muted-foreground">
-                        <FileText aria-hidden="true" className="h-4 w-4" />
+              {filename ? (
+                <div className="rounded-[2px] border border-border bg-background/60 p-4">
+                  <div className="flex items-start gap-4">
+                    <div className="flex size-10 items-center justify-center rounded-[2px] border border-primary/40 bg-card text-primary">
+                      <FileText aria-hidden="true" className="h-4 w-4" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate font-mono text-[13px] text-foreground">
+                        {filename}
                       </div>
-                      <div className="min-w-0">
-                        <div className="truncate text-[14px] font-medium text-foreground">
-                          {filename}
-                        </div>
-                        <div className="mt-1 text-[12px] text-muted-foreground">
-                          {filesize == null ? "等待上传" : formatBytes(filesize)}
-                        </div>
+                      <div className="mt-1 font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
+                        {filesize == null ? "waiting…" : formatBytes(filesize)} · txt
                       </div>
                     </div>
+                  </div>
 
-                    <div className="grid gap-3 sm:grid-cols-3">
-                      <InfoStat label="格式" value=".txt" />
-                      <InfoStat
-                        label="大小"
-                        value={filesize == null ? "未知" : formatBytes(filesize, 0)}
-                      />
-                      <InfoStat label="状态" value={pending ? "处理中" : "已就绪"} />
-                    </div>
+                  <div className="mt-4 grid gap-3 border-t border-dashed border-border/70 pt-4 sm:grid-cols-3">
+                    <InfoStat label="format" value=".txt" />
+                    <InfoStat
+                      label="size"
+                      value={filesize == null ? "unknown" : formatBytes(filesize, 0)}
+                    />
+                    <InfoStat label="status" value={pending ? "running" : "ready"} />
                   </div>
-                ) : (
-                  <div className="flex h-full items-center justify-center">
-                    <div className="max-w-sm text-center">
-                      <p className="text-[14px] font-medium text-foreground">等待导入文本</p>
-                      <p className="mt-2 text-[13px] leading-6 text-muted-foreground">
-                        任务创建后，文本会进入私有存储，并生成清洗后的分析输入。
-                      </p>
-                    </div>
-                  </div>
-                )}
-              </div>
+                </div>
+              ) : (
+                <pre className="whitespace-pre overflow-x-auto rounded-[2px] border border-dashed border-border/60 bg-background/30 p-5 text-center font-mono text-[12px] leading-6 text-muted-foreground">
+{`┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+      drop .txt here
+   or click "$ select" above
+┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄`}
+                </pre>
+              )}
             </div>
           </div>
 
           {statusText ? (
-            <p className="text-[13px] leading-6 text-muted-foreground">{statusText}</p>
+            <p className="font-mono text-[12px] uppercase tracking-[0.08em] text-primary">
+              {statusText}
+            </p>
           ) : null}
 
-          <div className="flex flex-col gap-3 border-t border-border/70 pt-5 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-xs leading-5 text-muted-foreground">
-              {filename ? "文件已准备好，可以开始。" : "先选文件，再开始任务。"}
+          <div className="flex flex-col gap-3 border-t border-dashed border-border/70 pt-5 sm:flex-row sm:items-center sm:justify-between">
+            <p className="font-mono text-[10.5px] uppercase tracking-[0.10em] text-muted-foreground">
+              {filename ? "// file ready — start when ready" : "// select file first"}
             </p>
-            <Button type="submit" disabled={pending}>
+            <Button
+              type="submit"
+              disabled={pending}
+              className="font-mono uppercase tracking-[0.10em]"
+            >
               {pending ? (
                 <>
                   <Loader2 className="animate-spin" />
-                  创建中
+                  $ creating…
                 </>
               ) : (
                 <>
                   <UploadCloud />
-                  开始任务
+                  $ create task
                 </>
               )}
             </Button>
@@ -229,30 +236,38 @@ export function UploadForm({
         <section className="surface-panel p-5">
           <button
             type="button"
-            className="inline-flex items-center gap-2 text-[13px] text-muted-foreground transition-colors hover:text-foreground"
+            className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.10em] text-primary/85 transition-colors hover:text-primary"
             onClick={() => setHelpOpen((current) => !current)}
             aria-expanded={helpOpen}
           >
-            {helpOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-            文件要求
+            {helpOpen ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+            {"// help · file requirements"}
           </button>
 
-          <div className="mt-4 flex flex-col gap-3 text-[13px] leading-6 text-muted-foreground">
-            <p>支持 `.txt` 文件，大小上限 {formatBytes(MAX_UPLOAD_BYTES, 0)}。</p>
+          <div className="mt-4 flex flex-col gap-3 text-[13px] leading-7 text-muted-foreground">
+            <p>支持 .txt 文件，上限 {formatBytes(MAX_UPLOAD_BYTES, 0)}。</p>
             <p>导入后会自动识别文本并创建分析任务。</p>
             {helpOpen ? (
-              <p>当前先基于文本前段快速分析，方便你先判断结果质量。</p>
+              <p className="border-l-[2px] border-primary/40 pl-3 italic">
+                当前先基于文本前段快速分析，方便你先判断结果质量。
+              </p>
             ) : null}
           </div>
         </section>
 
         <section className="surface-subtle p-5">
-          <p className="eyebrow-label">Pipeline</p>
-          <div className="mt-3 flex flex-col gap-3 text-[13px] leading-6 text-muted-foreground">
-            <p>1. 直传原始文本到私有存储。</p>
-            <p>2. 服务端确认入库并清洗文本。</p>
-            <p>3. 创建新的分析任务并进入任务详情页。</p>
-          </div>
+          <p className="eyebrow-label">pipeline</p>
+          <ol className="mt-4 flex flex-col gap-2.5 font-mono text-[12px] text-muted-foreground">
+            <li>
+              <span className="text-primary/80">01 →</span> 直传原始文本到私有存储
+            </li>
+            <li>
+              <span className="text-primary/80">02 →</span> 服务端确认入库并清洗文本
+            </li>
+            <li>
+              <span className="text-primary/80">03 →</span> 创建新分析任务并跳转
+            </li>
+          </ol>
         </section>
       </aside>
     </form>
@@ -261,9 +276,11 @@ export function UploadForm({
 
 function InfoStat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-[7px] border border-border/70 bg-background/55 px-3 py-3">
-      <p className="data-label">{label}</p>
-      <p className="mt-2 text-[13px] text-foreground">{value}</p>
+    <div>
+      <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-primary/85">
+        {label}
+      </p>
+      <p className="mt-1 font-mono text-[12.5px] text-foreground">{value}</p>
     </div>
   );
 }

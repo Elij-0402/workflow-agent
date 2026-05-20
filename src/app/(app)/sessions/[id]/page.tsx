@@ -116,10 +116,10 @@ export default async function SessionDetailPage({ params }: SessionPageProps) {
     variantCount: safeVariants.length,
   });
   const headerAction = !llmConfig ? (
-    <Button asChild>
+    <Button asChild className="font-mono uppercase tracking-[0.10em]">
       <Link href="/settings">
         <Settings2 aria-hidden="true" />
-        前往设置
+        $ settings
       </Link>
     </Button>
   ) : undefined;
@@ -127,15 +127,15 @@ export default async function SessionDetailPage({ params }: SessionPageProps) {
   return (
     <div className="app-page">
       <PageHeader
-        label="Session"
+        label="session"
         title={book.title}
         description={currentStepDescription}
         action={headerAction}
         meta={
           <MetaRow
             items={[
-              { label: "上传时间", value: formatDate(book.created_at) },
-              { label: "最近更新", value: formatRelativeTime(session.updated_at) },
+              { label: "uploaded", value: formatDate(book.created_at) },
+              { label: "updated", value: formatRelativeTime(session.updated_at) },
             ]}
           />
         }
@@ -145,30 +145,32 @@ export default async function SessionDetailPage({ params }: SessionPageProps) {
 
       <MetaRow
         items={[
-          { label: "字数", value: book.word_count?.toLocaleString("zh-CN") ?? "0" },
-          { label: "章节", value: String(chapterCount) },
-          { label: "编码", value: metadata.encoding ?? "未知" },
-          { label: "分析进度", value: `${safeAnalyses.length} / 3` },
+          { label: "words", value: book.word_count?.toLocaleString("zh-CN") ?? "0" },
+          { label: "chapters", value: String(chapterCount) },
+          { label: "encoding", value: metadata.encoding ?? "未知" },
+          { label: "analysis", value: `${safeAnalyses.length} / 3` },
         ]}
       />
 
-      <section className="grid gap-8">
-        <div className="surface-panel p-5">
-          <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_280px]">
+      <section className="grid gap-9">
+        <div className="surface-panel p-6">
+          <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_300px]">
             <div>
-              <p className="eyebrow-label">Overview</p>
-              <h2 className="mt-2 text-[18px] font-medium text-foreground">任务概览</h2>
-              <p className="mt-2 max-w-3xl text-[13px] leading-6 text-muted-foreground">
+              <p className="eyebrow-label">overview</p>
+              <h2 className="mt-2 font-display italic text-[24px] leading-tight text-foreground">
+                任务概览
+              </h2>
+              <p className="mt-3 max-w-3xl text-[13.5px] leading-7 text-muted-foreground">
                 当前版本先围绕单份文本建立完整的研究与生成路径。后续多书对比、双视角分析和来源映射会接入同一块结构。
               </p>
             </div>
             <div className="surface-subtle p-4">
-              <p className="data-label">当前状态</p>
-              <p className="mt-2 text-[14px] font-medium text-foreground">
+              <p className="data-label">{"// current state"}</p>
+              <p className="mt-2 font-display italic text-[18px] text-foreground">
                 {getStageSummary(hasCompleteAnalysis, hasVariants)}
               </p>
-              <p className="mt-2 text-[12px] leading-6 text-muted-foreground">
-                已完成分析 {safeAnalyses.length} / 3，已保存版本 {safeVariants.length}。
+              <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
+                analysis {safeAnalyses.length}/3 · variants {safeVariants.length}
               </p>
             </div>
           </div>

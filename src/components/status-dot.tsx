@@ -2,34 +2,53 @@ import { cn } from "@/lib/utils";
 
 export const SESSION_STATUS_META: Record<
   string,
-  { dot: string; label: string; tone: string }
+  { dot: string; label: string; tone: string; glyph: string }
 > = {
-  draft: { dot: "bg-zinc-500", label: "草稿", tone: "text-zinc-300" },
-  uploaded: { dot: "bg-sky-400", label: "已导入", tone: "text-sky-300" },
+  draft: {
+    dot: "text-muted-foreground",
+    label: "// draft",
+    tone: "text-muted-foreground",
+    glyph: "○",
+  },
+  uploaded: {
+    dot: "text-flash",
+    label: "// uploaded",
+    tone: "text-flash",
+    glyph: "●",
+  },
   analyzing: {
-    dot: "bg-amber-400 animate-pulse",
-    label: "分析中",
-    tone: "text-amber-300",
+    dot: "text-primary",
+    label: "// running",
+    tone: "text-primary",
+    glyph: "◐",
   },
   generating: {
-    dot: "bg-amber-400 animate-pulse",
-    label: "生成中",
-    tone: "text-amber-300",
+    dot: "text-primary",
+    label: "// generating",
+    tone: "text-primary",
+    glyph: "◐",
   },
   analyzed: {
-    dot: "bg-emerald-400",
-    label: "已分析",
-    tone: "text-emerald-300",
+    dot: "text-flash",
+    label: "// analyzed",
+    tone: "text-flash",
+    glyph: "●",
   },
-  done: { dot: "bg-emerald-400", label: "已完成", tone: "text-emerald-300" },
+  done: {
+    dot: "text-flash",
+    label: "// done",
+    tone: "text-flash",
+    glyph: "✓",
+  },
 };
 
 export function getSessionStatusMeta(status: string) {
   return (
     SESSION_STATUS_META[status] ?? {
-      dot: "bg-zinc-500",
-      label: status,
-      tone: "text-zinc-300",
+      dot: "text-muted-foreground",
+      label: `// ${status}`,
+      tone: "text-muted-foreground",
+      glyph: "○",
     }
   );
 }
@@ -42,15 +61,19 @@ export function StatusDot({
   className?: string;
 }) {
   const meta = getSessionStatusMeta(status);
+  const pulsing = status === "analyzing" || status === "generating";
 
   return (
     <span
       className={cn(
-        "inline-block h-2 w-2 shrink-0 rounded-full shadow-[0_0_0_2px_hsl(var(--background))]",
+        "inline-flex h-3 w-3 shrink-0 items-center justify-center font-mono text-[11px] leading-none",
         meta.dot,
+        pulsing && "animate-pulse",
         className
       )}
       aria-hidden="true"
-    />
+    >
+      {meta.glyph}
+    </span>
   );
 }

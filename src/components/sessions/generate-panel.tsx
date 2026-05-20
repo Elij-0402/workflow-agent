@@ -117,8 +117,6 @@ export function GeneratePanel({
   }, [pending, startedAt]);
 
   async function onSubmit(values: GenerateConfig) {
-    // Cost guard: each re-generation hits the LLM and burns BYOK tokens.
-    // Confirm if the session already has variants.
     if (variantCount > 0 && typeof window !== "undefined") {
       const ok = window.confirm(
         `再生成一个版本会再次调用模型并消耗你的 BYOK 配额。当前已有 ${variantCount} 个版本，继续？`
@@ -160,30 +158,33 @@ export function GeneratePanel({
 
   return (
     <section id="generate-panel" className="space-y-5">
-      <div className="space-y-2">
-        <p className="eyebrow-label">Generate</p>
-        <h2 className="text-[20px] font-medium tracking-tight text-foreground">
+      <div className="space-y-3">
+        <p className="eyebrow-label">generate</p>
+        <h2 className="font-display italic text-[28px] leading-[1.05] text-foreground">
           生成结果
         </h2>
-        <p className="max-w-2xl text-[14px] leading-6 text-muted-foreground">
+        <p className="max-w-2xl text-[14px] leading-7 text-muted-foreground">
           {variantCount > 0
             ? `当前已保存 ${variantCount} 个版本。保持常用参数在首屏，其余选项收进高级设置。`
             : "先用常用参数生成第一个版本，其他设置按需展开。"}
         </p>
         {blockReason ? (
-          <p className="text-[13px] leading-6 text-amber-200">{blockReason}</p>
+          <p className="font-mono text-[12px] uppercase tracking-[0.08em] text-primary">
+            {`// ${blockReason}`}
+          </p>
         ) : null}
         {pending ? (
-          <p className="text-[13px] leading-6 text-muted-foreground">
-            预计 30 到 60 秒，已等待 {elapsedSeconds} 秒。
+          <p className="font-mono text-[12px] uppercase tracking-[0.10em] text-primary">
+            {`// generating · est 30-60s · elapsed ${elapsedSeconds}s`}
+            <span className="blink-cursor" aria-hidden />
           </p>
         ) : null}
       </div>
 
-      <div className="surface-panel p-6">
+      <div className="surface-panel p-7">
         <Form {...form}>
           <form
-            className="flex flex-col gap-6"
+            className="flex flex-col gap-7"
             onSubmit={form.handleSubmit((values) => void onSubmit(values))}
           >
             <QuickGenerateForm
@@ -192,23 +193,23 @@ export function GeneratePanel({
               innovation={innovation}
             />
 
-            <div className="border-t border-border/70 pt-5">
+            <div className="border-t border-dashed border-border/60 pt-5">
               <button
                 type="button"
-                className="inline-flex items-center gap-2 text-[13px] text-muted-foreground transition-colors hover:text-foreground"
+                className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.10em] text-primary/85 transition-colors hover:text-primary"
                 onClick={() => setShowAdvanced((current) => !current)}
                 aria-expanded={showAdvanced}
               >
                 {showAdvanced ? (
-                  <ChevronUp className="h-4 w-4" />
+                  <ChevronUp className="h-3.5 w-3.5" />
                 ) : (
-                  <ChevronDown className="h-4 w-4" />
+                  <ChevronDown className="h-3.5 w-3.5" />
                 )}
-                高级选项
+                {"// advanced options"}
               </button>
 
               {showAdvanced ? (
-                <div className="mt-4">
+                <div className="mt-5">
                   <AdvancedOptions
                     form={form}
                     disabled={pending || Boolean(blockReason)}
@@ -217,22 +218,26 @@ export function GeneratePanel({
               ) : null}
             </div>
 
-            <div className="flex flex-col gap-3 border-t border-border/70 pt-5 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-xs leading-5 text-muted-foreground">
+            <div className="flex flex-col gap-3 border-t border-dashed border-border/60 pt-5 sm:flex-row sm:items-center sm:justify-between">
+              <p className="font-mono text-[10.5px] uppercase tracking-[0.08em] text-muted-foreground">
                 {variantCount > 0
-                  ? "新结果会追加保存，不会覆盖现有版本。"
-                  : "生成后结果会保存在当前任务下。"}
+                  ? "// new run appends — never overwrites"
+                  : "// result saves to current session"}
               </p>
-              <Button type="submit" disabled={pending || Boolean(blockReason)}>
+              <Button
+                type="submit"
+                disabled={pending || Boolean(blockReason)}
+                className="font-mono uppercase tracking-[0.10em]"
+              >
                 {pending ? (
                   <>
                     <Loader2 className="animate-spin" />
-                    生成中
+                    $ generating…
                   </>
                 ) : (
                   <>
                     <Sparkles />
-                    {variantCount > 0 ? "再生成一个版本" : "生成结果"}
+                    {variantCount > 0 ? "$ generate again" : "$ generate"}
                   </>
                 )}
               </Button>
@@ -257,20 +262,20 @@ function QuickGenerateForm({
   const outputScope = form.watch("output_scope");
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-7">
       <FormField
         control={form.control}
         name="output_scope"
         render={({ field }) => (
           <FormItem className="flex flex-col gap-3">
-            <FormLabel>结果范围</FormLabel>
+            <FormLabel>{"// output scope"}</FormLabel>
             <ChoiceGrid
               options={OUTPUT_SCOPE_OPTIONS}
               value={field.value}
               disabled={disabled}
               onChange={field.onChange}
             />
-            <p className="text-[13px] leading-6 text-muted-foreground">
+            <p className="text-[13px] leading-7 text-muted-foreground">
               {
                 OUTPUT_SCOPE_OPTIONS.find((option) => option.value === outputScope)
                   ?.description
@@ -286,14 +291,14 @@ function QuickGenerateForm({
         name="strategy"
         render={({ field }) => (
           <FormItem className="flex flex-col gap-3">
-            <FormLabel>改写方式</FormLabel>
+            <FormLabel>{"// strategy"}</FormLabel>
             <ChoiceGrid
               options={STRATEGY_OPTIONS}
               value={field.value}
               disabled={disabled}
               onChange={field.onChange}
             />
-            <p className="text-[13px] leading-6 text-muted-foreground">
+            <p className="text-[13px] leading-7 text-muted-foreground">
               {
                 STRATEGY_OPTIONS.find((option) => option.value === strategy)
                   ?.description
@@ -310,8 +315,10 @@ function QuickGenerateForm({
         render={({ field }) => (
           <FormItem className="flex flex-col gap-3">
             <div className="flex items-center justify-between gap-3">
-              <FormLabel>创新强度</FormLabel>
-              <span className="text-[13px] text-foreground">{innovation} / 10</span>
+              <FormLabel>{"// innovation"}</FormLabel>
+              <span className="font-mono text-[13px] text-primary">
+                {innovation} / 10
+              </span>
             </div>
             <FormControl>
               <input
@@ -327,9 +334,9 @@ function QuickGenerateForm({
                 }
               />
             </FormControl>
-            <div className="flex items-center justify-between text-[12px] text-muted-foreground">
-              <span>更稳</span>
-              <span>更大胆</span>
+            <div className="flex items-center justify-between font-mono text-[10.5px] uppercase tracking-[0.10em] text-muted-foreground">
+              <span>safer</span>
+              <span>bolder</span>
             </div>
             <FormMessage />
           </FormItem>
@@ -354,7 +361,7 @@ function AdvancedOptions({
           name="viewpoint"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>叙事视角</FormLabel>
+              <FormLabel>{"// viewpoint"}</FormLabel>
               <Select
                 disabled={disabled}
                 value={field.value}
@@ -383,7 +390,7 @@ function AdvancedOptions({
           name="style"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>文风倾向</FormLabel>
+              <FormLabel>{"// style"}</FormLabel>
               <Select
                 disabled={disabled}
                 value={field.value}
@@ -413,9 +420,9 @@ function AdvancedOptions({
         name="extra_instructions"
         render={({ field }) => (
           <FormItem>
-            <div className="flex items-center gap-2 text-[13px] text-muted-foreground">
-              <Settings2 className="h-4 w-4" />
-              <FormLabel>补充要求</FormLabel>
+            <div className="flex items-center gap-2">
+              <Settings2 className="h-3.5 w-3.5 text-primary/70" />
+              <FormLabel>{"// extra instructions"}</FormLabel>
             </div>
             <FormControl>
               <Textarea
@@ -463,11 +470,13 @@ function ChoiceGrid<T extends string>({
           disabled={disabled}
           variant="outline"
           className={cn(
-            "h-auto w-full justify-start rounded-[7px] px-3 py-3 text-left text-[13px]",
-            value === option.value ? "border-primary/50 bg-primary/10 text-foreground" : ""
+            "h-auto w-full justify-start rounded-[3px] px-3 py-3 text-left font-mono text-[12px] uppercase tracking-[0.06em]",
+            value === option.value
+              ? "border-primary bg-primary/10 text-primary"
+              : ""
           )}
         >
-          <span className="font-medium">{option.label}</span>
+          <span>[ {option.label} ]</span>
         </ToggleGroupItem>
       ))}
     </ToggleGroup>

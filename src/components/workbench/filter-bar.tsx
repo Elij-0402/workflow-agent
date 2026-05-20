@@ -13,16 +13,24 @@ type Props = {
 };
 
 export function FilterBar({ options, value, onChange }: Props) {
+  const hasFilter =
+    value.characters.length + value.conflicts.length > 0 ||
+    value.themeKeyword.trim().length > 0;
+
   return (
-    <div className="flex flex-wrap items-center gap-2 border-b border-border/60 p-2 text-[12px]">
+    <div className="flex flex-wrap items-center gap-2 border-b border-dashed border-border/60 px-3 py-2 text-[12px]">
+      <span className="font-mono text-[10.5px] uppercase tracking-[0.12em] text-primary/80">
+        {"// filter"}</span>
       <Multi
-        label="人物"
+        label="characters"
+        zh="人物"
         all={options.characters}
         selected={value.characters}
         onChange={(characters) => onChange({ ...value, characters })}
       />
       <Multi
-        label="冲突"
+        label="conflicts"
+        zh="冲突"
         all={options.conflicts}
         selected={value.conflicts}
         onChange={(conflicts) => onChange({ ...value, conflicts })}
@@ -31,16 +39,15 @@ export function FilterBar({ options, value, onChange }: Props) {
         value={value.themeKeyword}
         onChange={(e) => onChange({ ...value, themeKeyword: e.target.value })}
         placeholder="主题关键词"
-        className="h-7 rounded-[6px] border border-border/60 bg-background/40 px-2 text-[12px]"
+        className="h-7 rounded-[2px] border border-border bg-background/40 px-2 font-mono text-[12px] text-foreground placeholder:font-sans placeholder:text-muted-foreground/70 focus:border-primary focus:outline-none"
       />
-      {value.characters.length + value.conflicts.length > 0 ||
-      value.themeKeyword.trim() ? (
+      {hasFilter ? (
         <button
           type="button"
-          className="text-[11px] text-muted-foreground hover:text-foreground"
+          className="font-mono text-[10.5px] uppercase tracking-[0.10em] text-muted-foreground hover:text-primary"
           onClick={() => onChange({ characters: [], conflicts: [], themeKeyword: "" })}
         >
-          清空筛选
+          $ clear
         </button>
       ) : null}
     </div>
@@ -49,32 +56,48 @@ export function FilterBar({ options, value, onChange }: Props) {
 
 function Multi({
   label,
+  zh,
   all,
   selected,
   onChange,
 }: {
   label: string;
+  zh: string;
   all: string[];
   selected: string[];
   onChange: (v: string[]) => void;
 }) {
   return (
     <details className="relative">
-      <summary className="cursor-pointer rounded-[6px] border border-border/60 px-2 py-1 text-foreground">
-        {label}
-        {selected.length > 0 ? ` (${selected.length})` : ""}
+      <summary
+        className={`cursor-pointer rounded-[2px] border px-2 py-1 font-mono text-[11px] uppercase tracking-[0.08em] transition-colors ${
+          selected.length > 0
+            ? "border-primary bg-primary/10 text-primary"
+            : "border-border text-muted-foreground hover:border-primary/60 hover:text-foreground"
+        }`}
+      >
+        [ {label}
+        {selected.length > 0 ? ` · ${selected.length}` : ""} ]
       </summary>
-      <div className="absolute z-10 mt-1 max-h-60 w-48 overflow-auto rounded-[6px] border border-border/70 bg-background/95 p-2 shadow-md">
+      <div className="absolute z-10 mt-1 max-h-60 w-52 overflow-auto rounded-[3px] border border-border bg-popover p-2 shadow-brass-soft">
+        <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.12em] text-primary/70">
+          {`// ${zh}`}
+        </p>
         {all.length === 0 ? (
-          <p className="text-muted-foreground">无可选项</p>
+          <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
+            {"// no options"}</p>
         ) : null}
         {all.map((opt) => {
           const checked = selected.includes(opt);
           return (
-            <label key={opt} className="flex cursor-pointer items-center gap-2 py-0.5">
+            <label
+              key={opt}
+              className="flex cursor-pointer items-center gap-2 py-1 text-[12.5px] text-foreground"
+            >
               <input
                 type="checkbox"
                 checked={checked}
+                className="accent-primary"
                 onChange={(e) =>
                   onChange(
                     e.target.checked
