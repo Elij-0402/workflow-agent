@@ -11,14 +11,14 @@ import { cn } from "@/lib/utils";
 import {
   ANALYSIS_DIMENSIONS,
   DIMENSION_LABELS,
-  type AnalysisDimension,
+  type LegacyAnalysisDimension,
   type SessionStatus,
 } from "@/lib/types";
 
 type AnalysisState = "pending" | "loading" | "done" | "error";
 
 type AnalysisRecord = {
-  dimension: AnalysisDimension;
+  dimension: LegacyAnalysisDimension;
   result: unknown;
 };
 
@@ -34,7 +34,7 @@ type DimensionStatus = {
   result?: unknown;
 };
 
-function summarizeResult(dimension: AnalysisDimension, result: unknown) {
+function summarizeResult(dimension: LegacyAnalysisDimension, result: unknown) {
   if (!result || typeof result !== "object") {
     return "还没有可用结果。";
   }
@@ -61,7 +61,7 @@ function getDimensionActionLabel(state: AnalysisState) {
 }
 
 function getDimensionSummary(
-  dimension: AnalysisDimension,
+  dimension: LegacyAnalysisDimension,
   item: DimensionStatus
 ) {
   if (item.state === "loading") {
@@ -104,7 +104,7 @@ export function AnalysisPanel({
   sessionStatus,
 }: PanelProps) {
   const router = useRouter();
-  const initialMap = useMemo<Record<AnalysisDimension, DimensionStatus>>(() => {
+  const initialMap = useMemo<Record<LegacyAnalysisDimension, DimensionStatus>>(() => {
     const done = new Map(analyses.map((item) => [item.dimension, item.result]));
     return {
       worldview: done.has("worldview")
@@ -119,7 +119,7 @@ export function AnalysisPanel({
     };
   }, [analyses]);
   const [items, setItems] = useState(initialMap);
-  const [expanded, setExpanded] = useState<Record<AnalysisDimension, boolean>>({
+  const [expanded, setExpanded] = useState<Record<LegacyAnalysisDimension, boolean>>({
     worldview: false,
     characters: false,
     narrative: false,
@@ -144,7 +144,7 @@ export function AnalysisPanel({
   }, [initialMap]);
 
   async function runDimension(
-    dimension: AnalysisDimension,
+    dimension: LegacyAnalysisDimension,
     options?: { refresh?: boolean }
   ) {
     setItems((current) => ({
@@ -165,7 +165,7 @@ export function AnalysisPanel({
       });
 
       const payload = (await response.json()) as
-        | { ok: true; dimension: AnalysisDimension; result: unknown }
+        | { ok: true; dimension: LegacyAnalysisDimension; result: unknown }
         | { error: string };
 
       if (!response.ok || !("ok" in payload)) {

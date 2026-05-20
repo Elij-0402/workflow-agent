@@ -10,7 +10,7 @@ import {
   ANALYSIS_DIMENSION_CONFIG,
   ANALYSIS_TEXT_CHAR_LIMIT,
 } from "../../src/lib/prompts";
-import { ANALYSIS_DIMENSIONS, type AnalysisDimension } from "../../src/lib/types";
+import { ANALYSIS_DIMENSIONS, type LegacyAnalysisDimension } from "../../src/lib/types";
 
 import { aggregateAndSummarize, type AggregateResult } from "./aggregate";
 import { groupIntoChunks } from "./chunker";
@@ -252,7 +252,7 @@ async function runApproachA(args: {
     narrative: unknown;
   }> = {};
 
-  for (const dimension of ANALYSIS_DIMENSIONS as AnalysisDimension[]) {
+  for (const dimension of ANALYSIS_DIMENSIONS as readonly LegacyAnalysisDimension[]) {
     const cfg = ANALYSIS_DIMENSION_CONFIG[dimension];
     const result = await generateObject({
       model: args.openai(args.model),

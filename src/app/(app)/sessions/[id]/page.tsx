@@ -11,7 +11,7 @@ import { WorkflowStageBar, type WorkflowStageItem } from "@/components/workflow-
 import { Button } from "@/components/ui/button";
 import { ANALYSIS_DIMENSION_CONFIG } from "@/lib/prompts";
 import { createClient } from "@/lib/supabase/server";
-import type { AnalysisDimension, VariantRow } from "@/lib/types";
+import type { LegacyAnalysisDimension, VariantRow } from "@/lib/types";
 import { formatDate, formatRelativeTime } from "@/lib/utils";
 
 type SessionPageProps = {
@@ -79,11 +79,11 @@ export default async function SessionDetailPage({ params }: SessionPageProps) {
   // analyzed" — the user can re-run the dimension cleanly instead of seeing
   // half-rendered or "undefined" copy from a stale shape.
   const safeAnalyses = ((analyses ?? []).filter((item): item is {
-    dimension: AnalysisDimension;
+    dimension: LegacyAnalysisDimension;
     result: unknown;
   } => {
     if (!item.dimension || !item.result) return false;
-    const config = ANALYSIS_DIMENSION_CONFIG[item.dimension as AnalysisDimension];
+    const config = ANALYSIS_DIMENSION_CONFIG[item.dimension as LegacyAnalysisDimension];
     if (!config) return false;
     return config.schema.safeParse(item.result).success;
   }));

@@ -12,19 +12,34 @@ export type SessionStatus =
   | "generating"
   | "done";
 
-export type AnalysisDimension = "worldview" | "characters" | "narrative";
+export type AnalysisDimension =
+  | "worldview"
+  | "characters"
+  | "narrative"
+  | "chapter_brief"
+  | "book_synthesis";
 
-export const ANALYSIS_DIMENSIONS: AnalysisDimension[] = [
+export const LEGACY_ANALYSIS_DIMENSIONS = [
   "worldview",
   "characters",
   "narrative",
-];
+] as const satisfies readonly AnalysisDimension[];
+
+export type LegacyAnalysisDimension = (typeof LEGACY_ANALYSIS_DIMENSIONS)[number];
+
+export type AnalysisScope = "book" | "chapter";
+
+export const ANALYSIS_DIMENSIONS = LEGACY_ANALYSIS_DIMENSIONS;
 
 export const DIMENSION_LABELS: Record<AnalysisDimension, string> = {
   worldview: "世界观",
   characters: "人物",
   narrative: "叙事",
+  chapter_brief: "章节抽取",
+  book_synthesis: "整书汇总",
 };
+
+export type SessionMode = "single" | "dual";
 
 // ============================================================================
 // Analysis result schemas (LLM 必须返回该结构)
@@ -145,6 +160,7 @@ export type Database = {
           user_id: string;
           name: string;
           status: SessionStatus;
+          mode: SessionMode;
           created_at: string;
           updated_at: string;
         };
@@ -153,12 +169,14 @@ export type Database = {
           user_id: string;
           name?: string;
           status?: SessionStatus;
+          mode?: SessionMode;
           created_at?: string;
           updated_at?: string;
         };
         Update: Partial<{
           name: string;
           status: SessionStatus;
+          mode: SessionMode;
           updated_at: string;
         }>;
         Relationships: [];
@@ -170,6 +188,7 @@ export type Database = {
           user_id: string;
           title: string;
           storage_path: string;
+          position: number;
           word_count: number | null;
           chapter_count: number | null;
           metadata: Record<string, unknown>;
@@ -182,6 +201,7 @@ export type Database = {
           user_id: string;
           title: string;
           storage_path: string;
+          position?: number;
           word_count?: number | null;
           chapter_count?: number | null;
           metadata?: Record<string, unknown>;
@@ -190,10 +210,43 @@ export type Database = {
         };
         Update: Partial<{
           title: string;
+          position: number;
           word_count: number | null;
           chapter_count: number | null;
           metadata: Record<string, unknown>;
           cleaned_content: string | null;
+        }>;
+        Relationships: [];
+      };
+      chapters: {
+        Row: {
+          id: string;
+          book_id: string;
+          user_id: string;
+          index: number;
+          title: string;
+          start_char: number;
+          end_char: number;
+          source: "regex" | "length-chunk" | "manual";
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          book_id: string;
+          user_id: string;
+          index: number;
+          title: string;
+          start_char: number;
+          end_char: number;
+          source: "regex" | "length-chunk" | "manual";
+          created_at?: string;
+        };
+        Update: Partial<{
+          index: number;
+          title: string;
+          start_char: number;
+          end_char: number;
+          source: "regex" | "length-chunk" | "manual";
         }>;
         Relationships: [];
       };
