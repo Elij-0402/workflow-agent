@@ -92,13 +92,9 @@ limit 提到 60 MB 兜底）。
 ### 单元测试（`node:test`，无 runner）
 
 ```bash
-node --test --import tsx 'src/**/*.test.ts'          # 全部
+npm test                                             # 全部（glob src/**/*.test.ts）
 node --test --import tsx src/lib/crypto.test.ts      # 单文件
 ```
-
-注意：`package.json` 的 `npm test` 当前硬编码了一个固定文件列表，**没有**自动覆盖
-v0.2 新增的测试文件（blueprint / diff / chapter-batch / 新 prompt 三件套）。
-跑全量请用上面的 glob 命令，或参考待修的 follow-up issue。
 
 ### E2E Smoke（Playwright）
 
