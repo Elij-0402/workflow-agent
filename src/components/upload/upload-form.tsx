@@ -85,7 +85,6 @@ export function UploadForm() {
 
       toast.success(finalizeResult.message ?? "上传成功。");
       router.push(finalizeResult.redirectTo);
-      router.refresh();
     } catch {
       toast.error("上传失败，请稍后重试。");
     } finally {
