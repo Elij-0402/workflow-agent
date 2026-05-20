@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { Settings2 } from "lucide-react";
 
@@ -34,6 +34,18 @@ export default async function SessionDetailPage({ params }: SessionPageProps) {
 
   if (!user) {
     notFound();
+  }
+
+  // Dual-mode sessions live at /workbench. Branch early so we don't run the
+  // single-mode queries below for them.
+  const { data: sessionMode } = await supabase
+    .from("sessions")
+    .select("mode")
+    .eq("id", id)
+    .eq("user_id", user.id)
+    .maybeSingle();
+  if (sessionMode?.mode === "dual") {
+    redirect(`/sessions/${id}/workbench`);
   }
 
   const [{ data: session }, { data: book }, { data: llmConfig }] = await Promise.all([
