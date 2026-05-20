@@ -3,9 +3,11 @@
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { BookPlus } from "lucide-react";
 import { toast } from "sonner";
 
 import { PageHeader } from "@/components/page-header";
+import { Button } from "@/components/ui/button";
 import { BlueprintEditor } from "@/components/workbench/blueprint-editor";
 import { ChapterTree } from "@/components/workbench/chapter-tree";
 import { CostEstimateModal } from "@/components/workbench/cost-estimate-modal";
@@ -95,6 +97,22 @@ export function WorkbenchClient(props: Props) {
   const synthesisSet = useMemo(() => new Set(props.bookSynthesisByBook), [
     props.bookSynthesisByBook,
   ]);
+
+  const booksLookup = useMemo(
+    () =>
+      props.books.map((b) => ({
+        id: b.id,
+        title: b.title,
+        position: b.position,
+      })),
+    [props.books]
+  );
+
+  const chaptersLookup = useMemo(() => {
+    const m = new Map<string, { index: number; title: string }>();
+    for (const c of props.chapters) m.set(c.id, { index: c.index, title: c.title });
+    return m;
+  }, [props.chapters]);
 
   const chapterTotals = useMemo(
     () =>
@@ -226,7 +244,7 @@ export function WorkbenchClient(props: Props) {
           blueprintStatus={blueprintStatus}
           variantCount={props.variants.length}
         />
-        <div className="grid flex-1 grid-cols-2 gap-4 overflow-hidden">
+        <div className="grid h-[280px] shrink-0 grid-cols-2 gap-4 overflow-hidden">
           {a ? (
             <ChapterTree
               book={a}
@@ -281,6 +299,8 @@ export function WorkbenchClient(props: Props) {
           status={blueprintStatus}
           updatedAt={blueprintUpdatedAt}
           pendingCandidate={pendingCandidate}
+          books={booksLookup}
+          chapters={chaptersLookup}
           onSaved={(next, ts, id) => {
             setBlueprint(next);
             setBlueprintUpdatedAt(ts);
@@ -332,23 +352,19 @@ function EmptySlot({
   positionIndex: 0 | 1;
 }) {
   return (
-    <div className="surface-panel flex flex-col items-center justify-center gap-4 p-6">
-      <p className="font-mono text-[10.5px] uppercase tracking-[0.14em] text-primary">
-        [ {position} ]
+    <div className="surface-panel flex flex-col items-center justify-center gap-4 p-8 text-center">
+      <BookPlus className="h-12 w-12 text-primary/60" strokeWidth={1.5} aria-hidden />
+      <h3 className="font-display italic text-[20px] leading-tight text-foreground">
+        还差第 {position} 本书
+      </h3>
+      <p className="max-w-xs text-[13px] leading-7 text-muted-foreground">
+        上传后这本书的章节会进入素材区，参与下方蓝图的合并。
       </p>
-      <pre className="whitespace-pre text-center font-mono text-[11px] leading-6 text-muted-foreground">
-{`┌──── slot · ${position.toLowerCase()} · empty ────┐
-│                              │
-│   还未上传 ${position} 书                   │
-│                              │
-└──────────────────────────────┘`}
-      </pre>
-      <Link
-        href={`/upload?mode=dual&sessionId=${sessionId}&position=${positionIndex}`}
-        className="inline-flex h-9 items-center rounded-[3px] border border-border bg-transparent px-4 font-mono text-[12px] uppercase tracking-[0.10em] text-primary transition-colors hover:border-primary hover:bg-primary/8 hover:shadow-brass-soft"
-      >
-        $ upload book {position.toLowerCase()}
-      </Link>
+      <Button asChild>
+        <Link href={`/upload?mode=dual&sessionId=${sessionId}&position=${positionIndex}`}>
+          上传第 {position} 本书
+        </Link>
+      </Button>
     </div>
   );
 }

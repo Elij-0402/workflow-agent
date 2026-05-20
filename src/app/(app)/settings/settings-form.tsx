@@ -218,9 +218,9 @@ export function SettingsForm({
                     <button
                       type="button"
                       onClick={() => setManualModel((v) => !v)}
-                      className="font-mono text-[10.5px] uppercase tracking-[0.08em] text-muted-foreground transition hover:text-primary"
+                      className="text-[12px] text-muted-foreground transition hover:text-primary"
                     >
-                      {manualModel ? "↩ back to list" : "$ manual entry"}
+                      {manualModel ? "↩ 返回列表" : "手动输入"}
                     </button>
                   </div>
 
@@ -269,7 +269,7 @@ export function SettingsForm({
 
                     <Button
                       type="button"
-                      variant="terminal"
+                      variant="outline"
                       onClick={onFetchModels}
                       disabled={!canFetch || fetchingModels || savingConfig}
                       className="sm:w-auto"
@@ -282,7 +282,7 @@ export function SettingsForm({
                       ) : (
                         <>
                           <RefreshCw className="h-4 w-4" />
-                          $ fetch models
+                          获取模型列表
                         </>
                       )}
                     </Button>
@@ -347,15 +347,14 @@ export function SettingsForm({
                 <Button
                   type="submit"
                   disabled={savingConfig}
-                  className="font-mono uppercase tracking-[0.10em]"
                 >
                   {savingConfig ? (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin" />
-                      $ saving…
+                      保存中…
                     </>
                   ) : (
-                    "$ save config"
+                    "保存设置"
                   )}
                 </Button>
               </div>

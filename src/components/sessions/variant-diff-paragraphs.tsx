@@ -104,10 +104,10 @@ function Drawer({
           {"// paragraph"}</p>
         <button
           type="button"
-          className="font-mono text-[11px] uppercase tracking-[0.10em] text-muted-foreground hover:text-primary"
+          className="text-[12px] text-muted-foreground hover:text-primary"
           onClick={onClose}
         >
-          $ close
+          关闭
         </button>
       </div>
       <pre className="mt-4 whitespace-pre-wrap font-mono text-[12.5px] leading-7 text-foreground">

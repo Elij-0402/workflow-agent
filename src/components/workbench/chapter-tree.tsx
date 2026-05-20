@@ -118,18 +118,18 @@ export function ChapterTree({
         </div>
         <div className="flex shrink-0 gap-1.5">
           {pendingCount > 0 ? (
-            <Button size="sm" variant="terminal" onClick={onRunBatch}>
-              $ analyze ({pendingCount})
+            <Button size="sm" variant="outline" onClick={onRunBatch}>
+              批量分析 ({pendingCount})
             </Button>
           ) : null}
           {allChaptersAnalyzed ? (
             <Button
               size="sm"
               variant={synthesisDone ? "ghost" : "default"}
-              className="font-mono uppercase tracking-[0.08em]"
+              className={synthesisDone ? "font-mono uppercase tracking-[0.08em]" : undefined}
               onClick={onSynthesize}
             >
-              {synthesisDone ? "$ rerun synth" : "$ synthesize"}
+              {synthesisDone ? "$ rerun synth" : "整书汇总"}
             </Button>
           ) : null}
         </div>

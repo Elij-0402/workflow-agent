@@ -31,15 +31,15 @@ export function LoginForm({ redirectPath }: { redirectPath: string }) {
     () =>
       mode === "login"
         ? {
-            submit: "$ enter atelier",
+            submit: "进入工作区",
             alt: "还没有账号？",
-            switchLabel: "$ register",
+            switchLabel: "去注册",
             tagline: "使用邮箱和密码进入你的创作空间。",
           }
         : {
-            submit: "$ create account",
+            submit: "创建账号",
             alt: "已经有账号？",
-            switchLabel: "$ sign in",
+            switchLabel: "去登录",
             tagline: "创建一个普通账号，保存你的小说数据和 LLM 配置。",
           },
     [mode]
@@ -195,13 +195,13 @@ export function LoginForm({ redirectPath }: { redirectPath: string }) {
 
           <Button
             type="submit"
-            className="mt-2 h-11 w-full justify-center font-mono uppercase tracking-[0.10em]"
+            className="mt-2 h-11 w-full justify-center"
             disabled={pending}
           >
             {pending ? (
               <>
                 <Loader2 className="animate-spin" />
-                authenticating…
+                认证中…
               </>
             ) : (
               copy.submit
@@ -214,7 +214,7 @@ export function LoginForm({ redirectPath }: { redirectPath: string }) {
             {copy.alt}
             <button
               type="button"
-              className="ml-2 font-mono uppercase tracking-[0.08em] text-primary hover:underline"
+              className="ml-2 text-primary hover:underline"
               onClick={() => setMode(mode === "login" ? "register" : "login")}
               disabled={pending}
             >

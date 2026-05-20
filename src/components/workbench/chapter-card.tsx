@@ -67,8 +67,8 @@ export function ChapterCard({
               {open ? <ChevronUp /> : <ChevronDown />}
             </Button>
           ) : (
-            <Button variant="terminal" size="sm" disabled={busy} onClick={onAnalyze}>
-              {busy ? <Loader2 className="animate-spin" /> : "$ analyze"}
+            <Button variant="outline" size="sm" disabled={busy} onClick={onAnalyze}>
+              {busy ? <Loader2 className="animate-spin" /> : "分析此章"}
             </Button>
           )}
         </div>

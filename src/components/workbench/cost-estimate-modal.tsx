@@ -47,9 +47,9 @@ estimated cny  ──────  ¥${est.estimatedCNY}`}
 
         <div className="flex justify-end gap-2 border-t border-dashed border-border/70 pt-4">
           <Button variant="ghost" onClick={onCancel}>
-            $ cancel
+            取消
           </Button>
-          <Button onClick={onConfirm}>$ confirm batch</Button>
+          <Button onClick={onConfirm}>确认开始</Button>
         </div>
       </div>
     </div>

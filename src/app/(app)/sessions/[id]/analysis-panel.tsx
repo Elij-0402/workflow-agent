@@ -57,7 +57,7 @@ function getDimensionActionLabel(state: AnalysisState) {
   if (state === "loading") return "running…";
   if (state === "done") return "$ rerun";
   if (state === "error") return "$ retry";
-  return "$ analyze";
+  return "开始分析";
 }
 
 function getDimensionSummary(
@@ -253,17 +253,16 @@ export function AnalysisPanel({
           <Button
             onClick={() => void runAll()}
             disabled={!llmConfigured || hasLoading || blockedByGenerating}
-            className="font-mono uppercase tracking-[0.10em]"
           >
             {hasLoading ? (
               <>
                 <Loader2 className="animate-spin" />
-                $ analyzing…
+                分析中…
               </>
             ) : (
               <>
                 <Sparkles />
-                {doneCount > 0 ? "$ continue" : "$ start analysis"}
+                {doneCount > 0 ? "继续分析" : "开始分析"}
               </>
             )}
           </Button>
@@ -332,7 +331,6 @@ export function AnalysisPanel({
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="font-mono uppercase tracking-[0.08em]"
                       onClick={() =>
                         setExpanded((current) => ({
                           ...current,
@@ -343,12 +341,12 @@ export function AnalysisPanel({
                       {expanded[dimension] ? (
                         <>
                           <ChevronUp />
-                          ↑ collapse
+                          收起
                         </>
                       ) : (
                         <>
                           <ChevronDown />
-                          ↓ details
+                          展开详情
                         </>
                       )}
                     </Button>

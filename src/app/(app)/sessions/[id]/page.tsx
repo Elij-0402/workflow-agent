@@ -116,10 +116,10 @@ export default async function SessionDetailPage({ params }: SessionPageProps) {
     variantCount: safeVariants.length,
   });
   const headerAction = !llmConfig ? (
-    <Button asChild className="font-mono uppercase tracking-[0.10em]">
+    <Button asChild>
       <Link href="/settings">
         <Settings2 aria-hidden="true" />
-        $ settings
+        去设置
       </Link>
     </Button>
   ) : undefined;

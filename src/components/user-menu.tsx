@@ -47,12 +47,12 @@ export function UserMenu({ email }: { email: string }) {
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
-          className="font-mono text-[12px] uppercase tracking-[0.06em] text-destructive focus:text-destructive"
+          className="text-[12px] text-destructive focus:text-destructive"
           disabled={pending}
           onClick={() => start(() => signOut())}
         >
           <LogOut aria-hidden="true" className="text-destructive" />
-          {pending ? "$ signing out…" : "$ sign out"}
+          {pending ? "退出中…" : "退出账号"}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

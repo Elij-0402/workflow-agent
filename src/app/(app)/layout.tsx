@@ -23,9 +23,9 @@ export default async function AppLayout({
     <div className="relative min-h-screen bg-background">
       <a
         href="#main-content"
-        className="sr-only z-50 rounded-[2px] bg-card px-3 py-2 font-mono text-[12px] uppercase tracking-[0.10em] text-primary focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:outline-none focus:ring-1 focus:ring-primary"
+        className="sr-only z-50 rounded-[2px] bg-card px-3 py-2 text-[12px] text-primary focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:outline-none focus:ring-1 focus:ring-primary"
       >
-        $ jump to main
+        跳到主内容
       </a>
       <div className="app-shell-grid min-h-screen">
         <Sidebar />
@@ -45,13 +45,13 @@ export default async function AppLayout({
             <div className="flex items-center gap-3">
               <Button
                 asChild
-                variant="terminal"
+                variant="outline"
                 size="sm"
                 className="hidden sm:inline-flex"
               >
                 <Link href="/upload">
                   <Plus aria-hidden="true" />
-                  $ new task
+                  新建任务
                 </Link>
               </Button>
               <UserMenu email={user.email ?? "anonymous"} />

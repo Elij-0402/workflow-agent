@@ -156,12 +156,12 @@ export function UploadForm({
 
                 <Button
                   type="button"
-                  variant="terminal"
+                  variant="outline"
                   disabled={pending}
                   onClick={() => fileInputRef.current?.click()}
                 >
                   <UploadCloud />
-                  {filename ? "$ replace" : "$ select"}
+                  {filename ? "更换文件" : "选择文件"}
                 </Button>
               </div>
 
@@ -191,12 +191,15 @@ export function UploadForm({
                   </div>
                 </div>
               ) : (
-                <pre className="whitespace-pre overflow-x-auto rounded-[2px] border border-dashed border-border/60 bg-background/30 p-5 text-center font-mono text-[12px] leading-6 text-muted-foreground">
-{`┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
-      drop .txt here
-   or click "$ select" above
-┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄`}
-                </pre>
+                <div className="rounded-[2px] border border-dashed border-border/60 bg-background/30 p-8 text-center">
+                  <UploadCloud className="mx-auto h-10 w-10 text-primary/50" strokeWidth={1.5} aria-hidden />
+                  <p className="mt-3 font-display italic text-[18px] leading-tight text-foreground">
+                    将 .txt 文件拖到此处
+                  </p>
+                  <p className="mt-2 text-[13px] leading-6 text-muted-foreground">
+                    或点击右上角的「选择文件」
+                  </p>
+                </div>
               )}
             </div>
           </div>
@@ -214,17 +217,16 @@ export function UploadForm({
             <Button
               type="submit"
               disabled={pending}
-              className="font-mono uppercase tracking-[0.10em]"
             >
               {pending ? (
                 <>
                   <Loader2 className="animate-spin" />
-                  $ creating…
+                  创建中…
                 </>
               ) : (
                 <>
                   <UploadCloud />
-                  $ create task
+                  开始新任务
                 </>
               )}
             </Button>

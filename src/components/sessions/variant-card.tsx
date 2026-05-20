@@ -75,8 +75,8 @@ export function VariantCard({ variant }: VariantCardProps) {
 
           <Dialog>
             <DialogTrigger asChild>
-              <Button variant="terminal" size="sm">
-                $ read full →
+              <Button variant="outline" size="sm">
+                阅读全文 →
               </Button>
             </DialogTrigger>
             <DialogContent className="h-[85vh] max-w-5xl gap-0 overflow-hidden bg-card p-0">

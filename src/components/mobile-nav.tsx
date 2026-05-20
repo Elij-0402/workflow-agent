@@ -45,11 +45,11 @@ export function MobileNav() {
           <Button
             asChild
             variant="default"
-            className="h-10 w-full justify-center font-mono uppercase tracking-[0.10em]"
+            className="h-10 w-full justify-center"
           >
             <Link href="/upload" onClick={() => setOpen(false)}>
               <Plus aria-hidden="true" />
-              $ new task
+              新建任务
             </Link>
           </Button>
         </div>

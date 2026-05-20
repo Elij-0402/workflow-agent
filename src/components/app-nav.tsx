@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 export const APP_NAV_ITEMS = [
   { href: "/dashboard", label: "工作台", token: "workspace", icon: LayoutDashboard },
   { href: "/upload", label: "新建任务", token: "import", icon: Upload },
-  { href: "/sessions", label: "任务记录", token: "sessions", icon: History },
+  { href: "/sessions", label: "我的项目", token: "sessions", icon: History },
   { href: "/settings", label: "设置", token: "config", icon: Settings },
 ] as const;
 

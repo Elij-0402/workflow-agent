@@ -42,7 +42,7 @@ export default async function DashboardPage() {
     : null;
   const latestActionLabel = latestSession
     ? latestSession.mode === "dual"
-      ? "$ open workbench"
+      ? "进入工作台"
       : getSessionActionLabel(latestSession.status, latestVariantCount)
     : null;
 
@@ -107,7 +107,7 @@ export default async function DashboardPage() {
                 />
 
                 <div className="flex flex-col gap-3 border-t border-dashed border-border/70 pt-5 sm:flex-row sm:items-center">
-                  <Button asChild className="h-10 px-5 font-mono uppercase tracking-[0.08em]">
+                  <Button asChild className="h-10 px-5">
                     <Link
                       href={
                         latestSession.mode === "dual"
@@ -121,35 +121,22 @@ export default async function DashboardPage() {
                   </Button>
                   <Link
                     href="/sessions"
-                    className="brass-underline font-mono text-[12px] uppercase tracking-[0.10em] text-muted-foreground transition-colors hover:text-primary"
+                    className="brass-underline text-[13px] text-muted-foreground transition-colors hover:text-primary"
                   >
-                    $ view all sessions
+                    查看全部任务
                   </Link>
                 </div>
               </>
             ) : (
-              <>
-                <div className="flex flex-col gap-3">
-                  <p className="eyebrow-label">empty</p>
-                  <h2 className="font-display italic text-[32px] leading-[1.08] text-foreground">
-                    还没有任务
-                  </h2>
-                  <p className="max-w-2xl text-[14px] leading-7 text-muted-foreground">
-                    从一部小说开始。导入文本后，分析进度、生成结果和后续研究路径都会保留下来。
-                  </p>
-                </div>
-                <pre className="surface-subtle whitespace-pre overflow-x-auto p-6 font-mono text-[12px] leading-6 text-muted-foreground">
-{`┌──── workspace · empty ─────────────┐
-│                                    │
-│   no session yet                   │
-│                                    │
-│   $ upload your first .txt         │
-│   $ run three-dimension analysis   │
-│   $ generate a variant             │
-│                                    │
-└────────────────────────────────────┘`}
-                </pre>
-              </>
+              <div className="flex flex-col gap-3">
+                <p className="eyebrow-label">empty</p>
+                <h2 className="font-display italic text-[32px] leading-[1.08] text-foreground">
+                  还没有任务
+                </h2>
+                <p className="max-w-2xl text-[14px] leading-7 text-muted-foreground">
+                  从一部小说开始。导入文本后，分析进度、生成结果和后续研究路径都会保留下来。
+                </p>
+              </div>
             )}
           </div>
         </div>
@@ -180,21 +167,21 @@ export default async function DashboardPage() {
               <Button
                 asChild
                 variant={latestSession ? "outline" : "default"}
-                className="h-10 justify-center font-mono uppercase tracking-[0.08em]"
+                className="h-10 justify-center"
               >
                 <Link href="/upload">
                   <Plus aria-hidden="true" />
-                  {latestSession ? "$ new task" : "$ first task"}
+                  {latestSession ? "新建任务" : "开始第一个任务"}
                 </Link>
               </Button>
               <Button
                 asChild
                 variant="ghost"
-                className="h-10 justify-center font-mono uppercase tracking-[0.08em]"
+                className="h-10 justify-center"
               >
                 <Link href="/settings">
                   <Settings2 aria-hidden="true" />
-                  $ model config
+                  模型设置
                 </Link>
               </Button>
             </div>
@@ -239,12 +226,12 @@ export default async function DashboardPage() {
 
 function getSessionActionLabel(status: string, variantCount: number) {
   if (variantCount > 0 || status === "done") {
-    return "$ view results";
+    return "查看结果";
   }
 
   if (status === "analyzed") {
-    return "$ generate";
+    return "生成变体";
   }
 
-  return "$ continue";
+  return "继续";
 }

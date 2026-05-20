@@ -70,3 +70,6 @@ samples/
 .worktrees/
 .security-key
 logs/security/
+
+# third-party Claude Code agents (msitarzewski/agency-agents)
+.claude/agents/
