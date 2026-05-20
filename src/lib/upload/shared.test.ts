@@ -5,6 +5,7 @@ import {
   buildStorageObjectPath,
   getSessionName,
   sanitizeFilename,
+  sanitizeStorageFilename,
   validateUploadFile,
 } from "./shared";
 
@@ -15,6 +16,10 @@ test("sanitizeFilename removes illegal path characters", () => {
 test("getSessionName strips file extension", () => {
   assert.equal(getSessionName("novel.txt"), "novel");
   assert.equal(getSessionName(".txt"), "未命名小说");
+});
+
+test("sanitizeStorageFilename converts unicode-heavy names into ascii-safe object names", () => {
+  assert.equal(sanitizeStorageFilename("《斗破苍穹》小说全集txt版.txt"), "txt.txt");
 });
 
 test("validateUploadFile rejects invalid files", () => {
@@ -31,6 +36,6 @@ test("validateUploadFile rejects invalid files", () => {
 test("buildStorageObjectPath uses sanitized filename", () => {
   assert.equal(
     buildStorageObjectPath("user-1", "session-1", 'my:novel?.txt'),
-    "user-1/session-1/my_novel_.txt"
+    "user-1/session-1/my_novel.txt"
   );
 });
