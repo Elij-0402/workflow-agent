@@ -7,7 +7,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "npm run format || exit 0"
+            "command": "node .claude/scripts/format-file.js"
           }
         ]
       }
@@ -17,15 +17,15 @@
         "hooks": [
           {
             "type": "command",
+            "command": "node -e \"process.stdout.write(JSON.stringify({terminalSequence:String.fromCharCode(7)}))\""
+          },
+          {
+            "type": "command",
             "command": "npm run type-check || exit 2"
           },
           {
             "type": "command",
-            "command": "npm run lint; exit 0"
-          },
-          {
-            "type": "command",
-            "command": "node -e \"process.stdout.write(JSON.stringify({terminalSequence:String.fromCharCode(7)}))\""
+            "command": "npm run lint || exit 2"
           },
           {
             "type": "command",
