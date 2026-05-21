@@ -44,6 +44,8 @@ const config: Config = {
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
         flash: "hsl(var(--flash))",
+        locked: "hsl(var(--locked))",
+        blocked: "hsl(var(--blocked))",
         brass: {
           DEFAULT: "hsl(var(--primary))",
           soft: "hsl(var(--brass-soft) / 0.18)",

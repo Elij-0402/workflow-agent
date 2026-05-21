@@ -31,6 +31,26 @@
     --radius: 0.18rem;
     --flash: 132 23% 54%;
     --brass-soft: 44 56% 47%;
+
+    --chart-1: 44 56% 47%;
+    --chart-2: 132 23% 54%;
+    --chart-3: 28 48% 56%;
+    --chart-4: 200 22% 56%;
+    --chart-5: 48 12% 56%;
+
+    --locked: 132 23% 54%;
+    --blocked: 8 30% 45%;
+
+    --duration-instant: 80ms;
+    --duration-fast: 160ms;
+    --duration-base: 220ms;
+    --duration-slow: 360ms;
+    --easing-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --easing-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+    --space-tight: 6px;
+    --space-snug: 10px;
+    --space-cozy: 14px;
   }
 
   .dark {
@@ -55,6 +75,26 @@
     --ring: 44 56% 47%;
     --flash: 132 23% 54%;
     --brass-soft: 44 56% 47%;
+
+    --chart-1: 44 56% 47%;
+    --chart-2: 132 23% 54%;
+    --chart-3: 28 48% 56%;
+    --chart-4: 200 22% 56%;
+    --chart-5: 48 12% 56%;
+
+    --locked: 132 23% 54%;
+    --blocked: 8 30% 45%;
+
+    --duration-instant: 80ms;
+    --duration-fast: 160ms;
+    --duration-base: 220ms;
+    --duration-slow: 360ms;
+    --easing-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --easing-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+    --space-tight: 6px;
+    --space-snug: 10px;
+    --space-cozy: 14px;
   }
 }
 
@@ -146,6 +186,31 @@
 
   .surface-subtle {
     @apply rounded-[3px] border border-border/70 bg-muted/40;
+  }
+
+  .surface-locked {
+    @apply relative rounded-[3px] border border-dashed border-border bg-card;
+  }
+  .surface-locked::before,
+  .surface-locked::after {
+    content: "";
+    position: absolute;
+    width: 9px;
+    height: 9px;
+    border-color: hsl(var(--locked) / 0.85);
+    pointer-events: none;
+  }
+  .surface-locked::before {
+    top: -1px;
+    left: -1px;
+    border-top: 1px solid;
+    border-left: 1px solid;
+  }
+  .surface-locked::after {
+    bottom: -1px;
+    right: -1px;
+    border-bottom: 1px solid;
+    border-right: 1px solid;
   }
 
   /* Frame-corners modifier — adds the four-corner brass ticks to any element. */
@@ -321,13 +386,30 @@
 
 @media (prefers-reduced-motion: reduce) {
   .animate-fade-up,
+  .animate-pulse,
+  .animate-brass-pulse,
+  .animate-brass-shimmer,
+  .motion-safe\:animate-pulse,
   .blink-cursor::after {
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;
   }
   .brass-underline::after,
-  .terminal-tab::after {
+  .terminal-tab::after,
+  *[style*="transition"] {
     transition: none !important;
+  }
+}
+
+@layer base {
+  :focus-visible {
+    outline: 1px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+  .frame-corners :focus-visible,
+  .surface-panel :focus-visible,
+  .surface-locked :focus-visible {
+    outline-offset: 3px;
   }
 }

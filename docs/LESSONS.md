@@ -17,6 +17,20 @@
 
 <!-- Claude 会在每次会话结束反思时把新条目追加到这里。维护者审核后移到「已采纳」。 -->
 
+### 2026-05-22 · `dev-server/windows` · `pnpm dev` 卡死后端口 3000 LISTENING 但 HTTP 永远超时
+
+- **场景**：用户报 `http://localhost:3000` 无法启动。`netstat -ano | findstr :3000` 显示有进程在 LISTENING，但 `Invoke-WebRequest http://localhost:3000` 5 秒超时；type-check / lint 全干净，没有任何代码错误。
+- **错误 / 发现**：
+  1. 用户用 `pnpm dev` 启动了 `next dev --turbopack`（项目实际是 npm 项目，只有 `package-lock.json`，没 `pnpm-lock.yaml`）。当 Next 卡住后 Ctrl+C 在 Windows + pnpm 组合下**没杀掉整条进程树**——pnpm 父进程、`next dev` 子进程、`start-server.js` 孙进程、`postcss.js` worker 全部成为孤儿，继续占着端口 3000 但不响应 HTTP。
+  2. 我自己在诊断时用 `Bash run_in_background=true` 又跑了一次 `npm run dev` 试图捕获启动错误——结果 output 文件 **0 字节**。因为端口已被占，Next 启动失败的提示走 stderr 在 Windows 下被吞，**沉默**就是症状本身。这一度让我以为是 Bash 工具问题，差点钻进死胡同。
+  3. 进程取证只能靠 `Get-CimInstance Win32_Process | Where-Object { $_.CommandLine -match ... }`——`Get-Process` 不带命令行，无法区分多个 `node.exe`。
+- **教训**：
+  - Windows 上诊断 dev server 启动问题，**第一步永远是 `netstat -ano | Select-String ':3000'` + WMI CommandLine 查 PID**，不要先去看代码或 type-check。
+  - 端口 3000 LISTENING + HTTP 超时 ≈ "进程在但僵了"，不要再试着启动新的 dev 占同一个端口，先杀进程树再说。
+  - `run_in_background` 启 dev server 时如果 output 长时间 0 字节，**优先怀疑端口冲突或父子进程问题**，而非工具本身。前台跑 `npm run dev` 看实时输出更可靠。
+  - 杀 Next 进程树用命令行特征匹配比按 PID 杀更鲁棒：`next[\\/]dist[\\/](bin[\\/]next|server[\\/]lib[\\/]start-server)` + `\.next[\\/]postcss\.js`。
+- **建议更新**：根 `CLAUDE.md` 的 "Commands" 段可加一条："Windows 上 dev server 启动卡住时，先用 `Get-CimInstance Win32_Process | Where { $_.CommandLine -match 'next[\\/]dist[\\/]' } | ForEach { Stop-Process -Id $_.ProcessId -Force }` 清孤儿进程 + 删 `.next/` 重启。"另外可在 CLAUDE.md 顶部明确"本仓库用 npm，不要 pnpm/yarn"以减少这类工具链不一致引入的怪问题。
+
 ### 2026-05-21 · `harness/bash-tool` · Windows 路径在 Bash 工具中被反斜杠转义吃掉
 
 - **场景**：M1 写完准备跑 `npm run type-check`，按习惯敲 `cd /d D:\workflow-agent && npm run type-check`

@@ -76,12 +76,13 @@ export default function RootLayout({
           richColors
           position="top-right"
           theme="dark"
+          duration={6000}
           toastOptions={{
             classNames: {
               toast:
-                "border border-border bg-card text-foreground rounded-[3px] font-mono text-[12px]",
-              title: "font-sans text-[13px]",
-              description: "font-sans text-[12px] text-muted-foreground",
+                "border border-border bg-card text-foreground rounded-[3px] font-sans text-[13px]",
+              title: "font-sans text-[13px] leading-6",
+              description: "font-sans text-[12px] leading-6 text-muted-foreground",
               success: "border-l-[3px] border-l-flash",
               error: "border-l-[3px] border-l-destructive",
               info: "border-l-[3px] border-l-primary",

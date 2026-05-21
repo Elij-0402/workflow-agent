@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Sparkles } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Lock, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -77,7 +77,6 @@ export function BlueprintEditor({
   useEffect(() => {
     if (!pendingCandidate) return;
     if (disabled) {
-      toast.error("蓝图已锁定，请先解锁后再修改。");
       onCandidateConsumed();
       return;
     }
@@ -155,7 +154,10 @@ export function BlueprintEditor({
   }, [blueprint, updatedAt, blueprintId]);
 
   return (
-    <div className="surface-panel flex min-h-0 flex-1 flex-col">
+    <div
+      className={`${disabled ? "surface-locked" : "surface-panel"} flex min-h-0 flex-1 flex-col`}
+    >
+      {disabled ? <LockBanner updatedAt={bpUpdatedAt} onUnlock={() => void unlock()} /> : null}
       <div className="flex items-center justify-between gap-3 border-b border-dashed border-border/60 px-4 py-2.5">
         <nav className="flex flex-wrap gap-0.5">
           {TABS.map((t) => (
@@ -562,4 +564,43 @@ function Field({
 
 function renumberBeats<T extends { order: number }>(beats: T[]): T[] {
   return beats.map((b, idx) => ({ ...b, order: idx + 1 }));
+}
+
+function LockBanner({ updatedAt, onUnlock }: { updatedAt: string | null; onUnlock: () => void }) {
+  const stamp = useMemo(() => {
+    if (!updatedAt) return null;
+    try {
+      const d = new Date(updatedAt);
+      const hh = String(d.getHours()).padStart(2, "0");
+      const mm = String(d.getMinutes()).padStart(2, "0");
+      return `${hh}:${mm}`;
+    } catch {
+      return null;
+    }
+  }, [updatedAt]);
+
+  return (
+    <div className="bg-locked/8 flex items-center justify-between gap-3 border-b border-dashed border-locked/40 px-4 py-2">
+      <div className="flex items-center gap-2.5">
+        <Lock className="h-3.5 w-3.5 text-locked" aria-hidden />
+        <span className="font-mono text-[10.5px] uppercase tracking-[0.14em] text-locked">
+          locked
+        </span>
+        <span className="text-[12px] text-foreground/85">
+          蓝图已锁定
+          {stamp ? <span className="ml-2 text-muted-foreground">· {stamp}</span> : null}
+          <span className="ml-2 text-muted-foreground">· 编辑前请解锁</span>
+        </span>
+      </div>
+      <Button
+        size="sm"
+        variant="ghost"
+        className="font-mono uppercase tracking-[0.08em]"
+        onClick={onUnlock}
+        aria-label="解锁蓝图以继续编辑"
+      >
+        $ unlock
+      </Button>
+    </div>
+  );
 }

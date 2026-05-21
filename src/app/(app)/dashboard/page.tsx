@@ -4,6 +4,7 @@ import { ArrowRight, Loader2, Plus, Settings2, Sparkles, Waypoints } from "lucid
 import { TokenTrendChart } from "@/components/dashboard/token-trend-chart";
 import { MetaRow } from "@/components/meta-row";
 import { PageHeader } from "@/components/page-header";
+import { ProjectCard } from "@/components/sessions/project-card";
 import { Button } from "@/components/ui/button";
 import { getSessionStatusMeta, StatusDot } from "@/components/status-dot";
 import { createClient } from "@/lib/supabase/server";
@@ -22,10 +23,16 @@ export default async function DashboardPage() {
       .select("id, name, status, mode, created_at, updated_at")
       .is("archived_at", null)
       .order("updated_at", { ascending: false })
-      .limit(1),
+      .limit(4),
   ]);
 
   const latestSession = recentSessions?.[0] ?? null;
+  const nextSessions = (recentSessions ?? []).slice(1, 4);
+  const totalActiveSessions = await supabase
+    .from("sessions")
+    .select("id", { count: "exact", head: true })
+    .is("archived_at", null);
+  const activeSessionCount = totalActiveSessions.count ?? 0;
   let latestVariantCount = 0;
   if (latestSession) {
     const { count } = await supabase
@@ -228,6 +235,32 @@ export default async function DashboardPage() {
           </section>
         </div>
       </section>
+
+      {nextSessions.length > 0 ? (
+        <section>
+          <div className="mb-4 flex items-baseline justify-between">
+            <p className="eyebrow-label">continue</p>
+            <span className="font-mono text-[10.5px] uppercase tracking-[0.08em] text-muted-foreground">
+              {nextSessions.length} of {activeSessionCount} active
+            </span>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {nextSessions.map((s) => (
+              <ProjectCard key={s.id} session={s} />
+            ))}
+          </div>
+          {activeSessionCount > 4 ? (
+            <div className="mt-3 text-right">
+              <Link
+                href="/sessions"
+                className="brass-underline font-mono text-[11px] uppercase tracking-[0.10em] text-muted-foreground transition-colors hover:text-primary"
+              >
+                查看全部 {activeSessionCount} 个项目 →
+              </Link>
+            </div>
+          ) : null}
+        </section>
+      ) : null}
 
       <section className="grid gap-5 xl:grid-cols-3">
         <div className="surface-panel p-5">
