@@ -11,6 +11,35 @@
           }
         ]
       }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npm run type-check || exit 2"
+          },
+          {
+            "type": "command",
+            "command": "npm run lint; exit 0"
+          },
+          {
+            "type": "command",
+            "command": "node -e \"process.stdout.write(JSON.stringify({terminalSequence:String.fromCharCode(7)}))\""
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "resume|clear",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"const{execSync}=require('child_process');const s=execSync('git status --short').toString().trim()||'(clean)';const l=execSync('git log -3 --oneline').toString().trim();process.stdout.write(JSON.stringify({hookSpecificOutput:{additionalContext:`Current git status:\\n${s}\\n\\nRecent 3 commits:\\n${l}`}}))\""
+          }
+        ]
+      }
     ]
   }
 }
