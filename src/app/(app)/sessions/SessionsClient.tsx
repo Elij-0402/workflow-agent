@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
+import { GitCompare, X } from "lucide-react";
 import { toast } from "sonner";
 
 import { ProjectCard } from "@/components/sessions/project-card";
@@ -17,8 +18,6 @@ import {
 import { cn } from "@/lib/utils";
 
 const COMPARE_MAX = 6;
-
-type SelectIntent = null | "manage" | "compare";
 
 type SessionRow = {
   id: string;
@@ -36,19 +35,16 @@ type SessionsClientProps = {
 };
 
 type ConfirmState = null | {
-  kind: "single-delete" | "single-archive" | "single-restore" | "bulk";
+  kind: "single-delete" | "single-archive" | "single-restore";
   ids: string[];
   action: "archive" | "restore" | "delete";
 };
 
 export function SessionsClient({ sessions, view }: SessionsClientProps) {
   const router = useRouter();
-  const [intent, setIntent] = useState<SelectIntent>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [confirm, setConfirm] = useState<ConfirmState>(null);
   const [pending, startTransition] = useTransition();
-
-  const selectMode = intent !== null;
 
   const toggleSelect = (id: string) => {
     setSelectedIds((prev) => {
@@ -59,14 +55,11 @@ export function SessionsClient({ sessions, view }: SessionsClientProps) {
     });
   };
 
-  const clearSelection = () => {
-    setSelectedIds(new Set());
-    setIntent(null);
-  };
+  const clearSelection = () => setSelectedIds(new Set());
 
   const goCompare = () => {
-    if (selectedIds.size === 0) {
-      toast.error("请先勾选要比较的项目。");
+    if (selectedIds.size < 2) {
+      toast.error("请至少选择 2 个项目。");
       return;
     }
     const ids = Array.from(selectedIds).slice(0, COMPARE_MAX);
@@ -74,33 +67,20 @@ export function SessionsClient({ sessions, view }: SessionsClientProps) {
   };
 
   const runSingle = async (id: string, action: "archive" | "restore" | "delete") => {
-    let res: Response;
     if (action === "delete") {
       const hard = view === "archived" ? "?hard=true" : "";
-      res = await fetch(`/api/sessions/${id}${hard}`, { method: "DELETE" });
-    } else if (action === "archive") {
-      res = await fetch(`/api/sessions/${id}`, { method: "DELETE" });
-    } else {
-      res = await fetch(`/api/sessions/${id}`, { method: "PATCH" });
+      return fetch(`/api/sessions/${id}${hard}`, { method: "DELETE" });
     }
-    return res;
-  };
-
-  const runBulk = async (action: "archive" | "restore" | "delete", ids: string[]) => {
-    return fetch("/api/sessions/bulk", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action, ids }),
-    });
+    if (action === "archive") {
+      return fetch(`/api/sessions/${id}`, { method: "DELETE" });
+    }
+    return fetch(`/api/sessions/${id}`, { method: "PATCH" });
   };
 
   const handleConfirm = () => {
     if (!confirm) return;
     startTransition(async () => {
-      const isBulk = confirm.kind === "bulk";
-      const res = isBulk
-        ? await runBulk(confirm.action, confirm.ids)
-        : await runSingle(confirm.ids[0], confirm.action);
+      const res = await runSingle(confirm.ids[0], confirm.action);
       const json = await res.json().catch(() => ({}));
       if (!res.ok || !json.ok) {
         toast.error(json.error ?? "操作失败。");
@@ -108,116 +88,21 @@ export function SessionsClient({ sessions, view }: SessionsClientProps) {
       }
       toast.success(
         confirm.action === "delete"
-          ? `已删除 ${confirm.ids.length} 项`
+          ? "已删除"
           : confirm.action === "archive"
-            ? `已归档 ${confirm.ids.length} 项`
-            : `已恢复 ${confirm.ids.length} 项`,
+            ? "已归档"
+            : "已恢复",
       );
       setConfirm(null);
-      clearSelection();
       router.refresh();
     });
   };
 
   const selectedCount = selectedIds.size;
+  const showCompareBar = view === "active" && selectedCount > 0;
 
   return (
     <>
-      <div className="flex flex-wrap items-center justify-between gap-3 font-mono text-[10.5px] uppercase tracking-[0.12em] text-primary/80">
-        <span>
-          {view === "archived"
-            ? `// archived · ${sessions.length} projects`
-            : `// archive · ${sessions.length} projects`}
-        </span>
-        <div className="flex items-center gap-2">
-          {intent === "manage" ? (
-            <>
-              <span className="text-muted-foreground/80">已选 {selectedCount}</span>
-              {view === "active" ? (
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="ghost"
-                  disabled={selectedCount === 0 || pending}
-                  onClick={() =>
-                    setConfirm({
-                      kind: "bulk",
-                      action: "archive",
-                      ids: Array.from(selectedIds),
-                    })
-                  }
-                >
-                  批量归档
-                </Button>
-              ) : (
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="ghost"
-                  disabled={selectedCount === 0 || pending}
-                  onClick={() =>
-                    setConfirm({
-                      kind: "bulk",
-                      action: "restore",
-                      ids: Array.from(selectedIds),
-                    })
-                  }
-                >
-                  批量恢复
-                </Button>
-              )}
-              <Button
-                type="button"
-                size="sm"
-                variant="ghost"
-                disabled={selectedCount === 0 || pending}
-                className="text-destructive hover:text-destructive"
-                onClick={() =>
-                  setConfirm({
-                    kind: "bulk",
-                    action: "delete",
-                    ids: Array.from(selectedIds),
-                  })
-                }
-              >
-                批量删除
-              </Button>
-              <Button type="button" size="sm" variant="outline" onClick={clearSelection}>
-                取消选择
-              </Button>
-            </>
-          ) : intent === "compare" ? (
-            <>
-              <span className="text-muted-foreground/80">
-                已选 {selectedCount} / {COMPARE_MAX}
-              </span>
-              <Button type="button" size="sm" disabled={selectedCount === 0} onClick={goCompare}>
-                对比已选
-              </Button>
-              <Button type="button" size="sm" variant="outline" onClick={clearSelection}>
-                取消
-              </Button>
-            </>
-          ) : (
-            <>
-              <Button type="button" size="sm" variant="outline" onClick={() => setIntent("manage")}>
-                选择
-              </Button>
-              {view === "active" ? (
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="outline"
-                  onClick={() => setIntent("compare")}
-                >
-                  进入比较模式
-                </Button>
-              ) : null}
-            </>
-          )}
-        </div>
-      </div>
-
       <div
         className={cn(
           "grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3",
@@ -228,7 +113,7 @@ export function SessionsClient({ sessions, view }: SessionsClientProps) {
           <ProjectCard
             key={session.id}
             session={session}
-            selectMode={selectMode}
+            selectMode={view === "active"}
             selected={selectedIds.has(session.id)}
             onToggle={toggleSelect}
             onArchive={
@@ -245,6 +130,33 @@ export function SessionsClient({ sessions, view }: SessionsClientProps) {
           />
         ))}
       </div>
+
+      {showCompareBar ? (
+        <div className="pointer-events-none fixed inset-x-0 bottom-6 z-40 flex justify-center px-4">
+          <div className="pointer-events-auto flex items-center gap-3 rounded-full border border-border bg-card px-4 py-2 shadow-lg">
+            <span className="text-[13px] text-muted-foreground">
+              已选 {selectedCount} / {COMPARE_MAX}
+            </span>
+            <Button
+              type="button"
+              size="sm"
+              onClick={goCompare}
+              disabled={selectedCount < 2}
+            >
+              <GitCompare className="h-4 w-4" />
+              对比
+            </Button>
+            <button
+              type="button"
+              onClick={clearSelection}
+              className="rounded-full p-1.5 text-muted-foreground transition hover:bg-muted hover:text-foreground"
+              aria-label="清空选择"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      ) : null}
 
       <ConfirmDialog
         confirm={confirm}

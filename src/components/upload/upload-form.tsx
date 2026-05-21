@@ -248,7 +248,7 @@ export function UploadForm({
             ) : (
               <ChevronDown className="h-3.5 w-3.5" />
             )}
-            {"// help · file requirements"}
+            {"文件要求"}
           </button>
 
           <div className="mt-4 flex flex-col gap-3 text-[13px] leading-7 text-muted-foreground">

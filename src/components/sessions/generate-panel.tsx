@@ -9,6 +9,7 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
+import { toastError } from "@/lib/error-toast";
 import { GenerateConfigSchema, type GenerateConfig, type SessionStatus } from "@/lib/types";
 
 import { AdvancedOptions, QuickGenerateForm } from "./generate-form-fields";
@@ -111,14 +112,14 @@ export function GeneratePanel({
       const payload = (await response.json()) as GenerateResponse;
 
       if (!response.ok || !("ok" in payload)) {
-        toast.error("error" in payload ? payload.error : "生成失败，请稍后重试。");
+        toastError("error" in payload ? payload.error : "生成失败，请稍后重试。");
         return;
       }
 
       toast.success(`已生成《${payload.title}》`);
       router.refresh();
     } catch {
-      toast.error("生成失败，请稍后重试。");
+      toastError("生成失败，请稍后重试。");
     } finally {
       setPending(false);
       setStartedAt(null);
@@ -127,23 +128,17 @@ export function GeneratePanel({
 
   return (
     <section id="generate-panel" className="space-y-5">
-      <div className="space-y-3">
-        <p className="eyebrow-label">generate</p>
-        <h2 className="font-display text-[28px] italic leading-[1.05] text-foreground">生成结果</h2>
-        <p className="max-w-2xl text-[14px] leading-7 text-muted-foreground">
+      <div className="space-y-2">
+        <h2 className="text-[20px] font-medium leading-tight text-foreground">生成结果</h2>
+        <p className="max-w-2xl text-[13px] leading-7 text-muted-foreground">
           {variantCount > 0
-            ? `当前已保存 ${variantCount} 个版本。保持常用参数在首屏，其余选项收进高级设置。`
+            ? `当前已保存 ${variantCount} 个版本。常用参数在首屏，其余收进高级设置。`
             : "先用常用参数生成第一个版本，其他设置按需展开。"}
         </p>
-        {blockReason ? (
-          <p className="font-mono text-[12px] uppercase tracking-[0.08em] text-primary">
-            {`// ${blockReason}`}
-          </p>
-        ) : null}
+        {blockReason ? <p className="text-[12px] text-primary">{blockReason}</p> : null}
         {pending ? (
-          <p className="font-mono text-[12px] uppercase tracking-[0.10em] text-primary">
-            {`// generating · est 30-60s · elapsed ${elapsedSeconds}s`}
-            <span className="blink-cursor" aria-hidden />
+          <p className="font-mono text-[12px] text-primary">
+            生成中 · 预计 30-60s · 已用 {elapsedSeconds}s
           </p>
         ) : null}
       </div>
@@ -163,7 +158,7 @@ export function GeneratePanel({
             <div className="border-t border-dashed border-border/60 pt-5">
               <button
                 type="button"
-                className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.10em] text-primary/85 transition-colors hover:text-primary"
+                className="inline-flex items-center gap-2 text-[12px] text-muted-foreground transition-colors hover:text-foreground"
                 onClick={() => setShowAdvanced((current) => !current)}
                 aria-expanded={showAdvanced}
               >
@@ -172,7 +167,7 @@ export function GeneratePanel({
                 ) : (
                   <ChevronDown className="h-3.5 w-3.5" />
                 )}
-                {"// advanced options"}
+                高级设置
               </button>
 
               {showAdvanced ? (
@@ -183,10 +178,8 @@ export function GeneratePanel({
             </div>
 
             <div className="flex flex-col gap-3 border-t border-dashed border-border/60 pt-5 sm:flex-row sm:items-center sm:justify-between">
-              <p className="font-mono text-[10.5px] uppercase tracking-[0.08em] text-muted-foreground">
-                {variantCount > 0
-                  ? "// new run appends — never overwrites"
-                  : "// result saves to current session"}
+              <p className="text-[11px] text-muted-foreground">
+                {variantCount > 0 ? "每次生成会追加新版本，不会覆盖旧版本。" : "结果会保存到当前任务。"}
               </p>
               <Button type="submit" disabled={pending || Boolean(blockReason)}>
                 {pending ? (

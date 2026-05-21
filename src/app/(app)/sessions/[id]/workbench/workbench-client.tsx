@@ -571,15 +571,15 @@ function CollapsedBlueprintBar({
       aria-label="展开蓝图编辑器"
     >
       <span className="flex items-center gap-3">
-        <span className="eyebrow-label">blueprint</span>
-        <span className="font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
-          {cardCount} cards ·{" "}
+        <span className="text-[11px] uppercase tracking-[0.10em] text-muted-foreground">蓝图</span>
+        <span className="text-[12px] text-muted-foreground">
+          {cardCount} 张卡片 ·{" "}
           <span className={status === "confirmed" ? "text-locked" : "text-primary"}>
-            {status === "confirmed" ? "confirmed" : "draft"}
+            {status === "confirmed" ? "已确认" : "草稿"}
           </span>
         </span>
       </span>
-      <span className="font-mono text-[11px] uppercase tracking-[0.08em] text-primary">编辑 →</span>
+      <span className="text-[12px] text-primary">编辑 →</span>
     </button>
   );
 }
@@ -598,7 +598,7 @@ function CollapsedChaptersBar({
   function summary(book: BookRow | null, label: "A" | "B") {
     if (!book) return `${label} · 未上传`;
     const t = chapterTotals.find((c) => c.bookId === book.id);
-    return `${label} · ${book.title} · ${t?.analyzed ?? 0}/${t?.total ?? 0} ch`;
+    return `${label} · ${book.title} · ${t?.analyzed ?? 0}/${t?.total ?? 0} 章`;
   }
   return (
     <button
@@ -609,16 +609,12 @@ function CollapsedChaptersBar({
       aria-label="展开章节区"
     >
       <span className="flex min-w-0 flex-wrap items-center gap-3">
-        <span className="eyebrow-label">chapters</span>
-        <span className="truncate font-mono text-[11px] uppercase tracking-[0.08em] text-foreground">
-          {summary(a, "A")}
-        </span>
+        <span className="text-[11px] uppercase tracking-[0.10em] text-muted-foreground">章节</span>
+        <span className="truncate text-[12px] text-foreground">{summary(a, "A")}</span>
         <span className="text-primary/30">·</span>
-        <span className="truncate font-mono text-[11px] uppercase tracking-[0.08em] text-foreground">
-          {summary(b, "B")}
-        </span>
+        <span className="truncate text-[12px] text-foreground">{summary(b, "B")}</span>
       </span>
-      <span className="font-mono text-[11px] uppercase tracking-[0.08em] text-primary">展开 →</span>
+      <span className="text-[12px] text-primary">展开 →</span>
     </button>
   );
 }

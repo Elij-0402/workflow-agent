@@ -287,7 +287,7 @@ function FileSlot({
           </p>
           {slot === "B" ? (
             <p className="mt-2 font-mono text-[10.5px] uppercase tracking-[0.08em] text-muted-foreground">
-              {"// 可留空 · 之后再补"}
+              {"可留空 · 之后再补"}
             </p>
           ) : null}
         </div>

@@ -13,7 +13,9 @@ export function Sidebar() {
       >
         <div className="min-w-0">
           <span className="block leading-none">
-            <span className="font-display text-[22px] italic text-foreground">Novel</span>
+            <span className="font-display text-[22px] italic text-foreground">
+              Novel
+            </span>
             <span className="font-mono text-[15px] text-primary">·fusion</span>
           </span>
           <span className="mt-1 block font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
@@ -23,17 +25,7 @@ export function Sidebar() {
       </Link>
 
       <div className="flex-1 px-3 py-5">
-        <p className="eyebrow-label px-3 pb-3">workspace</p>
         <AppNav />
-      </div>
-
-      <div className="border-t border-dashed border-border/70 px-5 py-4">
-        <p className="font-mono text-[10.5px] uppercase tracking-[0.14em] text-muted-foreground/70">
-          <span className="text-primary/70">$</span> session · live
-        </p>
-        <p className="mt-1 font-mono text-[10px] text-muted-foreground/55">
-          v0.2 · dual-book blueprint workbench
-        </p>
       </div>
     </aside>
   );

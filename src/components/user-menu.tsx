@@ -7,7 +7,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -33,7 +32,6 @@ export function UserMenu({ email }: { email: string }) {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-60">
-        <DropdownMenuLabel>{"// account"}</DropdownMenuLabel>
         <DropdownMenuItem
           disabled
           className="cursor-default opacity-100 focus:bg-transparent focus:text-foreground"

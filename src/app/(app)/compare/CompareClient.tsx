@@ -62,7 +62,7 @@ export function CompareClient({ books }: Props) {
               {books.map((b) => (
                 <div key={b.bookId} className="surface-panel p-5">
                   <p className="font-mono text-[10.5px] uppercase tracking-[0.10em] text-primary/85">
-                    {`// ${dim}`}
+                    {`${dim}`}
                   </p>
                   <h3 className="mt-2 line-clamp-2 font-display text-[18px] italic leading-tight text-foreground">
                     {b.displayTitle}
@@ -72,7 +72,7 @@ export function CompareClient({ books }: Props) {
                       <AnalysisDetail dimension={dim} result={b.analyses[dim]} />
                     ) : (
                       <p className="font-mono text-[12px] uppercase tracking-[0.08em] text-muted-foreground/70">
-                        {"// 该维度尚未分析"}
+                        {"该维度尚未分析"}
                       </p>
                     )}
                   </div>

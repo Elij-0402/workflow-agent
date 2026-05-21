@@ -28,14 +28,14 @@ import { GenerateDrawer } from "./generate-drawer";
 
 type Status = BlueprintStatus;
 
-const TABS: Array<{ key: BlueprintSection; label: string; token: string }> = [
-  { key: "characters", label: "人物", token: "characters" },
-  { key: "relationships", label: "人物关系", token: "relationships" },
-  { key: "world_rules", label: "世界规则", token: "world" },
-  { key: "conflicts", label: "核心冲突", token: "conflicts" },
-  { key: "plot_beats", label: "章节节点", token: "beats" },
-  { key: "viewpoint", label: "视角与节奏", token: "viewpoint" },
-  { key: "themes", label: "主题", token: "themes" },
+const TABS: Array<{ key: BlueprintSection; label: string }> = [
+  { key: "characters", label: "人物" },
+  { key: "relationships", label: "人物关系" },
+  { key: "world_rules", label: "世界规则" },
+  { key: "conflicts", label: "核心冲突" },
+  { key: "plot_beats", label: "章节节点" },
+  { key: "viewpoint", label: "视角与节奏" },
+  { key: "themes", label: "主题" },
 ];
 
 type Props = {
@@ -165,10 +165,10 @@ export function BlueprintEditor({
               key={t.key}
               data-active={active === t.key}
               onClick={() => setActive(t.key)}
-              className="terminal-tab"
+              className="rounded-[2px] px-2.5 py-1.5 text-[12.5px] text-muted-foreground transition-colors hover:text-foreground data-[active=true]:bg-accent data-[active=true]:text-foreground"
               title={t.label}
             >
-              [ {t.token} ]
+              {t.label}
             </button>
           ))}
         </nav>
@@ -178,17 +178,12 @@ export function BlueprintEditor({
               status === "confirmed" ? "text-flash" : "text-primary/85"
             }`}
           >
-            {status === "confirmed" ? "// confirmed" : "// draft"}
+            {status === "confirmed" ? "已确认" : "草稿"}
           </span>
           {status === "confirmed" ? (
             <>
-              <Button
-                size="sm"
-                variant="ghost"
-                className="font-mono uppercase tracking-[0.08em]"
-                onClick={() => void unlock()}
-              >
-                $ unlock
+              <Button size="sm" variant="ghost" onClick={() => void unlock()}>
+                解锁
               </Button>
               <Button size="sm" onClick={() => setShowGenerate(true)}>
                 <Sparkles />
@@ -505,22 +500,19 @@ function ViewpointEditor({
   return (
     <div className="grid gap-3 p-4 text-[13px]">
       <Field
-        label="// mode"
-        zh="视角模式"
+        label="视角模式"
         value={bp.viewpoint.mode}
         disabled={disabled}
         onChange={(mode) => onSave({ mode })}
       />
       <Field
-        label="// pacing"
-        zh="节奏"
+        label="节奏"
         value={bp.viewpoint.pacing}
         disabled={disabled}
         onChange={(pacing) => onSave({ pacing })}
       />
       <Field
-        label="// notes"
-        zh="备注"
+        label="备注"
         value={bp.viewpoint.notes}
         disabled={disabled}
         onChange={(notes) => onSave({ notes })}
@@ -531,29 +523,20 @@ function ViewpointEditor({
 
 function Field({
   label,
-  zh,
   value,
   disabled,
   onChange,
 }: {
   label: string;
-  zh: string;
   value: string;
   disabled: boolean;
   onChange: (v: string) => void;
 }) {
   return (
     <label className="flex items-start gap-3">
-      <span className="w-32 shrink-0 pt-2">
-        <span className="block font-mono text-[10.5px] uppercase tracking-[0.12em] text-primary/85">
-          {label}
-        </span>
-        <span className="block font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground/70">
-          {zh}
-        </span>
-      </span>
+      <span className="w-24 shrink-0 pt-2 text-[12.5px] text-muted-foreground">{label}</span>
       <input
-        className="flex-1 rounded-[2px] border border-border bg-background/40 px-2 py-1.5 font-mono text-[12.5px] text-foreground focus:border-primary focus:outline-none"
+        className="flex-1 rounded-[2px] border border-border bg-background/40 px-2 py-1.5 text-[13px] text-foreground focus:border-primary focus:outline-none"
         value={value}
         disabled={disabled}
         onChange={(e) => onChange(e.target.value)}
@@ -583,23 +566,14 @@ function LockBanner({ updatedAt, onUnlock }: { updatedAt: string | null; onUnloc
     <div className="bg-locked/8 flex items-center justify-between gap-3 border-b border-dashed border-locked/40 px-4 py-2">
       <div className="flex items-center gap-2.5">
         <Lock className="h-3.5 w-3.5 text-locked" aria-hidden />
-        <span className="font-mono text-[10.5px] uppercase tracking-[0.14em] text-locked">
-          locked
-        </span>
         <span className="text-[12px] text-foreground/85">
           蓝图已锁定
           {stamp ? <span className="ml-2 text-muted-foreground">· {stamp}</span> : null}
           <span className="ml-2 text-muted-foreground">· 编辑前请解锁</span>
         </span>
       </div>
-      <Button
-        size="sm"
-        variant="ghost"
-        className="font-mono uppercase tracking-[0.08em]"
-        onClick={onUnlock}
-        aria-label="解锁蓝图以继续编辑"
-      >
-        $ unlock
+      <Button size="sm" variant="ghost" onClick={onUnlock} aria-label="解锁蓝图以继续编辑">
+        解锁
       </Button>
     </div>
   );

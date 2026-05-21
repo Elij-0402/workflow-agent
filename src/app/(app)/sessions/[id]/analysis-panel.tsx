@@ -2,12 +2,10 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronDown, ChevronUp, Loader2, RefreshCw, Sparkles } from "lucide-react";
-import { toast } from "sonner";
-
-import { AnalysisDetail } from "@/components/sessions/analysis-detail";
+import { ChevronDown, ChevronUp, Loader2, RefreshCw, Sparkles } from "lucide-react";import { AnalysisDetail } from "@/components/sessions/analysis-detail";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { toastError } from "@/lib/error-toast";
 import {
   ANALYSIS_DIMENSIONS,
   DIMENSION_LABELS,
@@ -54,9 +52,9 @@ function summarizeResult(dimension: LegacyAnalysisDimension, result: unknown) {
 }
 
 function getDimensionActionLabel(state: AnalysisState) {
-  if (state === "loading") return "running…";
-  if (state === "done") return "$ rerun";
-  if (state === "error") return "$ retry";
+  if (state === "loading") return "分析中…";
+  if (state === "done") return "重新分析";
+  if (state === "error") return "重试";
   return "开始分析";
 }
 
@@ -80,25 +78,19 @@ function getDimensionSummary(dimension: LegacyAnalysisDimension, item: Dimension
 
 function getStatusCopy(state: AnalysisState) {
   if (state === "done") {
-    return { label: "// done", className: "text-flash", glyph: "●" };
+    return { label: "完成", className: "text-flash", glyph: "●" };
   }
 
   if (state === "loading") {
-    return { label: "// running", className: "text-primary animate-pulse", glyph: "◐" };
+    return { label: "分析中", className: "text-primary animate-pulse", glyph: "◐" };
   }
 
   if (state === "error") {
-    return { label: "// error", className: "text-destructive", glyph: "✕" };
+    return { label: "失败", className: "text-destructive", glyph: "✕" };
   }
 
-  return { label: "// pending", className: "text-muted-foreground", glyph: "○" };
+  return { label: "待开始", className: "text-muted-foreground", glyph: "○" };
 }
-
-const DIMENSION_TOKEN: Record<LegacyAnalysisDimension, string> = {
-  worldview: "world",
-  characters: "characters",
-  narrative: "narrative",
-};
 
 export function AnalysisPanel({ sessionId, analyses, llmConfigured, sessionStatus }: PanelProps) {
   const router = useRouter();
@@ -172,7 +164,7 @@ export function AnalysisPanel({ sessionId, analyses, llmConfigured, sessionStatu
             state: "error",
           },
         }));
-        toast.error(`${DIMENSION_LABELS[dimension]}分析失败：${error}`);
+        toastError(`${DIMENSION_LABELS[dimension]}分析失败：${error}`);
         return;
       }
 
@@ -194,14 +186,13 @@ export function AnalysisPanel({ sessionId, analyses, llmConfigured, sessionStatu
           state: "error",
         },
       }));
-      toast.error(`${DIMENSION_LABELS[dimension]}分析失败：请稍后重试。`);
+      toastError(`${DIMENSION_LABELS[dimension]}分析失败：请稍后重试。`);
     }
   }
 
   async function runAll() {
-    for (const dimension of ANALYSIS_DIMENSIONS) {
-      await runDimension(dimension, { refresh: false });
-    }
+    const pending = ANALYSIS_DIMENSIONS.filter((d) => items[d].state !== "done");
+    await Promise.all(pending.map((d) => runDimension(d, { refresh: false })));
     router.refresh();
   }
 
@@ -215,24 +206,17 @@ export function AnalysisPanel({ sessionId, analyses, llmConfigured, sessionStatu
   return (
     <section id="analysis-panel" className="space-y-5">
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-        <div className="space-y-3">
-          <p className="eyebrow-label">analysis</p>
-          <h2 className="font-display text-[28px] italic leading-[1.05] text-foreground">
-            分析结果
-          </h2>
-          <p className="max-w-2xl text-[14px] leading-7 text-muted-foreground">
+        <div className="space-y-2">
+          <h2 className="text-[20px] font-medium leading-tight text-foreground">分析结果</h2>
+          <p className="max-w-2xl text-[13px] leading-7 text-muted-foreground">
             {allDone
               ? "三项分析已经完成。需要时可以单独重跑某一项。"
               : `先完成三项基础分析。当前已完成 ${doneCount} / ${ANALYSIS_DIMENSIONS.length}。`}
           </p>
           {!llmConfigured ? (
-            <p className="font-mono text-[12px] uppercase tracking-[0.08em] text-primary">
-              {"// 先完成模型设置再开始"}
-            </p>
+            <p className="text-[12px] text-primary">先完成模型设置再开始。</p>
           ) : blockedByGenerating ? (
-            <p className="font-mono text-[12px] uppercase tracking-[0.08em] text-primary">
-              {"// 当前正在生成，暂不可重新分析"}
-            </p>
+            <p className="text-[12px] text-primary">当前正在生成，暂不可重新分析。</p>
           ) : null}
         </div>
 
@@ -249,7 +233,7 @@ export function AnalysisPanel({ sessionId, analyses, llmConfigured, sessionStatu
             ) : (
               <>
                 <Sparkles />
-                {doneCount > 0 ? "继续分析" : "开始分析"}
+                一键分析三项
               </>
             )}
           </Button>
@@ -267,16 +251,13 @@ export function AnalysisPanel({ sessionId, analyses, llmConfigured, sessionStatu
               <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                 <div className="min-w-0 space-y-2">
                   <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                    <span className="font-mono text-[10.5px] uppercase tracking-[0.14em] text-primary/85">
-                      {`// ${DIMENSION_TOKEN[dimension]}`}
-                    </span>
+                    <h3 className="text-[15px] font-medium text-foreground">
+                      {DIMENSION_LABELS[dimension]}
+                    </h3>
                     <span className={cn("font-mono text-[11px]", statusCopy.className)}>
                       {statusCopy.glyph} {statusCopy.label}
                     </span>
                   </div>
-                  <h3 className="font-display text-[20px] italic leading-tight text-foreground">
-                    {DIMENSION_LABELS[dimension]}
-                  </h3>
                   <p className="max-w-2xl text-[13px] leading-7 text-muted-foreground">
                     {getDimensionSummary(dimension, item)}
                   </p>
@@ -300,7 +281,7 @@ export function AnalysisPanel({ sessionId, analyses, llmConfigured, sessionStatu
                     {item.state === "loading" ? (
                       <>
                         <Loader2 className="animate-spin" />
-                        running…
+                        分析中…
                       </>
                     ) : (
                       <>

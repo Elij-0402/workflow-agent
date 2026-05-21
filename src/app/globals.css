@@ -47,10 +47,6 @@
     --duration-slow: 360ms;
     --easing-out: cubic-bezier(0.16, 1, 0.3, 1);
     --easing-in-out: cubic-bezier(0.65, 0, 0.35, 1);
-
-    --space-tight: 6px;
-    --space-snug: 10px;
-    --space-cozy: 14px;
   }
 
   .dark {
@@ -91,10 +87,6 @@
     --duration-slow: 360ms;
     --easing-out: cubic-bezier(0.16, 1, 0.3, 1);
     --easing-in-out: cubic-bezier(0.65, 0, 0.35, 1);
-
-    --space-tight: 6px;
-    --space-snug: 10px;
-    --space-cozy: 14px;
   }
 }
 
@@ -105,7 +97,8 @@
   body {
     @apply bg-background text-foreground;
     font-family:
-      var(--font-sans), var(--font-zh-sans), "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+      var(--font-sans), var(--font-zh-sans), "PingFang SC", "Microsoft YaHei",
+      system-ui, sans-serif;
     font-feature-settings:
       "ss01" 1,
       "ss03" 1,
@@ -113,7 +106,11 @@
     text-rendering: optimizeLegibility;
     background-image:
       radial-gradient(circle at 8% -6%, hsl(44 56% 47% / 0.1), transparent 38%),
-      radial-gradient(circle at 102% 102%, hsl(132 23% 54% / 0.045), transparent 42%),
+      radial-gradient(
+        circle at 102% 102%,
+        hsl(132 23% 54% / 0.045),
+        transparent 42%
+      ),
       linear-gradient(180deg, hsl(75 8% 6%), hsl(75 8% 5%));
     background-attachment: fixed;
     position: relative;
@@ -259,14 +256,10 @@
     border-left: 1px solid;
   }
 
-  /* Mono "// section" eyebrow — replaces the old uppercased label */
+  /* Mono section eyebrow — quiet label, no decorative prefix */
   .eyebrow-label {
     font-family: var(--font-mono), "JetBrains Mono", ui-monospace, monospace;
-    @apply text-[11px] uppercase tracking-[0.16em] text-primary/85;
-  }
-  .eyebrow-label::before {
-    content: "// ";
-    @apply text-primary/55;
+    @apply text-[10.5px] uppercase tracking-[0.14em] text-muted-foreground/70;
   }
 
   .data-label {

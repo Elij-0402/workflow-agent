@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, MoreVertical } from "lucide-react";
+import { ArrowRight, Check, MoreVertical } from "lucide-react";
 
 import {
   DropdownMenu,
@@ -47,89 +47,74 @@ export function ProjectCard({
   const isDual = session.mode === "dual";
   const isArchived = Boolean(session.archived_at);
 
-  const cardClass = cn(
-    "surface-panel group relative flex h-full flex-col p-5 transition-colors",
-    selectMode
-      ? selected
-        ? "border-primary cursor-pointer"
-        : "cursor-pointer hover:border-primary/60"
-      : "hover:border-primary/60 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary",
-  );
+  return (
+    <div
+      className={cn(
+        "surface-panel group relative flex h-full flex-col p-5 transition-colors",
+        selected
+          ? "border-primary"
+          : "hover:border-primary/60 focus-within:border-primary/60",
+      )}
+    >
+      <Link
+        href={href}
+        className="absolute inset-0 z-0 rounded-[3px] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary"
+        aria-label={`打开 ${session.name}`}
+      />
 
-  const inner = (
-    <>
-      <div className="flex items-start justify-between gap-4">
+      <div className="relative z-10 flex items-start justify-between gap-4">
         <BookSpineVisual isDual={isDual} />
-        <div className="flex items-center gap-2">
-          <span className="font-mono text-[10.5px] uppercase tracking-[0.10em] text-muted-foreground/60">
-            {isDual ? "// 双书" : "// 单书"}
-          </span>
-          {!selectMode ? (
-            <CardActions
-              isArchived={isArchived}
-              onArchive={onArchive ? () => onArchive(session.id) : undefined}
-              onRestore={onRestore ? () => onRestore(session.id) : undefined}
-              onDelete={onDelete ? () => onDelete(session.id) : undefined}
-            />
+        <div className="flex items-center gap-1">
+          {selectMode && onToggle ? (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onToggle(session.id);
+              }}
+              className={cn(
+                "inline-flex h-6 w-6 items-center justify-center rounded-[2px] border transition-colors",
+                selected
+                  ? "border-primary bg-primary/15 text-primary"
+                  : "border-border bg-background/80 text-transparent hover:border-primary/60 hover:text-primary/60",
+              )}
+              aria-pressed={selected}
+              aria-label={selected ? "取消选择" : "选择此项目用于对比"}
+            >
+              <Check className="h-3.5 w-3.5" strokeWidth={2.5} />
+            </button>
           ) : null}
+          <CardActions
+            isArchived={isArchived}
+            onArchive={onArchive ? () => onArchive(session.id) : undefined}
+            onRestore={onRestore ? () => onRestore(session.id) : undefined}
+            onDelete={onDelete ? () => onDelete(session.id) : undefined}
+          />
         </div>
       </div>
 
-      <h3 className="mt-5 line-clamp-2 font-display text-[20px] italic leading-tight text-foreground">
+      <h3 className="relative z-10 mt-5 line-clamp-2 font-display text-[20px] italic leading-tight text-foreground">
         {session.name}
       </h3>
 
-      <div className="mt-3 flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.08em]">
+      <div className="relative z-10 mt-3 flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.08em]">
         <StatusDot status={session.status} />
         <span className={status.tone}>{status.label}</span>
+        <span className="ml-2 text-muted-foreground/60">{isDual ? "双书" : "单书"}</span>
       </div>
 
-      <div className="mt-auto flex items-end justify-between gap-3 border-t border-dashed border-border/60 pt-5">
+      <div className="relative z-10 mt-auto flex items-end justify-between gap-3 border-t border-dashed border-border/60 pt-5">
         <div className="space-y-0.5 font-mono text-[10.5px] uppercase tracking-[0.06em] text-muted-foreground">
           <div>updated · {formatRelativeTime(session.updated_at)}</div>
           <div className="text-muted-foreground/60">created · {formatDate(session.created_at)}</div>
         </div>
-        {!selectMode ? (
-          <span className="inline-flex items-center gap-1 text-[12px] text-primary opacity-60 transition-opacity group-hover:opacity-100">
-            打开
-            <ArrowRight aria-hidden className="h-3 w-3" />
-          </span>
-        ) : (
-          <span
-            className={cn(
-              "inline-flex h-5 w-5 items-center justify-center rounded-[2px] border font-mono text-[11px]",
-              selected
-                ? "border-primary bg-primary/15 text-primary"
-                : "border-border text-muted-foreground",
-            )}
-            aria-hidden
-          >
-            {selected ? "✓" : ""}
-          </span>
-        )}
+        <span className="inline-flex items-center gap-1 text-[12px] text-primary opacity-60 transition-opacity group-hover:opacity-100">
+          打开
+          <ArrowRight aria-hidden className="h-3 w-3" />
+        </span>
       </div>
-
-      {selectMode ? <span className="sr-only">{selected ? "已选择" : "未选择"}</span> : null}
-    </>
-  );
-
-  if (selectMode) {
-    return (
-      <button
-        type="button"
-        onClick={() => onToggle?.(session.id)}
-        className={cn(cardClass, "text-left")}
-        aria-pressed={selected}
-      >
-        {inner}
-      </button>
-    );
-  }
-
-  return (
-    <Link href={href} className={cardClass}>
-      {inner}
-    </Link>
+    </div>
   );
 }
 

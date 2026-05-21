@@ -118,7 +118,7 @@ export function OutlineStreamer({ briefId }: Props) {
       <div className="flex items-center justify-between">
         <div>
           <p className="font-mono text-[10.5px] uppercase tracking-[0.10em] text-primary/85">
-            {"// preview outline"}
+            {"预览大纲"}
           </p>
           <p className="mt-1 text-[13px] text-muted-foreground">
             根据当前简报 + 已确认蓝图，流式合成一份新版本的大纲（不消耗整书 token）。
@@ -161,7 +161,7 @@ export function OutlineStreamer({ briefId }: Props) {
             ) : null}
           </div>
           <div className="space-y-2">
-            <p className="data-label">{"// chapters"}</p>
+            <p className="data-label">{"章节"}</p>
             <ol className="space-y-2">
               {(view.chapters ?? []).map((ch, i) => (
                 <li

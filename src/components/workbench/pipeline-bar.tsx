@@ -14,25 +14,20 @@ export function PipelineBar(p: Props) {
     p.chapterTotals.length > 0 &&
     p.chapterTotals.every((t) => t.total > 0 && t.analyzed === t.total);
   const allSynthesized = p.bookSynthesisDone.a && p.bookSynthesisDone.b;
+  const analysisDone = allBooksImported && allChaptersAnalyzed && allSynthesized;
+  const blueprintConfirmed = p.blueprintStatus === "confirmed";
+  const hasVariants = p.variantCount > 0;
 
   const steps = [
-    { key: "import", no: "01", label: "import", done: allBooksImported },
-    { key: "chapter-analyze", no: "02", label: "chapter", done: allChaptersAnalyzed },
-    { key: "synthesis", no: "03", label: "synth", done: allSynthesized },
-    {
-      key: "compare",
-      no: "04",
-      label: "compare",
-      done: p.blueprintStatus === "confirmed" || allSynthesized,
-    },
-    { key: "confirm", no: "05", label: "confirm", done: p.blueprintStatus === "confirmed" },
-    { key: "generate", no: "06", label: "generate", done: p.variantCount > 0 },
+    { no: "1", label: "分析素材", done: analysisDone },
+    { no: "2", label: "编辑蓝图", done: blueprintConfirmed },
+    { no: "3", label: "生成变体", done: hasVariants },
   ];
 
   const currentIdx = steps.findIndex((s) => !s.done);
 
   return (
-    <div className="surface-panel flex flex-wrap items-center gap-x-1 gap-y-1 px-4 py-2.5 font-mono text-[11px] uppercase tracking-[0.08em]">
+    <div className="surface-panel flex items-center gap-2 px-4 py-2.5 text-[12px]">
       {steps.map((s, i) => {
         const isCurrent = i === currentIdx;
         const glyph = s.done ? "●" : isCurrent ? "◐" : "○";
@@ -41,26 +36,17 @@ export function PipelineBar(p: Props) {
           : isCurrent
             ? "text-primary"
             : "text-muted-foreground/55";
-        const numColor = s.done
-          ? "text-flash"
-          : isCurrent
-            ? "text-primary"
-            : "text-muted-foreground/70";
-        const labelColor = s.done
-          ? "text-foreground"
-          : isCurrent
-            ? "text-foreground"
-            : "text-muted-foreground";
+        const labelColor = s.done || isCurrent ? "text-foreground" : "text-muted-foreground";
         return (
-          <span key={s.key} className="inline-flex items-center gap-1.5">
-            {i > 0 ? <span className="px-1 text-primary/30">─┄─</span> : null}
+          <span key={s.no} className="inline-flex items-center gap-2">
+            {i > 0 ? <span className="px-1 text-primary/30">─</span> : null}
             <span
-              className={`${glyphColor}${isCurrent ? "motion-safe:animate-pulse" : ""}`}
+              className={`${glyphColor}${isCurrent ? " motion-safe:animate-pulse" : ""}`}
               aria-hidden
             >
               {glyph}
             </span>
-            <span className={numColor}>{s.no}</span>
+            <span className={`text-muted-foreground/60`}>{s.no}</span>
             <span className={labelColor}>{s.label}</span>
           </span>
         );

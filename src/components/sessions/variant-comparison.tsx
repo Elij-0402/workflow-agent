@@ -26,10 +26,10 @@ type Props = {
 
 type DiffTab = "meta" | "structure" | "paragraphs";
 
-const TABS: Array<{ key: DiffTab; label: string; token: string }> = [
-  { key: "paragraphs", label: "段落差异", token: "paragraphs" },
-  { key: "structure", label: "章节结构", token: "structure" },
-  { key: "meta", label: "元信息", token: "meta" },
+const TABS: Array<{ key: DiffTab; label: string }> = [
+  { key: "structure", label: "章节结构" },
+  { key: "meta", label: "元信息" },
+  { key: "paragraphs", label: "段落差异" },
 ];
 
 const TAB_STORAGE_KEY = "wb-diff-tab";
@@ -37,7 +37,7 @@ const TAB_STORAGE_KEY = "wb-diff-tab";
 export function VariantComparison({ variants, confirmedAt }: Props) {
   const [leftId, setLeftId] = useState(variants[0]?.id ?? "");
   const [rightId, setRightId] = useState(variants[1]?.id ?? variants[0]?.id ?? "");
-  const [tab, setTab] = useState<DiffTab>("paragraphs");
+  const [tab, setTab] = useState<DiffTab>("structure");
 
   useEffect(() => {
     try {
@@ -70,10 +70,7 @@ export function VariantComparison({ variants, confirmedAt }: Props) {
   if (!left || !right) {
     return (
       <div className="surface-panel p-6">
-        <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground/70">
-          {"// empty · variants"}
-        </p>
-        <p className="mt-1.5 text-[13px] leading-7 text-muted-foreground">
+        <p className="text-[13px] leading-7 text-muted-foreground">
           至少需要 2 个变体才能开始对比。
         </p>
       </div>
@@ -83,13 +80,8 @@ export function VariantComparison({ variants, confirmedAt }: Props) {
   return (
     <section className="space-y-4">
       <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="eyebrow-label">compare variants</p>
-          <h2 className="mt-2 font-display text-[24px] italic leading-tight text-foreground">
-            结果对比
-          </h2>
-        </div>
-        <div className="flex flex-wrap items-center gap-2 font-mono text-[12px]">
+        <h2 className="text-[18px] font-medium leading-tight text-foreground">结果对比</h2>
+        <div className="flex flex-wrap items-center gap-2 text-[12px]">
           <Picker
             label="A"
             value={leftId}
@@ -103,11 +95,9 @@ export function VariantComparison({ variants, confirmedAt }: Props) {
             size="sm"
             onClick={swap}
             aria-label="交换 A/B 变体"
-            className="font-mono uppercase tracking-[0.08em]"
             title="交换 A 与 B"
           >
             <ArrowLeftRight aria-hidden className="h-3.5 w-3.5" />
-            <span className="sr-only sm:not-sr-only sm:ml-1">swap</span>
           </Button>
           <Picker
             label="B"
@@ -131,11 +121,11 @@ export function VariantComparison({ variants, confirmedAt }: Props) {
             role="tab"
             data-active={tab === t.key}
             onClick={() => changeTab(t.key)}
-            className="terminal-tab"
+            className="rounded-[2px] px-2.5 py-1 text-[12px] text-muted-foreground transition-colors hover:text-foreground data-[active=true]:bg-background data-[active=true]:text-foreground"
             aria-selected={tab === t.key}
             aria-label={`查看${t.label}`}
           >
-            [ {t.token} ]
+            {t.label}
           </button>
         ))}
       </div>
@@ -179,11 +169,9 @@ function Picker({
 }) {
   return (
     <label className="flex items-center gap-2">
-      <span className="font-mono text-[10.5px] uppercase tracking-[0.12em] text-primary/85">
-        {`// ${label}`}
-      </span>
+      <span className="text-[11px] uppercase tracking-[0.10em] text-muted-foreground">{label}</span>
       <select
-        className="h-8 rounded-[3px] border border-border bg-background/40 px-2 font-mono text-[12px] text-foreground transition-colors focus:border-primary focus:outline-none focus-visible:ring-1 focus-visible:ring-primary/40"
+        className="h-8 rounded-[3px] border border-border bg-background/40 px-2 text-[12px] text-foreground transition-colors focus:border-primary focus:outline-none focus-visible:ring-1 focus-visible:ring-primary/40"
         style={{ transitionDuration: "var(--duration-fast)" }}
         value={value}
         onChange={(e) => onChange(e.target.value)}
@@ -194,7 +182,7 @@ function Picker({
           return (
             <option key={v.id} value={v.id}>
               {v.title}
-              {stale ? " · (stale)" : ""}
+              {stale ? " · (旧)" : ""}
             </option>
           );
         })}
