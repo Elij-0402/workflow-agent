@@ -11,7 +11,11 @@ export type AnalysisDimension =
   | "characters"
   | "narrative"
   | "chapter_brief"
-  | "book_synthesis";
+  | "book_synthesis"
+  | "prose_craft"
+  | "emotion_arc"
+  | "pacing_map"
+  | "suspense_grid";
 
 export const LEGACY_ANALYSIS_DIMENSIONS = [
   "worldview",
@@ -20,6 +24,15 @@ export const LEGACY_ANALYSIS_DIMENSIONS = [
 ] as const satisfies readonly AnalysisDimension[];
 
 export type LegacyAnalysisDimension = (typeof LEGACY_ANALYSIS_DIMENSIONS)[number];
+
+export const EXTENDED_ANALYSIS_DIMENSIONS = [
+  "prose_craft",
+  "emotion_arc",
+  "pacing_map",
+  "suspense_grid",
+] as const satisfies readonly AnalysisDimension[];
+
+export type ExtendedAnalysisDimension = (typeof EXTENDED_ANALYSIS_DIMENSIONS)[number];
 
 export type AnalysisScope = "book" | "chapter";
 
@@ -31,6 +44,10 @@ export const DIMENSION_LABELS: Record<AnalysisDimension, string> = {
   narrative: "叙事",
   chapter_brief: "章节抽取",
   book_synthesis: "整书汇总",
+  prose_craft: "写作技法",
+  emotion_arc: "情感曲线",
+  pacing_map: "节奏图谱",
+  suspense_grid: "悬念分布",
 };
 
 export type SessionMode = "single" | "dual";
@@ -190,6 +207,110 @@ export const BookSynthesisResultSchema = z.object({
 });
 export type BookSynthesisResult = z.infer<typeof BookSynthesisResultSchema>;
 
+// ----------------------------------------------------------------------------
+// Extended analysis dimensions (V0.3 — opt-in, do not feed session state machine)
+// ----------------------------------------------------------------------------
+export const ProseCraftResultSchema = z.object({
+  sentence_length: z.object({
+    short_pct: z.number().min(0).max(1).describe("≤10 字句占比"),
+    medium_pct: z.number().min(0).max(1).describe("11-25 字句占比"),
+    long_pct: z.number().min(0).max(1).describe(">25 字句占比"),
+    average: z.number().min(1).describe("平均句长（字）"),
+  }),
+  rhetoric_density: z.object({
+    metaphor: z.number().min(0).max(10).describe("比喻密度 0-10"),
+    parallelism: z.number().min(0).max(10).describe("排比/对仗"),
+    personification: z.number().min(0).max(10).describe("拟人"),
+    irony: z.number().min(0).max(10).describe("反讽"),
+    hyperbole: z.number().min(0).max(10).describe("夸张"),
+  }),
+  sensory_mix: z.object({
+    visual: z.number().min(0).max(1),
+    auditory: z.number().min(0).max(1),
+    tactile: z.number().min(0).max(1),
+    olfactory_gustatory: z.number().min(0).max(1),
+    interoceptive: z.number().min(0).max(1).describe("内感受/情绪体感"),
+  }),
+  mode_balance: z.object({
+    dialogue_pct: z.number().min(0).max(1),
+    description_pct: z.number().min(0).max(1),
+    action_pct: z.number().min(0).max(1),
+    introspection_pct: z.number().min(0).max(1),
+  }),
+  signature_techniques: z.array(z.string()).max(8).describe("作者标志性技法 0-8 条"),
+  summary: z.string(),
+});
+export type ProseCraftResult = z.infer<typeof ProseCraftResultSchema>;
+
+export const EmotionArcResultSchema = z.object({
+  chapters: z
+    .array(
+      z.object({
+        index: z.number().int().min(0),
+        valence: z.number().min(-1).max(1).describe("正/负情感 -1..1"),
+        intensity: z.number().min(0).max(1).describe("情感强度 0..1"),
+        dominant_emotion: z.string().describe("主导情感：喜/怒/哀/惧/爱/恶/欲/平静 等"),
+        note: z.string().optional(),
+      }),
+    )
+    .min(1),
+  peaks: z
+    .array(
+      z.object({
+        index: z.number().int().min(0),
+        kind: z.enum(["high", "low"]),
+        description: z.string(),
+      }),
+    )
+    .max(10),
+  summary: z.string(),
+});
+export type EmotionArcResult = z.infer<typeof EmotionArcResultSchema>;
+
+export const PacingMapResultSchema = z.object({
+  chapters: z
+    .array(
+      z.object({
+        index: z.number().int().min(0),
+        action_pct: z.number().min(0).max(1),
+        dialogue_pct: z.number().min(0).max(1),
+        description_pct: z.number().min(0).max(1),
+        introspection_pct: z.number().min(0).max(1),
+        tempo: z.enum(["slow", "moderate", "fast", "burst"]).describe("节奏档"),
+      }),
+    )
+    .min(1),
+  tempo_shifts: z
+    .array(
+      z.object({
+        from_index: z.number().int().min(0),
+        to_index: z.number().int().min(0),
+        description: z.string(),
+      }),
+    )
+    .max(10),
+  summary: z.string(),
+});
+export type PacingMapResult = z.infer<typeof PacingMapResultSchema>;
+
+export const SuspenseGridResultSchema = z.object({
+  threads: z
+    .array(
+      z.object({
+        id: z.string().describe("线索 id，可用 t1/t2/.."),
+        label: z.string(),
+        setup_chapter: z.number().int().min(0).describe("埋伏笔的章节 index"),
+        payoff_chapter: z.number().int().min(0).nullable().describe("回收章节，未回收则 null"),
+        strength: z.number().min(1).max(10).describe("线索强度 1-10"),
+        kind: z.enum(["foreshadow", "mystery", "deferred_promise", "red_herring"]),
+      }),
+    )
+    .min(1),
+  unresolved: z.array(z.string()).describe("未回收线索 id 列表"),
+  summary: z.string(),
+});
+export type SuspenseGridResult = z.infer<typeof SuspenseGridResultSchema>;
+
 // ============================================================================
 // Generate variant
 // ============================================================================
@@ -238,6 +359,7 @@ export type Database = {
           name: string;
           status: SessionStatus;
           mode: SessionMode;
+          archived_at: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -247,6 +369,7 @@ export type Database = {
           name?: string;
           status?: SessionStatus;
           mode?: SessionMode;
+          archived_at?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -254,6 +377,7 @@ export type Database = {
           name: string;
           status: SessionStatus;
           mode: SessionMode;
+          archived_at: string | null;
           updated_at: string;
         }>;
         Relationships: [];
@@ -372,6 +496,10 @@ export type Database = {
           word_count: number | null;
           llm_config_id: string | null;
           blueprint_id: string | null;
+          brief_id: string | null;
+          parent_variant_id: string | null;
+          scope: "outline" | "chapter" | "full";
+          chapter_index: number | null;
           created_at: string;
         };
         Insert: {
@@ -384,12 +512,18 @@ export type Database = {
           word_count?: number | null;
           llm_config_id?: string | null;
           blueprint_id?: string | null;
+          brief_id?: string | null;
+          parent_variant_id?: string | null;
+          scope?: "outline" | "chapter" | "full";
+          chapter_index?: number | null;
           created_at?: string;
         };
         Update: Partial<{
           title: string;
           content: string;
           word_count: number | null;
+          scope: "outline" | "chapter" | "full";
+          chapter_index: number | null;
         }>;
         Relationships: [];
       };
@@ -419,6 +553,43 @@ export type Database = {
           sections: unknown;
           confirmed_at: string | null;
           updated_at: string;
+        }>;
+        Relationships: [];
+      };
+      creative_briefs: {
+        Row: {
+          id: string;
+          user_id: string;
+          session_id: string;
+          title: string;
+          persona_directives: unknown;
+          plot_directives: unknown;
+          style_directives: unknown;
+          retention_rules: unknown;
+          status: "draft" | "active" | "archived";
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          session_id: string;
+          title?: string;
+          persona_directives?: unknown;
+          plot_directives?: unknown;
+          style_directives?: unknown;
+          retention_rules?: unknown;
+          status?: "draft" | "active" | "archived";
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<{
+          title: string;
+          persona_directives: unknown;
+          plot_directives: unknown;
+          style_directives: unknown;
+          retention_rules: unknown;
+          status: "draft" | "active" | "archived";
         }>;
         Relationships: [];
       };

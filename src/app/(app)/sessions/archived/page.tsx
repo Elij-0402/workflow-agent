@@ -1,49 +1,46 @@
-import { BookOpen } from "lucide-react";
+import { Archive } from "lucide-react";
 import Link from "next/link";
 
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
 
-import { SessionsClient } from "./SessionsClient";
+import { SessionsClient } from "../SessionsClient";
 
-export default async function SessionsPage() {
+export default async function ArchivedSessionsPage() {
   const supabase = await createClient();
   const { data: sessions } = await supabase
     .from("sessions")
     .select("id, name, status, mode, archived_at, created_at, updated_at")
-    .is("archived_at", null)
-    .order("updated_at", { ascending: false });
+    .not("archived_at", "is", null)
+    .order("archived_at", { ascending: false });
 
   const list = sessions ?? [];
 
   return (
     <div className="app-page">
       <PageHeader
-        label="projects"
-        title="我的项目"
-        description="导入和分析过的所有项目都在这里。"
+        label="archive"
+        title="归档夹"
+        description="归档的项目仍可恢复；永久删除会同时移除分析、章节、变体。"
         action={
           <Button asChild variant="outline" size="sm">
-            <Link href="/sessions/archived">归档夹</Link>
+            <Link href="/sessions">返回项目列表</Link>
           </Button>
         }
       />
 
       {list.length > 0 ? (
-        <SessionsClient sessions={list} view="active" />
+        <SessionsClient sessions={list} view="archived" />
       ) : (
         <div className="surface-panel flex flex-col items-center justify-center gap-4 px-6 py-16 text-center">
-          <BookOpen className="h-12 w-12 text-primary/60" strokeWidth={1.5} aria-hidden />
+          <Archive className="h-12 w-12 text-primary/60" strokeWidth={1.5} aria-hidden />
           <h3 className="font-display text-[22px] italic leading-tight text-foreground">
-            还没有项目
+            归档夹是空的
           </h3>
           <p className="max-w-md text-[13.5px] leading-7 text-muted-foreground">
-            导入第一部小说后，所有分析进度、生成结果都会保留在这里。
+            在项目列表的卡片菜单选择「归档」后，项目会移到这里。
           </p>
-          <Button asChild>
-            <Link href="/upload">开始新项目</Link>
-          </Button>
         </div>
       )}
     </div>

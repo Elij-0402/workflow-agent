@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { getUserLLMClient } from "@/lib/llm/dispatch";
 import { isUserFixableLLMConfigMessage } from "@/lib/llm-config";
+import { composeBriefIntoPrompt } from "@/lib/prompts/brief-compose";
 import {
   GENERATE_FROM_BLUEPRINT_SYSTEM_PROMPT,
   buildGenerateFromBlueprintUserPrompt,
@@ -12,6 +13,7 @@ import { GENERATE_TITLE_FALLBACK, scopeToMaxTokens } from "@/lib/prompts/generat
 import { createClient } from "@/lib/supabase/server";
 import { countWords } from "@/lib/text/clean";
 import { GenerateConfigSchema, VariantResultSchema } from "@/lib/types";
+import { CreativeBriefSchema } from "@/lib/types/creative-brief";
 
 export const runtime = "nodejs";
 export const maxDuration = 300;
@@ -19,6 +21,7 @@ export const maxDuration = 300;
 const bodySchema = z.object({
   blueprintId: z.string().uuid(),
   config: GenerateConfigSchema,
+  briefId: z.string().uuid().optional(),
 });
 
 export async function POST(req: Request) {
@@ -46,16 +49,47 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "请先确认蓝图。" }, { status: 409 });
   }
 
+  let briefSection = "";
+  if (body.briefId) {
+    const { data: briefRow } = await supabase
+      .from("creative_briefs")
+      .select(
+        "id, session_id, title, persona_directives, plot_directives, style_directives, retention_rules",
+      )
+      .eq("id", body.briefId)
+      .eq("user_id", user.id)
+      .maybeSingle();
+    if (!briefRow) {
+      return NextResponse.json({ error: "未找到简报。" }, { status: 404 });
+    }
+    if (briefRow.session_id !== bp.session_id) {
+      return NextResponse.json({ error: "简报和蓝图不属于同一项目。" }, { status: 409 });
+    }
+    const briefParsed = CreativeBriefSchema.safeParse({
+      title: briefRow.title,
+      persona_directives: briefRow.persona_directives,
+      plot_directives: briefRow.plot_directives,
+      style_directives: briefRow.style_directives,
+      retention_rules: briefRow.retention_rules,
+    });
+    if (!briefParsed.success) {
+      return NextResponse.json({ error: "简报格式异常。" }, { status: 409 });
+    }
+    briefSection = composeBriefIntoPrompt(briefParsed.data);
+  }
+
   try {
     const llm = await getUserLLMClient(supabase);
+    const userPrompt = buildGenerateFromBlueprintUserPrompt({
+      blueprint: bp.sections,
+      config: body.config,
+    });
+    const finalPrompt = briefSection ? `${userPrompt}\n\n${briefSection}` : userPrompt;
     const { object } = await generateObject({
       model: llm.openai(llm.model),
       schema: VariantResultSchema,
       system: GENERATE_FROM_BLUEPRINT_SYSTEM_PROMPT,
-      prompt: buildGenerateFromBlueprintUserPrompt({
-        blueprint: bp.sections,
-        config: body.config,
-      }),
+      prompt: finalPrompt,
       temperature: llm.temperature,
       maxTokens: Math.min(scopeToMaxTokens(body.config.output_scope), llm.maxTokens),
     });
@@ -77,6 +111,8 @@ export async function POST(req: Request) {
         word_count: wordCount,
         llm_config_id: llm.configId,
         blueprint_id: bp.id,
+        brief_id: body.briefId ?? null,
+        scope: "full",
       })
       .select("id")
       .single();

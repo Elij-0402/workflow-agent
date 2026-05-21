@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { History, LayoutDashboard, Settings, Upload } from "lucide-react";
+import { GitCompare, History, LayoutDashboard, Settings, Sparkles, Upload } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -10,6 +10,8 @@ export const APP_NAV_ITEMS = [
   { href: "/dashboard", label: "工作台", token: "workspace", icon: LayoutDashboard },
   { href: "/upload", label: "新建任务", token: "import", icon: Upload },
   { href: "/sessions", label: "我的项目", token: "sessions", icon: History },
+  { href: "/compare", label: "多书比较", token: "compare", icon: GitCompare },
+  { href: "/studio", label: "创意工作室", token: "studio", icon: Sparkles },
   { href: "/settings", label: "设置", token: "config", icon: Settings },
 ] as const;
 

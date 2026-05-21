@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { ArrowRight, Plus, Settings2, Sparkles, Waypoints } from "lucide-react";
+import { ArrowRight, Loader2, Plus, Settings2, Sparkles, Waypoints } from "lucide-react";
 
+import { TokenTrendChart } from "@/components/dashboard/token-trend-chart";
 import { MetaRow } from "@/components/meta-row";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
@@ -19,6 +20,7 @@ export default async function DashboardPage() {
     supabase
       .from("sessions")
       .select("id, name, status, mode, created_at, updated_at")
+      .is("archived_at", null)
       .order("updated_at", { ascending: false })
       .limit(1),
   ]);
@@ -32,6 +34,30 @@ export default async function DashboardPage() {
       .eq("session_id", latestSession.id);
     latestVariantCount = count ?? 0;
   }
+
+  // M5: token trend (last 30 days) + recent variants + inflight tasks
+  const since = new Date(Date.now() - 30 * 86_400_000).toISOString();
+  const [{ data: tokenRows }, { data: recentVariants }, { data: inflight }] = await Promise.all([
+    supabase
+      .from("analyses")
+      .select("prompt_tokens, completion_tokens, created_at")
+      .gte("created_at", since),
+    supabase
+      .from("variants")
+      .select("id, title, session_id, scope, chapter_index, word_count, created_at")
+      .order("created_at", { ascending: false })
+      .limit(5),
+    supabase
+      .from("sessions")
+      .select("id, name, status, mode, updated_at")
+      .is("archived_at", null)
+      .in("status", ["analyzing", "generating"])
+      .order("updated_at", { ascending: false })
+      .limit(5),
+  ]);
+
+  const trend = buildTokenTrend(tokenRows ?? []);
+  const totalTokens = trend.reduce((sum, p) => sum + p.tokens, 0);
 
   const username = user?.email?.split("@")[0] ?? "创作者";
   const latestStatus = latestSession ? getSessionStatusMeta(latestSession.status) : null;
@@ -202,8 +228,122 @@ export default async function DashboardPage() {
           </section>
         </div>
       </section>
+
+      <section className="grid gap-5 xl:grid-cols-3">
+        <div className="surface-panel p-5">
+          <div className="flex items-baseline justify-between">
+            <p className="font-mono text-[10.5px] uppercase tracking-[0.14em] text-primary/85">
+              {"// token spend · 30d"}
+            </p>
+            <span className="font-mono text-[11px] text-foreground">
+              {totalTokens.toLocaleString("zh-CN")}
+            </span>
+          </div>
+          <h3 className="mt-2 font-display text-[18px] italic text-foreground">
+            最近 30 天 token 消耗
+          </h3>
+          <div className="mt-4">
+            {trend.some((p) => p.tokens > 0) ? (
+              <TokenTrendChart data={trend} />
+            ) : (
+              <p className="py-6 text-center text-[12.5px] text-muted-foreground">暂无消耗记录。</p>
+            )}
+          </div>
+        </div>
+
+        <div className="surface-panel p-5">
+          <p className="font-mono text-[10.5px] uppercase tracking-[0.14em] text-primary/85">
+            {"// recent variants"}
+          </p>
+          <h3 className="mt-2 font-display text-[18px] italic text-foreground">最近变体</h3>
+          <ul className="mt-4 space-y-2">
+            {(recentVariants ?? []).length === 0 ? (
+              <li className="text-[12.5px] text-muted-foreground">还没有生成过变体。</li>
+            ) : (
+              (recentVariants ?? []).map((v) => (
+                <li
+                  key={v.id}
+                  className="flex items-center justify-between gap-3 rounded-[3px] border border-border bg-background/40 px-3 py-2"
+                >
+                  <Link
+                    href={`/sessions/${v.session_id}`}
+                    className="min-w-0 flex-1 truncate text-[13px] text-foreground hover:text-primary"
+                  >
+                    {v.title || "（未命名）"}
+                  </Link>
+                  <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground/70">
+                    {v.scope === "outline"
+                      ? "outline"
+                      : v.scope === "chapter"
+                        ? `ch${v.chapter_index ?? "?"}`
+                        : "full"}
+                    {v.word_count ? ` · ${v.word_count.toLocaleString("zh-CN")} 字` : ""}
+                  </span>
+                </li>
+              ))
+            )}
+          </ul>
+        </div>
+
+        <div className="surface-panel p-5">
+          <p className="font-mono text-[10.5px] uppercase tracking-[0.14em] text-primary/85">
+            {"// inflight"}
+          </p>
+          <h3 className="mt-2 font-display text-[18px] italic text-foreground">进行中</h3>
+          <ul className="mt-4 space-y-2">
+            {(inflight ?? []).length === 0 ? (
+              <li className="text-[12.5px] text-muted-foreground">暂无进行中的任务。</li>
+            ) : (
+              (inflight ?? []).map((s) => (
+                <li
+                  key={s.id}
+                  className="flex items-center justify-between gap-3 rounded-[3px] border border-border bg-background/40 px-3 py-2"
+                >
+                  <Link
+                    href={s.mode === "dual" ? `/sessions/${s.id}/workbench` : `/sessions/${s.id}`}
+                    className="flex min-w-0 flex-1 items-center gap-2 text-[13px] text-foreground hover:text-primary"
+                  >
+                    <Loader2 className="h-3 w-3 shrink-0 animate-spin text-primary" />
+                    <span className="truncate">{s.name}</span>
+                  </Link>
+                  <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-primary/80">
+                    {s.status}
+                  </span>
+                </li>
+              ))
+            )}
+          </ul>
+        </div>
+      </section>
     </div>
   );
+}
+
+function buildTokenTrend(
+  rows: Array<{
+    prompt_tokens: number | null;
+    completion_tokens: number | null;
+    created_at: string;
+  }>,
+): Array<{ day: string; tokens: number }> {
+  const days = 30;
+  const buckets = new Map<string, number>();
+  const today = new Date();
+  today.setUTCHours(0, 0, 0, 0);
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(today.getTime() - i * 86_400_000);
+    buckets.set(d.toISOString().slice(0, 10), 0);
+  }
+  for (const r of rows) {
+    const key = r.created_at.slice(0, 10);
+    if (!buckets.has(key)) continue;
+    const tokens = (r.prompt_tokens ?? 0) + (r.completion_tokens ?? 0);
+    buckets.set(key, (buckets.get(key) ?? 0) + tokens);
+  }
+  return Array.from(buckets.entries()).map(([day, tokens]) => ({
+    day: day.slice(5),
+    tokens,
+  }));
 }
 
 function getSessionActionLabel(status: string, variantCount: number) {
