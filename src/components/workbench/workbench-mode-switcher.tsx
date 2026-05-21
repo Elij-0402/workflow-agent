@@ -2,10 +2,10 @@
 
 export type WorkbenchMode = "chapters" | "blueprint" | "variants";
 
-const MODES: Array<{ key: WorkbenchMode; label: string; token: string }> = [
-  { key: "chapters", label: "章节", token: "chapters" },
-  { key: "blueprint", label: "蓝图", token: "blueprint" },
-  { key: "variants", label: "变体", token: "variants" },
+const MODES: Array<{ key: WorkbenchMode; label: string }> = [
+  { key: "chapters", label: "章节" },
+  { key: "blueprint", label: "蓝图" },
+  { key: "variants", label: "变体" },
 ];
 
 export function WorkbenchModeSwitcher({
@@ -38,7 +38,7 @@ export function WorkbenchModeSwitcher({
             aria-label={`切换至 ${m.label} 模式`}
             aria-selected={active}
           >
-            [ {m.token} ]
+            {m.label}
           </button>
         );
       })}

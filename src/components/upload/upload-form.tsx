@@ -122,9 +122,7 @@ export function UploadForm({
             </p>
           </div>
 
-          <div className="frame-corners relative rounded-[3px] border border-dashed border-border bg-background/40 p-6">
-            <span className="frame-tr" aria-hidden />
-            <span className="frame-bl" aria-hidden />
+          <div className="relative rounded-[3px] border border-dashed border-border bg-background/40 p-6">
             <input
               ref={fileInputRef}
               id="file"

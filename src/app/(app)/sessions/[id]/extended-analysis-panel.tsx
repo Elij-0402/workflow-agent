@@ -151,7 +151,7 @@ export function ExtendedAnalysisPanel({ bookId, analyses, llmConfigured, disable
                     onClick={() => {
                       if (item.state === "done" && typeof window !== "undefined") {
                         const ok = window.confirm(
-                          `重新分析「${DIMENSION_LABELS[dimension]}」会再次调用模型并消耗你的 BYOK 配额。继续？`,
+                          `重新分析「${DIMENSION_LABELS[dimension]}」将消耗 BYOK 配额。继续？`,
                         );
                         if (!ok) return;
                       }

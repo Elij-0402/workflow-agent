@@ -65,8 +65,8 @@ function getDimensionSummary(dimension: LegacyAnalysisDimension, item: Dimension
 
   if (item.state === "error") {
     return item.result
-      ? "本次重试失败，当前仍保留上一次结果。"
-      : "当前维度分析失败，可以单独重试。";
+      ? "重试失败，保留上次结果"
+      : "本维度分析失败，可单独重试";
   }
 
   if (item.state === "done") {
@@ -270,7 +270,7 @@ export function AnalysisPanel({ sessionId, analyses, llmConfigured, sessionStatu
                     onClick={() => {
                       if (item.state === "done" && typeof window !== "undefined") {
                         const ok = window.confirm(
-                          `重新分析「${DIMENSION_LABELS[dimension]}」会再次调用模型并消耗你的 BYOK 配额。继续？`,
+                          `重新分析「${DIMENSION_LABELS[dimension]}」将消耗 BYOK 配额。继续？`,
                         );
                         if (!ok) return;
                       }

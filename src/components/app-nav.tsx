@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { GitCompare, History, LayoutDashboard, Settings, Sparkles, Upload } from "lucide-react";
+import { GitCompare, History, LayoutDashboard, Palette, Settings, Sparkles, Upload } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -20,13 +20,14 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/studio", label: "生成实验台", icon: Sparkles },
 ];
 
-const FOOTER_ITEM: NavItem = {
-  href: "/settings",
-  label: "设置",
-  icon: Settings,
-};
+const FOOTER_ITEMS: NavItem[] = [
+  ...(process.env.NODE_ENV !== "production"
+    ? [{ href: "/design-system", label: "设计系统", icon: Palette }]
+    : []),
+  { href: "/settings", label: "设置", icon: Settings },
+];
 
-export const APP_NAV_ITEMS: NavItem[] = [...NAV_ITEMS, FOOTER_ITEM];
+export const APP_NAV_ITEMS: NavItem[] = [...NAV_ITEMS, ...FOOTER_ITEMS];
 
 type AppNavProps = {
   onNavigate?: () => void;
@@ -41,8 +42,10 @@ export function AppNav({ onNavigate, className }: AppNavProps) {
       {NAV_ITEMS.map((item) => (
         <NavLink key={item.href} item={item} pathname={pathname} onNavigate={onNavigate} />
       ))}
-      <div className="mt-2 border-t border-dashed border-border/40 pt-2">
-        <NavLink item={FOOTER_ITEM} pathname={pathname} onNavigate={onNavigate} />
+      <div className="mt-2 flex flex-col gap-0.5 border-t border-dashed border-border/40 pt-2">
+        {FOOTER_ITEMS.map((item) => (
+          <NavLink key={item.href} item={item} pathname={pathname} onNavigate={onNavigate} />
+        ))}
       </div>
     </nav>
   );

@@ -141,7 +141,7 @@ export function VariantList({ variants }: VariantListProps) {
           <div className="grid gap-0 xl:grid-cols-[minmax(0,1fr)_280px]">
             <ScrollArea className="h-[620px]">
               <div className="px-7 py-7">
-                <article className="reading-prose italic-cap max-w-[74ch] whitespace-pre-wrap">
+                <article className="reading-prose max-w-[74ch] whitespace-pre-wrap">
                   {activeVariant.content}
                 </article>
               </div>

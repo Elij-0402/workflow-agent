@@ -142,7 +142,7 @@ export function ChapterCard({
 
       {brief && open ? (
         <div className="ml-7 mt-3 space-y-3 text-[12.5px] text-muted-foreground">
-          <p className="italic-cap leading-7">{brief.summary}</p>
+          <p className="leading-7">{brief.summary}</p>
           {brief.blueprint_candidates.length === 0 ? (
             <p className="font-mono text-[10.5px] uppercase tracking-[0.08em] text-muted-foreground/70">
               {"// no auto candidates"}

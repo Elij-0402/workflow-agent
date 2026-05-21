@@ -54,19 +54,19 @@ export function GeneratePanel({
   const isReadyStatus = sessionStatus === "analyzed" || sessionStatus === "done";
   const blockReason = useMemo(() => {
     if (!llmConfigured) {
-      return "开始生成前，先完成模型设置。";
+      return "需先配置模型";
     }
 
     if (!hasCompleteAnalysis) {
-      return "请先完成三项分析。";
+      return "完成三项分析后可生成";
     }
 
     if (sessionStatus === "generating") {
-      return "当前正在生成，请稍候刷新。";
+      return "正在生成，稍后刷新";
     }
 
     if (!isReadyStatus) {
-      return "当前任务还不能开始生成。";
+      return "任务暂不可生成";
     }
 
     return null;
@@ -89,7 +89,7 @@ export function GeneratePanel({
   async function onSubmit(values: GenerateConfig) {
     if (variantCount > 0 && typeof window !== "undefined") {
       const ok = window.confirm(
-        `再生成一个版本会再次调用模型并消耗你的 BYOK 配额。当前已有 ${variantCount} 个版本，继续？`,
+        `生成新版本将消耗 BYOK 配额。已有 ${variantCount} 个版本，继续？`,
       );
       if (!ok) return;
     }

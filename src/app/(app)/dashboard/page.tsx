@@ -33,7 +33,7 @@ export default async function DashboardPage() {
         <div className="surface-panel max-w-md p-8 text-center">
           <Settings2 className="mx-auto h-10 w-10 text-primary/70" strokeWidth={1.5} aria-hidden />
           <h1 className="mt-5 text-[22px] font-medium leading-tight text-foreground">
-            先配置你的模型
+            配置模型后可使用
           </h1>
           <p className="mt-3 text-[13.5px] leading-7 text-muted-foreground">
             连接 OpenAI、DeepSeek 或自定义 OpenAI-compatible 接口后，就可以开始导入小说并分析。

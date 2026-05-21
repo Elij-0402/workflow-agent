@@ -125,11 +125,11 @@ export default async function SessionDetailPage({ params }: SessionPageProps) {
   const hasVariants = safeVariants.length > 0;
   const currentStepDescription = !hasCompleteAnalysis
     ? Boolean(llmConfig)
-      ? "先完成三项分析，再进入生成。"
-      : "当前还不能开始分析，先去补上模型设置。"
+      ? "完成三项分析后可生成"
+      : "需先配置模型"
     : hasVariants
-      ? "结果已经生成完成。你可以继续查看，或再生成一个版本。"
-      : "分析已经准备好，下一步直接生成结果。";
+      ? "结果已生成，可继续查看或再生成一个版本"
+      : "分析已准备好，可直接生成结果";
   const stageItems = getStageItems({
     hasCompleteAnalysis,
     variantCount: safeVariants.length,

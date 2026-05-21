@@ -100,9 +100,6 @@ export function LoginForm({ redirectPath }: { redirectPath: string }) {
           />
         </div>
 
-        <p className="font-mono text-[10.5px] uppercase tracking-[0.14em] text-muted-foreground/60">
-          ┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
-        </p>
       </section>
 
       <div className="surface-panel relative bg-card p-7">
@@ -125,7 +122,7 @@ export function LoginForm({ redirectPath }: { redirectPath: string }) {
             disabled={pending}
             className="terminal-tab"
           >
-            [ login ]
+            登录
           </button>
           <button
             type="button"
@@ -134,7 +131,7 @@ export function LoginForm({ redirectPath }: { redirectPath: string }) {
             disabled={pending}
             className="terminal-tab"
           >
-            [ register ]
+            注册
           </button>
         </div>
 
