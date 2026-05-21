@@ -10,16 +10,11 @@ type SP = Promise<{
   position?: string;
 }>;
 
-export default async function UploadPage({
-  searchParams,
-}: {
-  searchParams: SP;
-}) {
+export default async function UploadPage({ searchParams }: { searchParams: SP }) {
   const sp = await searchParams;
   const mode = sp.mode === "dual" ? "dual" : "single";
   const sessionId = sp.sessionId ?? undefined;
-  const position =
-    sp.position === "1" ? 1 : sp.position === "0" ? 0 : undefined;
+  const position = sp.position === "1" ? 1 : sp.position === "0" ? 0 : undefined;
   const addingSecondBook = Boolean(sessionId);
   const dualFreshStart = mode === "dual" && !addingSecondBook;
 
@@ -27,13 +22,7 @@ export default async function UploadPage({
     <div className="app-page">
       <PageHeader
         label="import"
-        title={
-          addingSecondBook
-            ? "上传第 2 本书"
-            : dualFreshStart
-              ? "开始双书任务"
-              : "开始新任务"
-        }
+        title={addingSecondBook ? "上传第 2 本书" : dualFreshStart ? "开始双书任务" : "开始新任务"}
         description={
           addingSecondBook
             ? "把第 2 本书追加到当前双书任务。上传完成后会回到工作台。"
@@ -42,9 +31,7 @@ export default async function UploadPage({
               : "导入一份小说文本，系统会创建新的研究任务，并把清洗后的内容接入后续分析与生成流程。"
         }
       />
-      {addingSecondBook || dualFreshStart ? null : (
-        <ModePicker current={mode} />
-      )}
+      {addingSecondBook || dualFreshStart ? null : <ModePicker current={mode} />}
       {dualFreshStart ? (
         <DualUploadForm />
       ) : (
@@ -72,21 +59,9 @@ function ModePicker({ current }: { current: "single" | "dual" }) {
   );
 }
 
-function Tab({
-  href,
-  active,
-  label,
-}: {
-  href: string;
-  active: boolean;
-  label: string;
-}) {
+function Tab({ href, active, label }: { href: string; active: boolean; label: string }) {
   return (
-    <Link
-      href={href}
-      data-active={active}
-      className="terminal-tab"
-    >
+    <Link href={href} data-active={active} className="terminal-tab">
       [ {label} ]
     </Link>
   );

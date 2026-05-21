@@ -1,11 +1,11 @@
 export type ChapterAnalyzeFn = (
-  chapterId: string
+  chapterId: string,
 ) => Promise<{ ok: true } | { ok: false; error: string }>;
 
 export type ChapterBatchProgress = (
   chapterId: string,
   status: "running" | "done" | "error",
-  error?: string
+  error?: string,
 ) => void;
 
 export async function runBatch(opts: {
@@ -41,8 +41,6 @@ export async function runBatch(opts: {
     }
   }
 
-  await Promise.all(
-    Array.from({ length: Math.min(max, opts.chapterIds.length) }, worker)
-  );
+  await Promise.all(Array.from({ length: Math.min(max, opts.chapterIds.length) }, worker));
   return { failures };
 }

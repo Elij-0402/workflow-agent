@@ -33,18 +33,12 @@ export function PipelineBar(p: Props) {
     <div className="surface-panel flex flex-wrap items-center gap-x-1 gap-y-1 px-4 py-2.5 font-mono text-[11px] uppercase tracking-[0.08em]">
       {steps.map((s, i) => (
         <span key={s.key} className="inline-flex items-center gap-1.5">
-          {i > 0 ? (
-            <span className="px-1 text-primary/30">─┄─</span>
-          ) : null}
+          {i > 0 ? <span className="px-1 text-primary/30">─┄─</span> : null}
           <span className={s.done ? "text-flash" : "text-muted-foreground/55"}>
             {s.done ? "●" : "○"}
           </span>
-          <span className={s.done ? "text-flash" : "text-muted-foreground/70"}>
-            {s.no}
-          </span>
-          <span className={s.done ? "text-foreground" : "text-muted-foreground"}>
-            {s.label}
-          </span>
+          <span className={s.done ? "text-flash" : "text-muted-foreground/70"}>{s.no}</span>
+          <span className={s.done ? "text-foreground" : "text-muted-foreground"}>{s.label}</span>
         </span>
       ))}
     </div>

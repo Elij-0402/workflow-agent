@@ -10,19 +10,14 @@ export type DecodedText = {
 
 function countReplacementRatio(text: string) {
   if (text.length === 0) return 0;
-  const replacements = [...text].filter(
-    (char) => char === UTF8_REPLACEMENT_CHAR
-  ).length;
+  const replacements = [...text].filter((char) => char === UTF8_REPLACEMENT_CHAR).length;
   return replacements / text.length;
 }
 
 export function decodeNovelBuffer(input: Uint8Array): DecodedText {
   const buffer = Buffer.from(input);
   const hasUtf8Bom =
-    buffer.length >= 3 &&
-    buffer[0] === 0xef &&
-    buffer[1] === 0xbb &&
-    buffer[2] === 0xbf;
+    buffer.length >= 3 && buffer[0] === 0xef && buffer[1] === 0xbb && buffer[2] === 0xbf;
 
   if (hasUtf8Bom) {
     return {

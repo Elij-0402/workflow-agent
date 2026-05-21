@@ -8,11 +8,7 @@ import { UserMenu } from "@/components/user-menu";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
 
-export default async function AppLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
   const {
     data: { user },
@@ -35,20 +31,17 @@ export default async function AppLayout({
               <MobileNav />
               <div className="min-w-0">
                 <div className="truncate font-mono text-[10.5px] uppercase tracking-[0.16em] text-muted-foreground">
-                  {"// 多源小说分析与融合创作"}</div>
-                <div className="mt-1 truncate font-display italic text-[14px] leading-none text-foreground">
-                  signed in as <span className="text-primary">{user.email?.split("@")[0] ?? "anonymous"}</span>
+                  {"// 多源小说分析与融合创作"}
+                </div>
+                <div className="mt-1 truncate font-display text-[14px] italic leading-none text-foreground">
+                  signed in as{" "}
+                  <span className="text-primary">{user.email?.split("@")[0] ?? "anonymous"}</span>
                 </div>
               </div>
             </div>
 
             <div className="flex items-center gap-3">
-              <Button
-                asChild
-                variant="outline"
-                size="sm"
-                className="hidden sm:inline-flex"
-              >
+              <Button asChild variant="outline" size="sm" className="hidden sm:inline-flex">
                 <Link href="/upload">
                   <Plus aria-hidden="true" />
                   新建任务

@@ -8,10 +8,7 @@ import {
   GENERATE_FROM_BLUEPRINT_SYSTEM_PROMPT,
   buildGenerateFromBlueprintUserPrompt,
 } from "@/lib/prompts/generate-from-blueprint";
-import {
-  GENERATE_TITLE_FALLBACK,
-  scopeToMaxTokens,
-} from "@/lib/prompts/generate";
+import { GENERATE_TITLE_FALLBACK, scopeToMaxTokens } from "@/lib/prompts/generate";
 import { createClient } from "@/lib/supabase/server";
 import { countWords } from "@/lib/text/clean";
 import { GenerateConfigSchema, VariantResultSchema } from "@/lib/types";
@@ -100,7 +97,7 @@ export async function POST(req: Request) {
         : "生成失败，请稍后重试。";
     return NextResponse.json(
       { error: msg },
-      { status: msg === "生成失败，请稍后重试。" ? 502 : 409 }
+      { status: msg === "生成失败，请稍后重试。" ? 502 : 409 },
     );
   }
 }

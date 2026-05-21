@@ -155,7 +155,7 @@ export function BlueprintEditor({
   }, [blueprint, updatedAt, blueprintId]);
 
   return (
-    <div className="surface-panel flex flex-1 min-h-0 flex-col">
+    <div className="surface-panel flex min-h-0 flex-1 flex-col">
       <div className="flex items-center justify-between gap-3 border-b border-dashed border-border/60 px-4 py-2.5">
         <nav className="flex flex-wrap gap-0.5">
           {TABS.map((t) => (
@@ -194,10 +194,7 @@ export function BlueprintEditor({
               </Button>
             </>
           ) : (
-            <Button
-              size="sm"
-              onClick={() => void confirm()}
-            >
+            <Button size="sm" onClick={() => void confirm()}>
               确认蓝图
             </Button>
           )}
@@ -208,9 +205,7 @@ export function BlueprintEditor({
           <ViewpointEditor
             bp={bp}
             disabled={disabled}
-            onSave={(patch) =>
-              void save({ ...bp, viewpoint: { ...bp.viewpoint, ...patch } })
-            }
+            onSave={(patch) => void save({ ...bp, viewpoint: { ...bp.viewpoint, ...patch } })}
           />
         ) : active === "characters" ? (
           <BlueprintCardList
@@ -245,7 +240,7 @@ export function BlueprintEditor({
                   void save({
                     ...bp,
                     characters: bp.characters.map((r) =>
-                      r.id === row.id ? { ...r, ...patch } : r
+                      r.id === row.id ? { ...r, ...patch } : r,
                     ),
                   })
                 }
@@ -291,7 +286,7 @@ export function BlueprintEditor({
                   void save({
                     ...bp,
                     relationships: bp.relationships.map((r) =>
-                      r.id === row.id ? { ...r, ...patch } : r
+                      r.id === row.id ? { ...r, ...patch } : r,
                     ),
                   })
                 }
@@ -335,7 +330,7 @@ export function BlueprintEditor({
                   void save({
                     ...bp,
                     world_rules: bp.world_rules.map((r) =>
-                      r.id === row.id ? { ...r, ...patch } : r
+                      r.id === row.id ? { ...r, ...patch } : r,
                     ),
                   })
                 }
@@ -378,9 +373,7 @@ export function BlueprintEditor({
                 onChange={(patch) =>
                   void save({
                     ...bp,
-                    conflicts: bp.conflicts.map((r) =>
-                      r.id === row.id ? { ...r, ...patch } : r
-                    ),
+                    conflicts: bp.conflicts.map((r) => (r.id === row.id ? { ...r, ...patch } : r)),
                   })
                 }
                 onDelete={() =>
@@ -430,16 +423,14 @@ export function BlueprintEditor({
                   void save({
                     ...bp,
                     plot_beats: bp.plot_beats.map((r) =>
-                      r.id === row.id ? { ...r, ...patch } : r
+                      r.id === row.id ? { ...r, ...patch } : r,
                     ),
                   })
                 }
                 onDelete={() =>
                   void save({
                     ...bp,
-                    plot_beats: renumberBeats(
-                      bp.plot_beats.filter((r) => r.id !== row.id)
-                    ),
+                    plot_beats: renumberBeats(bp.plot_beats.filter((r) => r.id !== row.id)),
                   })
                 }
               />
@@ -474,9 +465,7 @@ export function BlueprintEditor({
                 onChange={(patch) =>
                   void save({
                     ...bp,
-                    themes: bp.themes.map((r) =>
-                      r.id === row.id ? { ...r, ...patch } : r
-                    ),
+                    themes: bp.themes.map((r) => (r.id === row.id ? { ...r, ...patch } : r)),
                   })
                 }
                 onDelete={() =>

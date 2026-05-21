@@ -7,6 +7,7 @@ blueprint → 基于蓝图的变体生成 → 三层 variant diff）。
 ## 功能
 
 ### 单书模式（v0.1，沿用）
+
 - 邮箱密码注册 / 登录
 - BYOK：每个用户一套 DeepSeek / OpenAI-compatible API Key + Base URL（不支持 Anthropic 原生接口）
 - 上传 `.txt` 小说（≤ 50 MB），浏览器直传私有存储后由服务端清洗
@@ -14,6 +15,7 @@ blueprint → 基于蓝图的变体生成 → 三层 variant diff）。
 - 流式生成变体小说
 
 ### 双书模式（v0.2 新增）
+
 - 上传两本小说（`/upload?mode=dual`），自动切章后并发执行 chapter-brief 分析
 - 选取候选片段合成 book synthesis
 - 编辑结构化 blueprint（meta / structure / paragraph），通过 Zod 强校验

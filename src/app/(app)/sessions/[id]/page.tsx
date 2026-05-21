@@ -90,15 +90,19 @@ export default async function SessionDetailPage({ params }: SessionPageProps) {
   // misbehaving model) are dropped here so the UI treats them as "not yet
   // analyzed" — the user can re-run the dimension cleanly instead of seeing
   // half-rendered or "undefined" copy from a stale shape.
-  const safeAnalyses = ((analyses ?? []).filter((item): item is {
-    dimension: LegacyAnalysisDimension;
-    result: unknown;
-  } => {
-    if (!item.dimension || !item.result) return false;
-    const config = ANALYSIS_DIMENSION_CONFIG[item.dimension as LegacyAnalysisDimension];
-    if (!config) return false;
-    return config.schema.safeParse(item.result).success;
-  }));
+  const safeAnalyses = (analyses ?? []).filter(
+    (
+      item,
+    ): item is {
+      dimension: LegacyAnalysisDimension;
+      result: unknown;
+    } => {
+      if (!item.dimension || !item.result) return false;
+      const config = ANALYSIS_DIMENSION_CONFIG[item.dimension as LegacyAnalysisDimension];
+      if (!config) return false;
+      return config.schema.safeParse(item.result).success;
+    },
+  );
   const safeVariants = (variants ?? []) as Array<
     Pick<VariantRow, "id" | "title" | "config" | "content" | "word_count" | "created_at">
   >;
@@ -157,7 +161,7 @@ export default async function SessionDetailPage({ params }: SessionPageProps) {
           <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_300px]">
             <div>
               <p className="eyebrow-label">overview</p>
-              <h2 className="mt-2 font-display italic text-[24px] leading-tight text-foreground">
+              <h2 className="mt-2 font-display text-[24px] italic leading-tight text-foreground">
                 任务概览
               </h2>
               <p className="mt-3 max-w-3xl text-[13.5px] leading-7 text-muted-foreground">
@@ -166,7 +170,7 @@ export default async function SessionDetailPage({ params }: SessionPageProps) {
             </div>
             <div className="surface-subtle p-4">
               <p className="data-label">{"// current state"}</p>
-              <p className="mt-2 font-display italic text-[18px] text-foreground">
+              <p className="mt-2 font-display text-[18px] italic text-foreground">
                 {getStageSummary(hasCompleteAnalysis, hasVariants)}
               </p>
               <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
@@ -225,9 +229,7 @@ function getStageItems({
     {
       key: "analysis",
       label: "完成分析",
-      description: hasCompleteAnalysis
-        ? "三项分析已经准备好。"
-        : "先完成世界观、人物和叙事分析。",
+      description: hasCompleteAnalysis ? "三项分析已经准备好。" : "先完成世界观、人物和叙事分析。",
       state: hasCompleteAnalysis ? "done" : "current",
     },
     {

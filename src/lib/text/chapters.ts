@@ -62,17 +62,12 @@ export function detectChapters(text: string): ChapterMeta[] {
 
 type ExpandOptions = { fallbackChunkChars?: number };
 
-export function expandToChapters(
-  text: string,
-  options: ExpandOptions = {}
-): ChapterMeta[] {
+export function expandToChapters(text: string, options: ExpandOptions = {}): ChapterMeta[] {
   const chunkSize = options.fallbackChunkChars ?? 5000;
   const detected = detectChapters(text);
   if (detected.length > 0) return detected;
   if (text.length === 0) {
-    return [
-      { index: 1, title: "块 #1", startChar: 0, endChar: 0, source: "length-chunk" },
-    ];
+    return [{ index: 1, title: "块 #1", startChar: 0, endChar: 0, source: "length-chunk" }];
   }
   const chunks: ChapterMeta[] = [];
   for (let i = 0, cursor = 0; cursor < text.length; i += 1) {

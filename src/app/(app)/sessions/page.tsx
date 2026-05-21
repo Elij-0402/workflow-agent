@@ -35,7 +35,7 @@ export default async function SessionsPage() {
       ) : (
         <div className="surface-panel flex flex-col items-center justify-center gap-4 px-6 py-16 text-center">
           <BookOpen className="h-12 w-12 text-primary/60" strokeWidth={1.5} aria-hidden />
-          <h3 className="font-display italic text-[22px] leading-tight text-foreground">
+          <h3 className="font-display text-[22px] italic leading-tight text-foreground">
             还没有项目
           </h3>
           <p className="max-w-md text-[13.5px] leading-7 text-muted-foreground">

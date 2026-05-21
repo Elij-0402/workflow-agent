@@ -24,7 +24,7 @@ export function VariantList({ variants }: VariantListProps) {
 
   const activeVariant = useMemo(
     () => variants.find((variant) => variant.id === activeId) ?? variants[0],
-    [activeId, variants]
+    [activeId, variants],
   );
 
   if (variants.length === 0 || !activeVariant) {
@@ -35,7 +35,7 @@ export function VariantList({ variants }: VariantListProps) {
     <section className="space-y-5">
       <div>
         <p className="eyebrow-label">results</p>
-        <h2 className="mt-2 font-display italic text-[28px] leading-[1.05] text-foreground">
+        <h2 className="mt-2 font-display text-[28px] italic leading-[1.05] text-foreground">
           已生成结果
         </h2>
         <p className="mt-2 text-[13.5px] leading-7 text-muted-foreground">
@@ -68,14 +68,17 @@ export function VariantList({ variants }: VariantListProps) {
                     }`}
                   >
                     {active ? (
-                      <span className="absolute left-0 top-3 bottom-3 w-[2px] bg-primary" aria-hidden />
+                      <span
+                        className="absolute bottom-3 left-0 top-3 w-[2px] bg-primary"
+                        aria-hidden
+                      />
                     ) : null}
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0 flex-1">
                         <p className="font-mono text-[10.5px] uppercase tracking-[0.10em] text-primary/80">
                           {versionTag}
                         </p>
-                        <p className="mt-1 truncate font-display italic text-[16px] text-foreground">
+                        <p className="mt-1 truncate font-display text-[16px] italic text-foreground">
                           {variant.title}
                         </p>
                         <p className="mt-1 font-mono text-[10.5px] uppercase tracking-[0.08em] text-muted-foreground">
@@ -96,7 +99,7 @@ export function VariantList({ variants }: VariantListProps) {
                       </span>
                     </div>
 
-                    <p className="text-[12.5px] leading-6 text-muted-foreground line-clamp-3">
+                    <p className="line-clamp-3 text-[12.5px] leading-6 text-muted-foreground">
                       {preview || "暂无正文内容。"}
                     </p>
                   </button>
@@ -111,12 +114,18 @@ export function VariantList({ variants }: VariantListProps) {
             <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
               <div className="min-w-0 flex-1">
                 <p className="eyebrow-label">reader</p>
-                <h3 className="mt-1.5 font-display italic text-[24px] leading-tight text-foreground">
+                <h3 className="mt-1.5 font-display text-[24px] italic leading-tight text-foreground">
                   {activeVariant.title}
                 </h3>
                 <div className="mt-3 flex flex-wrap gap-1.5 font-mono text-[10px] uppercase tracking-[0.06em] text-muted-foreground">
-                  <ReadingBadge icon={FileText} label={OUTPUT_SCOPE_LABELS[activeVariant.config.output_scope]} />
-                  <ReadingBadge icon={Sparkles} label={STRATEGY_LABELS[activeVariant.config.strategy]} />
+                  <ReadingBadge
+                    icon={FileText}
+                    label={OUTPUT_SCOPE_LABELS[activeVariant.config.output_scope]}
+                  />
+                  <ReadingBadge
+                    icon={Sparkles}
+                    label={STRATEGY_LABELS[activeVariant.config.strategy]}
+                  />
                   <ReadingBadge label={`innov ${activeVariant.config.innovation}`} />
                   <ReadingBadge label={VIEWPOINT_LABELS[activeVariant.config.viewpoint]} />
                   <ReadingBadge label={STYLE_LABELS[activeVariant.config.style]} />

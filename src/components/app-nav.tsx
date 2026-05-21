@@ -34,15 +34,13 @@ export function AppNav({ onNavigate, className }: AppNavProps) {
             aria-current={active ? "page" : undefined}
             className={cn(
               "group relative flex min-w-0 items-center gap-3 px-3 py-2.5 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary/40",
-              active
-                ? "text-foreground"
-                : "text-muted-foreground hover:text-foreground"
+              active ? "text-foreground" : "text-muted-foreground hover:text-foreground",
             )}
           >
             <span
               className={cn(
-                "absolute left-0 top-2 bottom-2 w-[2px] transition-all",
-                active ? "bg-primary" : "bg-transparent group-hover:bg-primary/30"
+                "absolute bottom-2 left-0 top-2 w-[2px] transition-all",
+                active ? "bg-primary" : "bg-transparent group-hover:bg-primary/30",
               )}
               aria-hidden="true"
             />
@@ -50,7 +48,7 @@ export function AppNav({ onNavigate, className }: AppNavProps) {
               aria-hidden="true"
               className={cn(
                 "h-4 w-4 shrink-0 transition-colors",
-                active ? "text-primary" : "text-muted-foreground/70 group-hover:text-foreground"
+                active ? "text-primary" : "text-muted-foreground/70 group-hover:text-foreground",
               )}
               strokeWidth={1.5}
             />
@@ -59,7 +57,7 @@ export function AppNav({ onNavigate, className }: AppNavProps) {
               <span
                 className={cn(
                   "ml-auto truncate font-mono text-[10px] uppercase tracking-[0.10em]",
-                  active ? "text-primary/80" : "text-muted-foreground/50"
+                  active ? "text-primary/80" : "text-muted-foreground/50",
                 )}
               >
                 {token}

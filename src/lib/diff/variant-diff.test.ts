@@ -1,12 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import {
-  diffMeta,
-  diffParagraphs,
-  diffStructure,
-  splitParagraphs,
-} from "./variant-diff";
+import { diffMeta, diffParagraphs, diffStructure, splitParagraphs } from "./variant-diff";
 
 test("splitParagraphs splits on blank lines and trims", () => {
   const out = splitParagraphs("一段。\n\n二段。\n  \n三段。");
@@ -21,7 +16,7 @@ test("splitParagraphs filters empty trailing chunks", () => {
 test("diffMeta marks per-field differences", () => {
   const d = diffMeta(
     { title: "A", wordCount: 100, chapters: 1, config: { strategy: "balanced" } },
-    { title: "B", wordCount: 100, chapters: 2, config: { strategy: "a-dominant" } }
+    { title: "B", wordCount: 100, chapters: 2, config: { strategy: "a-dominant" } },
   );
   assert.equal(d.title.same, false);
   assert.equal(d.wordCount.same, true);

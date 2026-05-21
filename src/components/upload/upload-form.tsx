@@ -114,7 +114,7 @@ export function UploadForm({
         <div className="flex flex-col gap-6">
           <div>
             <p className="eyebrow-label">source text</p>
-            <h2 className="mt-2 font-display italic text-[24px] leading-[1.1] text-foreground">
+            <h2 className="mt-2 font-display text-[24px] italic leading-[1.1] text-foreground">
               选择小说文本
             </h2>
             <p className="mt-2 text-[13.5px] leading-7 text-muted-foreground">
@@ -192,8 +192,12 @@ export function UploadForm({
                 </div>
               ) : (
                 <div className="rounded-[2px] border border-dashed border-border/60 bg-background/30 p-8 text-center">
-                  <UploadCloud className="mx-auto h-10 w-10 text-primary/50" strokeWidth={1.5} aria-hidden />
-                  <p className="mt-3 font-display italic text-[18px] leading-tight text-foreground">
+                  <UploadCloud
+                    className="mx-auto h-10 w-10 text-primary/50"
+                    strokeWidth={1.5}
+                    aria-hidden
+                  />
+                  <p className="mt-3 font-display text-[18px] italic leading-tight text-foreground">
                     将 .txt 文件拖到此处
                   </p>
                   <p className="mt-2 text-[13px] leading-6 text-muted-foreground">
@@ -214,10 +218,7 @@ export function UploadForm({
             <p className="font-mono text-[10.5px] uppercase tracking-[0.10em] text-muted-foreground">
               {filename ? "// file ready — start when ready" : "// select file first"}
             </p>
-            <Button
-              type="submit"
-              disabled={pending}
-            >
+            <Button type="submit" disabled={pending}>
               {pending ? (
                 <>
                   <Loader2 className="animate-spin" />
@@ -242,7 +243,11 @@ export function UploadForm({
             onClick={() => setHelpOpen((current) => !current)}
             aria-expanded={helpOpen}
           >
-            {helpOpen ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+            {helpOpen ? (
+              <ChevronUp className="h-3.5 w-3.5" />
+            ) : (
+              <ChevronDown className="h-3.5 w-3.5" />
+            )}
             {"// help · file requirements"}
           </button>
 
@@ -279,9 +284,7 @@ export function UploadForm({
 function InfoStat({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-primary/85">
-        {label}
-      </p>
+      <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-primary/85">{label}</p>
       <p className="mt-1 font-mono text-[12.5px] text-foreground">{value}</p>
     </div>
   );

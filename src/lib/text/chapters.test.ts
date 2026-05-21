@@ -21,14 +21,7 @@ test("detectChapters: 序章/楔子/番外 are recognized", () => {
 });
 
 test("detectChapters: 第X节/折/部/篇 variants", () => {
-  const text = [
-    "第一节 开端",
-    "...",
-    "第二折 中段",
-    "...",
-    "第三部 终章",
-    "...",
-  ].join("\n");
+  const text = ["第一节 开端", "...", "第二折 中段", "...", "第三部 终章", "..."].join("\n");
 
   const chapters = detectChapters(text);
   assert.equal(chapters.length, 3);
@@ -41,16 +34,7 @@ test("detectChapters: 正文 N variant", () => {
 });
 
 test("detectChapters: numeric-only weak signal accepted when ≥3 in a row with blank surroundings", () => {
-  const text = [
-    "001 启程",
-    "...",
-    "",
-    "002 风雪",
-    "...",
-    "",
-    "003 抵达",
-    "...",
-  ].join("\n");
+  const text = ["001 启程", "...", "", "002 风雪", "...", "", "003 抵达", "..."].join("\n");
   const chapters = detectChapters(text);
   assert.equal(chapters.length, 3);
   assert.equal(chapters[0].title, "001 启程");

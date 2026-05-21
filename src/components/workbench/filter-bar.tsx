@@ -14,13 +14,13 @@ type Props = {
 
 export function FilterBar({ options, value, onChange }: Props) {
   const hasFilter =
-    value.characters.length + value.conflicts.length > 0 ||
-    value.themeKeyword.trim().length > 0;
+    value.characters.length + value.conflicts.length > 0 || value.themeKeyword.trim().length > 0;
 
   return (
     <div className="flex flex-wrap items-center gap-2 border-b border-dashed border-border/60 px-3 py-2 text-[12px]">
       <span className="font-mono text-[10.5px] uppercase tracking-[0.12em] text-primary/80">
-        {"// filter"}</span>
+        {"// filter"}
+      </span>
       <Multi
         label="characters"
         zh="人物"
@@ -85,7 +85,8 @@ function Multi({
         </p>
         {all.length === 0 ? (
           <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
-            {"// no options"}</p>
+            {"// no options"}
+          </p>
         ) : null}
         {all.map((opt) => {
           const checked = selected.includes(opt);
@@ -100,9 +101,7 @@ function Multi({
                 className="accent-primary"
                 onChange={(e) =>
                   onChange(
-                    e.target.checked
-                      ? [...selected, opt]
-                      : selected.filter((s) => s !== opt)
+                    e.target.checked ? [...selected, opt] : selected.filter((s) => s !== opt),
                   )
                 }
               />

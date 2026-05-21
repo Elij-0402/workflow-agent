@@ -53,13 +53,7 @@ export function getSessionStatusMeta(status: string) {
   );
 }
 
-export function StatusDot({
-  status,
-  className,
-}: {
-  status: string;
-  className?: string;
-}) {
+export function StatusDot({ status, className }: { status: string; className?: string }) {
   const meta = getSessionStatusMeta(status);
   const pulsing = status === "analyzing" || status === "generating";
 
@@ -69,7 +63,7 @@ export function StatusDot({
         "inline-flex h-3 w-3 shrink-0 items-center justify-center font-mono text-[11px] leading-none",
         meta.dot,
         pulsing && "animate-pulse",
-        className
+        className,
       )}
       aria-hidden="true"
     >

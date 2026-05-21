@@ -21,7 +21,7 @@ export const BlueprintSchema = z.object({
         role: z.string(),
         traits: z.array(z.string()).default([]),
         description: z.string(),
-      })
+      }),
     )
     .default([]),
   relationships: z
@@ -32,7 +32,7 @@ export const BlueprintSchema = z.object({
         to: z.string(),
         type: z.string(),
         description: z.string(),
-      })
+      }),
     )
     .default([]),
   world_rules: z
@@ -41,7 +41,7 @@ export const BlueprintSchema = z.object({
         ...baseItem,
         rule: z.string(),
         description: z.string(),
-      })
+      }),
     )
     .default([]),
   conflicts: z
@@ -50,7 +50,7 @@ export const BlueprintSchema = z.object({
         ...baseItem,
         title: z.string(),
         description: z.string(),
-      })
+      }),
     )
     .default([]),
   plot_beats: z
@@ -60,7 +60,7 @@ export const BlueprintSchema = z.object({
         title: z.string(),
         description: z.string(),
         order: z.number().int(),
-      })
+      }),
     )
     .default([]),
   viewpoint: z
@@ -75,7 +75,7 @@ export const BlueprintSchema = z.object({
       z.object({
         ...baseItem,
         theme: z.string(),
-      })
+      }),
     )
     .default([]),
 });
@@ -87,9 +87,7 @@ export function emptyBlueprint(): Blueprint {
   return BlueprintSchema.parse({});
 }
 
-export type ReadyToConfirm =
-  | { ok: true }
-  | { ok: false; missing: string[] };
+export type ReadyToConfirm = { ok: true } | { ok: false; missing: string[] };
 
 const ARRAY_SECTIONS_REQUIRING_AT_LEAST_ONE = [
   "characters",

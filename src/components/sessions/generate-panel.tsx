@@ -2,28 +2,16 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  ChevronDown,
-  ChevronUp,
-  Loader2,
-  Sparkles,
-} from "lucide-react";
+import { ChevronDown, ChevronUp, Loader2, Sparkles } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
-import {
-  GenerateConfigSchema,
-  type GenerateConfig,
-  type SessionStatus,
-} from "@/lib/types";
+import { GenerateConfigSchema, type GenerateConfig, type SessionStatus } from "@/lib/types";
 
-import {
-  AdvancedOptions,
-  QuickGenerateForm,
-} from "./generate-form-fields";
+import { AdvancedOptions, QuickGenerateForm } from "./generate-form-fields";
 
 type GeneratePanelProps = {
   sessionId: string;
@@ -100,7 +88,7 @@ export function GeneratePanel({
   async function onSubmit(values: GenerateConfig) {
     if (variantCount > 0 && typeof window !== "undefined") {
       const ok = window.confirm(
-        `再生成一个版本会再次调用模型并消耗你的 BYOK 配额。当前已有 ${variantCount} 个版本，继续？`
+        `再生成一个版本会再次调用模型并消耗你的 BYOK 配额。当前已有 ${variantCount} 个版本，继续？`,
       );
       if (!ok) return;
     }
@@ -141,9 +129,7 @@ export function GeneratePanel({
     <section id="generate-panel" className="space-y-5">
       <div className="space-y-3">
         <p className="eyebrow-label">generate</p>
-        <h2 className="font-display italic text-[28px] leading-[1.05] text-foreground">
-          生成结果
-        </h2>
+        <h2 className="font-display text-[28px] italic leading-[1.05] text-foreground">生成结果</h2>
         <p className="max-w-2xl text-[14px] leading-7 text-muted-foreground">
           {variantCount > 0
             ? `当前已保存 ${variantCount} 个版本。保持常用参数在首屏，其余选项收进高级设置。`
@@ -191,10 +177,7 @@ export function GeneratePanel({
 
               {showAdvanced ? (
                 <div className="mt-5">
-                  <AdvancedOptions
-                    form={form}
-                    disabled={pending || Boolean(blockReason)}
-                  />
+                  <AdvancedOptions form={form} disabled={pending || Boolean(blockReason)} />
                 </div>
               ) : null}
             </div>
@@ -205,10 +188,7 @@ export function GeneratePanel({
                   ? "// new run appends — never overwrites"
                   : "// result saves to current session"}
               </p>
-              <Button
-                type="submit"
-                disabled={pending || Boolean(blockReason)}
-              >
+              <Button type="submit" disabled={pending || Boolean(blockReason)}>
                 {pending ? (
                   <>
                     <Loader2 className="animate-spin" />

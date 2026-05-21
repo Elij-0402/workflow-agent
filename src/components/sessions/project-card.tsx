@@ -17,9 +17,7 @@ type ProjectSession = {
 export function ProjectCard({ session }: { session: ProjectSession }) {
   const status = getSessionStatusMeta(session.status);
   const href =
-    session.mode === "dual"
-      ? `/sessions/${session.id}/workbench`
-      : `/sessions/${session.id}`;
+    session.mode === "dual" ? `/sessions/${session.id}/workbench` : `/sessions/${session.id}`;
   const isDual = session.mode === "dual";
 
   return (
@@ -34,7 +32,7 @@ export function ProjectCard({ session }: { session: ProjectSession }) {
         </span>
       </div>
 
-      <h3 className="mt-5 line-clamp-2 font-display italic text-[20px] leading-tight text-foreground">
+      <h3 className="mt-5 line-clamp-2 font-display text-[20px] italic leading-tight text-foreground">
         {session.name}
       </h3>
 
@@ -43,12 +41,10 @@ export function ProjectCard({ session }: { session: ProjectSession }) {
         <span className={status.tone}>{status.label}</span>
       </div>
 
-      <div className="mt-auto pt-5 flex items-end justify-between gap-3 border-t border-dashed border-border/60">
+      <div className="mt-auto flex items-end justify-between gap-3 border-t border-dashed border-border/60 pt-5">
         <div className="space-y-0.5 font-mono text-[10.5px] uppercase tracking-[0.06em] text-muted-foreground">
           <div>updated · {formatRelativeTime(session.updated_at)}</div>
-          <div className="text-muted-foreground/60">
-            created · {formatDate(session.created_at)}
-          </div>
+          <div className="text-muted-foreground/60">created · {formatDate(session.created_at)}</div>
         </div>
         <div className="inline-flex items-center gap-1 text-[12px] text-primary opacity-60 transition-opacity group-hover:opacity-100">
           打开
@@ -73,7 +69,7 @@ function Spine({ className }: { className?: string }) {
     <span
       className={cn(
         "block h-16 w-2 rounded-[1px] bg-primary/70 shadow-[inset_0_0_0_1px_rgba(0,0,0,0.18)]",
-        className
+        className,
       )}
     />
   );

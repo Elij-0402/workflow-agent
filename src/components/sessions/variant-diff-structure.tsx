@@ -3,20 +3,15 @@
 import { detectChapters } from "@/lib/text/chapters";
 import { diffStructure } from "@/lib/diff/variant-diff";
 
-export function VariantDiffStructure({
-  left,
-  right,
-}: {
-  left: string;
-  right: string;
-}) {
+export function VariantDiffStructure({ left, right }: { left: string; right: string }) {
   const leftTitles = detectChapters(left).map((c) => c.title);
   const rightTitles = detectChapters(right).map((c) => c.title);
   const d = diffStructure(leftTitles, rightTitles);
   if (leftTitles.length === 0 && rightTitles.length === 0) {
     return (
       <p className="font-mono text-[12px] uppercase tracking-[0.08em] text-muted-foreground">
-        {"// no chapter titles detected"}</p>
+        {"// no chapter titles detected"}
+      </p>
     );
   }
   return (
@@ -37,9 +32,7 @@ export function VariantDiffStructure({
                     : "px-2 py-1 text-foreground"
                 }
               >
-                <span className="mr-2 text-primary/60">
-                  {String(i + 1).padStart(2, "0")}
-                </span>
+                <span className="mr-2 text-primary/60">{String(i + 1).padStart(2, "0")}</span>
                 {t}
               </li>
             );
@@ -62,9 +55,7 @@ export function VariantDiffStructure({
                     : "px-2 py-1 text-foreground"
                 }
               >
-                <span className="mr-2 text-primary/60">
-                  {String(i + 1).padStart(2, "0")}
-                </span>
+                <span className="mr-2 text-primary/60">{String(i + 1).padStart(2, "0")}</span>
                 {t}
               </li>
             );

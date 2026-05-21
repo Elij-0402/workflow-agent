@@ -60,10 +60,7 @@ function getDimensionActionLabel(state: AnalysisState) {
   return "开始分析";
 }
 
-function getDimensionSummary(
-  dimension: LegacyAnalysisDimension,
-  item: DimensionStatus
-) {
+function getDimensionSummary(dimension: LegacyAnalysisDimension, item: DimensionStatus) {
   if (item.state === "loading") {
     return `正在生成${DIMENSION_LABELS[dimension]}分析，请稍候。`;
   }
@@ -103,12 +100,7 @@ const DIMENSION_TOKEN: Record<LegacyAnalysisDimension, string> = {
   narrative: "narrative",
 };
 
-export function AnalysisPanel({
-  sessionId,
-  analyses,
-  llmConfigured,
-  sessionStatus,
-}: PanelProps) {
+export function AnalysisPanel({ sessionId, analyses, llmConfigured, sessionStatus }: PanelProps) {
   const router = useRouter();
   const initialMap = useMemo<Record<LegacyAnalysisDimension, DimensionStatus>>(() => {
     const done = new Map(analyses.map((item) => [item.dimension, item.result]));
@@ -149,10 +141,7 @@ export function AnalysisPanel({
     });
   }, [initialMap]);
 
-  async function runDimension(
-    dimension: LegacyAnalysisDimension,
-    options?: { refresh?: boolean }
-  ) {
+  async function runDimension(dimension: LegacyAnalysisDimension, options?: { refresh?: boolean }) {
     setItems((current) => ({
       ...current,
       [dimension]: {
@@ -216,12 +205,10 @@ export function AnalysisPanel({
     router.refresh();
   }
 
-  const hasLoading = ANALYSIS_DIMENSIONS.some(
-    (dimension) => items[dimension].state === "loading"
-  );
+  const hasLoading = ANALYSIS_DIMENSIONS.some((dimension) => items[dimension].state === "loading");
   const blockedByGenerating = sessionStatus === "generating";
   const doneCount = ANALYSIS_DIMENSIONS.filter(
-    (dimension) => items[dimension].state === "done"
+    (dimension) => items[dimension].state === "done",
   ).length;
   const allDone = doneCount === ANALYSIS_DIMENSIONS.length;
 
@@ -230,7 +217,7 @@ export function AnalysisPanel({
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div className="space-y-3">
           <p className="eyebrow-label">analysis</p>
-          <h2 className="font-display italic text-[28px] leading-[1.05] text-foreground">
+          <h2 className="font-display text-[28px] italic leading-[1.05] text-foreground">
             分析结果
           </h2>
           <p className="max-w-2xl text-[14px] leading-7 text-muted-foreground">
@@ -287,7 +274,7 @@ export function AnalysisPanel({
                       {statusCopy.glyph} {statusCopy.label}
                     </span>
                   </div>
-                  <h3 className="font-display italic text-[20px] leading-tight text-foreground">
+                  <h3 className="font-display text-[20px] italic leading-tight text-foreground">
                     {DIMENSION_LABELS[dimension]}
                   </h3>
                   <p className="max-w-2xl text-[13px] leading-7 text-muted-foreground">
@@ -302,17 +289,13 @@ export function AnalysisPanel({
                     onClick={() => {
                       if (item.state === "done" && typeof window !== "undefined") {
                         const ok = window.confirm(
-                          `重新分析「${DIMENSION_LABELS[dimension]}」会再次调用模型并消耗你的 BYOK 配额。继续？`
+                          `重新分析「${DIMENSION_LABELS[dimension]}」会再次调用模型并消耗你的 BYOK 配额。继续？`,
                         );
                         if (!ok) return;
                       }
                       void runDimension(dimension);
                     }}
-                    disabled={
-                      !llmConfigured ||
-                      blockedByGenerating ||
-                      item.state === "loading"
-                    }
+                    disabled={!llmConfigured || blockedByGenerating || item.state === "loading"}
                   >
                     {item.state === "loading" ? (
                       <>

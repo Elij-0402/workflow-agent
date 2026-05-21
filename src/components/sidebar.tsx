@@ -13,9 +13,7 @@ export function Sidebar() {
       >
         <div className="min-w-0">
           <span className="block leading-none">
-            <span className="font-display italic text-[22px] text-foreground">
-              Novel
-            </span>
+            <span className="font-display text-[22px] italic text-foreground">Novel</span>
             <span className="font-mono text-[15px] text-primary">·fusion</span>
           </span>
           <span className="mt-1 block font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">

@@ -1,11 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import {
-  BlueprintSchema,
-  blueprintReadyToConfirm,
-  emptyBlueprint,
-} from "./schema";
+import { BlueprintSchema, blueprintReadyToConfirm, emptyBlueprint } from "./schema";
 
 test("emptyBlueprint passes BlueprintSchema", () => {
   const parsed = BlueprintSchema.safeParse(emptyBlueprint());

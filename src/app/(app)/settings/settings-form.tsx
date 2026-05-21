@@ -2,15 +2,7 @@
 
 import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import {
-  Bot,
-  Eye,
-  EyeOff,
-  KeyRound,
-  Loader2,
-  RefreshCw,
-  Server,
-} from "lucide-react";
+import { Bot, Eye, EyeOff, KeyRound, Loader2, RefreshCw, Server } from "lucide-react";
 import { toast } from "sonner";
 
 import { fetchAvailableModels, saveLLMConfig } from "./actions";
@@ -25,9 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-type Status =
-  | { kind: "unconfigured" }
-  | { kind: "saved"; updatedAt: string };
+type Status = { kind: "unconfigured" } | { kind: "saved"; updatedAt: string };
 
 type SettingsFormProps = {
   initialConfig: {
@@ -40,34 +30,24 @@ type SettingsFormProps = {
   status: Status;
 };
 
-export function SettingsForm({
-  initialConfig,
-  maskedApiKey,
-  status,
-}: SettingsFormProps) {
+export function SettingsForm({ initialConfig, maskedApiKey, status }: SettingsFormProps) {
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
 
   const [savingConfig, startSave] = useTransition();
   const [fetchingModels, startFetch] = useTransition();
 
-  const [baseUrl, setBaseUrl] = useState(
-    initialConfig?.base_url ?? "https://api.openai.com/v1"
-  );
+  const [baseUrl, setBaseUrl] = useState(initialConfig?.base_url ?? "https://api.openai.com/v1");
   const [apiKey, setApiKey] = useState("");
   const [showKey, setShowKey] = useState(false);
   const [model, setModel] = useState(initialConfig?.model ?? "");
   const [modelOptions, setModelOptions] = useState<string[]>(
-    initialConfig?.model ? [initialConfig.model] : []
+    initialConfig?.model ? [initialConfig.model] : [],
   );
   const [savedModelStale, setSavedModelStale] = useState(false);
   const [manualModel, setManualModel] = useState(false);
-  const [temperature, setTemperature] = useState(
-    String(initialConfig?.temperature ?? 0.7)
-  );
-  const [maxTokens, setMaxTokens] = useState(
-    String(initialConfig?.max_tokens ?? 4096)
-  );
+  const [temperature, setTemperature] = useState(String(initialConfig?.temperature ?? 0.7));
+  const [maxTokens, setMaxTokens] = useState(String(initialConfig?.max_tokens ?? 4096));
 
   const hasSavedKey = Boolean(maskedApiKey);
   const canFetch = baseUrl.trim().length > 0 && (apiKey.length > 0 || hasSavedKey);
@@ -116,7 +96,7 @@ export function SettingsForm({
     <div className="app-page">
       <div className="max-w-3xl">
         <p className="eyebrow-label">config · models</p>
-        <h1 className="mt-3 font-display italic text-[40px] leading-[1.04] tracking-[-0.01em] text-foreground sm:text-[48px]">
+        <h1 className="mt-3 font-display text-[40px] italic leading-[1.04] tracking-[-0.01em] text-foreground sm:text-[48px]">
           配置分析模型
         </h1>
         <p className="mt-4 max-w-2xl text-[14px] leading-7 text-muted-foreground sm:text-[15px]">
@@ -129,7 +109,7 @@ export function SettingsForm({
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="eyebrow-label">endpoint</p>
-              <h2 className="mt-2 font-display italic text-[24px] leading-[1.1] text-foreground">
+              <h2 className="mt-2 font-display text-[24px] italic leading-[1.1] text-foreground">
                 LLM 配置
               </h2>
               <p className="mt-2 text-[13.5px] leading-7 text-muted-foreground">
@@ -195,11 +175,7 @@ export function SettingsForm({
                         aria-label={showKey ? "隐藏 API Key" : "显示 API Key"}
                         tabIndex={-1}
                       >
-                        {showKey ? (
-                          <EyeOff className="h-4 w-4" />
-                        ) : (
-                          <Eye className="h-4 w-4" />
-                        )}
+                        {showKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </button>
                     </div>
                   </div>
@@ -246,7 +222,9 @@ export function SettingsForm({
                         >
                           <SelectTrigger id="model" className="h-10">
                             <SelectValue
-                              placeholder={modelOptions.length === 0 ? "// fetch models first" : "select model"}
+                              placeholder={
+                                modelOptions.length === 0 ? "// fetch models first" : "select model"
+                              }
                             />
                           </SelectTrigger>
                           <SelectContent>
@@ -290,7 +268,8 @@ export function SettingsForm({
 
                   {savedModelStale ? (
                     <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-destructive">
-                      {"// saved model not in new list — please re-select"}</p>
+                      {"// saved model not in new list — please re-select"}
+                    </p>
                   ) : null}
                 </div>
               }
@@ -343,11 +322,9 @@ export function SettingsForm({
             <div className="mt-1 border-t border-dashed border-border/70 pt-5">
               <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
-                  {"// api key 仅在服务端加密存储"}</p>
-                <Button
-                  type="submit"
-                  disabled={savingConfig}
-                >
+                  {"// api key 仅在服务端加密存储"}
+                </p>
+                <Button type="submit" disabled={savingConfig}>
                   {savingConfig ? (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin" />
@@ -365,9 +342,7 @@ export function SettingsForm({
         <aside className="flex flex-col gap-4">
           <section className="surface-subtle p-5">
             <p className="eyebrow-label">notes</p>
-            <h3 className="mt-2 font-display italic text-[18px] text-foreground">
-              当前状态
-            </h3>
+            <h3 className="mt-2 font-display text-[18px] italic text-foreground">当前状态</h3>
             <div className="mt-3 flex flex-col gap-3 text-[13px] leading-7 text-muted-foreground">
               <p>模型配置会在后续分析与生成请求中复用。</p>
               <p>当 endpoint 可列出模型时，建议优先从列表选择，减少拼写错误。</p>
@@ -376,9 +351,7 @@ export function SettingsForm({
 
           <section className="surface-subtle p-5">
             <p className="eyebrow-label">security</p>
-            <h3 className="mt-2 font-display italic text-[18px] text-foreground">
-              安全说明
-            </h3>
+            <h3 className="mt-2 font-display text-[18px] italic text-foreground">安全说明</h3>
             <div className="mt-3 flex flex-col gap-3 text-[13px] leading-7 text-muted-foreground">
               <p>API Key 不会出现在客户端源码中。</p>
               <p>系统只保留一套当前账户的可用模型配置，用于维持最短工作路径。</p>
@@ -406,9 +379,7 @@ function SettingsSection({
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Icon className="h-4 w-4 text-primary" />
-          <h3 className="font-display italic text-[16px] text-foreground">
-            {title}
-          </h3>
+          <h3 className="font-display text-[16px] italic text-foreground">{title}</h3>
         </div>
         <span className="font-mono text-[10.5px] uppercase tracking-[0.12em] text-primary/70">
           {`// ${token}`}
@@ -429,7 +400,8 @@ function StatusBadge({ status }: { status: Status }) {
     return (
       <span className="inline-flex items-center gap-1.5 rounded-[2px] border border-border bg-muted px-2 py-1 font-mono text-[10.5px] uppercase tracking-[0.10em] text-muted-foreground">
         <span className="text-muted-foreground/60">○</span>
-        {"// unconfigured"}</span>
+        {"// unconfigured"}
+      </span>
     );
   }
 

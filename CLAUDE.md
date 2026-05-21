@@ -15,16 +15,18 @@ npm run start       # next start (after build)
 npm run lint        # next lint (legacy .eslintrc.json + eslint-config-next)
 npm run type-check  # tsc --noEmit  — use this, the build does not type-check
 
-# Tests use node:test directly; there is no test runner script.
-node --test --import tsx src/lib/llm-config.test.ts                  # single file
-node --test --import tsx 'src/**/*.test.ts'                          # all
+npm test                                                       # all unit tests (node:test + tsx)
+npm run test:e2e                                               # Playwright e2e smoke
+npm run test:e2e:headed                                        # Playwright with headed browser
+node --test --import tsx src/lib/llm-config.test.ts            # single unit-test file
 ```
 
-Tests are colocated as `*.test.ts` next to the file they cover and use `node:test` + `node:assert/strict`. `tsconfig.json` excludes `**/*.test.ts` from the build.
+Unit tests are colocated as `*.test.ts` next to the file they cover and use `node:test` + `node:assert/strict`. `tsconfig.json` excludes `**/*.test.ts` from the build.
 
 ## Architecture
 
 ### Route layout (App Router with route groups)
+
 - `src/app/(auth)/` — public auth pages. `actions.ts` exports `submitPasswordAuth` / `signOut` Server Actions.
 - `src/app/(app)/` — authenticated app. The group `layout.tsx` does a server-side `supabase.auth.getUser()` and redirects to `/login` if absent, then renders the `Sidebar` + `UserMenu` shell. Pages: `dashboard`, `upload` (stub), `sessions` (stub), `settings` (LLM config form).
 - `src/app/auth/callback/` — placeholder for an OAuth callback; email-confirm must be disabled in Supabase so password signup returns a session immediately.
@@ -32,11 +34,13 @@ Tests are colocated as `*.test.ts` next to the file they cover and use `node:tes
 - `middleware.ts` → `src/lib/supabase/middleware.ts:updateSession` runs on every non-static request, refreshes the Supabase session cookie, and gates routes. `PUBLIC_PATHS = ["/login"]`. Any other unauthenticated path redirects to `/login?redirect=<original>`.
 
 ### Supabase clients (three flavors — pick the right one)
+
 - `src/lib/supabase/client.ts` → `createClient()` — **browser**, anon key, used from Client Components.
 - `src/lib/supabase/server.ts` → `createClient()` — **server with user cookies**, anon key, RLS enforced. Use in Server Components, Server Actions, Route Handlers.
 - `src/lib/supabase/server.ts` → `createServiceClient()` — **service role**, bypasses RLS. Only in trusted server contexts and only with an explicit `.eq("user_id", user.id)` filter. Never import into a client bundle.
 
 ### BYOK + single-model pattern (load-bearing — do not redesign)
+
 Every LLM call (the 3 analysis dimensions and variant generation) reads the user's single `llm_config` row, decrypts the API key, and dispatches to a user-provided OpenAI-compatible endpoint via `@ai-sdk/openai`'s `createOpenAI({ baseURL })`. Supported endpoints are OpenAI, DeepSeek, and custom OpenAI-compatible gateways. Anthropic native endpoints are out of scope here. There is one model per user; tasks differ only by system prompt. Do not add per-task model selection or expand to a multi-preset UI — that was migration 0002's whole point.
 
 - `src/lib/crypto.ts` — AES-GCM (`webcrypto`) wrapper. `ENCRYPTION_KEY` is a 32-byte base64 secret loaded from env. **Server-only**; the module would crash in a browser bundle, but the bigger reason is the threat model: the key must never reach the client. Exposes `encrypt`, `decrypt`, `maskApiKey`.
@@ -46,21 +50,26 @@ Every LLM call (the 3 analysis dimensions and variant generation) reads the user
 API keys must never appear in: client bundles, component props, URLs, server logs, or error responses. Decryption happens only inside Server Actions / Route Handlers.
 
 ### Database (Supabase Postgres, RLS-enforced)
+
 Schema in `supabase/migrations/`. Run them in order in the SQL Editor.
+
 - `0001_init.sql` — initial schema with **`llm_presets`** (multiple per user) plus `sessions`, `books`, `analyses`, `variants`, the `novels` storage bucket, the `touch_updated_at` trigger, and RLS policies `auth.uid() = user_id` on every table.
 - `0002_simplify_auth_and_llm_config.sql` — collapses presets into a single **`llm_config`** row per user (uniqueness via `user_id unique`), data-migrates from `llm_presets` preferring `is_default=true` then oldest, renames `preset_id` → `llm_config_id` on `analyses`/`variants`, drops `llm_presets`. Any new code must target `llm_config` / `llm_config_id`, not the legacy `llm_presets` / `preset_id` names.
 - `0003_restrict_llm_providers_to_openai_compatible.sql` — rewrites legacy `anthropic` rows to `custom` and tightens `llm_config.provider` to `openai | deepseek | custom`.
 
 Domain enums (mirror these in `src/lib/types.ts` if you change the SQL):
+
 - `sessions.status`: `draft | uploaded | analyzing | analyzed | generating | done`
 - `analyses.dimension`: `worldview | characters | narrative` (also a `unique(book_id, dimension)` — one analysis per dimension per book)
 
 `Database` in `src/lib/types.ts` is hand-rolled, not generated. Keep it in sync with migrations or regenerate it via `supabase gen types typescript` when the schema grows.
 
 ### Storage
+
 Bucket `novels` is private, 50 MB cap, MIME-restricted (`text/plain`, `text/markdown`, `application/octet-stream`). RLS policy gates `bucket_id = 'novels' AND auth.uid()::text = storage.foldername(name)[1]`, so **uploads must use the path `{user_id}/...`** or they will 403. `next.config.ts` raises Server Actions body limit to 60 MB to accommodate the 50 MB cap.
 
 ### Analysis result schemas
+
 `src/lib/types.ts` defines `WorldviewResultSchema`, `CharactersResultSchema`, `NarrativeResultSchema`, and `GenerateConfigSchema` as Zod. These are the contract the LLM must satisfy — use them with `generateObject` / `streamObject` from the `ai` SDK and store the validated result in `analyses.result`.
 
 ## Conventions
@@ -69,7 +78,8 @@ Bucket `novels` is private, 50 MB cap, MIME-restricted (`text/plain`, `text/mark
 - **Path alias**: `@/*` → `./src/*`. Use it for all internal imports.
 - **TypeScript**: strict mode on. `noEmit: true` — type-check runs separately from build.
 - **Shadcn**: new-york style, neutral base, `cssVariables: true`. Add components under `src/components/ui/`; aliases live in `components.json`.
-- **Dark mode**: forced via `className="dark"` on `<html>` in `src/app/layout.tsx`. No theme toggle yet — that's V2.
+- **Dark mode / UI theme**: "Atelier Terminal" — dark-only, forced via `className="dark"` on `<html>` in `src/app/layout.tsx`. Five Google fonts are wired as CSS variables (`--font-display` Instrument Serif, `--font-sans` Inter Tight, `--font-mono` JetBrains Mono, `--font-zh-serif` Noto Serif SC, `--font-zh-sans` Noto Sans SC); Tailwind references them by variable, so new components should use `font-sans` / `font-mono` / `font-display` rather than hard-coding families. The `Toaster` in `layout.tsx` is custom-themed — match its mono/border style for any new global UI chrome. No theme toggle.
+- **Local fixtures**: Test novels go in `samples/` (gitignored). The repo does not ship fixtures for the upload flow.
 - **Language**: UI copy and user-facing errors are Chinese; code identifiers, comments, commit messages are English.
 
 ## Environment variables
@@ -93,6 +103,7 @@ Stubbed / V2: variant UI polish, cards/export, multi-session selection, payment/
 ## V0.2 — Dual-book blueprint workbench
 
 Wired in dual mode (`sessions.mode='dual'`):
+
 - `/upload?mode=dual` flow + workbench empty-slot "添加第二本书" link
 - `/sessions/[id]/workbench` page (server component fetches everything, hands a `WorkbenchClient` shell with: chapter tree per book, candidate picker, blueprint editor, pipeline bar, variant comparison)
 - New tables: `chapters`, `blueprints` (see `supabase/migrations/0004_multi_book_blueprint_workbench.sql`)

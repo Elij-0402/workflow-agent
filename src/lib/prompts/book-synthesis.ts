@@ -36,7 +36,7 @@ export function pickBriefsForSynthesis(briefs: BriefEntry[]): BriefEntry[] {
     sampled.push(middle[i]);
   }
   const turning = briefs.filter((b) =>
-    (b.brief.events ?? []).some((e) => e.is_turning_point === true)
+    (b.brief.events ?? []).some((e) => e.is_turning_point === true),
   );
   const dedup = new Map<number, BriefEntry>();
   for (const b of [...head, ...sampled, ...tail, ...turning]) {

@@ -19,10 +19,7 @@ import {
 } from "./generate-meta";
 
 type VariantCardProps = {
-  variant: Pick<
-    VariantRow,
-    "id" | "title" | "config" | "content" | "word_count" | "created_at"
-  >;
+  variant: Pick<VariantRow, "id" | "title" | "config" | "content" | "word_count" | "created_at">;
 };
 
 export function VariantCard({ variant }: VariantCardProps) {
@@ -37,7 +34,7 @@ export function VariantCard({ variant }: VariantCardProps) {
         <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
           <div className="space-y-2">
             <p className="eyebrow-label">variant</p>
-            <h3 className="font-display italic text-[20px] leading-tight text-foreground">
+            <h3 className="font-display text-[20px] italic leading-tight text-foreground">
               {variant.title}
             </h3>
             <div className="flex flex-wrap gap-x-3 gap-y-1 font-mono text-[10.5px] uppercase tracking-[0.08em] text-muted-foreground">
@@ -66,11 +63,7 @@ export function VariantCard({ variant }: VariantCardProps) {
           <div className="flex flex-wrap gap-x-3 gap-y-1 font-mono text-[10.5px] uppercase tracking-[0.08em] text-muted-foreground">
             <span>{variant.word_count?.toLocaleString("zh-CN") ?? "0"} 字</span>
             <span className="text-primary/40">·</span>
-            <span>
-              {variant.config.extra_instructions.trim()
-                ? "with extra"
-                : "default"}
-            </span>
+            <span>{variant.config.extra_instructions.trim() ? "with extra" : "default"}</span>
           </div>
 
           <Dialog>

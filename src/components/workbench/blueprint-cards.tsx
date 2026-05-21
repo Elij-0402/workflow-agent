@@ -1,21 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import {
-  BookOpen,
-  ChevronDown,
-  ChevronUp,
-  Plus,
-  Trash2,
-  X,
-} from "lucide-react";
+import { BookOpen, ChevronDown, ChevronUp, Plus, Trash2, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import type {
-  Blueprint,
-  BlueprintSource,
-} from "@/lib/blueprint/schema";
+import type { Blueprint, BlueprintSource } from "@/lib/blueprint/schema";
 
 export type BookLookup = { id: string; title: string; position: number };
 export type ChapterLookup = Map<string, { index: number; title: string }>;
@@ -218,7 +208,7 @@ function TitleInput({
       disabled={disabled}
       placeholder={placeholder}
       onChange={(e) => onChange(e.target.value)}
-      className="w-full rounded-[2px] border border-transparent bg-transparent px-1 py-0.5 font-display italic text-[18px] leading-tight text-foreground outline-none focus:border-primary/60 focus:bg-background/40"
+      className="w-full rounded-[2px] border border-transparent bg-transparent px-1 py-0.5 font-display text-[18px] italic leading-tight text-foreground outline-none focus:border-primary/60 focus:bg-background/40"
     />
   );
 }
@@ -298,7 +288,7 @@ function TraitChips({
       {traits.map((t) => (
         <span
           key={t}
-          className="inline-flex items-center gap-1 rounded-[2px] border border-primary/30 bg-primary/8 px-1.5 py-0.5 text-[12px] text-primary"
+          className="bg-primary/8 inline-flex items-center gap-1 rounded-[2px] border border-primary/30 px-1.5 py-0.5 text-[12px] text-primary"
         >
           {t}
           {!disabled ? (
@@ -391,7 +381,7 @@ export function RelationshipCard(props: WithBaseProps<RelationshipRow>) {
               disabled={disabled}
               placeholder="角色 A"
               onChange={(e) => onChange({ from: e.target.value } as Partial<RelationshipRow>)}
-              className="w-full rounded-[2px] border border-border bg-background/30 px-2 py-1 font-display italic text-[16px] text-foreground outline-none focus:border-primary/70 focus:bg-background/40"
+              className="w-full rounded-[2px] border border-border bg-background/30 px-2 py-1 font-display text-[16px] italic text-foreground outline-none focus:border-primary/70 focus:bg-background/40"
             />
             <span className="text-primary/70">↔</span>
             <input
@@ -399,7 +389,7 @@ export function RelationshipCard(props: WithBaseProps<RelationshipRow>) {
               disabled={disabled}
               placeholder="角色 B"
               onChange={(e) => onChange({ to: e.target.value } as Partial<RelationshipRow>)}
-              className="w-full rounded-[2px] border border-border bg-background/30 px-2 py-1 font-display italic text-[16px] text-foreground outline-none focus:border-primary/70 focus:bg-background/40"
+              className="w-full rounded-[2px] border border-border bg-background/30 px-2 py-1 font-display text-[16px] italic text-foreground outline-none focus:border-primary/70 focus:bg-background/40"
             />
           </div>
           <SubInput
@@ -594,7 +584,7 @@ export function BlueprintCardList<T extends { id: string }>({
       {rows.length === 0 ? (
         <p
           className={cn(
-            "rounded-[2px] border border-dashed border-border/60 bg-background/30 px-4 py-6 text-center text-[13px] leading-7 text-muted-foreground"
+            "rounded-[2px] border border-dashed border-border/60 bg-background/30 px-4 py-6 text-center text-[13px] leading-7 text-muted-foreground",
           )}
         >
           {emptyHint}

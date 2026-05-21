@@ -31,8 +31,7 @@ export function countWords(text: string) {
   if (compact.length === 0) return 0;
 
   const cjkMatches = compact.match(/[\p{Script=Han}]/gu) ?? [];
-  const latinMatches =
-    compact.match(/[A-Za-z0-9]+(?:['_-][A-Za-z0-9]+)*/g) ?? [];
+  const latinMatches = compact.match(/[A-Za-z0-9]+(?:['_-][A-Za-z0-9]+)*/g) ?? [];
 
   return cjkMatches.length + latinMatches.length;
 }

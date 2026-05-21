@@ -40,7 +40,7 @@ const requestSchema = z.object({
 class RouteError extends Error {
   constructor(
     message: string,
-    readonly status: number
+    readonly status: number,
   ) {
     super(message);
     this.name = "RouteError";
@@ -52,7 +52,7 @@ function jsonError(message: string, status: number) {
 }
 
 function parseAnalyses(
-  rows: Array<{ dimension: AnalysisDimension; result: unknown }>
+  rows: Array<{ dimension: AnalysisDimension; result: unknown }>,
 ): GenerateAnalyses | null {
   const byDimension = new Map(rows.map((row) => [row.dimension, row.result]));
 
@@ -142,19 +142,21 @@ export async function POST(request: Request) {
     return jsonError("当前书籍内容不可用。", 400);
   }
 
-  const [{ data: analyses, error: analysesError }, { count: variantCount, error: variantCountError }] =
-    await Promise.all([
-      supabase
-        .from("analyses")
-        .select("dimension, result")
-        .eq("user_id", user.id)
-        .eq("book_id", book.id),
-      supabase
-        .from("variants")
-        .select("*", { count: "exact", head: true })
-        .eq("session_id", session.id)
-        .eq("user_id", user.id),
-    ]);
+  const [
+    { data: analyses, error: analysesError },
+    { count: variantCount, error: variantCountError },
+  ] = await Promise.all([
+    supabase
+      .from("analyses")
+      .select("dimension, result")
+      .eq("user_id", user.id)
+      .eq("book_id", book.id),
+    supabase
+      .from("variants")
+      .select("*", { count: "exact", head: true })
+      .eq("session_id", session.id)
+      .eq("user_id", user.id),
+  ]);
 
   if (analysesError) {
     return jsonError("读取分析结果失败，请稍后再试。", 500);
@@ -169,7 +171,7 @@ export async function POST(request: Request) {
   }
 
   const parsedAnalyses = parseAnalyses(
-    (analyses ?? []) as Array<{ dimension: AnalysisDimension; result: unknown }>
+    (analyses ?? []) as Array<{ dimension: AnalysisDimension; result: unknown }>,
   );
 
   if (!parsedAnalyses) {
@@ -263,7 +265,7 @@ export async function POST(request: Request) {
   } catch (error) {
     if (statusFlipped) {
       const restoreStatus = getSessionStatusAfterGenerateFailure(
-        existingVariantCount + (variantCreated ? 1 : 0)
+        existingVariantCount + (variantCreated ? 1 : 0),
       );
 
       await supabase

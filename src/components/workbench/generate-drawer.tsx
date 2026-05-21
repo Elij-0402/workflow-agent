@@ -15,10 +15,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import {
-  AdvancedOptions,
-  QuickGenerateForm,
-} from "@/components/sessions/generate-form-fields";
+import { AdvancedOptions, QuickGenerateForm } from "@/components/sessions/generate-form-fields";
 import { GenerateConfigSchema, type GenerateConfig } from "@/lib/types";
 
 type Props = {
@@ -78,30 +75,21 @@ export function GenerateDrawer({ open, onOpenChange, blueprintId, onGenerated }:
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent
-        side="right"
-        className="flex w-full flex-col gap-0 p-0 sm:max-w-[520px]"
-      >
+      <SheetContent side="right" className="flex w-full flex-col gap-0 p-0 sm:max-w-[520px]">
         <SheetHeader className="border-b border-dashed border-border/60 px-6 py-5">
           <p className="eyebrow-label">generate</p>
-          <SheetTitle className="font-display italic text-[24px] leading-tight">
+          <SheetTitle className="font-display text-[24px] italic leading-tight">
             生成变体参数
           </SheetTitle>
-          <SheetDescription>
-            常用参数留在首屏；视角、文风、额外要求收进高级选项。
-          </SheetDescription>
+          <SheetDescription>常用参数留在首屏；视角、文风、额外要求收进高级选项。</SheetDescription>
         </SheetHeader>
         <Form {...form}>
           <form
-            className="flex flex-1 min-h-0 flex-col"
+            className="flex min-h-0 flex-1 flex-col"
             onSubmit={form.handleSubmit((values) => void onSubmit(values))}
           >
             <div className="flex-1 overflow-y-auto px-6 py-6">
-              <QuickGenerateForm
-                form={form}
-                disabled={pending}
-                innovation={innovation}
-              />
+              <QuickGenerateForm form={form} disabled={pending} innovation={innovation} />
               <div className="mt-7 border-t border-dashed border-border/60 pt-5">
                 <button
                   type="button"

@@ -23,16 +23,15 @@ type Props = {
 
 export function VariantComparison({ variants, confirmedAt }: Props) {
   const [leftId, setLeftId] = useState(variants[0]?.id ?? "");
-  const [rightId, setRightId] = useState(
-    variants[1]?.id ?? variants[0]?.id ?? ""
-  );
+  const [rightId, setRightId] = useState(variants[1]?.id ?? variants[0]?.id ?? "");
   const left = variants.find((v) => v.id === leftId);
   const right = variants.find((v) => v.id === rightId);
 
   if (!left || !right) {
     return (
       <p className="font-mono text-[12px] uppercase tracking-[0.08em] text-muted-foreground">
-        {"// 至少生成 2 个变体才能进入比较"}</p>
+        {"// 至少生成 2 个变体才能进入比较"}
+      </p>
     );
   }
 
@@ -41,7 +40,7 @@ export function VariantComparison({ variants, confirmedAt }: Props) {
       <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="eyebrow-label">compare variants</p>
-          <h2 className="mt-2 font-display italic text-[24px] leading-tight text-foreground">
+          <h2 className="mt-2 font-display text-[24px] italic leading-tight text-foreground">
             结果对比
           </h2>
         </div>
@@ -140,9 +139,7 @@ function Card({
   return (
     <div className="surface-panel p-4">
       <div className="mb-3 flex items-baseline gap-3">
-        <h3 className="font-display italic text-[16px] text-foreground">
-          {title}
-        </h3>
+        <h3 className="font-display text-[16px] italic text-foreground">{title}</h3>
         <span className="font-mono text-[10.5px] uppercase tracking-[0.12em] text-primary/70">
           {`// ${token}`}
         </span>

@@ -27,13 +27,7 @@ type Props = {
   onAddCandidate: (c: CandidateAddRequest) => void;
 };
 
-export function ChapterCard({
-  chapter,
-  brief,
-  status,
-  onAnalyze,
-  onAddCandidate,
-}: Props) {
+export function ChapterCard({ chapter, brief, status, onAnalyze, onAddCandidate }: Props) {
   const [open, setOpen] = useState(false);
   const hasBrief = Boolean(brief);
   const busy = status === "running";
@@ -49,11 +43,7 @@ export function ChapterCard({
           </span>
           <span
             className={`font-mono text-[11px] ${
-              done
-                ? "text-flash"
-                : busy
-                  ? "text-primary animate-pulse"
-                  : "text-muted-foreground/60"
+              done ? "text-flash" : busy ? "animate-pulse text-primary" : "text-muted-foreground/60"
             }`}
             aria-hidden
           >
@@ -75,16 +65,18 @@ export function ChapterCard({
       </div>
 
       {status === "error" ? (
-        <p className="mt-1.5 ml-7 font-mono text-[10.5px] uppercase tracking-[0.08em] text-destructive">
-          {"// analysis failed — retry"}</p>
+        <p className="ml-7 mt-1.5 font-mono text-[10.5px] uppercase tracking-[0.08em] text-destructive">
+          {"// analysis failed — retry"}
+        </p>
       ) : null}
 
       {brief && open ? (
-        <div className="mt-3 ml-7 space-y-3 text-[12.5px] text-muted-foreground">
+        <div className="ml-7 mt-3 space-y-3 text-[12.5px] text-muted-foreground">
           <p className="italic-cap leading-7">{brief.summary}</p>
           {brief.blueprint_candidates.length === 0 ? (
             <p className="font-mono text-[10.5px] uppercase tracking-[0.08em] text-muted-foreground/70">
-              {"// no auto candidates"}</p>
+              {"// no auto candidates"}
+            </p>
           ) : null}
           {brief.blueprint_candidates.map((cand, i) => {
             const payload = (cand.payload ?? {}) as Record<string, unknown>;
@@ -121,7 +113,7 @@ export function ChapterCard({
       ) : null}
 
       {chapter.source !== "regex" ? (
-        <p className="mt-1.5 ml-7 font-mono text-[10.5px] uppercase tracking-[0.08em] text-primary/70">
+        <p className="ml-7 mt-1.5 font-mono text-[10.5px] uppercase tracking-[0.08em] text-primary/70">
           {`// source · ${chapter.source === "length-chunk" ? "length chunk" : "manual"}`}
         </p>
       ) : null}

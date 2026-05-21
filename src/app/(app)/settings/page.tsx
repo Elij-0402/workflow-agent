@@ -7,9 +7,7 @@ export default async function SettingsPage() {
   const supabase = await createClient();
   const { data: config } = await supabase
     .from("llm_config")
-    .select(
-      "id, base_url, api_key_encrypted, model, temperature, max_tokens, updated_at"
-    )
+    .select("id, base_url, api_key_encrypted, model, temperature, max_tokens, updated_at")
     .maybeSingle();
 
   let maskedApiKey: string | null = null;

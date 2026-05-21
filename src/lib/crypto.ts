@@ -19,22 +19,19 @@ async function getKey(): Promise<CryptoKey> {
   if (!raw) {
     throw new Error(
       "ENCRYPTION_KEY env var is missing. Generate one with: " +
-        "node -e \"console.log(require('crypto').randomBytes(32).toString('base64'))\""
+        "node -e \"console.log(require('crypto').randomBytes(32).toString('base64'))\"",
     );
   }
   const keyBytes = Buffer.from(raw, "base64");
   if (keyBytes.length !== 32) {
     throw new Error(
-      `ENCRYPTION_KEY must be 32 bytes (base64-encoded), got ${keyBytes.length} bytes`
+      `ENCRYPTION_KEY must be 32 bytes (base64-encoded), got ${keyBytes.length} bytes`,
     );
   }
-  cachedKey = await subtle.importKey(
-    "raw",
-    keyBytes,
-    { name: "AES-GCM" },
-    false,
-    ["encrypt", "decrypt"]
-  );
+  cachedKey = await subtle.importKey("raw", keyBytes, { name: "AES-GCM" }, false, [
+    "encrypt",
+    "decrypt",
+  ]);
   return cachedKey;
 }
 
@@ -44,7 +41,7 @@ export async function encrypt(plaintext: string): Promise<string> {
   const ciphertext = await subtle.encrypt(
     { name: "AES-GCM", iv },
     key,
-    new TextEncoder().encode(plaintext)
+    new TextEncoder().encode(plaintext),
   );
   return Buffer.concat([iv, new Uint8Array(ciphertext)]).toString("base64");
 }
@@ -55,11 +52,7 @@ export async function decrypt(payload: string): Promise<string> {
   if (data.length < 13) throw new Error("Invalid ciphertext payload");
   const iv = data.subarray(0, 12);
   const ciphertext = data.subarray(12);
-  const plaintext = await subtle.decrypt(
-    { name: "AES-GCM", iv },
-    key,
-    ciphertext
-  );
+  const plaintext = await subtle.decrypt({ name: "AES-GCM", iv }, key, ciphertext);
   return new TextDecoder().decode(plaintext);
 }
 

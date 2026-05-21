@@ -4,13 +4,7 @@ import type { LLMConfig, LLMProvider } from "@/lib/llm-config";
 // ============================================================================
 // Domain
 // ============================================================================
-export type SessionStatus =
-  | "draft"
-  | "uploaded"
-  | "analyzing"
-  | "analyzed"
-  | "generating"
-  | "done";
+export type SessionStatus = "draft" | "uploaded" | "analyzing" | "analyzed" | "generating" | "done";
 
 export type AnalysisDimension =
   | "worldview"
@@ -53,7 +47,7 @@ export const WorldviewResultSchema = z.object({
         name: z.string(),
         description: z.string(),
         importance: z.enum(["low", "medium", "high"]),
-      })
+      }),
     )
     .describe("主要地理场景"),
   power_system: z.string().describe("权力/魔法/科技体系简述").optional(),
@@ -70,7 +64,7 @@ export const CharactersResultSchema = z.object({
       traits: z.array(z.string()),
       background: z.string(),
       description: z.string(),
-    })
+    }),
   ),
   relationships: z.array(
     z.object({
@@ -78,16 +72,14 @@ export const CharactersResultSchema = z.object({
       to: z.string(),
       type: z.string().describe("盟友/对立/爱情/亲情/师徒 等"),
       description: z.string(),
-    })
+    }),
   ),
   summary: z.string(),
 });
 export type CharactersResult = z.infer<typeof CharactersResultSchema>;
 
 export const NarrativeResultSchema = z.object({
-  structure: z
-    .string()
-    .describe("情节结构类型：英雄之旅/三幕式/起承转合/非线性"),
+  structure: z.string().describe("情节结构类型：英雄之旅/三幕式/起承转合/非线性"),
   viewpoint: z.string().describe("叙事视角：第一/第三有限/全知/混合"),
   pacing: z.string().describe("节奏特点描述"),
   themes: z.array(z.string()).describe("主题与母题"),
@@ -96,11 +88,9 @@ export const NarrativeResultSchema = z.object({
       title: z.string(),
       description: z.string(),
       impact: z.number().min(1).max(10),
-    })
+    }),
   ),
-  conflicts: z
-    .array(z.string())
-    .describe("核心冲突：人vs人 / 人vs自然 / 人vs社会 / 人vs自我"),
+  conflicts: z.array(z.string()).describe("核心冲突：人vs人 / 人vs自然 / 人vs社会 / 人vs自我"),
   summary: z.string(),
 });
 export type NarrativeResult = z.infer<typeof NarrativeResultSchema>;
@@ -113,7 +103,7 @@ export const ChapterBriefResultSchema = z.object({
         place: z.string(),
         time: z.string().optional(),
         description: z.string(),
-      })
+      }),
     )
     .default([]),
   characters_appeared: z
@@ -121,7 +111,7 @@ export const ChapterBriefResultSchema = z.object({
       z.object({
         name: z.string(),
         action: z.string(),
-      })
+      }),
     )
     .default([]),
   events: z
@@ -130,7 +120,7 @@ export const ChapterBriefResultSchema = z.object({
         title: z.string(),
         description: z.string(),
         is_turning_point: z.boolean().default(false),
-      })
+      }),
     )
     .default([]),
   conflicts: z.array(z.string()).default([]),
@@ -150,7 +140,7 @@ export const ChapterBriefResultSchema = z.object({
         ]),
         title: z.string(),
         payload: z.unknown(),
-      })
+      }),
     )
     .default([]),
 });
@@ -163,7 +153,7 @@ export const BookSynthesisResultSchema = z.object({
       role: z.string(),
       traits: z.array(z.string()).default([]),
       description: z.string(),
-    })
+    }),
   ),
   relationships: z.array(
     z.object({
@@ -171,26 +161,26 @@ export const BookSynthesisResultSchema = z.object({
       to: z.string(),
       type: z.string(),
       description: z.string(),
-    })
+    }),
   ),
   world_rules: z.array(
     z.object({
       rule: z.string(),
       description: z.string(),
-    })
+    }),
   ),
   conflicts: z.array(
     z.object({
       title: z.string(),
       description: z.string(),
-    })
+    }),
   ),
   plot_beats: z.array(
     z.object({
       title: z.string(),
       description: z.string(),
       order: z.number().int(),
-    })
+    }),
   ),
   viewpoint: z.object({
     mode: z.string(),
@@ -204,19 +194,11 @@ export type BookSynthesisResult = z.infer<typeof BookSynthesisResultSchema>;
 // Generate variant
 // ============================================================================
 export const GenerateConfigSchema = z.object({
-  strategy: z
-    .enum(["a-dominant", "balanced", "theme-graft"])
-    .default("balanced"),
+  strategy: z.enum(["a-dominant", "balanced", "theme-graft"]).default("balanced"),
   innovation: z.number().int().min(1).max(10).default(5),
-  viewpoint: z
-    .enum(["keep", "first-person", "third-limited", "omniscient"])
-    .default("keep"),
-  style: z
-    .enum(["keep", "modern", "classical", "web-novel"])
-    .default("keep"),
-  output_scope: z
-    .enum(["single-chapter", "outline", "three-chapters"])
-    .default("single-chapter"),
+  viewpoint: z.enum(["keep", "first-person", "third-limited", "omniscient"]).default("keep"),
+  style: z.enum(["keep", "modern", "classical", "web-novel"]).default("keep"),
+  output_scope: z.enum(["single-chapter", "outline", "three-chapters"]).default("single-chapter"),
   extra_instructions: z.string().max(800).default(""),
 });
 export type GenerateConfig = z.infer<typeof GenerateConfigSchema>;

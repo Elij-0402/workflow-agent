@@ -64,21 +64,16 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-family: var(--font-sans), var(--font-zh-sans), "PingFang SC",
-      "Microsoft YaHei", system-ui, sans-serif;
-    font-feature-settings: "ss01" 1, "ss03" 1, "cv11" 1;
+    font-family:
+      var(--font-sans), var(--font-zh-sans), "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+    font-feature-settings:
+      "ss01" 1,
+      "ss03" 1,
+      "cv11" 1;
     text-rendering: optimizeLegibility;
     background-image:
-      radial-gradient(
-        circle at 8% -6%,
-        hsl(44 56% 47% / 0.1),
-        transparent 38%
-      ),
-      radial-gradient(
-        circle at 102% 102%,
-        hsl(132 23% 54% / 0.045),
-        transparent 42%
-      ),
+      radial-gradient(circle at 8% -6%, hsl(44 56% 47% / 0.1), transparent 38%),
+      radial-gradient(circle at 102% 102%, hsl(132 23% 54% / 0.045), transparent 42%),
       linear-gradient(180deg, hsl(75 8% 6%), hsl(75 8% 5%));
     background-attachment: fixed;
     position: relative;

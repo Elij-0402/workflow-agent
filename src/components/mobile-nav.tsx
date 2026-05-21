@@ -21,32 +21,21 @@ export function MobileNav() {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="md:hidden"
-          aria-label="打开导航菜单"
-        >
+        <Button variant="ghost" size="icon" className="md:hidden" aria-label="打开导航菜单">
           <Menu aria-hidden="true" />
         </Button>
       </SheetTrigger>
-      <SheetContent
-        side="left"
-        className="w-[304px] border-r border-border bg-background p-0"
-      >
+      <SheetContent side="left" className="w-[304px] border-r border-border bg-background p-0">
         <SheetHeader className="border-b border-dashed border-border/70 px-5 py-4">
           <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-primary/80">
-            {"// menu"}</p>
+            {"// menu"}
+          </p>
           <SheetTitle>NovelFusion</SheetTitle>
           <SheetDescription>atelier · 创作工作室</SheetDescription>
         </SheetHeader>
 
         <div className="px-5 py-5">
-          <Button
-            asChild
-            variant="default"
-            className="h-10 w-full justify-center"
-          >
+          <Button asChild variant="default" className="h-10 w-full justify-center">
             <Link href="/upload" onClick={() => setOpen(false)}>
               <Plus aria-hidden="true" />
               新建任务

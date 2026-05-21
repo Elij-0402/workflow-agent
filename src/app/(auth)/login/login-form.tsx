@@ -2,15 +2,7 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import {
-  KeyRound,
-  Loader2,
-  LockKeyhole,
-  Mail,
-  Orbit,
-  ScanSearch,
-  Sparkles,
-} from "lucide-react";
+import { KeyRound, Loader2, LockKeyhole, Mail, Orbit, ScanSearch, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
 import { submitPasswordAuth } from "../actions";
@@ -42,7 +34,7 @@ export function LoginForm({ redirectPath }: { redirectPath: string }) {
             switchLabel: "去登录",
             tagline: "创建一个普通账号，保存你的小说数据和 LLM 配置。",
           },
-    [mode]
+    [mode],
   );
 
   const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -69,11 +61,10 @@ export function LoginForm({ redirectPath }: { redirectPath: string }) {
         <div className="max-w-[560px]">
           <div className="mb-8">
             <p className="font-mono text-[10.5px] uppercase tracking-[0.18em] text-primary/80">
-              {"// atelier · v0.2"}</p>
+              {"// atelier · v0.2"}
+            </p>
             <div className="mt-3 leading-none">
-              <span className="font-display italic text-[40px] text-foreground">
-                Novel
-              </span>
+              <span className="font-display text-[40px] italic text-foreground">Novel</span>
               <span className="font-mono text-[24px] text-primary">·fusion</span>
             </div>
             <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
@@ -81,8 +72,10 @@ export function LoginForm({ redirectPath }: { redirectPath: string }) {
             </p>
           </div>
 
-          <h1 className="font-display italic text-[44px] leading-[1.06] tracking-[-0.01em] text-foreground sm:text-[52px]">
-            为长篇文本建立可复用的<br />分析与生成工作流。
+          <h1 className="font-display text-[44px] italic leading-[1.06] tracking-[-0.01em] text-foreground sm:text-[52px]">
+            为长篇文本建立可复用的
+            <br />
+            分析与生成工作流。
           </h1>
           <p className="mt-6 max-w-[520px] text-[15px] leading-7 text-muted-foreground">
             导入小说，拆解世界构建、人物关系与叙事结构，再在研究结论之上生成新的原创变体文本。
@@ -119,12 +112,10 @@ export function LoginForm({ redirectPath }: { redirectPath: string }) {
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="eyebrow-label">access</p>
-            <h2 className="mt-2 font-display italic text-[28px] leading-[1.05] text-foreground">
+            <h2 className="mt-2 font-display text-[28px] italic leading-[1.05] text-foreground">
               进入工作区
             </h2>
-            <p className="mt-2 text-[13px] leading-6 text-muted-foreground">
-              {copy.tagline}
-            </p>
+            <p className="mt-2 text-[13px] leading-6 text-muted-foreground">{copy.tagline}</p>
           </div>
           <KeyRound aria-hidden className="h-5 w-5 text-primary/70" />
         </div>
@@ -193,11 +184,7 @@ export function LoginForm({ redirectPath }: { redirectPath: string }) {
             </div>
           </div>
 
-          <Button
-            type="submit"
-            className="mt-2 h-11 w-full justify-center"
-            disabled={pending}
-          >
+          <Button type="submit" className="mt-2 h-11 w-full justify-center" disabled={pending}>
             {pending ? (
               <>
                 <Loader2 className="animate-spin" />
@@ -251,10 +238,8 @@ function FeaturePill({
         <Icon className="h-4 w-4 text-primary/70" />
       </div>
       <div>
-        <p className="font-display italic text-[16px] text-foreground">{title}</p>
-        <p className="mt-2 text-[12.5px] leading-6 text-muted-foreground">
-          {description}
-        </p>
+        <p className="font-display text-[16px] italic text-foreground">{title}</p>
+        <p className="mt-2 text-[12.5px] leading-6 text-muted-foreground">{description}</p>
       </div>
     </div>
   );

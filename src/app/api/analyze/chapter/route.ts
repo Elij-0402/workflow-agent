@@ -87,7 +87,7 @@ export async function POST(req: Request) {
           ? result.usage.completionTokens
           : null,
       },
-      { onConflict: "book_id,chapter_id,dimension" }
+      { onConflict: "book_id,chapter_id,dimension" },
     );
     if (upErr) {
       return NextResponse.json({ error: "保存分析失败。" }, { status: 500 });
@@ -96,12 +96,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true, result: result.object });
   } catch (e) {
     const msg =
-      e instanceof Error && isUserFixableLLMConfigMessage(e.message)
-        ? e.message
-        : "章节分析失败。";
-    return NextResponse.json(
-      { error: msg },
-      { status: msg === "章节分析失败。" ? 502 : 409 }
-    );
+      e instanceof Error && isUserFixableLLMConfigMessage(e.message) ? e.message : "章节分析失败。";
+    return NextResponse.json({ error: msg }, { status: msg === "章节分析失败。" ? 502 : 409 });
   }
 }

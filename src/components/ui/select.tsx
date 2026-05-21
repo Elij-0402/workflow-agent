@@ -18,7 +18,7 @@ const SelectTrigger = React.forwardRef<
     ref={ref}
     className={cn(
       "flex h-9 w-full items-center justify-between whitespace-nowrap rounded-[3px] border border-border bg-background/40 px-3 py-2 font-mono text-[13px] text-foreground ring-offset-background placeholder:text-muted-foreground/70 focus:border-primary/80 focus:outline-none focus:ring-1 focus:ring-primary/50 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1",
-      className
+      className,
     )}
     {...props}
   >
@@ -41,7 +41,7 @@ const SelectContent = React.forwardRef<
         "relative z-50 max-h-96 min-w-[8rem] overflow-hidden rounded-[3px] border border-border bg-popover text-popover-foreground shadow-brass-soft data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
         position === "popper" &&
           "data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1",
-        className
+        className,
       )}
       position={position}
       {...props}
@@ -50,7 +50,7 @@ const SelectContent = React.forwardRef<
         className={cn(
           "p-1",
           position === "popper" &&
-            "h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)]"
+            "h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)]",
         )}
       >
         {children}
@@ -68,7 +68,7 @@ const SelectItem = React.forwardRef<
     ref={ref}
     className={cn(
       "relative flex w-full cursor-default select-none items-center rounded-[2px] py-1.5 pl-2 pr-8 font-mono text-[12px] text-foreground outline-none focus:bg-accent focus:text-primary data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
-      className
+      className,
     )}
     {...props}
   >
@@ -82,11 +82,4 @@ const SelectItem = React.forwardRef<
 ));
 SelectItem.displayName = SelectPrimitive.Item.displayName;
 
-export {
-  Select,
-  SelectGroup,
-  SelectValue,
-  SelectTrigger,
-  SelectContent,
-  SelectItem,
-};
+export { Select, SelectGroup, SelectValue, SelectTrigger, SelectContent, SelectItem };

@@ -59,10 +59,7 @@ export function QuickGenerateForm({
               onChange={field.onChange}
             />
             <p className="text-[13px] leading-7 text-muted-foreground">
-              {
-                OUTPUT_SCOPE_OPTIONS.find((option) => option.value === outputScope)
-                  ?.description
-              }
+              {OUTPUT_SCOPE_OPTIONS.find((option) => option.value === outputScope)?.description}
             </p>
             <FormMessage />
           </FormItem>
@@ -82,10 +79,7 @@ export function QuickGenerateForm({
               onChange={field.onChange}
             />
             <p className="text-[13px] leading-7 text-muted-foreground">
-              {
-                STRATEGY_OPTIONS.find((option) => option.value === strategy)
-                  ?.description
-              }
+              {STRATEGY_OPTIONS.find((option) => option.value === strategy)?.description}
             </p>
             <FormMessage />
           </FormItem>
@@ -99,9 +93,7 @@ export function QuickGenerateForm({
           <FormItem className="flex flex-col gap-3">
             <div className="flex items-center justify-between gap-3">
               <FormLabel>{"// innovation"}</FormLabel>
-              <span className="font-mono text-[13px] text-primary">
-                {innovation} / 10
-              </span>
+              <span className="font-mono text-[13px] text-primary">{innovation} / 10</span>
             </div>
             <FormControl>
               <input
@@ -112,9 +104,7 @@ export function QuickGenerateForm({
                 value={field.value}
                 disabled={disabled}
                 className="w-full accent-primary"
-                onChange={(event) =>
-                  field.onChange(Number(event.target.value))
-                }
+                onChange={(event) => field.onChange(Number(event.target.value))}
               />
             </FormControl>
             <div className="flex items-center justify-between font-mono text-[10.5px] uppercase tracking-[0.10em] text-muted-foreground">
@@ -145,11 +135,7 @@ export function AdvancedOptions({
           render={({ field }) => (
             <FormItem>
               <FormLabel>{"// viewpoint"}</FormLabel>
-              <Select
-                disabled={disabled}
-                value={field.value}
-                onValueChange={field.onChange}
-              >
+              <Select disabled={disabled} value={field.value} onValueChange={field.onChange}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="选择叙事视角" />
@@ -174,11 +160,7 @@ export function AdvancedOptions({
           render={({ field }) => (
             <FormItem>
               <FormLabel>{"// style"}</FormLabel>
-              <Select
-                disabled={disabled}
-                value={field.value}
-                onValueChange={field.onChange}
-              >
+              <Select disabled={disabled} value={field.value} onValueChange={field.onChange}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="选择文风倾向" />
@@ -254,9 +236,7 @@ export function ChoiceGrid<T extends string>({
           variant="outline"
           className={cn(
             "h-auto w-full justify-start rounded-[3px] px-3 py-3 text-left font-mono text-[12px] uppercase tracking-[0.06em]",
-            value === option.value
-              ? "border-primary bg-primary/10 text-primary"
-              : ""
+            value === option.value ? "border-primary bg-primary/10 text-primary" : "",
           )}
         >
           <span>[ {option.label} ]</span>

@@ -108,7 +108,7 @@ export function ChapterTree({
                 [ {position} ]
               </span>
             ) : null}
-            <h3 className="truncate font-display italic text-[16px] leading-tight text-foreground">
+            <h3 className="truncate font-display text-[16px] italic leading-tight text-foreground">
               {book.title}
             </h3>
           </div>
@@ -138,9 +138,7 @@ export function ChapterTree({
       <div className="flex-1 overflow-auto">
         {visibleChapters.length === 0 ? (
           <p className="p-4 font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
-            {chapters.length === 0
-              ? "// empty — no chapters"
-              : "// no chapters match filter"}
+            {chapters.length === 0 ? "// empty — no chapters" : "// no chapters match filter"}
           </p>
         ) : (
           visibleChapters.map((c) => (

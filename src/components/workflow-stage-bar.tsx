@@ -33,18 +33,14 @@ export function WorkflowStageBar({ items }: WorkflowStageBarProps) {
               key={item.key}
               className={cn(
                 "relative flex-1 px-5 py-4 transition-colors",
-                isCurrent && "bg-primary/5"
+                isCurrent && "bg-primary/5",
               )}
             >
               <div className="flex items-start gap-3">
                 <span
                   className={cn(
                     "mt-0.5 flex h-5 w-7 shrink-0 items-center justify-center font-mono text-[11px] tracking-[0.06em]",
-                    isDone
-                      ? "text-flash"
-                      : isCurrent
-                        ? "text-primary"
-                        : "text-muted-foreground/60"
+                    isDone ? "text-flash" : isCurrent ? "text-primary" : "text-muted-foreground/60",
                   )}
                   aria-hidden="true"
                 >
@@ -60,7 +56,7 @@ export function WorkflowStageBar({ items }: WorkflowStageBarProps) {
                           ? "text-flash"
                           : isCurrent
                             ? "text-primary"
-                            : "text-muted-foreground/50"
+                            : "text-muted-foreground/50",
                       )}
                       aria-hidden="true"
                     >
@@ -69,17 +65,13 @@ export function WorkflowStageBar({ items }: WorkflowStageBarProps) {
                     <span
                       className={cn(
                         "text-[13px]",
-                        isCurrent
-                          ? "font-display italic text-foreground"
-                          : "text-foreground"
+                        isCurrent ? "font-display italic text-foreground" : "text-foreground",
                       )}
                     >
                       {item.label}
                     </span>
                   </div>
-                  <p className="text-[12px] leading-5 text-muted-foreground">
-                    {item.description}
-                  </p>
+                  <p className="text-[12px] leading-5 text-muted-foreground">{item.description}</p>
                 </div>
               </div>
             </li>

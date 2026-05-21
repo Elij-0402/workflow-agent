@@ -75,12 +75,10 @@ export function WorkbenchClient(props: Props) {
 
   const [chapterStatus, setChapterStatus] = useState<ChapterStatus>({});
   const [pendingCandidate, setPendingCandidate] = useState<Candidate | null>(null);
-  const [blueprintStatus, setBlueprintStatus] = useState<BlueprintStatus>(
-    props.blueprintStatus
-  );
+  const [blueprintStatus, setBlueprintStatus] = useState<BlueprintStatus>(props.blueprintStatus);
   const [blueprintId, setBlueprintId] = useState<string | null>(props.blueprintId);
   const [blueprintUpdatedAt, setBlueprintUpdatedAt] = useState<string | null>(
-    props.blueprintUpdatedAt
+    props.blueprintUpdatedAt,
   );
   const [blueprint, setBlueprint] = useState<Blueprint>(props.blueprint);
 
@@ -94,9 +92,10 @@ export function WorkbenchClient(props: Props) {
   const a = props.books[0] ?? null;
   const b = props.books[1] ?? null;
 
-  const synthesisSet = useMemo(() => new Set(props.bookSynthesisByBook), [
-    props.bookSynthesisByBook,
-  ]);
+  const synthesisSet = useMemo(
+    () => new Set(props.bookSynthesisByBook),
+    [props.bookSynthesisByBook],
+  );
 
   const booksLookup = useMemo(
     () =>
@@ -105,7 +104,7 @@ export function WorkbenchClient(props: Props) {
         title: b.title,
         position: b.position,
       })),
-    [props.books]
+    [props.books],
   );
 
   const chaptersLookup = useMemo(() => {
@@ -121,7 +120,7 @@ export function WorkbenchClient(props: Props) {
         const analyzed = props.briefs.filter((br) => br.book_id === book.id).length;
         return { bookId: book.id, total, analyzed };
       }),
-    [props.books, props.chapters, props.briefs]
+    [props.books, props.chapters, props.briefs],
   );
 
   // Keep editor state in sync after router.refresh().
@@ -162,8 +161,7 @@ export function WorkbenchClient(props: Props) {
       toast.info("该书所有章节已分析。");
       return;
     }
-    const avgChars =
-      targets.reduce((s, c) => s + (c.end_char - c.start_char), 0) / targets.length;
+    const avgChars = targets.reduce((s, c) => s + (c.end_char - c.start_char), 0) / targets.length;
     setCostModal({
       open: true,
       bookId,
@@ -318,10 +316,7 @@ export function WorkbenchClient(props: Props) {
 
       {props.variants.length >= 2 ? (
         <section className="mt-4">
-          <VariantComparison
-            variants={props.variants}
-            confirmedAt={props.blueprintConfirmedAt}
-          />
+          <VariantComparison variants={props.variants} confirmedAt={props.blueprintConfirmedAt} />
         </section>
       ) : null}
 
@@ -354,7 +349,7 @@ function EmptySlot({
   return (
     <div className="surface-panel flex flex-col items-center justify-center gap-4 p-8 text-center">
       <BookPlus className="h-12 w-12 text-primary/60" strokeWidth={1.5} aria-hidden />
-      <h3 className="font-display italic text-[20px] leading-tight text-foreground">
+      <h3 className="font-display text-[20px] italic leading-tight text-foreground">
         还差第 {position} 本书
       </h3>
       <p className="max-w-xs text-[13px] leading-7 text-muted-foreground">

@@ -15,10 +15,7 @@ export default async function DashboardPage() {
   } = await supabase.auth.getUser();
 
   const [{ data: llmConfig }, { data: recentSessions }] = await Promise.all([
-    supabase
-      .from("llm_config")
-      .select("id, provider, model, updated_at")
-      .maybeSingle(),
+    supabase.from("llm_config").select("id, provider, model, updated_at").maybeSingle(),
     supabase
       .from("sessions")
       .select("id, name, status, mode, created_at, updated_at")
@@ -37,9 +34,7 @@ export default async function DashboardPage() {
   }
 
   const username = user?.email?.split("@")[0] ?? "创作者";
-  const latestStatus = latestSession
-    ? getSessionStatusMeta(latestSession.status)
-    : null;
+  const latestStatus = latestSession ? getSessionStatusMeta(latestSession.status) : null;
   const latestActionLabel = latestSession
     ? latestSession.mode === "dual"
       ? "进入工作台"
@@ -66,15 +61,13 @@ export default async function DashboardPage() {
                 <div className="flex flex-col gap-3">
                   <div className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.10em]">
                     <StatusDot status={latestSession.status} />
-                    <span className={latestStatus?.tone}>
-                      {latestStatus?.label}
-                    </span>
+                    <span className={latestStatus?.tone}>{latestStatus?.label}</span>
                     <span className="text-muted-foreground/50">·</span>
                     <span className="text-muted-foreground/80">
                       session · {latestSession.id.slice(0, 6)}
                     </span>
                   </div>
-                  <h2 className="font-display italic text-[32px] leading-[1.08] tracking-[-0.005em] text-foreground">
+                  <h2 className="font-display text-[32px] italic leading-[1.08] tracking-[-0.005em] text-foreground">
                     {latestSession.name}
                   </h2>
                   <p className="max-w-2xl text-[14px] leading-7 text-muted-foreground">
@@ -90,10 +83,7 @@ export default async function DashboardPage() {
                   items={[
                     {
                       label: "results",
-                      value:
-                        latestVariantCount > 0
-                          ? `${latestVariantCount} 个版本`
-                          : "尚未生成",
+                      value: latestVariantCount > 0 ? `${latestVariantCount} 个版本` : "尚未生成",
                     },
                     {
                       label: "updated",
@@ -130,7 +120,7 @@ export default async function DashboardPage() {
             ) : (
               <div className="flex flex-col gap-3">
                 <p className="eyebrow-label">empty</p>
-                <h2 className="font-display italic text-[32px] leading-[1.08] text-foreground">
+                <h2 className="font-display text-[32px] italic leading-[1.08] text-foreground">
                   还没有任务
                 </h2>
                 <p className="max-w-2xl text-[14px] leading-7 text-muted-foreground">
@@ -144,9 +134,7 @@ export default async function DashboardPage() {
         <div className="flex flex-col gap-4">
           <section className="surface-panel p-5">
             <p className="eyebrow-label">actions</p>
-            <h3 className="mt-3 font-display italic text-[20px] text-foreground">
-              开始新任务
-            </h3>
+            <h3 className="mt-3 font-display text-[20px] italic text-foreground">开始新任务</h3>
             <p className="mt-2 text-[13px] leading-6 text-muted-foreground">
               上传新的小说文本，直接进入分析页。
             </p>
@@ -174,11 +162,7 @@ export default async function DashboardPage() {
                   {latestSession ? "新建任务" : "开始第一个任务"}
                 </Link>
               </Button>
-              <Button
-                asChild
-                variant="ghost"
-                className="h-10 justify-center"
-              >
+              <Button asChild variant="ghost" className="h-10 justify-center">
                 <Link href="/settings">
                   <Settings2 aria-hidden="true" />
                   模型设置
@@ -191,11 +175,10 @@ export default async function DashboardPage() {
             <div className="flex items-center gap-3">
               <Waypoints className="h-4 w-4 text-primary" />
               <p className="font-mono text-[10.5px] uppercase tracking-[0.14em] text-primary/85">
-                {"// research"}</p>
+                {"// research"}
+              </p>
             </div>
-            <p className="mt-1 font-display italic text-[16px] text-foreground">
-              研究方向
-            </p>
+            <p className="mt-1 font-display text-[16px] italic text-foreground">研究方向</p>
             <p className="mt-3 text-[12.5px] leading-6 text-muted-foreground">
               当前版本先围绕单书分析与生成闭环展开，后续会在同一套工作台里接入多文本对照、双视角总结与更强的长文本处理能力。
             </p>
@@ -205,12 +188,11 @@ export default async function DashboardPage() {
             <div className="flex items-center gap-3">
               <Sparkles className="h-4 w-4 text-primary" />
               <p className="font-mono text-[10.5px] uppercase tracking-[0.14em] text-primary/85">
-                {"// model"}</p>
+                {"// model"}
+              </p>
             </div>
             <p className="mt-2 font-mono text-[12px] text-foreground">
-              {llmConfig
-                ? `${llmConfig.provider} · ${llmConfig.model}`
-                : "未配置"}
+              {llmConfig ? `${llmConfig.provider} · ${llmConfig.model}` : "未配置"}
             </p>
             {llmConfig ? (
               <p className="mt-1 font-mono text-[10.5px] uppercase tracking-[0.10em] text-muted-foreground/70">

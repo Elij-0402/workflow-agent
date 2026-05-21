@@ -34,10 +34,7 @@ export function AnalysisDetail({ dimension, result }: AnalysisDetailProps) {
       <div className="space-y-6 text-[13px] leading-7 text-muted-foreground">
         <div className="grid gap-3 md:grid-cols-2">
           <DetailBlock label="world type" value={data.type} />
-          <DetailBlock
-            label="power system"
-            value={data.power_system ?? "未明确提及"}
-          />
+          <DetailBlock label="power system" value={data.power_system ?? "未明确提及"} />
           <DetailBlock className="md:col-span-2" label="setting" value={data.setting} />
         </div>
 
@@ -125,13 +122,9 @@ export function AnalysisDetail({ dimension, result }: AnalysisDetailProps) {
                   className="rounded-[3px] border border-border bg-background/40 px-3 py-3"
                 >
                   <div className="flex flex-wrap items-center gap-2 font-mono text-[12px]">
-                    <span className="text-foreground">
-                      {relationship.from}
-                    </span>
+                    <span className="text-foreground">{relationship.from}</span>
                     <span className="text-primary">→</span>
-                    <span className="text-foreground">
-                      {relationship.to}
-                    </span>
+                    <span className="text-foreground">{relationship.to}</span>
                     <Badge variant="outline">{relationship.type}</Badge>
                   </div>
                   <p className="mt-2 text-[13px] leading-7 text-muted-foreground">
@@ -157,7 +150,7 @@ export function AnalysisDetail({ dimension, result }: AnalysisDetailProps) {
   const data = parsed.data;
 
   return (
-      <div className="space-y-6 text-[13px] leading-7 text-muted-foreground">
+    <div className="space-y-6 text-[13px] leading-7 text-muted-foreground">
       <div className="grid gap-3 md:grid-cols-3">
         <DetailBlock label="structure" value={data.structure} />
         <DetailBlock label="viewpoint" value={data.viewpoint} />
@@ -229,8 +222,9 @@ export function AnalysisDetail({ dimension, result }: AnalysisDetailProps) {
 
 function InvalidResultNotice() {
   return (
-    <p className="rounded-[3px] border border-destructive/40 bg-destructive/8 px-3 py-3 font-mono text-[12px] uppercase tracking-[0.08em] text-destructive">
-      {"// schema invalid — please rerun this dimension"}</p>
+    <p className="bg-destructive/8 rounded-[3px] border border-destructive/40 px-3 py-3 font-mono text-[12px] uppercase tracking-[0.08em] text-destructive">
+      {"// schema invalid — please rerun this dimension"}
+    </p>
   );
 }
 
@@ -256,7 +250,7 @@ function DetailBlock({
 function SectionTitle({ title, token }: { title: string; token?: string }) {
   return (
     <div className="flex items-baseline gap-3">
-      <h4 className="font-display italic text-[16px] text-foreground">{title}</h4>
+      <h4 className="font-display text-[16px] italic text-foreground">{title}</h4>
       {token ? (
         <span className="font-mono text-[10.5px] uppercase tracking-[0.10em] text-primary/70">
           {`// ${token}`}
@@ -270,13 +264,7 @@ function EmptyText({ text }: { text: string }) {
   return <p className="text-[13px] text-muted-foreground">{text}</p>;
 }
 
-function OverflowTable({
-  headers,
-  rows,
-}: {
-  headers: string[];
-  rows: string[][];
-}) {
+function OverflowTable({ headers, rows }: { headers: string[]; rows: string[][] }) {
   return (
     <div className="overflow-x-auto rounded-[3px] border border-border bg-background/30">
       <Table className="text-[13px]">
@@ -291,10 +279,7 @@ function OverflowTable({
           {rows.map((row, index) => (
             <TableRow key={`${row[0]}-${index}`}>
               {row.map((cell, cellIndex) => (
-                <TableCell
-                  key={`${row[0]}-${cellIndex}`}
-                  className="align-top text-foreground"
-                >
+                <TableCell key={`${row[0]}-${cellIndex}`} className="align-top text-foreground">
                   {cell}
                 </TableCell>
               ))}

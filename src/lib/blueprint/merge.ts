@@ -14,10 +14,7 @@ export type Candidate = {
   source: BlueprintSource;
 };
 
-function identityKey(
-  section: BlueprintSection,
-  item: Record<string, unknown>
-): string {
+function identityKey(section: BlueprintSection, item: Record<string, unknown>): string {
   switch (section) {
     case "characters":
       return String(item.name ?? "");
