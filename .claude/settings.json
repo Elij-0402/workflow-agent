@@ -26,6 +26,10 @@
           {
             "type": "command",
             "command": "node -e \"process.stdout.write(JSON.stringify({terminalSequence:String.fromCharCode(7)}))\""
+          },
+          {
+            "type": "command",
+            "command": "node .claude/scripts/reflect-prompt.js"
           }
         ]
       }

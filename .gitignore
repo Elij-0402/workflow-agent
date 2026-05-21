@@ -73,3 +73,6 @@ logs/security/
 
 # third-party Claude Code agents (msitarzewski/agency-agents)
 .claude/agents/
+
+# reflect-prompt.js session marker (per-session reflection state)
+.claude/.reflected-sessions
