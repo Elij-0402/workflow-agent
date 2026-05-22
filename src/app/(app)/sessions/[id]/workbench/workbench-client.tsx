@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { BookPlus } from "lucide-react";
+import { BookPlus, GitCompare } from "lucide-react";
 import { toast } from "sonner";
 
 import { PageHeader } from "@/components/page-header";
@@ -13,7 +13,6 @@ import { BlueprintEditor } from "@/components/workbench/blueprint-editor";
 import { ChapterTree } from "@/components/workbench/chapter-tree";
 import { CostEstimateModal } from "@/components/workbench/cost-estimate-modal";
 import { HintBanner } from "@/components/workbench/hint-banner";
-import { OnboardingCard } from "@/components/workbench/onboarding-card";
 import { PipelineBar } from "@/components/workbench/pipeline-bar";
 import {
   WorkbenchModeSwitcher,
@@ -365,6 +364,14 @@ export function WorkbenchClient(props: Props) {
             : a
               ? `${a.title} · 等待第 2 本书`
               : "等待导入"
+        }
+        action={
+          <Button asChild variant="ghost" size="sm">
+            <Link href={`/sessions?with=${props.session.id}`}>
+              <GitCompare className="h-4 w-4" aria-hidden />
+              加入对比
+            </Link>
+          </Button>
         }
       />
 

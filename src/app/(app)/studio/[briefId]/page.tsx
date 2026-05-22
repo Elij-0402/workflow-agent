@@ -65,10 +65,14 @@ export default async function StudioBriefPage({ params }: Props) {
           </Button>
         }
       />
-      <BriefEditor mode={{ kind: "edit", briefId }} initial={initial} />
-      <section className="border-t border-dashed border-border/60 pt-6">
-        <OutlineStreamer briefId={briefId} />
-      </section>
+      <div className="grid gap-6 xl:grid-cols-2 xl:gap-8">
+        <div className="min-w-0">
+          <BriefEditor mode={{ kind: "edit", briefId }} initial={initial} />
+        </div>
+        <section className="min-w-0 xl:border-l xl:border-border/60 xl:pl-8">
+          <OutlineStreamer briefId={briefId} />
+        </section>
+      </div>
     </div>
   );
 }

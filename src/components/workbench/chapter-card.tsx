@@ -79,6 +79,9 @@ export function ChapterCard({
       >
         {busy ? "◐" : done ? "●" : "○"}
       </span>
+      <span className="sr-only">
+        {busy ? "进行中" : done ? "已完成" : status === "error" ? "失败" : "未开始"}
+      </span>
       <span className="truncate text-foreground">{chapter.title}</span>
     </>
   );

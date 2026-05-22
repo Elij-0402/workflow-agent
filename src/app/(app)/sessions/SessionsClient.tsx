@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { GitCompare, X } from "lucide-react";
 import { toast } from "sonner";
 
@@ -32,6 +32,7 @@ type SessionRow = {
 type SessionsClientProps = {
   sessions: SessionRow[];
   view: "active" | "archived";
+  initialWith?: string | null;
 };
 
 type ConfirmState = null | {
@@ -40,11 +41,27 @@ type ConfirmState = null | {
   action: "archive" | "restore" | "delete";
 };
 
-export function SessionsClient({ sessions, view }: SessionsClientProps) {
+export function SessionsClient({ sessions, view, initialWith = null }: SessionsClientProps) {
   const router = useRouter();
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(() => {
+    const initial = new Set<string>();
+    if (initialWith && sessions.some((s) => s.id === initialWith)) initial.add(initialWith);
+    return initial;
+  });
   const [confirm, setConfirm] = useState<ConfirmState>(null);
   const [pending, startTransition] = useTransition();
+
+  // If initialWith arrives via prop change (e.g. SSR re-render), seed selection once.
+  useEffect(() => {
+    if (initialWith && sessions.some((s) => s.id === initialWith)) {
+      setSelectedIds((prev) => {
+        if (prev.has(initialWith)) return prev;
+        const next = new Set(prev);
+        next.add(initialWith);
+        return next;
+      });
+    }
+  }, [initialWith, sessions]);
 
   const toggleSelect = (id: string) => {
     setSelectedIds((prev) => {
@@ -103,6 +120,15 @@ export function SessionsClient({ sessions, view }: SessionsClientProps) {
 
   return (
     <>
+      <div className="flex items-center gap-1 border-b border-border/60">
+        <SegmentLink active={view === "active"} href="/sessions">
+          进行中
+        </SegmentLink>
+        <SegmentLink active={view === "archived"} href="/sessions?view=archived">
+          归档
+        </SegmentLink>
+      </div>
+
       <div
         className={cn(
           "grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3",
@@ -166,6 +192,26 @@ export function SessionsClient({ sessions, view }: SessionsClientProps) {
         onConfirm={handleConfirm}
       />
     </>
+  );
+}
+
+function SegmentLink({
+  href,
+  active,
+  children,
+}: {
+  href: string;
+  active: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <a
+      href={href}
+      data-active={active ? "true" : undefined}
+      className="terminal-tab"
+    >
+      {children}
+    </a>
   );
 }
 

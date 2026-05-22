@@ -121,7 +121,14 @@ function CompareInner({ books }: Props) {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-end gap-2">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/60 pb-3">
+        <div className="min-w-0 flex items-center gap-3">
+          <span className="mono-label-sm">对比 · {books.length} 部</span>
+          <span className="text-muted-foreground/40">·</span>
+          <span className="font-mono text-[11px] uppercase tracking-[0.10em] text-primary">
+            维度 · {active}
+          </span>
+        </div>
         <ExportMenu snapshotRef={snapshotRef} />
       </div>
       <div ref={snapshotRef} className="flex flex-col gap-6">

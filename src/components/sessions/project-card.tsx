@@ -9,8 +9,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { SessionStatusBadge } from "@/components/ui/status-badge";
 import { cn, formatDate, formatRelativeTime } from "@/lib/utils";
-import { getSessionStatusMeta, StatusDot } from "@/components/status-dot";
 
 type ProjectSession = {
   id: string;
@@ -41,7 +41,6 @@ export function ProjectCard({
   onRestore,
   onDelete,
 }: ProjectCardProps) {
-  const status = getSessionStatusMeta(session.status);
   const href =
     session.mode === "dual" ? `/sessions/${session.id}/workbench` : `/sessions/${session.id}`;
   const isDual = session.mode === "dual";
@@ -98,10 +97,11 @@ export function ProjectCard({
         {session.name}
       </h3>
 
-      <div className="relative z-10 mt-3 flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.08em]">
-        <StatusDot status={session.status} />
-        <span className={status.tone}>{status.label}</span>
-        <span className="ml-2 text-muted-foreground/60">{isDual ? "双书" : "单书"}</span>
+      <div className="relative z-10 mt-3 flex flex-wrap items-center gap-2">
+        <SessionStatusBadge status={session.status} />
+        <span className="font-mono text-[10px] uppercase tracking-[0.10em] text-muted-foreground/70">
+          {isDual ? "双书" : "单书"}
+        </span>
       </div>
 
       <div className="relative z-10 mt-auto flex items-end justify-between gap-3 border-t border-dashed border-border/60 pt-5">

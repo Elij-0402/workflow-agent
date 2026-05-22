@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { GitCompare, History, LayoutDashboard, Palette, Settings, Sparkles, Upload } from "lucide-react";
+import { GitCompare, History, LayoutDashboard, Palette, Settings, Sparkles } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -15,7 +15,6 @@ type NavItem = {
 const NAV_ITEMS: NavItem[] = [
   { href: "/dashboard", label: "概览", icon: LayoutDashboard },
   { href: "/sessions", label: "项目", icon: History },
-  { href: "/upload", label: "新建项目", icon: Upload },
   { href: "/compare", label: "对比研究", icon: GitCompare },
   { href: "/studio", label: "生成实验台", icon: Sparkles },
 ];

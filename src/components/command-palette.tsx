@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import {
   GitCompare,
   History,
+  Keyboard,
   LayoutDashboard,
   Search,
   Settings,
@@ -36,6 +37,19 @@ const COMMANDS: Command[] = [
   { id: "compare", label: "对比研究", hint: "Compare", href: "/compare", icon: GitCompare },
   { id: "studio", label: "生成实验台", hint: "Studio", href: "/studio", icon: Sparkles },
   { id: "settings", label: "模型设置", hint: "Settings", href: "/settings", icon: Settings },
+];
+
+type Shortcut = {
+  keys: string[];
+  label: string;
+  scope?: string;
+};
+
+const SHORTCUTS: Shortcut[] = [
+  { keys: ["⌘", "K"], label: "打开命令面板", scope: "全局" },
+  { keys: ["Esc"], label: "关闭弹层", scope: "全局" },
+  { keys: ["1", "—", "7"], label: "切换维度", scope: "对比研究" },
+  { keys: ["F"], label: "聚焦/锚定当前维度", scope: "对比研究" },
 ];
 
 export function CommandPalette() {
@@ -87,6 +101,8 @@ export function CommandPalette() {
     }
   }
 
+  const showShortcuts = query.trim() === "";
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent
@@ -104,7 +120,7 @@ export function CommandPalette() {
             placeholder="搜索页面、操作…"
             className="h-12 flex-1 bg-transparent text-[14px] text-foreground outline-none placeholder:text-muted-foreground"
           />
-          <kbd className="hidden rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-mono text-muted-foreground sm:inline-block">
+          <kbd className="hidden rounded border border-border bg-muted px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground sm:inline-block">
             ESC
           </kbd>
         </div>
@@ -141,6 +157,36 @@ export function CommandPalette() {
             })
           )}
         </ul>
+        {showShortcuts ? (
+          <div className="border-t border-border/60 px-4 py-3">
+            <p className="mb-2 flex items-center gap-1.5 mono-label-xs text-muted-foreground/80">
+              <Keyboard className="h-3 w-3" aria-hidden strokeWidth={1.5} />
+              快捷键
+            </p>
+            <ul className="grid grid-cols-1 gap-1 sm:grid-cols-2">
+              {SHORTCUTS.map((s) => (
+                <li key={s.label} className="flex items-center justify-between gap-2 py-1 text-[12px]">
+                  <span className="truncate text-muted-foreground">
+                    {s.label}
+                    {s.scope ? (
+                      <span className="ml-1.5 text-muted-foreground/50">· {s.scope}</span>
+                    ) : null}
+                  </span>
+                  <span className="flex shrink-0 items-center gap-1">
+                    {s.keys.map((k, idx) => (
+                      <kbd
+                        key={`${s.label}-${idx}`}
+                        className="rounded border border-border bg-muted px-1.5 py-0.5 font-mono text-[10px] text-foreground"
+                      >
+                        {k}
+                      </kbd>
+                    ))}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
         <div className="flex items-center justify-between gap-3 border-t border-border/60 px-4 py-2 text-[11px] text-muted-foreground">
           <span>↑↓ 选择 · Enter 打开</span>
           <span className="font-mono">

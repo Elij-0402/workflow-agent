@@ -1,6 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
-import { Settings2 } from "lucide-react";
+import { GitCompare, Settings2 } from "lucide-react";
 
 import { AnalysisPanel } from "./analysis-panel";
 import { ExtendedAnalysisPanel } from "./extended-analysis-panel";
@@ -141,11 +141,21 @@ export default async function SessionDetailPage({ params }: SessionPageProps) {
         去设置
       </Link>
     </Button>
-  ) : hasCompleteAnalysis ? (
-    <Button asChild variant="outline" size="sm">
-      <Link href={`/studio/new?sessionId=${session.id}`}>新建创意简报</Link>
-    </Button>
-  ) : undefined;
+  ) : (
+    <div className="flex flex-wrap items-center gap-2">
+      {hasCompleteAnalysis ? (
+        <Button asChild variant="outline" size="sm">
+          <Link href={`/studio/new?sessionId=${session.id}`}>新建创意简报</Link>
+        </Button>
+      ) : null}
+      <Button asChild variant="ghost" size="sm">
+        <Link href={`/sessions?with=${session.id}`}>
+          <GitCompare className="h-4 w-4" aria-hidden />
+          加入对比
+        </Link>
+      </Button>
+    </div>
+  );
 
   return (
     <div className="app-page">

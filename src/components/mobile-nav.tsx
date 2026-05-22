@@ -47,7 +47,7 @@ export function MobileNav() {
           >
             <Link href="/upload" onClick={() => setOpen(false)}>
               <Plus aria-hidden="true" />
-              新建任务
+              新建项目
             </Link>
           </Button>
         </div>

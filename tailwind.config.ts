@@ -49,6 +49,9 @@ const config: Config = {
         brass: {
           DEFAULT: "hsl(var(--primary))",
         },
+        "brass-soft": {
+          DEFAULT: "hsl(var(--brass-soft))",
+        },
         chart: {
           "1": "hsl(var(--chart-1))",
           "2": "hsl(var(--chart-2))",
@@ -61,6 +64,19 @@ const config: Config = {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 1px)",
         sm: "calc(var(--radius) - 2px)",
+        xs: "var(--radius-xs)",
+      },
+      fontSize: {
+        "display-hero": [
+          "40px",
+          { lineHeight: "1.05", letterSpacing: "-0.01em" },
+        ],
+        "display-page": [
+          "28px",
+          { lineHeight: "1.15", letterSpacing: "-0.005em" },
+        ],
+        "display-section": ["22px", { lineHeight: "1.2" }],
+        "display-card": ["20px", { lineHeight: "1.25" }],
       },
       fontFamily: {
         display: [

@@ -1,4 +1,8 @@
-export default function AuthLayout({ children }: { children: React.ReactNode }) {
+export default function AuthLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <div className="relative min-h-screen overflow-hidden bg-background">
       <div
@@ -6,9 +10,9 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         className="pointer-events-none absolute inset-0"
         style={{
           backgroundImage: [
-            "radial-gradient(circle at 6% -8%, hsl(44 56% 47% / 0.16), transparent 38%)",
-            "radial-gradient(circle at 96% 102%, hsl(132 23% 54% / 0.10), transparent 42%)",
-            "radial-gradient(circle at 50% 50%, hsl(75 10% 8% / 0.30), transparent 70%)",
+            "radial-gradient(circle at 6% -8%, hsl(var(--auth-glow-1) / 0.18), transparent 38%)",
+            "radial-gradient(circle at 96% 102%, hsl(var(--auth-glow-2) / 0.12), transparent 42%)",
+            "radial-gradient(circle at 50% 50%, hsl(var(--auth-glow-3) / 0.30), transparent 70%)",
           ].join(", "),
         }}
       />
