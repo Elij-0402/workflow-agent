@@ -2,6 +2,8 @@ import type { GenerateAnalyses, GenerateConfig } from "@/lib/types";
 
 import { UNTRUSTED_NOVEL_RULE, wrapUntrustedNovel } from "./safety";
 
+export const GENERATE_PROMPT_VERSION = "2026-05-22";
+export const GENERATE_SCHEMA_VERSION = "1";
 export const GENERATE_SYSTEM_PROMPT = `你是一名中文小说变体创作助手。
 
 请基于结构化分析结果与原文片段，生成一个自洽、可读、可直接展示的中文小说变体，并严格返回符合 schema 的 JSON。

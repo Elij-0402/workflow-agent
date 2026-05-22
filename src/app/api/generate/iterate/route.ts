@@ -1,11 +1,17 @@
-import { streamObject } from "ai";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { getUserLLMClient } from "@/lib/llm/dispatch";
+import {
+  validateOutlineVariantForBrief,
+  validatePreviousChapterVariantForBrief,
+} from "@/lib/brief-workflow";
+import { asLLMClientError } from "@/lib/llm/errors";
+import { streamLLMObject } from "@/lib/llm/runtime";
 import { composeBriefIntoPrompt } from "@/lib/prompts/brief-compose";
 import {
   ITERATE_CHAPTER_RESULT_SCHEMA,
+  ITERATE_CHAPTER_PROMPT_VERSION,
+  ITERATE_CHAPTER_SCHEMA_VERSION,
   ITERATE_CHAPTER_SYSTEM_PROMPT,
   buildIterateChapterUserPrompt,
 } from "@/lib/prompts/iterate-chapter";
@@ -58,7 +64,7 @@ export async function POST(req: Request) {
     body.previousVariantId
       ? supabase
           .from("variants")
-          .select("id, content, chapter_index, scope")
+          .select("id, session_id, content, chapter_index, scope, brief_id")
           .eq("id", body.previousVariantId)
           .eq("user_id", user.id)
           .maybeSingle()
@@ -66,19 +72,31 @@ export async function POST(req: Request) {
   ]);
 
   if (!brief) return NextResponse.json({ error: "未找到简报。" }, { status: 404 });
-  if (!outlineVariant) {
-    return NextResponse.json({ error: "未找到大纲。" }, { status: 404 });
+  const outlineCheck = validateOutlineVariantForBrief({
+    brief,
+    outlineVariant,
+  });
+  if (!outlineCheck.ok) {
+    return NextResponse.json({ error: outlineCheck.message }, { status: outlineCheck.status });
   }
-  if (outlineVariant.scope !== "outline") {
-    return NextResponse.json({ error: "传入的不是大纲版本。" }, { status: 409 });
+  if (body.previousVariantId) {
+    const previousCheck = validatePreviousChapterVariantForBrief({
+      brief,
+      chapterIndex: body.chapterIndex,
+      previousVariant: prev.data,
+    });
+    if (!previousCheck.ok) {
+      return NextResponse.json(
+        { error: previousCheck.message },
+        { status: previousCheck.status },
+      );
+    }
   }
-  if (outlineVariant.session_id !== brief.session_id) {
-    return NextResponse.json({ error: "大纲和简报不属于同一项目。" }, { status: 409 });
-  }
+  const safeOutlineVariant = outlineVariant!;
 
   let outline;
   try {
-    outline = OutlineSchema.parse(JSON.parse(outlineVariant.content));
+    outline = OutlineSchema.parse(JSON.parse(safeOutlineVariant.content));
   } catch {
     return NextResponse.json({ error: "大纲格式异常。" }, { status: 409 });
   }
@@ -101,10 +119,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "简报格式异常。" }, { status: 409 });
   }
 
-  const previousContent =
-    prev?.data && prev.data.scope === "chapter" && prev.data.chapter_index === body.chapterIndex
-      ? prev.data.content
-      : undefined;
+  const previousContent = prev.data?.content;
 
   const briefSection = composeBriefIntoPrompt(briefParsed.data);
   const userPrompt = buildIterateChapterUserPrompt({
@@ -116,30 +131,60 @@ export async function POST(req: Request) {
   });
 
   return sseResponse(async (emit) => {
-    const llm = await getUserLLMClient(supabase);
-    const result = streamObject({
-      model: llm.openai(llm.model),
-      schema: ITERATE_CHAPTER_RESULT_SCHEMA,
-      system: ITERATE_CHAPTER_SYSTEM_PROMPT,
-      prompt: userPrompt,
-      temperature: llm.temperature,
-      maxTokens: Math.min(6000, llm.maxTokens),
-    });
+    let result: Awaited<
+      ReturnType<typeof streamLLMObject<typeof ITERATE_CHAPTER_RESULT_SCHEMA>>
+    >;
+    try {
+      result = await streamLLMObject({
+        supabase,
+        route: "/api/generate/iterate",
+        operation: "iterate_chapter",
+        schema: ITERATE_CHAPTER_RESULT_SCHEMA,
+        system: ITERATE_CHAPTER_SYSTEM_PROMPT,
+        prompt: userPrompt,
+        promptVersion: ITERATE_CHAPTER_PROMPT_VERSION,
+        schemaVersion: ITERATE_CHAPTER_SCHEMA_VERSION,
+        maxTokens: 6000,
+        cacheSeed: {
+          briefId: brief.id,
+          outlineVariantId: body.outlineVariantId,
+          chapterIndex: body.chapterIndex,
+          previousVariantId: body.previousVariantId ?? null,
+          feedback: body.feedback ?? "",
+        },
+      });
+    } catch (error) {
+      emit({
+        type: "error",
+        message: asLLMClientError(error, {
+          code: "llm_request_failed",
+          userMessage: "生成失败，请稍后重试。",
+          retryable: true,
+        }).userMessage,
+      });
+      return;
+    }
 
     for await (const partial of result.partialObjectStream) {
       emit({ type: "partial", data: partial });
     }
 
-    let object: unknown;
+    let finalized: Awaited<ReturnType<typeof result.finalize>>;
     try {
-      object = await result.object;
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : "stream failed";
-      emit({ type: "error", message: `生成失败：${msg}` });
+      finalized = await result.finalize();
+    } catch (error) {
+      emit({
+        type: "error",
+        message: asLLMClientError(error, {
+          code: "llm_request_failed",
+          userMessage: "生成失败，请稍后重试。",
+          retryable: true,
+        }).userMessage,
+      });
       return;
     }
 
-    const validated = ITERATE_CHAPTER_RESULT_SCHEMA.safeParse(object);
+    const validated = ITERATE_CHAPTER_RESULT_SCHEMA.safeParse(finalized.object);
     if (!validated.success) {
       emit({ type: "error", message: "章节格式校验失败。" });
       return;
@@ -168,11 +213,17 @@ export async function POST(req: Request) {
         },
         content,
         word_count: wordCount,
-        llm_config_id: llm.configId,
+        llm_config_id: finalized.llm.configId,
         brief_id: brief.id,
         parent_variant_id: body.previousVariantId ?? null,
         scope: "chapter",
         chapter_index: body.chapterIndex,
+        prompt_version: ITERATE_CHAPTER_PROMPT_VERSION,
+        schema_version: ITERATE_CHAPTER_SCHEMA_VERSION,
+        prompt_tokens: finalized.usage.promptTokens,
+        completion_tokens: finalized.usage.completionTokens,
+        estimated_cost_cny: finalized.estimatedCostCNY,
+        cache_key: finalized.cacheKey,
       })
       .select("id")
       .single();

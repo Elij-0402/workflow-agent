@@ -10,6 +10,8 @@ export const COMPARE_INSIGHT_DIMENSIONS = [
   ...ANALYSIS_DIMENSIONS,
   ...EXTENDED_ANALYSIS_DIMENSIONS,
 ] as const satisfies readonly AnalysisDimension[];
+export const COMPARE_INSIGHTS_PROMPT_VERSION = "2026-05-22";
+export const COMPARE_INSIGHTS_SCHEMA_VERSION = "1";
 
 type Dim = (typeof COMPARE_INSIGHT_DIMENSIONS)[number];
 

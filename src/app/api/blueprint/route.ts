@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { mergeSections } from "@/lib/blueprint/merge";
+import { toBlueprintSaveResult } from "@/lib/blueprint/save-result";
 import { BlueprintSchema, emptyBlueprint } from "@/lib/blueprint/schema";
 import { createClient } from "@/lib/supabase/server";
 
@@ -61,11 +62,11 @@ export async function PATCH(req: Request) {
   const upserted = await supabase
     .from("blueprints")
     .upsert(payload, { onConflict: "session_id" })
-    .select("updated_at")
+    .select("id, updated_at")
     .single();
 
   if (upserted.error) {
     return NextResponse.json({ error: "保存蓝图失败。" }, { status: 500 });
   }
-  return NextResponse.json({ ok: true, updated_at: upserted.data.updated_at });
+  return NextResponse.json(toBlueprintSaveResult(upserted.data));
 }

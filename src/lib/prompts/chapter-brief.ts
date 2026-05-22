@@ -1,6 +1,8 @@
 import { UNTRUSTED_NOVEL_RULE, wrapUntrustedNovel } from "./safety";
 
 export const CHAPTER_TEXT_CHAR_LIMIT = 12_000;
+export const CHAPTER_BRIEF_PROMPT_VERSION = "2026-05-22";
+export const CHAPTER_BRIEF_SCHEMA_VERSION = "1";
 
 export const CHAPTER_BRIEF_SYSTEM_PROMPT = `你是中文小说研究助手。
 

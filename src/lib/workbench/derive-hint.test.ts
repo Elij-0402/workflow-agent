@@ -15,7 +15,7 @@ const base = {
 test("import step when fewer than 2 books", () => {
   const h = deriveHint({ ...base, importedCount: 1 });
   assert.equal(h.step, "import");
-  assert.match(h.text, /上传第 2 本书/);
+  assert.match(h.text, /参考书 2/);
 });
 
 test("chapter step when chapters pending", () => {
@@ -42,7 +42,7 @@ test("synth step when both books need synthesis", () => {
     ],
   });
   assert.equal(h.step, "synth");
-  assert.match(h.text, /两本书/);
+  assert.match(h.text, /两本参考书/);
 });
 
 test("synth step when only book B pending", () => {
@@ -56,7 +56,7 @@ test("synth step when only book B pending", () => {
     bookSynthesisDone: { a: true, b: false },
   });
   assert.equal(h.step, "synth");
-  assert.match(h.text, /书 B/);
+  assert.match(h.text, /参考书 2/);
 });
 
 test("compare step when blueprint draft and not ready", () => {
@@ -109,5 +109,5 @@ test("generate step suggests comparison when variants ≥ 2", () => {
     variantCount: 3,
   });
   assert.equal(h.step, "generate");
-  assert.match(h.text, /variants 模式/);
+  assert.match(h.text, /多个生成版本/);
 });

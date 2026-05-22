@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { getUserLLMClient } from "@/lib/llm/dispatch";
 import { isUserFixableLLMConfigMessage } from "@/lib/llm-config";
+import { saveAnalysis } from "@/lib/analysis-store";
 import { ANALYSIS_TEXT_CHAR_LIMIT, EXTENDED_ANALYSIS_DIMENSION_CONFIG } from "@/lib/prompts";
 import { wrapUntrustedNovel } from "@/lib/prompts/safety";
 import { createClient } from "@/lib/supabase/server";
@@ -66,24 +67,21 @@ export async function POST(req: Request) {
       maxTokens: llm.maxTokens,
     });
 
-    const { error: upErr } = await supabase.from("analyses").upsert(
-      {
-        book_id: book.id,
-        user_id: user.id,
-        dimension: body.dimension,
-        scope: "book",
-        chapter_id: null,
-        result: result.object,
-        llm_config_id: llm.configId,
-        prompt_tokens: Number.isFinite(result.usage.promptTokens)
-          ? result.usage.promptTokens
-          : null,
-        completion_tokens: Number.isFinite(result.usage.completionTokens)
-          ? result.usage.completionTokens
-          : null,
-      },
-      { onConflict: "book_id,dimension" },
-    );
+    const { error: upErr } = await saveAnalysis({
+      supabase,
+      userId: user.id,
+      bookId: book.id,
+      scope: "book",
+      dimension: body.dimension,
+      result: result.object,
+      llmConfigId: llm.configId,
+      promptTokens: Number.isFinite(result.usage.promptTokens)
+        ? result.usage.promptTokens
+        : null,
+      completionTokens: Number.isFinite(result.usage.completionTokens)
+        ? result.usage.completionTokens
+        : null,
+    });
     if (upErr) {
       return jsonError("保存分析结果失败。", 500);
     }

@@ -13,6 +13,8 @@ export const ITERATE_CHAPTER_SYSTEM_PROMPT = `你是中文小说撰写助手。
 5. 不要跨越目标章节的范围讲下一章。`;
 
 export const ITERATE_CHAPTER_RESULT_SCHEMA = VariantResultSchema;
+export const ITERATE_CHAPTER_PROMPT_VERSION = "iterate-chapter-v1";
+export const ITERATE_CHAPTER_SCHEMA_VERSION = "variant-result-v1";
 
 export function buildIterateChapterUserPrompt({
   outline,

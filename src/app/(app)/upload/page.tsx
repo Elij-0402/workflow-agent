@@ -23,11 +23,11 @@ export default async function UploadPage({
     <div className="app-page">
       <PageHeader
         label="import"
-        title={addingSecondBook ? "补充第 2 本小说" : "新建任务"}
+        title={addingSecondBook ? "补充参考书 2" : "创建双书融合任务"}
         description={
           addingSecondBook
-            ? "把第 2 本小说追加到当前任务。上传完成后会回到任务流程页。"
-            : "一次上传两本小说，然后顺着完成分析、对比和生成。书 B 可留空，稍后补传。"
+            ? "把第 2 本参考小说补充到当前任务。上传完成后会回到蓝图工作台。"
+            : "导入两本参考小说，系统会分析、整合情节与创意，然后带你进入蓝图工作台继续生成衍生小说。"
         }
       />
       {addingSecondBook ? (

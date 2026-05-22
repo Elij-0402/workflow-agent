@@ -1,10 +1,9 @@
-import { generateObject } from "ai";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { distanceFor } from "@/lib/compare/distance";
-import { getUserLLMClient } from "@/lib/llm/dispatch";
-import { isUserFixableLLMConfigMessage } from "@/lib/llm-config";
+import { asLLMClientError } from "@/lib/llm/errors";
+import { runLLMObject } from "@/lib/llm/runtime";
 import { COMPARE_INSIGHTS_CONFIG } from "@/lib/prompts";
 import { COMPARE_INSIGHT_DIMENSIONS } from "@/lib/prompts/compare-insights";
 import { createClient } from "@/lib/supabase/server";
@@ -229,29 +228,36 @@ export async function POST(req: Request) {
 ${JSON.stringify(payload, null, 2)}`;
 
   try {
-    const llm = await getUserLLMClient(supabase);
-    const result = await generateObject({
-      model: llm.openai(llm.model),
+    const result = await runLLMObject({
+      supabase,
+      route: "/api/compare/insights",
+      operation: "compare_insights",
       schema: COMPARE_INSIGHTS_CONFIG.schema,
       system: COMPARE_INSIGHTS_CONFIG.systemPrompt,
       prompt,
-      temperature: llm.temperature,
-      maxTokens: llm.maxTokens,
+      promptVersion: COMPARE_INSIGHTS_CONFIG.promptVersion,
+      schemaVersion: COMPARE_INSIGHTS_CONFIG.schemaVersion,
+      cacheSeed: {
+        sessionIds,
+        bookIds,
+      },
     });
 
     return NextResponse.json({
       ok: true,
       insights: (result.object as { insights: unknown }).insights,
-      promptTokens: Number.isFinite(result.usage.promptTokens)
-        ? result.usage.promptTokens
-        : null,
-      completionTokens: Number.isFinite(result.usage.completionTokens)
-        ? result.usage.completionTokens
-        : null,
+      promptTokens: result.usage.promptTokens,
+      completionTokens: result.usage.completionTokens,
     });
   } catch (e) {
-    const msg =
-      e instanceof Error && isUserFixableLLMConfigMessage(e.message) ? e.message : GENERIC_FAILURE;
-    return jsonError(msg, msg === GENERIC_FAILURE ? 502 : 409);
+    const clientError = asLLMClientError(e, {
+      code: "llm_request_failed",
+      userMessage: GENERIC_FAILURE,
+      retryable: true,
+    });
+    return NextResponse.json(
+      { error: clientError },
+      { status: clientError.userMessage === GENERIC_FAILURE ? 502 : 409 },
+    );
   }
 }

@@ -545,10 +545,10 @@ export function WorkbenchClient(props: Props) {
         title={props.session.name}
         description={
           a && b
-            ? `双书任务 · ${a.title} × ${b.title}`
+            ? `双书融合任务 · ${a.title} × ${b.title}`
             : a
-              ? `${a.title} 已就位 · 等待第 2 本小说`
-              : "先上传两本小说，再开始后续流程"
+              ? `${a.title} 已就位 · 等待参考书 2`
+              : "先导入两本参考小说，再开始后续流程"
         }
         action={
           <Button asChild variant="outline" size="sm">
@@ -567,8 +567,8 @@ export function WorkbenchClient(props: Props) {
       {activeStep === "upload" ? (
         <section className="space-y-5">
           <StepIntro
-            title="第 1 步 · 上传两本小说"
-            description="一个任务只围绕两本来源小说展开。两本都到位后，再开始分析。"
+            title="第 1 步 · 导入两本参考小说"
+            description="一个任务只围绕两本参考小说展开。两本都到位后，再开始分析。"
           />
           <div className="grid gap-4 lg:grid-cols-2">
             <UploadBookCard label="A" book={a} />
@@ -585,8 +585,8 @@ export function WorkbenchClient(props: Props) {
           <div className="surface-panel flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-[13px] leading-6 text-muted-foreground">
               {hasBothBooks
-                ? "两本小说都已上传。现在可以开始分析章节和整书素材。"
-                : "还缺 1 本小说。补齐后才会开放分析步骤。"}
+                ? "两本参考小说都已上传。现在可以开始分析章节和整书素材。"
+                : "还缺 1 本参考小说。补齐后才会开放分析步骤。"}
             </p>
             <Button
               onClick={() => navigateToStep("analysis")}
@@ -601,8 +601,8 @@ export function WorkbenchClient(props: Props) {
       {activeStep === "analysis" ? (
         <section className="space-y-5">
           <StepIntro
-            title="第 2 步 · 分析两本小说"
-            description="先把两本书的章节分析完，再做整书汇总。分析完成后，系统会开放双书对比和融合蓝图。"
+            title="第 2 步 · 分析两本参考小说"
+            description="先把两本参考书的章节分析完，再做整书汇总。分析完成后，系统会开放双书对比和融合蓝图。"
           />
           <PipelineBar
             importedCount={props.books.length}
@@ -636,7 +636,7 @@ export function WorkbenchClient(props: Props) {
             <p className="text-[13px] leading-6 text-muted-foreground">
               {analysisDone
                 ? "章节分析和整书汇总都完成了。下一步进入双书对比与蓝图整理。"
-                : "完成两本书的章节分析和整书汇总后，才能进入对比。"}
+                : "完成两本参考书的章节分析和整书汇总后，才能进入对比。"}
             </p>
             <Button
               onClick={() => navigateToStep("compare")}
@@ -652,7 +652,7 @@ export function WorkbenchClient(props: Props) {
         <section className="space-y-5">
           <StepIntro
             title="第 3 步 · 对比并整理骨架"
-            description="这里把两本小说的章节素材、人物关系、世界规则和情节节点合并成一份融合蓝图。确认蓝图后才开放最终生成。"
+            description="这里把两本参考小说的章节素材、人物关系、世界规则和情节节点合并成一份融合蓝图。确认蓝图后才开放最终生成。"
           />
           <CollapsedChaptersBar
             a={a}
@@ -837,7 +837,9 @@ function getStageItems({
     {
       key: "upload",
       label: "上传",
-      description: hasBothBooks ? "两本小说都已上传。" : "还需要补齐两本小说。",
+      description: hasBothBooks
+        ? "两本参考小说都已上传。"
+        : "还需要补齐两本参考小说。",
       state: hasBothBooks ? "done" : "current",
     },
     {
@@ -847,7 +849,7 @@ function getStageItems({
         ? "章节分析和整书汇总都已完成。"
         : totalChapters > 0
           ? `已分析 ${analyzedChapters}/${totalChapters} 章。`
-          : "开始分析两本小说的章节。",
+          : "开始分析两本参考小说的章节。",
       state: analysisDone ? "done" : hasBothBooks ? "current" : "upcoming",
     },
     {
@@ -899,7 +901,7 @@ function UploadBookCard({
   if (!book) {
     return (
       <div className="surface-panel flex min-h-[220px] items-center justify-center p-6 text-[13px] text-muted-foreground">
-        还没有上传书 {label}。
+        还没有导入参考书 {label === "A" ? "1" : "2"}。
       </div>
     );
   }
@@ -910,7 +912,7 @@ function UploadBookCard({
         <div>
           <p className="eyebrow-label">book {label}</p>
           <h3 className="mt-2 text-[20px] font-semibold leading-tight text-foreground">
-            {book.title}
+            {`参考书 ${label === "A" ? "1" : "2"} · ${book.title}`}
           </h3>
         </div>
         <span className="font-mono text-[24px] text-primary/50">{label}</span>
@@ -957,14 +959,14 @@ function EmptySlot({
         aria-hidden
       />
       <h3 className="text-[20px] font-semibold leading-tight text-foreground">
-        还差书 {position}
+        {`还差参考书 ${position === "A" ? "1" : "2"}`}
       </h3>
       <p className="max-w-xs text-[13px] leading-7 text-muted-foreground">
-        补上第 {position} 本小说后，这个任务才会开放完整的分析和对比流程。
+        补上缺少的参考小说后，这个任务才会开放完整的分析和对比流程。
       </p>
       <Button asChild>
         <Link href={`/upload?sessionId=${sessionId}&position=${positionIndex}`}>
-          上传书 {position}
+          {`补充参考书 ${position === "A" ? "1" : "2"}`}
         </Link>
       </Button>
     </div>
@@ -983,9 +985,10 @@ function CollapsedChaptersBar({
   onExpand: () => void;
 }) {
   function summary(book: BookRow | null, label: "A" | "B") {
-    if (!book) return `${label} · 未上传`;
+    const bookNo = label === "A" ? "参考书 1" : "参考书 2";
+    if (!book) return `${bookNo} · 未上传`;
     const total = chapterTotals.find((item) => item.bookId === book.id);
-    return `${label} · ${book.title} · ${total?.analyzed ?? 0}/${total?.total ?? 0} 章`;
+    return `${bookNo} · ${book.title} · ${total?.analyzed ?? 0}/${total?.total ?? 0} 章`;
   }
 
   return (

@@ -1,5 +1,7 @@
 import type { GenerateConfig } from "@/lib/types";
 
+export const GENERATE_FROM_BLUEPRINT_PROMPT_VERSION = "2026-05-22";
+export const GENERATE_FROM_BLUEPRINT_SCHEMA_VERSION = "1";
 export const GENERATE_FROM_BLUEPRINT_SYSTEM_PROMPT = `你是中文小说变体创作助手。
 
 仅基于"合并创作蓝图"与用户的生成参数，创作一个自洽、可直接展示的中文小说 variant，严格返回符合 schema 的 JSON。

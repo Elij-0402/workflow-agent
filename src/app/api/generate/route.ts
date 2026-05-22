@@ -1,12 +1,13 @@
-import { generateObject } from "ai";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { getUserLLMClient } from "@/lib/llm/dispatch";
-import { isUserFixableLLMConfigMessage } from "@/lib/llm-config";
+import { asLLMClientError } from "@/lib/llm/errors";
+import { runLLMObject } from "@/lib/llm/runtime";
 import {
   buildGenerateUserPrompt,
   GENERATE_SYSTEM_PROMPT,
+  GENERATE_PROMPT_VERSION,
+  GENERATE_SCHEMA_VERSION,
   GENERATE_TEXT_CHAR_LIMIT,
   GENERATE_TITLE_FALLBACK,
   scopeToMaxTokens,
@@ -69,22 +70,6 @@ function parseAnalyses(
     characters: characters.data,
     narrative: narrative.data,
   };
-}
-
-async function getLLMOrThrow(supabase: Awaited<ReturnType<typeof createClient>>) {
-  try {
-    return await getUserLLMClient(supabase);
-  } catch (error) {
-    if (error instanceof Error && isUserFixableLLMConfigMessage(error.message)) {
-      throw new RouteError(error.message, 409);
-    }
-
-    throw new RouteError("读取模型配置失败，请稍后再试。", 500);
-  }
-}
-
-function sanitizeModelError() {
-  return new RouteError("生成失败，请稍后重试。", 502);
 }
 
 export async function POST(request: Request) {
@@ -184,8 +169,6 @@ export async function POST(request: Request) {
   let variantCreated = false;
 
   try {
-    const llm = await getLLMOrThrow(supabase);
-
     if (shouldEnterGeneratingStatus(session.status)) {
       const { error: statusError } = await supabase
         .from("sessions")
@@ -201,26 +184,35 @@ export async function POST(request: Request) {
       statusFlipped = true;
     }
 
-    const { object } = await generateObject({
-      model: llm.openai(llm.model),
+    const prompt = buildGenerateUserPrompt({
+      analyses: parsedAnalyses,
+      config: parsedBody.config,
+      excerpt,
+    });
+    const result = await runLLMObject({
+      supabase,
+      route: "/api/generate",
+      operation: "generate_variant",
       schema: VariantResultSchema,
       system: GENERATE_SYSTEM_PROMPT,
-      prompt: buildGenerateUserPrompt({
+      prompt,
+      promptVersion: GENERATE_PROMPT_VERSION,
+      schemaVersion: GENERATE_SCHEMA_VERSION,
+      maxTokens: scopeToMaxTokens(parsedBody.config.output_scope),
+      cacheSeed: {
+        sessionId: session.id,
         analyses: parsedAnalyses,
         config: parsedBody.config,
         excerpt,
-      }),
-      temperature: llm.temperature,
-      maxTokens: Math.min(scopeToMaxTokens(parsedBody.config.output_scope), llm.maxTokens),
-    }).catch(() => {
-      throw sanitizeModelError();
+      },
     });
+    const { object } = result;
 
     const title = object.title.trim() || GENERATE_TITLE_FALLBACK;
     const content = object.content.trim();
 
     if (!content) {
-      throw sanitizeModelError();
+      throw new RouteError("生成失败，请稍后重试。", 502);
     }
 
     const wordCount = countWords(content);
@@ -233,7 +225,13 @@ export async function POST(request: Request) {
         config: parsedBody.config,
         content,
         word_count: wordCount,
-        llm_config_id: llm.configId,
+        llm_config_id: result.llm.configId,
+        prompt_version: GENERATE_PROMPT_VERSION,
+        schema_version: GENERATE_SCHEMA_VERSION,
+        prompt_tokens: result.usage.promptTokens,
+        completion_tokens: result.usage.completionTokens,
+        estimated_cost_cny: result.estimatedCostCNY,
+        cache_key: result.cacheKey,
       })
       .select("id")
       .single();
@@ -279,6 +277,11 @@ export async function POST(request: Request) {
       return jsonError(error.message, error.status);
     }
 
-    return jsonError("生成失败，请稍后重试。", 502);
+    const clientError = asLLMClientError(error, {
+      code: "llm_request_failed",
+      userMessage: "生成失败，请稍后重试。",
+      retryable: true,
+    });
+    return NextResponse.json({ error: clientError }, { status: 502 });
   }
 }

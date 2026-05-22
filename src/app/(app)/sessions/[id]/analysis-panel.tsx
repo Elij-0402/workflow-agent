@@ -2,10 +2,13 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronDown, ChevronUp, Loader2, RefreshCw, Sparkles } from "lucide-react";import { AnalysisDetail } from "@/components/sessions/analysis-detail";
+import { ChevronDown, ChevronUp, Loader2, RefreshCw, Sparkles } from "lucide-react";
+
+import { AnalysisDetail } from "@/components/sessions/analysis-detail";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { toastError } from "@/lib/error-toast";
+import type { LLMClientError } from "@/lib/llm/errors";
 import {
   ANALYSIS_DIMENSIONS,
   DIMENSION_LABELS,
@@ -153,7 +156,7 @@ export function AnalysisPanel({ sessionId, analyses, llmConfigured, sessionStatu
 
       const payload = (await response.json()) as
         | { ok: true; dimension: LegacyAnalysisDimension; result: unknown }
-        | { error: string };
+        | { error: string | LLMClientError };
 
       if (!response.ok || !("ok" in payload)) {
         const error = "error" in payload ? payload.error : "分析失败，请稍后重试。";
@@ -164,7 +167,11 @@ export function AnalysisPanel({ sessionId, analyses, llmConfigured, sessionStatu
             state: "error",
           },
         }));
-        toastError(`${DIMENSION_LABELS[dimension]}分析失败：${error}`);
+        toastError(
+          typeof error === "string"
+            ? `${DIMENSION_LABELS[dimension]}分析失败：${error}`
+            : { ...error, userMessage: `${DIMENSION_LABELS[dimension]}分析失败：${error.userMessage}` },
+        );
         return;
       }
 

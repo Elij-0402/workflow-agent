@@ -16,6 +16,8 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { AdvancedOptions, QuickGenerateForm } from "@/components/sessions/generate-form-fields";
+import { toastError } from "@/lib/error-toast";
+import type { LLMClientError } from "@/lib/llm/errors";
 import { GenerateConfigSchema, type GenerateConfig } from "@/lib/types";
 
 type Props = {
@@ -27,7 +29,7 @@ type Props = {
 
 type GenerateResponse =
   | { ok: true; variantId: string; title: string; wordCount: number }
-  | { error: string };
+  | { error: string | LLMClientError };
 
 export function GenerateDrawer({ open, onOpenChange, blueprintId, onGenerated }: Props) {
   const [pending, setPending] = useState(false);
@@ -60,14 +62,14 @@ export function GenerateDrawer({ open, onOpenChange, blueprintId, onGenerated }:
       });
       const payload = (await res.json()) as GenerateResponse;
       if (!res.ok || !("ok" in payload)) {
-        toast.error("error" in payload ? payload.error : "生成失败，请稍后重试。");
+        toastError("error" in payload ? payload.error : "生成失败，请稍后重试。");
         return;
       }
       toast.success(`已生成《${payload.title}》`);
       onGenerated();
       onOpenChange(false);
     } catch {
-      toast.error("生成失败，请稍后重试。");
+      toastError("生成失败，请稍后重试。");
     } finally {
       setPending(false);
     }

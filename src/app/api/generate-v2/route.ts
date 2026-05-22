@@ -1,12 +1,13 @@
-import { generateObject } from "ai";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { getUserLLMClient } from "@/lib/llm/dispatch";
-import { isUserFixableLLMConfigMessage } from "@/lib/llm-config";
+import { asLLMClientError } from "@/lib/llm/errors";
+import { runLLMObject } from "@/lib/llm/runtime";
 import { composeBriefIntoPrompt } from "@/lib/prompts/brief-compose";
 import {
   GENERATE_FROM_BLUEPRINT_SYSTEM_PROMPT,
+  GENERATE_FROM_BLUEPRINT_PROMPT_VERSION,
+  GENERATE_FROM_BLUEPRINT_SCHEMA_VERSION,
   buildGenerateFromBlueprintUserPrompt,
 } from "@/lib/prompts/generate-from-blueprint";
 import { GENERATE_TITLE_FALLBACK, scopeToMaxTokens } from "@/lib/prompts/generate";
@@ -79,20 +80,28 @@ export async function POST(req: Request) {
   }
 
   try {
-    const llm = await getUserLLMClient(supabase);
     const userPrompt = buildGenerateFromBlueprintUserPrompt({
       blueprint: bp.sections,
       config: body.config,
     });
     const finalPrompt = briefSection ? `${userPrompt}\n\n${briefSection}` : userPrompt;
-    const { object } = await generateObject({
-      model: llm.openai(llm.model),
+    const result = await runLLMObject({
+      supabase,
+      route: "/api/generate-v2",
+      operation: "generate_from_blueprint",
       schema: VariantResultSchema,
       system: GENERATE_FROM_BLUEPRINT_SYSTEM_PROMPT,
       prompt: finalPrompt,
-      temperature: llm.temperature,
-      maxTokens: Math.min(scopeToMaxTokens(body.config.output_scope), llm.maxTokens),
+      promptVersion: GENERATE_FROM_BLUEPRINT_PROMPT_VERSION,
+      schemaVersion: GENERATE_FROM_BLUEPRINT_SCHEMA_VERSION,
+      maxTokens: scopeToMaxTokens(body.config.output_scope),
+      cacheSeed: {
+        blueprintId: bp.id,
+        briefId: body.briefId ?? null,
+        config: body.config,
+      },
     });
+    const { object } = result;
     const title = object.title.trim() || GENERATE_TITLE_FALLBACK;
     const content = object.content.trim();
     if (!content) {
@@ -109,10 +118,16 @@ export async function POST(req: Request) {
         config: body.config,
         content,
         word_count: wordCount,
-        llm_config_id: llm.configId,
+        llm_config_id: result.llm.configId,
         blueprint_id: bp.id,
         brief_id: body.briefId ?? null,
         scope: "full",
+        prompt_version: GENERATE_FROM_BLUEPRINT_PROMPT_VERSION,
+        schema_version: GENERATE_FROM_BLUEPRINT_SCHEMA_VERSION,
+        prompt_tokens: result.usage.promptTokens,
+        completion_tokens: result.usage.completionTokens,
+        estimated_cost_cny: result.estimatedCostCNY,
+        cache_key: result.cacheKey,
       })
       .select("id")
       .single();
@@ -127,13 +142,14 @@ export async function POST(req: Request) {
       wordCount,
     });
   } catch (e) {
-    const msg =
-      e instanceof Error && isUserFixableLLMConfigMessage(e.message)
-        ? e.message
-        : "生成失败，请稍后重试。";
+    const clientError = asLLMClientError(e, {
+      code: "llm_request_failed",
+      userMessage: "生成失败，请稍后重试。",
+      retryable: true,
+    });
     return NextResponse.json(
-      { error: msg },
-      { status: msg === "生成失败，请稍后重试。" ? 502 : 409 },
+      { error: clientError },
+      { status: clientError.userMessage === "生成失败，请稍后重试。" ? 502 : 409 },
     );
   }
 }

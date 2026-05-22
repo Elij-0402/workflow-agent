@@ -2,18 +2,17 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { History, PlusSquare, Settings } from "lucide-react";
+import { History, Settings } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
 type NavItem = {
   href: string;
   label: string;
-  icon: typeof PlusSquare;
+  icon: typeof History;
 };
 
 const NAV_ITEMS: NavItem[] = [
-  { href: "/upload", label: "新建任务", icon: PlusSquare },
   { href: "/sessions", label: "任务", icon: History },
 ];
 

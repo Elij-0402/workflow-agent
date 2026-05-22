@@ -6,6 +6,7 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { OutlineSchema, type Outline } from "@/lib/prompts/preview-outline";
+import { resolveStreamCompletionState } from "@/lib/streaming/client-state";
 
 type StreamState = "idle" | "running" | "done" | "error";
 
@@ -60,6 +61,7 @@ export function OutlineStreamer({ briefId }: Props) {
       const decoder = new TextDecoder();
       let buffer = "";
       let receivedDone = false;
+      let receivedError = false;
       while (true) {
         const { value, done } = await reader.read();
         if (done) break;
@@ -91,6 +93,7 @@ export function OutlineStreamer({ briefId }: Props) {
               const message = (parsed as { message?: string }).message ?? "stream error";
               setErrorMsg(message);
               setState("error");
+              receivedError = true;
               toast.error(message);
             }
           } catch {
@@ -98,7 +101,7 @@ export function OutlineStreamer({ briefId }: Props) {
           }
         }
       }
-      if (!receivedDone && state !== "error") {
+      if (resolveStreamCompletionState({ receivedDone, receivedError }) === "interrupted") {
         setErrorMsg("连接中断，请重试。");
         setState("error");
       }

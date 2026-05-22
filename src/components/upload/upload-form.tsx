@@ -29,6 +29,9 @@ export function UploadForm({
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [statusText, setStatusText] = useState<string | null>(null);
   const [helpOpen, setHelpOpen] = useState(false);
+  const referenceLabel =
+    mode === "dual" ? (position === 0 ? "参考书 1" : "参考书 2") : "小说文本";
+  const isDualSupplement = mode === "dual";
 
   const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -115,10 +118,12 @@ export function UploadForm({
           <div>
             <p className="eyebrow-label">source text</p>
             <h2 className="mt-2 font-display text-[24px] italic leading-[1.1] text-foreground">
-              选择小说文本
+              {isDualSupplement ? `补充${referenceLabel}` : "选择小说文本"}
             </h2>
             <p className="mt-2 text-[13.5px] leading-7 text-muted-foreground">
-              当前版本支持单个 .txt 文件。导入后会直接创建任务并进入分析页。
+              {isDualSupplement
+                ? "把缺少的参考小说补进当前任务。上传完成后会回到蓝图工作台继续后续流程。"
+                : "当前版本支持单个 .txt 文件。导入后会直接创建任务并进入分析页。"}
             </p>
           </div>
 
@@ -147,8 +152,12 @@ export function UploadForm({
                   </div>
                   <p className="mt-2 text-[13px] leading-7 text-muted-foreground">
                     {filename
-                      ? "确认文件无误后，直接开始创建任务。"
-                      : "先选择文件，再进入分析流程。"}
+                      ? isDualSupplement
+                        ? "确认补充的参考小说无误后，返回工作台继续。"
+                        : "确认文件无误后，直接开始创建任务。"
+                      : isDualSupplement
+                        ? `先选择 ${referenceLabel} 的 .txt 文件。`
+                        : "先选择文件，再进入分析流程。"}
                   </p>
                 </div>
 
@@ -214,7 +223,11 @@ export function UploadForm({
 
           <div className="flex flex-col gap-3 border-t border-dashed border-border/70 pt-5 sm:flex-row sm:items-center sm:justify-between">
             <p className="font-mono text-[10.5px] uppercase tracking-[0.10em] text-muted-foreground">
-              {filename ? "// file ready — start when ready" : "// select file first"}
+              {filename
+                ? isDualSupplement
+                  ? "// reference ready — return to workbench"
+                  : "// file ready — start when ready"
+                : "// select file first"}
             </p>
             <Button type="submit" disabled={pending}>
               {pending ? (
@@ -225,7 +238,7 @@ export function UploadForm({
               ) : (
                 <>
                   <UploadCloud />
-                  开始新任务
+                  {isDualSupplement ? "补充并返回工作台" : "开始新任务"}
                 </>
               )}
             </Button>
@@ -251,7 +264,11 @@ export function UploadForm({
 
           <div className="mt-4 flex flex-col gap-3 text-[13px] leading-7 text-muted-foreground">
             <p>支持 .txt 文件，上限 {formatBytes(MAX_UPLOAD_BYTES, 0)}。</p>
-            <p>导入后会自动识别文本并创建分析任务。</p>
+            <p>
+              {isDualSupplement
+                ? "导入后会自动识别文本，并把它补入当前双书任务。"
+                : "导入后会自动识别文本并创建分析任务。"}
+            </p>
             {helpOpen ? (
               <p className="border-l-[2px] border-primary/40 pl-3 italic">
                 当前先基于文本前段快速分析，方便你先判断结果质量。

@@ -41,11 +41,6 @@ export default async function SessionsPage({ searchParams }: Props) {
             ? "归档任务仍可恢复。永久删除会同时移除分析、章节和生成结果。"
             : "这里保留所有任务。打开任意任务后，会在同一个页面里完成上传、分析、对比和生成。"
         }
-        action={
-          <Button asChild variant="outline" size="sm">
-            <Link href="/upload">新建任务</Link>
-          </Button>
-        }
       />
 
       {list.length > 0 ? (
@@ -71,7 +66,7 @@ export default async function SessionsPage({ searchParams }: Props) {
           <p className="max-w-md text-[13px] leading-6 text-muted-foreground">
             {view === "archived"
               ? "任务归档后会出现在这里。"
-              : "上传两本小说后，分析进度、对比蓝图和生成结果都会保留在这里。"}
+              : "导入两本参考小说后，分析进度、对比蓝图和生成结果都会保留在这里。"}
           </p>
           {view === "active" ? (
             <Button asChild>
