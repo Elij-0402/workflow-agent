@@ -22,6 +22,21 @@ App Router 路由组 + API Route Handlers。父级 `D:\workflow-agent\CLAUDE.md`
 - chapter 级分析走 `/api/analyze/chapter`，book 级综合走 `/api/analyze/book`
 - blueprint CRUD 走 `/api/blueprint` PATCH，状态变更走 `/api/blueprint/confirm` 和 `/unconfirm`
 
+**V0.3 brief 流不绕开 blueprint 闸门**——`/api/generate/preview` 仍硬性要求 `blueprints.status='confirmed'`（返回 409 "请先在工作台确认蓝图。"）；`/api/generate/iterate` 通过校验 `outlineVariant.scope === 'outline'` 且 `outlineVariant.session_id === brief.session_id` 间接依赖已 confirmed 的 blueprint；brief CRUD（`/api/briefs[/id]`）独立于 blueprint 状态，可以在任何状态下写入，但生成路径会拦下。
+
+## V0.3 路由速查
+
+- `/api/briefs` — `GET ?sessionId=…`、`POST { sessionId, brief }`，brief 走 `CreativeBriefSchema.parse`
+- `/api/briefs/[id]` — `GET` / `PATCH`（局部字段：title / 4 类 directive / status via `CreativeBriefStatusSchema`）/ `DELETE`（硬删）
+- `/api/generate/preview` — `POST { briefId, targetChapterCount? }`，SSE 流（`partial` / `done` / `error`），写 `variants(scope='outline', brief_id)`
+- `/api/generate/iterate` — `POST { briefId, outlineVariantId, chapterIndex, previousVariantId?, feedback? }`，SSE 流，写 `variants(scope='chapter', parent_variant_id, brief_id)`，**显式校验 `outlineVariant.scope === 'outline'` 且 `outlineVariant.session_id === brief.session_id`**；`previousVariantId` 通过 RLS 保护
+- `/api/analyze/extended` — `POST { bookId, dimension ∈ {prose_craft, emotion_arc, pacing_map, suspense_grid} }`，非流式 `generateObject`，写入前小说原文必须经 `wrapUntrustedNovel`
+- `/api/sessions/[id]` — `DELETE`（默认软删 = 设 `archived_at`；`?hard=true` 级联硬删）/ `PATCH`（恢复：清 `archived_at`）
+- `/api/sessions/bulk` — `POST { action: 'archive'|'restore'|'delete', ids[] (≤100) }`
+- `/api/variants/[id]` — `DELETE`
+
+所有 V0.3 路由的返回错误形式与 Server Action 不同：`NextResponse.json({ error: string }, { status })`。**SSE 路由**先 200 打开流，错误以 `event: error\ndata: {message}` 推送后关闭，调用方解析事件类型而不是 HTTP 状态。
+
 ## Supabase client 选择（在 Route Handler / Server Action 里）
 
 - **默认用** `@/lib/supabase/server:createClient()` ——带 user cookies，RLS 生效

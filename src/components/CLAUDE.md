@@ -25,11 +25,14 @@ new-york style / neutral base / `cssVariables: true`。新的基础组件放 `sr
 
 ## 子目录划分
 
-- `ui/` — shadcn 原语（button / card / dialog / form …）。**只放可复用基础件**。
-- `sessions/` — 旧 single-mode session 详情 + 变体相关：`analysis-detail`、`generate-panel`、`variant-card`、`variant-list`、`variant-comparison`、`variant-diff-*`（meta / structure / paragraphs 三层）。**`variant-comparison` 和 `variant-diff-*` 也被 workbench 复用**。
+- `ui/` — shadcn 原语（button / card / dialog / form / scroll-area / select / sheet / sonner / table / tabs / textarea / toggle / toggle-group / skeleton …）。**只放可复用基础件**。
+- `sessions/` — 单 session 视图与变体相关：`analysis-detail.tsx`（聚合 entry）+ `analysis-detail/` 子目录按维度拆分的 panel（`worldview-panel` / `characters-panel` / `narrative-panel` / `prose-craft-panel` / `emotion-arc-panel` / `pacing-map-panel` / `suspense-grid-panel` + 共享 `shared.tsx`）、`generate-panel`、`generate-form-fields`、`project-card`、`variant-card`、`variant-list`、`variant-comparison`、`variant-diff-*`（meta / structure / paragraphs 三层）。**`variant-comparison` 和 `variant-diff-*` 也被 workbench 复用**。
 - `workbench/` — dual-mode 专属（章节树、blueprint 编辑、pipeline 状态条、cost 估算 modal 等）。详见 `workbench/CLAUDE.md`。
+- `creative-brief/` — V0.3 简报 UI：`brief-editor`（4 个 directive 标签页 + 冲突检测）、`outline-streamer`（解析 `/api/generate/preview` 的 SSE，渲染 outline 流）。
+- `charts/` — 分析维度可视化：`radar-panel`（legacy 3-dim 雷达）、`emotion-arc-chart`、`pacing-stack-chart`、`suspense-grid-chart`（V0.3 extended dimensions 的图表）。基于 `recharts`。
+- `dashboard/` — 仪表盘可视化：`token-trend-chart`。
 - `upload/` — `upload-form` (single) / `dual-upload-form` (dual)。
-- 顶层 chrome（`app-nav`、`sidebar`、`user-menu`、`mobile-nav`、`page-header`、`status-dot`、`workflow-stage-bar`、`meta-row`）= shell 件。单页交互组件不要写到顶层，归到 `sessions/` 或 `workbench/`。
+- 顶层 chrome（`app-nav`、`sidebar`、`user-menu`、`mobile-nav`、`page-header`、`status-dot`、`workflow-stage-bar`、`meta-row`、`command-palette`、`dismissible-tip`、`empty-state`、`progress-note`）= shell 件。单页交互组件不要写到顶层，归到 `sessions/` / `workbench/` / `creative-brief/` 等业务子目录。
 
 ## 语言
 

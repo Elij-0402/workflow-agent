@@ -8,7 +8,7 @@ dual-mode (`sessions.mode='dual'`) 专属 UI。父级 `src/components/CLAUDE.md`
 
 ## 状态流
 
-1. **章节树**（`chapter-tree.tsx` + `chapter-card.tsx`）按两本书展示已解析章节 → 候选选择器收集要分析的章节
+1. **章节树**（`chapter-tree.tsx` + `chapter-card.tsx`）按两本书展示已解析章节；勾选要分析的章节即把它们加入候选集——**没有独立的「选择器」组件**，勾选逻辑就在这两个组件里
 2. **批量章节分析**：client-orchestrated（无 worker），并发上限 **3**（`src/app/(app)/sessions/[id]/workbench/chapter-batch.ts:18` 的 `opts.concurrency ?? 3`）
 3. 章节分析跑完 → 触发 `/api/analyze/book` 做综合 → 写入 blueprint draft
 4. **Blueprint 编辑**（`blueprint-editor.tsx` + `blueprint-cards.tsx`）改动 → `/api/blueprint` PATCH（服务端 `BlueprintSchema.parse` 闸门）
@@ -22,7 +22,14 @@ dual-mode (`sessions.mode='dual'`) 专属 UI。父级 `src/components/CLAUDE.md`
 
 ## 本目录文件清单
 
-`chapter-tree` `chapter-card` `blueprint-cards` `blueprint-editor` `cost-estimate-modal` `filter-bar` `generate-drawer` `pipeline-bar`。
+主干 8 件：`chapter-tree` `chapter-card` `blueprint-cards` `blueprint-editor` `cost-estimate-modal` `filter-bar` `generate-drawer` `pipeline-bar`。
+
+辅助 4 件：
+
+- `batch-tracker` —— 批量章节分析进度跟踪（concurrency=3 跑批时显示每章状态）
+- `hint-banner` —— 工作台上下文提示横幅，文案派生自 `src/lib/workbench/derive-hint.ts`
+- `onboarding-card` —— 首次进入工作台的引导卡片
+- `workbench-mode-switcher` —— 视图模式切换（章节树 / blueprint / variant 等子视图之间）
 
 如果新增交互组件：dual 专属 → 这里；single 也能用 → 放 `src/components/sessions/`。
 
