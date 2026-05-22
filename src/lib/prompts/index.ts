@@ -12,6 +12,10 @@ import {
   type LegacyAnalysisDimension,
 } from "@/lib/types";
 import { SYSTEM_PROMPT as CHARACTERS_PROMPT } from "./characters";
+import {
+  COMPARE_INSIGHTS_SYSTEM_PROMPT,
+  CompareInsightsResultSchema,
+} from "./compare-insights";
 import { SYSTEM_PROMPT as EMOTION_ARC_PROMPT } from "./emotion-arc";
 import { SYSTEM_PROMPT as NARRATIVE_PROMPT } from "./narrative";
 import { SYSTEM_PROMPT as PACING_MAP_PROMPT } from "./pacing-map";
@@ -66,3 +70,8 @@ export const EXTENDED_ANALYSIS_DIMENSION_CONFIG: Record<
     schema: SuspenseGridResultSchema,
   },
 };
+
+export const COMPARE_INSIGHTS_CONFIG = {
+  systemPrompt: COMPARE_INSIGHTS_SYSTEM_PROMPT,
+  schema: CompareInsightsResultSchema,
+} as const;
