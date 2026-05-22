@@ -1,12 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
-import { AnalysisDetail } from "@/components/sessions/analysis-detail";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ChapterBrushstrip } from "@/components/compare/ChapterBrushstrip";
+import { CompareAtlas } from "@/components/compare/CompareAtlas";
+import { CompareDimensionPanel } from "@/components/compare/CompareDimensionPanel";
+import { DetailDrawer } from "@/components/compare/DetailDrawer";
+import { distanceFor } from "@/lib/compare/distance";
+import { DrawerProvider } from "@/lib/compare/drawer-context";
+import { SyncProvider, useSyncContext } from "@/lib/compare/sync-context";
 import {
   ANALYSIS_DIMENSIONS,
-  DIMENSION_LABELS,
   EXTENDED_ANALYSIS_DIMENSIONS,
   type AnalysisDimension,
 } from "@/lib/types";
@@ -15,6 +19,8 @@ export type CompareBook = {
   bookId: string;
   sessionId: string;
   displayTitle: string;
+  wordCount: number | null;
+  chapterCount: number | null;
   analyses: Partial<Record<AnalysisDimension, unknown>>;
 };
 
@@ -27,61 +33,111 @@ const COMPARE_DIMENSIONS = [
   ...EXTENDED_ANALYSIS_DIMENSIONS,
 ] as const satisfies readonly AnalysisDimension[];
 
-export function CompareClient({ books }: Props) {
-  const [active, setActive] = useState<AnalysisDimension>(COMPARE_DIMENSIONS[0]);
+const BOOK_LETTERS = ["A", "B", "C", "D", "E", "F"];
+
+function makeLabel(index: number): string {
+  return `BOOK ${BOOK_LETTERS[index] ?? index + 1}`;
+}
+
+function isTypingTarget(target: EventTarget | null): boolean {
+  if (!(target instanceof HTMLElement)) return false;
+  const tag = target.tagName;
+  return (
+    tag === "INPUT" ||
+    tag === "TEXTAREA" ||
+    tag === "SELECT" ||
+    target.isContentEditable
+  );
+}
+
+function CompareInner({ books }: Props) {
+  const [active, setActive] = useState<AnalysisDimension>(
+    COMPARE_DIMENSIONS[0],
+  );
+  const [isFocus, setIsFocus] = useState(false);
+  const { setAnchor } = useSyncContext();
+
+  const labeled = useMemo(
+    () => books.map((b, i) => ({ ...b, label: makeLabel(i) })),
+    [books],
+  );
+
+  const distances = useMemo(() => {
+    const out: Partial<Record<AnalysisDimension, number | null>> = {};
+    for (const dim of COMPARE_DIMENSIONS) {
+      const results = books
+        .map((b) => b.analyses[dim])
+        .filter((r): r is unknown => r !== undefined);
+      out[dim] = distanceFor(dim, results);
+    }
+    return out;
+  }, [books]);
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      if (isTypingTarget(e.target)) return;
+      if (e.key === "Escape") {
+        setAnchor(null);
+        return;
+      }
+      if (e.key === "f" || e.key === "F") {
+        setIsFocus((v) => !v);
+        e.preventDefault();
+        return;
+      }
+      const digit = Number(e.key);
+      if (
+        Number.isInteger(digit) &&
+        digit >= 1 &&
+        digit <= COMPARE_DIMENSIONS.length
+      ) {
+        setActive(COMPARE_DIMENSIONS[digit - 1]);
+        e.preventDefault();
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [setAnchor]);
+
+  const brushstripBooks = useMemo(
+    () =>
+      labeled.map((b, i) => ({
+        bookId: b.bookId,
+        label: b.label,
+        index: i,
+        analyses: b.analyses,
+      })),
+    [labeled],
+  );
 
   return (
-    <Tabs
-      value={active}
-      onValueChange={(v) => setActive(v as AnalysisDimension)}
-      className="space-y-4"
-    >
-      <TabsList className="flex-wrap">
-        {COMPARE_DIMENSIONS.map((dim) => {
-          const count = books.filter((b) => Boolean(b.analyses[dim])).length;
-          return (
-            <TabsTrigger key={dim} value={dim}>
-              {DIMENSION_LABELS[dim]}
-              <span className="ml-2 font-mono text-[10px] text-muted-foreground/70">
-                {count}/{books.length}
-              </span>
-            </TabsTrigger>
-          );
-        })}
-      </TabsList>
+    <div className="flex flex-col gap-6">
+      {!isFocus ? (
+        <CompareAtlas dimensions={COMPARE_DIMENSIONS} books={labeled} />
+      ) : null}
+      <CompareDimensionPanel
+        dimensions={COMPARE_DIMENSIONS}
+        books={labeled}
+        distances={distances}
+        active={active}
+        onChange={setActive}
+      />
+      <ChapterBrushstrip dimension={active} books={brushstripBooks} />
+      <p className="font-mono text-[10px] uppercase tracking-[0.10em] text-muted-foreground/50">
+        快捷键 · 1-7 切维度 · f 焦点 · esc 解除锚定
+      </p>
+    </div>
+  );
+}
 
-      {COMPARE_DIMENSIONS.map((dim) => (
-        <TabsContent key={dim} value={dim} className="pt-2">
-          <div className="overflow-x-auto">
-            <div
-              className="grid gap-4"
-              style={{
-                gridTemplateColumns: `repeat(${books.length}, minmax(360px, 1fr))`,
-              }}
-            >
-              {books.map((b) => (
-                <div key={b.bookId} className="surface-panel p-5">
-                  <p className="font-mono text-[10.5px] uppercase tracking-[0.10em] text-primary/85">
-                    {`${dim}`}
-                  </p>
-                  <h3 className="mt-2 line-clamp-2 font-display text-[18px] italic leading-tight text-foreground">
-                    {b.displayTitle}
-                  </h3>
-                  <div className="mt-4 border-t border-dashed border-border/60 pt-4">
-                    {b.analyses[dim] !== undefined ? (
-                      <AnalysisDetail dimension={dim} result={b.analyses[dim]} />
-                    ) : (
-                      <p className="font-mono text-[12px] uppercase tracking-[0.08em] text-muted-foreground/70">
-                        {"该维度尚未分析"}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </TabsContent>
-      ))}
-    </Tabs>
+export function CompareClient({ books }: Props) {
+  return (
+    <SyncProvider>
+      <DrawerProvider>
+        <CompareInner books={books} />
+        <DetailDrawer />
+      </DrawerProvider>
+    </SyncProvider>
   );
 }

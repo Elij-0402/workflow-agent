@@ -51,7 +51,10 @@ export default async function ComparePage({ searchParams }: { searchParams: Sear
 
   const [{ data: sessions }, { data: books }] = await Promise.all([
     supabase.from("sessions").select("id, name, mode").in("id", limited),
-    supabase.from("books").select("id, session_id, title, position").in("session_id", limited),
+    supabase
+      .from("books")
+      .select("id, session_id, title, position, word_count, chapter_count")
+      .in("session_id", limited),
   ]);
 
   const safeSessions = sessions ?? [];
@@ -107,6 +110,8 @@ export default async function ComparePage({ searchParams }: { searchParams: Sear
       bookId: b.id,
       sessionId: b.session_id,
       displayTitle,
+      wordCount: b.word_count ?? null,
+      chapterCount: b.chapter_count ?? null,
       analyses: Object.fromEntries(analysesByBook.get(b.id) ?? new Map()) as Partial<
         Record<AnalysisDimension, unknown>
       >,
