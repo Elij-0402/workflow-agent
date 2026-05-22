@@ -1,5 +1,3 @@
-import { randomUUID } from "node:crypto";
-
 import {
   BlueprintSchema,
   type Blueprint,
@@ -14,7 +12,10 @@ export type Candidate = {
   source: BlueprintSource;
 };
 
-function identityKey(section: BlueprintSection, item: Record<string, unknown>): string {
+function identityKey(
+  section: BlueprintSection,
+  item: Record<string, unknown>,
+): string {
   switch (section) {
     case "characters":
       return String(item.name ?? "");
@@ -59,7 +60,9 @@ export function applyCandidate(bp: Blueprint, c: Candidate): Blueprint {
     });
   }
 
-  const arr = bp[c.section] as Array<Record<string, unknown> & { sources?: BlueprintSource[] }>;
+  const arr = bp[c.section] as Array<
+    Record<string, unknown> & { sources?: BlueprintSource[] }
+  >;
   const key = identityKey(c.section, c.payload);
   const existingIdx = arr.findIndex((it) => identityKey(c.section, it) === key);
 
@@ -72,7 +75,7 @@ export function applyCandidate(bp: Blueprint, c: Candidate): Blueprint {
   }
 
   const newItem = {
-    id: randomUUID(),
+    id: crypto.randomUUID(),
     notes: "",
     sources: [c.source],
     ...c.payload,
@@ -80,6 +83,9 @@ export function applyCandidate(bp: Blueprint, c: Candidate): Blueprint {
   return BlueprintSchema.parse({ ...bp, [c.section]: [...arr, newItem] });
 }
 
-export function mergeSections(bp: Blueprint, patch: Partial<Blueprint>): Blueprint {
+export function mergeSections(
+  bp: Blueprint,
+  patch: Partial<Blueprint>,
+): Blueprint {
   return BlueprintSchema.parse({ ...bp, ...patch });
 }

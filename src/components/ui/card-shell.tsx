@@ -78,7 +78,7 @@ export function CardShell({
       {title ? (
         <div className="relative z-10 mt-3 min-w-0">
           {typeof title === "string" ? (
-            <h3 className="line-clamp-2 font-display text-[20px] italic leading-tight text-foreground">
+            <h3 className="line-clamp-2 text-[18px] font-semibold leading-tight text-foreground">
               {title}
             </h3>
           ) : (

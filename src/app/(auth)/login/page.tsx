@@ -6,7 +6,7 @@ export default async function LoginPage({
   searchParams?: Promise<{ redirect?: string }>;
 }) {
   const resolvedSearchParams = await searchParams;
-  const redirectPath = resolvedSearchParams?.redirect ?? "/dashboard";
+  const redirectPath = resolvedSearchParams?.redirect ?? "/sessions";
 
   return <LoginForm redirectPath={redirectPath} />;
 }

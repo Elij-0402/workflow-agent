@@ -1,8 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState, useTransition } from "react";
-import { GitCompare, X } from "lucide-react";
+import { useState, useTransition } from "react";
 import { toast } from "sonner";
 
 import { ProjectCard } from "@/components/sessions/project-card";
@@ -17,8 +16,6 @@ import {
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 
-const COMPARE_MAX = 6;
-
 type SessionRow = {
   id: string;
   name: string;
@@ -32,7 +29,6 @@ type SessionRow = {
 type SessionsClientProps = {
   sessions: SessionRow[];
   view: "active" | "archived";
-  initialWith?: string | null;
 };
 
 type ConfirmState = null | {
@@ -41,49 +37,15 @@ type ConfirmState = null | {
   action: "archive" | "restore" | "delete";
 };
 
-export function SessionsClient({ sessions, view, initialWith = null }: SessionsClientProps) {
+export function SessionsClient({ sessions, view }: SessionsClientProps) {
   const router = useRouter();
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(() => {
-    const initial = new Set<string>();
-    if (initialWith && sessions.some((s) => s.id === initialWith)) initial.add(initialWith);
-    return initial;
-  });
   const [confirm, setConfirm] = useState<ConfirmState>(null);
   const [pending, startTransition] = useTransition();
 
-  // If initialWith arrives via prop change (e.g. SSR re-render), seed selection once.
-  useEffect(() => {
-    if (initialWith && sessions.some((s) => s.id === initialWith)) {
-      setSelectedIds((prev) => {
-        if (prev.has(initialWith)) return prev;
-        const next = new Set(prev);
-        next.add(initialWith);
-        return next;
-      });
-    }
-  }, [initialWith, sessions]);
-
-  const toggleSelect = (id: string) => {
-    setSelectedIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  };
-
-  const clearSelection = () => setSelectedIds(new Set());
-
-  const goCompare = () => {
-    if (selectedIds.size < 2) {
-      toast.error("请至少选择 2 个项目。");
-      return;
-    }
-    const ids = Array.from(selectedIds).slice(0, COMPARE_MAX);
-    router.push(`/compare?sessionIds=${ids.join(",")}`);
-  };
-
-  const runSingle = async (id: string, action: "archive" | "restore" | "delete") => {
+  const runSingle = async (
+    id: string,
+    action: "archive" | "restore" | "delete",
+  ) => {
     if (action === "delete") {
       const hard = view === "archived" ? "?hard=true" : "";
       return fetch(`/api/sessions/${id}${hard}`, { method: "DELETE" });
@@ -115,16 +77,16 @@ export function SessionsClient({ sessions, view, initialWith = null }: SessionsC
     });
   };
 
-  const selectedCount = selectedIds.size;
-  const showCompareBar = view === "active" && selectedCount > 0;
-
   return (
     <>
       <div className="flex items-center gap-1 border-b border-border/60">
         <SegmentLink active={view === "active"} href="/sessions">
           进行中
         </SegmentLink>
-        <SegmentLink active={view === "archived"} href="/sessions?view=archived">
+        <SegmentLink
+          active={view === "archived"}
+          href="/sessions?view=archived"
+        >
           归档
         </SegmentLink>
       </div>
@@ -139,50 +101,32 @@ export function SessionsClient({ sessions, view, initialWith = null }: SessionsC
           <ProjectCard
             key={session.id}
             session={session}
-            selectMode={view === "active"}
-            selected={selectedIds.has(session.id)}
-            onToggle={toggleSelect}
             onArchive={
               view === "active"
-                ? (id) => setConfirm({ kind: "single-archive", action: "archive", ids: [id] })
+                ? (id) =>
+                    setConfirm({
+                      kind: "single-archive",
+                      action: "archive",
+                      ids: [id],
+                    })
                 : undefined
             }
             onRestore={
               view === "archived"
-                ? (id) => setConfirm({ kind: "single-restore", action: "restore", ids: [id] })
+                ? (id) =>
+                    setConfirm({
+                      kind: "single-restore",
+                      action: "restore",
+                      ids: [id],
+                    })
                 : undefined
             }
-            onDelete={(id) => setConfirm({ kind: "single-delete", action: "delete", ids: [id] })}
+            onDelete={(id) =>
+              setConfirm({ kind: "single-delete", action: "delete", ids: [id] })
+            }
           />
         ))}
       </div>
-
-      {showCompareBar ? (
-        <div className="pointer-events-none fixed inset-x-0 bottom-6 z-40 flex justify-center px-4">
-          <div className="pointer-events-auto flex items-center gap-3 rounded-full border border-border bg-card px-4 py-2 shadow-lg">
-            <span className="text-[13px] text-muted-foreground">
-              已选 {selectedCount} / {COMPARE_MAX}
-            </span>
-            <Button
-              type="button"
-              size="sm"
-              onClick={goCompare}
-              disabled={selectedCount < 2}
-            >
-              <GitCompare className="h-4 w-4" />
-              对比
-            </Button>
-            <button
-              type="button"
-              onClick={clearSelection}
-              className="rounded-full p-1.5 text-muted-foreground transition hover:bg-muted hover:text-foreground"
-              aria-label="清空选择"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          </div>
-        </div>
-      ) : null}
 
       <ConfirmDialog
         confirm={confirm}
@@ -239,19 +183,19 @@ function ConfirmDialog({
 
   if (action === "delete") {
     const isHard = view === "archived";
-    title = isHard ? "永久删除项目" : "删除项目";
+    title = isHard ? "永久删除任务" : "删除任务";
     description = isHard
-      ? `永久删除选中的 ${count} 个项目及其全部分析、章节、变体。此操作无法撤销。`
-      : `删除选中的 ${count} 个项目（连同其全部分析、章节、变体）。此操作无法撤销。`;
+      ? `永久删除选中的 ${count} 个任务及其全部分析、章节和结果。此操作无法撤销。`
+      : `删除选中的 ${count} 个任务（连同其全部分析、章节和结果）。此操作无法撤销。`;
     confirmLabel = isHard ? "永久删除" : "确认删除";
     destructive = true;
   } else if (action === "archive") {
-    title = "归档项目";
-    description = `归档选中的 ${count} 个项目。归档后可在「归档夹」中找到并恢复。`;
+    title = "归档任务";
+    description = `归档选中的 ${count} 个任务。归档后可在「归档夹」中找到并恢复。`;
     confirmLabel = "确认归档";
   } else if (action === "restore") {
-    title = "恢复项目";
-    description = `把选中的 ${count} 个项目恢复到主列表。`;
+    title = "恢复任务";
+    description = `把选中的 ${count} 个任务恢复到主列表。`;
     confirmLabel = "确认恢复";
   }
 
@@ -263,7 +207,12 @@ function ConfirmDialog({
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
         <DialogFooter>
-          <Button type="button" variant="outline" onClick={onCancel} disabled={pending}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onCancel}
+            disabled={pending}
+          >
             取消
           </Button>
           <Button

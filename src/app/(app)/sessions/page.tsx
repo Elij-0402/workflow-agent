@@ -12,8 +12,9 @@ type Props = {
 };
 
 export default async function SessionsPage({ searchParams }: Props) {
-  const { view: viewParam, with: withParam } = await searchParams;
-  const view: "active" | "archived" = viewParam === "archived" ? "archived" : "active";
+  const { view: viewParam } = await searchParams;
+  const view: "active" | "archived" =
+    viewParam === "archived" ? "archived" : "active";
 
   const supabase = await createClient();
   const query = supabase
@@ -21,52 +22,64 @@ export default async function SessionsPage({ searchParams }: Props) {
     .select("id, name, status, mode, archived_at, created_at, updated_at");
   const { data: sessions } =
     view === "archived"
-      ? await query.not("archived_at", "is", null).order("archived_at", { ascending: false })
-      : await query.is("archived_at", null).order("updated_at", { ascending: false });
+      ? await query
+          .not("archived_at", "is", null)
+          .order("archived_at", { ascending: false })
+      : await query
+          .is("archived_at", null)
+          .order("updated_at", { ascending: false });
 
   const list = sessions ?? [];
 
   return (
     <div className="app-page">
       <PageHeader
-        label={view === "archived" ? "projects · archived" : "projects"}
-        title={view === "archived" ? "归档夹" : "我的项目"}
+        label={view === "archived" ? "tasks · archived" : "tasks"}
+        title={view === "archived" ? "归档任务" : "任务"}
         description={
           view === "archived"
-            ? "归档的项目仍可恢复；永久删除会同时移除分析、章节、变体。"
-            : "导入和分析过的所有项目都在这里。多选两个或更多项目可进入对比。"
+            ? "归档任务仍可恢复。永久删除会同时移除分析、章节和生成结果。"
+            : "这里保留所有任务。打开任意任务后，会在同一个页面里完成上传、分析、对比和生成。"
         }
         action={
           <Button asChild variant="outline" size="sm">
-            <Link href="/upload">导入新项目</Link>
+            <Link href="/upload">新建任务</Link>
           </Button>
         }
       />
 
       {list.length > 0 ? (
-        <SessionsClient sessions={list} view={view} initialWith={withParam ?? null} />
+        <SessionsClient sessions={list} view={view} />
       ) : (
-        <div className="surface-panel flex flex-col items-center justify-center gap-4 px-6 py-16 text-center">
+        <div className="surface-panel flex flex-col items-center justify-center gap-4 px-6 py-14 text-center">
           {view === "archived" ? (
-            <Archive className="h-12 w-12 text-primary/60" strokeWidth={1.5} aria-hidden />
+            <Archive
+              className="h-12 w-12 text-primary/60"
+              strokeWidth={1.5}
+              aria-hidden
+            />
           ) : (
-            <BookOpen className="h-12 w-12 text-primary/60" strokeWidth={1.5} aria-hidden />
+            <BookOpen
+              className="h-12 w-12 text-primary/60"
+              strokeWidth={1.5}
+              aria-hidden
+            />
           )}
-          <h3 className="font-display text-[22px] italic leading-tight text-foreground">
-            {view === "archived" ? "归档夹是空的" : "还没有项目"}
+          <h3 className="text-[18px] font-semibold leading-tight text-foreground">
+            {view === "archived" ? "归档夹是空的" : "还没有任务"}
           </h3>
-          <p className="max-w-md text-[13.5px] leading-7 text-muted-foreground">
+          <p className="max-w-md text-[13px] leading-6 text-muted-foreground">
             {view === "archived"
-              ? "在项目列表的卡片菜单选择「归档」后，项目会移到这里。"
-              : "导入第一部小说后，所有分析进度、生成结果都会保留在这里。"}
+              ? "任务归档后会出现在这里。"
+              : "上传两本小说后，分析进度、对比蓝图和生成结果都会保留在这里。"}
           </p>
           {view === "active" ? (
             <Button asChild>
-              <Link href="/upload">开始新项目</Link>
+              <Link href="/upload">开始新任务</Link>
             </Button>
           ) : (
             <Button asChild variant="outline">
-              <Link href="/sessions">返回项目列表</Link>
+              <Link href="/sessions">返回任务列表</Link>
             </Button>
           )}
         </div>

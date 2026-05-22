@@ -32,7 +32,7 @@ new-york style / neutral base / `cssVariables: true`。新的基础组件放 `sr
 - `charts/` — 分析维度可视化：`radar-panel`（legacy 3-dim 雷达）、`emotion-arc-chart`、`pacing-stack-chart`、`suspense-grid-chart`（V0.3 extended dimensions 的图表）。基于 `recharts`。
 - `dashboard/` — 仪表盘可视化：`token-trend-chart`。
 - `upload/` — `upload-form` (single) / `dual-upload-form` (dual)。
-- 顶层 chrome（`app-nav`、`sidebar`、`user-menu`、`mobile-nav`、`page-header`、`status-dot`、`workflow-stage-bar`、`meta-row`、`command-palette`、`dismissible-tip`、`empty-state`、`progress-note`）= shell 件。单页交互组件不要写到顶层，归到 `sessions/` / `workbench/` / `creative-brief/` 等业务子目录。
+- 顶层 chrome（`app-nav`、`sidebar`、`user-menu`、`mobile-nav`、`page-header`、`status-dot`、`workflow-stage-bar`、`meta-row`、`empty-state`、`progress-note`）= shell 件。单页交互组件不要写到顶层，归到 `sessions/` / `workbench/` / `creative-brief/` 等业务子目录。
 
 ## 语言
 

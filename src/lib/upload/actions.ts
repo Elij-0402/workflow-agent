@@ -81,7 +81,11 @@ export async function initNovelUpload(input: InitNovelUploadInput) {
     return {
       ok: true as const,
       sessionId: input.sessionId,
-      storageObjectPath: buildStorageObjectPath(user.id, input.sessionId, safeFilename),
+      storageObjectPath: buildStorageObjectPath(
+        user.id,
+        input.sessionId,
+        safeFilename,
+      ),
       position,
     };
   }
@@ -104,7 +108,11 @@ export async function initNovelUpload(input: InitNovelUploadInput) {
   return {
     ok: true as const,
     sessionId: session.id,
-    storageObjectPath: buildStorageObjectPath(user.id, session.id, safeFilename),
+    storageObjectPath: buildStorageObjectPath(
+      user.id,
+      session.id,
+      safeFilename,
+    ),
     position: 0 as const,
   };
 }
@@ -134,7 +142,11 @@ export async function finalizeNovelUpload(input: FinalizeNovelUploadInput) {
   }
 
   const safeFilename = sanitizeFilename(input.filename);
-  const expectedPath = buildStorageObjectPath(user.id, input.sessionId, safeFilename);
+  const expectedPath = buildStorageObjectPath(
+    user.id,
+    input.sessionId,
+    safeFilename,
+  );
 
   if (input.storageObjectPath !== expectedPath) {
     return { error: "上传路径校验失败，请重新开始。" };
@@ -167,7 +179,11 @@ export async function finalizeNovelUpload(input: FinalizeNovelUploadInput) {
     return { error: "读取上传记录失败，请稍后重试。" };
   }
 
-  if (session.status === "uploaded" && existingBook && session.mode === "single") {
+  if (
+    session.status === "uploaded" &&
+    existingBook &&
+    session.mode === "single"
+  ) {
     return {
       ok: true as const,
       message: "小说已上传。",
@@ -191,7 +207,9 @@ export async function finalizeNovelUpload(input: FinalizeNovelUploadInput) {
     return { error: "原始文件已上传，但解析后为空。请检查文本内容后重试。" };
   }
 
-  const chapters = expandToChapters(cleaned.cleaned, { fallbackChunkChars: 5000 });
+  const chapters = expandToChapters(cleaned.cleaned, {
+    fallbackChunkChars: 5000,
+  });
 
   const bookInsertPayload = {
     session_id: session.id,
@@ -243,7 +261,11 @@ export async function finalizeNovelUpload(input: FinalizeNovelUploadInput) {
   }
 
   // Replace any existing chapter rows (covers re-upload + dual re-parse).
-  await supabase.from("chapters").delete().eq("book_id", bookId).eq("user_id", user.id);
+  await supabase
+    .from("chapters")
+    .delete()
+    .eq("book_id", bookId)
+    .eq("user_id", user.id);
 
   const { error: chaptersInsertError } = await supabase.from("chapters").insert(
     chapters.map((c) => ({
@@ -278,8 +300,7 @@ export async function finalizeNovelUpload(input: FinalizeNovelUploadInput) {
     return { error: "原始文件已上传，但更新会话状态失败。请稍后重试。" };
   }
 
-  const redirectTo =
-    session.mode === "dual" ? `/sessions/${session.id}/workbench` : `/sessions/${session.id}`;
+  const redirectTo = `/sessions/${session.id}`;
 
   return {
     ok: true as const,

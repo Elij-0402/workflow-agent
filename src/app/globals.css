@@ -9,36 +9,36 @@
     background: hsl(75 8% 5%);
   }
   :root {
-    --background: 75 8% 5%;
-    --foreground: 48 26% 86%;
-    --card: 75 9% 9%;
-    --card-foreground: 48 26% 86%;
-    --popover: 75 9% 9%;
-    --popover-foreground: 48 26% 86%;
-    --primary: 44 60% 57%;
-    --primary-foreground: 75 10% 6%;
-    --secondary: 75 8% 11%;
-    --secondary-foreground: 48 18% 82%;
-    --muted: 75 8% 11%;
-    --muted-foreground: 48 14% 64%;
-    --accent: 75 8% 19%;
-    --accent-foreground: 48 26% 86%;
+    --background: 220 14% 7%;
+    --foreground: 210 18% 92%;
+    --card: 220 14% 10%;
+    --card-foreground: 210 18% 92%;
+    --popover: 220 14% 10%;
+    --popover-foreground: 210 18% 92%;
+    --primary: 42 74% 62%;
+    --primary-foreground: 220 16% 8%;
+    --secondary: 220 14% 12%;
+    --secondary-foreground: 210 14% 86%;
+    --muted: 220 14% 12%;
+    --muted-foreground: 214 10% 64%;
+    --accent: 220 14% 16%;
+    --accent-foreground: 210 18% 92%;
     --destructive: 8 56% 51%;
-    --destructive-foreground: 48 26% 96%;
-    --border: 75 8% 18%;
-    --input: 75 8% 18%;
-    --ring: 44 60% 57%;
-    --radius: 0.18rem;
+    --destructive-foreground: 210 18% 96%;
+    --border: 220 12% 20%;
+    --input: 220 12% 20%;
+    --ring: 42 74% 62%;
+    --radius: 0.2rem;
     --flash: 132 23% 54%;
-    --brass-soft: 44 56% 47%;
+    --brass-soft: 42 50% 38%;
 
     --radius-xs: 2px;
     --radius-sm: 3px;
     --radius-md: 5px;
 
-    --auth-glow-1: 44 60% 57%;
-    --auth-glow-2: 132 23% 54%;
-    --auth-glow-3: 75 10% 8%;
+    --auth-glow-1: 42 74% 62%;
+    --auth-glow-2: 220 14% 14%;
+    --auth-glow-3: 220 18% 7%;
 
     --chart-1: 44 56% 47%;
     --chart-2: 132 23% 54%;
@@ -66,35 +66,35 @@
   }
 
   .dark {
-    --background: 75 8% 5%;
-    --foreground: 48 26% 86%;
-    --card: 75 9% 9%;
-    --card-foreground: 48 26% 86%;
-    --popover: 75 9% 9%;
-    --popover-foreground: 48 26% 86%;
-    --primary: 44 60% 57%;
-    --primary-foreground: 75 10% 6%;
-    --secondary: 75 8% 11%;
-    --secondary-foreground: 48 18% 82%;
-    --muted: 75 8% 11%;
-    --muted-foreground: 48 14% 64%;
-    --accent: 75 8% 19%;
-    --accent-foreground: 48 26% 86%;
+    --background: 220 14% 7%;
+    --foreground: 210 18% 92%;
+    --card: 220 14% 10%;
+    --card-foreground: 210 18% 92%;
+    --popover: 220 14% 10%;
+    --popover-foreground: 210 18% 92%;
+    --primary: 42 74% 62%;
+    --primary-foreground: 220 16% 8%;
+    --secondary: 220 14% 12%;
+    --secondary-foreground: 210 14% 86%;
+    --muted: 220 14% 12%;
+    --muted-foreground: 214 10% 64%;
+    --accent: 220 14% 16%;
+    --accent-foreground: 210 18% 92%;
     --destructive: 8 56% 51%;
-    --destructive-foreground: 48 26% 96%;
-    --border: 75 8% 18%;
-    --input: 75 8% 18%;
-    --ring: 44 60% 57%;
+    --destructive-foreground: 210 18% 96%;
+    --border: 220 12% 20%;
+    --input: 220 12% 20%;
+    --ring: 42 74% 62%;
     --flash: 132 23% 54%;
-    --brass-soft: 44 56% 47%;
+    --brass-soft: 42 50% 38%;
 
     --radius-xs: 2px;
     --radius-sm: 3px;
     --radius-md: 5px;
 
-    --auth-glow-1: 44 60% 57%;
-    --auth-glow-2: 132 23% 54%;
-    --auth-glow-3: 75 10% 8%;
+    --auth-glow-1: 42 74% 62%;
+    --auth-glow-2: 220 14% 14%;
+    --auth-glow-3: 220 18% 7%;
 
     --chart-1: 44 56% 47%;
     --chart-2: 132 23% 54%;
@@ -160,23 +160,23 @@
 
 @layer components {
   .app-shell-grid {
-    @apply mx-auto flex w-full max-w-[1480px] gap-0 px-0;
+    @apply mx-auto flex w-full max-w-[1440px] gap-0 px-0;
   }
 
   .app-page {
-    @apply mx-auto flex w-full max-w-[1280px] flex-col gap-9 px-4 py-7 sm:px-6 lg:px-9 lg:py-10;
+    @apply mx-auto flex w-full max-w-[1240px] flex-col gap-7 px-4 py-6 sm:px-6 lg:px-8 lg:py-8;
   }
 
   .surface-panel {
-    @apply relative rounded-[3px] border border-border bg-card;
+    @apply relative rounded-[4px] border border-border/90 bg-card;
   }
 
   .surface-subtle {
-    @apply rounded-[3px] border border-border/70 bg-muted/40;
+    @apply rounded-[4px] border border-border/70 bg-muted/35;
   }
 
   .surface-locked {
-    @apply relative rounded-[3px] border border-dashed border-border bg-card;
+    @apply relative rounded-[4px] border border-dashed border-border bg-card;
   }
 
   .eyebrow-label {
@@ -217,7 +217,7 @@
   }
 
   .terminal-tab {
-    @apply relative inline-flex items-center px-3 py-1.5 text-[13px] font-medium text-muted-foreground transition-colors hover:text-foreground;
+    @apply relative inline-flex items-center px-3 py-2 text-[13px] font-medium text-muted-foreground transition-colors hover:text-foreground;
   }
   .terminal-tab[data-active="true"] {
     @apply text-foreground;
@@ -228,7 +228,7 @@
     left: 8px;
     right: 8px;
     bottom: -1px;
-    height: 1.5px;
+    height: 1px;
     background: hsl(var(--primary));
     transform: scaleX(0);
     transform-origin: left center;
