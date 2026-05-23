@@ -106,7 +106,7 @@ export async function POST(request: Request) {
 
   const { data: session, error: sessionError } = await supabase
     .from("sessions")
-    .select("id, status")
+    .select("id, status, mode")
     .eq("id", parsedBody.sessionId)
     .eq("user_id", user.id)
     .maybeSingle();
@@ -117,6 +117,10 @@ export async function POST(request: Request) {
 
   if (!session) {
     return jsonError("未找到对应会话。", 404);
+  }
+
+  if (session.mode === "dual") {
+    return jsonError("双书任务请使用蓝图生成入口。", 409);
   }
 
   if (session.status !== "analyzed" && session.status !== "done") {
