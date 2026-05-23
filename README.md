@@ -8,7 +8,7 @@
 
 - 邮箱密码注册 / 登录
 - BYOK：每个用户保存一套 DeepSeek / OpenAI 兼容 API Key + Base URL
-- 上传 `.txt` 小说（≤ 50 MB），客户端清洗
+- 上传 `.txt` 小说（≤ 50 MB），浏览器直传私有存储后由服务端清洗
 - 三维度结构化分析：世界观 / 人物 / 叙事
 - 流式生成变体小说
 - 会话历史
@@ -62,6 +62,8 @@ npm run dev
 1. 推送到 GitHub
 2. 在 Vercel 新建项目，导入仓库
 3. 配置环境变量（同 `.env.local`）
+
+说明：生产环境下大文件上传走“浏览器直传 Supabase Storage + 服务端确认入库”链路，不依赖 Vercel Function 接收完整文件体，因此可保留 50 MB 上限。
 
 ## 安全说明
 
