@@ -71,7 +71,6 @@ export function LoginForm({ redirectPath }: { redirectPath: string }) {
 
       toast.success(result?.message ?? "操作成功。");
       router.push(result?.redirectTo ?? "/dashboard");
-      router.refresh();
     });
   };
 

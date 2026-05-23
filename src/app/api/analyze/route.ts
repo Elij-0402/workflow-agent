@@ -11,14 +11,14 @@ import {
   getSessionStatusAfterAnalysis,
   shouldEnterAnalyzingStatus,
 } from "@/lib/session-status";
-import { ANALYSIS_DIMENSIONS, type AnalysisDimension } from "@/lib/types";
+import { LEGACY_ANALYSIS_DIMENSIONS, type LegacyAnalysisDimension } from "@/lib/types";
 
 export const runtime = "nodejs";
 export const maxDuration = 300;
 
 const requestSchema = z.object({
   sessionId: z.string().uuid(),
-  dimension: z.enum(ANALYSIS_DIMENSIONS as [AnalysisDimension, ...AnalysisDimension[]]),
+  dimension: z.enum(LEGACY_ANALYSIS_DIMENSIONS as readonly [LegacyAnalysisDimension, ...LegacyAnalysisDimension[]]),
 });
 
 const ANALYSIS_LOCKED_MESSAGE = "当前正在生成，暂不可重新分析。";
@@ -170,7 +170,7 @@ export async function POST(request: Request) {
 
     const nextStatus = getSessionStatusAfterAnalysis({
       analysisCount: analysisCount ?? 0,
-      totalAnalyses: ANALYSIS_DIMENSIONS.length,
+      totalAnalyses: LEGACY_ANALYSIS_DIMENSIONS.length,
       variantCount: variantCount ?? 0,
     });
 

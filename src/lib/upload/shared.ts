@@ -22,6 +22,20 @@ export function sanitizeFilename(filename: string) {
     .trim();
 }
 
+export function sanitizeStorageFilename(filename: string) {
+  const normalized = sanitizeFilename(filename).normalize("NFKD");
+  const match = normalized.match(/(\.[^.]+)$/);
+  const extension = match?.[1]?.toLowerCase() ?? "";
+  const stem = extension ? normalized.slice(0, -extension.length) : normalized;
+  const asciiStem = stem
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^A-Za-z0-9._-]+/g, "_")
+    .replace(/_+/g, "_")
+    .replace(/^[_\-.]+|[_\-.]+$/g, "");
+
+  return `${asciiStem || "novel"}${extension}`;
+}
+
 export function getSessionName(filename: string) {
   return filename.replace(/\.[^.]+$/, "").trim() || "未命名小说";
 }
@@ -55,5 +69,5 @@ export function validateUploadFile(file: UploadFileMeta) {
 }
 
 export function buildStorageObjectPath(userId: string, sessionId: string, filename: string) {
-  return `${userId}/${sessionId}/${sanitizeFilename(filename)}`;
+  return `${userId}/${sessionId}/${sanitizeStorageFilename(filename)}`;
 }

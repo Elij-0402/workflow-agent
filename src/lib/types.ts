@@ -12,19 +12,34 @@ export type SessionStatus =
   | "generating"
   | "done";
 
-export type AnalysisDimension = "worldview" | "characters" | "narrative";
+export type AnalysisDimension =
+  | "worldview"
+  | "characters"
+  | "narrative"
+  | "chapter_brief"
+  | "book_synthesis";
 
-export const ANALYSIS_DIMENSIONS: AnalysisDimension[] = [
+export const LEGACY_ANALYSIS_DIMENSIONS = [
   "worldview",
   "characters",
   "narrative",
-];
+] as const satisfies readonly AnalysisDimension[];
+
+export type LegacyAnalysisDimension = (typeof LEGACY_ANALYSIS_DIMENSIONS)[number];
+
+export type AnalysisScope = "book" | "chapter";
+
+export const ANALYSIS_DIMENSIONS = LEGACY_ANALYSIS_DIMENSIONS;
 
 export const DIMENSION_LABELS: Record<AnalysisDimension, string> = {
   worldview: "世界观",
   characters: "人物",
   narrative: "叙事",
+  chapter_brief: "章节抽取",
+  book_synthesis: "整书汇总",
 };
+
+export type SessionMode = "single" | "dual";
 
 // ============================================================================
 // Analysis result schemas (LLM 必须返回该结构)
@@ -90,6 +105,101 @@ export const NarrativeResultSchema = z.object({
 });
 export type NarrativeResult = z.infer<typeof NarrativeResultSchema>;
 
+export const ChapterBriefResultSchema = z.object({
+  summary: z.string(),
+  scenes: z
+    .array(
+      z.object({
+        place: z.string(),
+        time: z.string().optional(),
+        description: z.string(),
+      })
+    )
+    .default([]),
+  characters_appeared: z
+    .array(
+      z.object({
+        name: z.string(),
+        action: z.string(),
+      })
+    )
+    .default([]),
+  events: z
+    .array(
+      z.object({
+        title: z.string(),
+        description: z.string(),
+        is_turning_point: z.boolean().default(false),
+      })
+    )
+    .default([]),
+  conflicts: z.array(z.string()).default([]),
+  viewpoint: z.string().optional(),
+  themes_hints: z.array(z.string()).default([]),
+  blueprint_candidates: z
+    .array(
+      z.object({
+        section: z.enum([
+          "characters",
+          "relationships",
+          "world_rules",
+          "conflicts",
+          "plot_beats",
+          "viewpoint",
+          "themes",
+        ]),
+        title: z.string(),
+        payload: z.unknown(),
+      })
+    )
+    .default([]),
+});
+export type ChapterBriefResult = z.infer<typeof ChapterBriefResultSchema>;
+
+export const BookSynthesisResultSchema = z.object({
+  characters: z.array(
+    z.object({
+      name: z.string(),
+      role: z.string(),
+      traits: z.array(z.string()).default([]),
+      description: z.string(),
+    })
+  ),
+  relationships: z.array(
+    z.object({
+      from: z.string(),
+      to: z.string(),
+      type: z.string(),
+      description: z.string(),
+    })
+  ),
+  world_rules: z.array(
+    z.object({
+      rule: z.string(),
+      description: z.string(),
+    })
+  ),
+  conflicts: z.array(
+    z.object({
+      title: z.string(),
+      description: z.string(),
+    })
+  ),
+  plot_beats: z.array(
+    z.object({
+      title: z.string(),
+      description: z.string(),
+      order: z.number().int(),
+    })
+  ),
+  viewpoint: z.object({
+    mode: z.string(),
+    pacing: z.string(),
+  }),
+  themes: z.array(z.string()),
+});
+export type BookSynthesisResult = z.infer<typeof BookSynthesisResultSchema>;
+
 // ============================================================================
 // Generate variant
 // ============================================================================
@@ -145,6 +255,7 @@ export type Database = {
           user_id: string;
           name: string;
           status: SessionStatus;
+          mode: SessionMode;
           created_at: string;
           updated_at: string;
         };
@@ -153,12 +264,14 @@ export type Database = {
           user_id: string;
           name?: string;
           status?: SessionStatus;
+          mode?: SessionMode;
           created_at?: string;
           updated_at?: string;
         };
         Update: Partial<{
           name: string;
           status: SessionStatus;
+          mode: SessionMode;
           updated_at: string;
         }>;
         Relationships: [];
@@ -170,6 +283,7 @@ export type Database = {
           user_id: string;
           title: string;
           storage_path: string;
+          position: number;
           word_count: number | null;
           chapter_count: number | null;
           metadata: Record<string, unknown>;
@@ -182,6 +296,7 @@ export type Database = {
           user_id: string;
           title: string;
           storage_path: string;
+          position?: number;
           word_count?: number | null;
           chapter_count?: number | null;
           metadata?: Record<string, unknown>;
@@ -190,10 +305,43 @@ export type Database = {
         };
         Update: Partial<{
           title: string;
+          position: number;
           word_count: number | null;
           chapter_count: number | null;
           metadata: Record<string, unknown>;
           cleaned_content: string | null;
+        }>;
+        Relationships: [];
+      };
+      chapters: {
+        Row: {
+          id: string;
+          book_id: string;
+          user_id: string;
+          index: number;
+          title: string;
+          start_char: number;
+          end_char: number;
+          source: "regex" | "length-chunk" | "manual";
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          book_id: string;
+          user_id: string;
+          index: number;
+          title: string;
+          start_char: number;
+          end_char: number;
+          source: "regex" | "length-chunk" | "manual";
+          created_at?: string;
+        };
+        Update: Partial<{
+          index: number;
+          title: string;
+          start_char: number;
+          end_char: number;
+          source: "regex" | "length-chunk" | "manual";
         }>;
         Relationships: [];
       };
@@ -203,6 +351,8 @@ export type Database = {
           book_id: string;
           user_id: string;
           dimension: AnalysisDimension;
+          scope: AnalysisScope;
+          chapter_id: string | null;
           result: unknown;
           llm_config_id: string | null;
           prompt_tokens: number | null;
@@ -214,6 +364,8 @@ export type Database = {
           book_id: string;
           user_id: string;
           dimension: AnalysisDimension;
+          scope?: AnalysisScope;
+          chapter_id?: string | null;
           result: unknown;
           llm_config_id?: string | null;
           prompt_tokens?: number | null;
@@ -237,6 +389,7 @@ export type Database = {
           content: string;
           word_count: number | null;
           llm_config_id: string | null;
+          blueprint_id: string | null;
           created_at: string;
         };
         Insert: {
@@ -248,12 +401,42 @@ export type Database = {
           content: string;
           word_count?: number | null;
           llm_config_id?: string | null;
+          blueprint_id?: string | null;
           created_at?: string;
         };
         Update: Partial<{
           title: string;
           content: string;
           word_count: number | null;
+        }>;
+        Relationships: [];
+      };
+      blueprints: {
+        Row: {
+          id: string;
+          session_id: string;
+          user_id: string;
+          status: "draft" | "confirmed";
+          sections: unknown;
+          confirmed_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          session_id: string;
+          user_id: string;
+          status?: "draft" | "confirmed";
+          sections?: unknown;
+          confirmed_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<{
+          status: "draft" | "confirmed";
+          sections: unknown;
+          confirmed_at: string | null;
+          updated_at: string;
         }>;
         Relationships: [];
       };
@@ -267,5 +450,7 @@ export type Database = {
 
 export type SessionRow = Database["public"]["Tables"]["sessions"]["Row"];
 export type BookRow = Database["public"]["Tables"]["books"]["Row"];
+export type ChapterRow = Database["public"]["Tables"]["chapters"]["Row"];
 export type AnalysisRow = Database["public"]["Tables"]["analyses"]["Row"];
 export type VariantRow = Database["public"]["Tables"]["variants"]["Row"];
+export type BlueprintRow = Database["public"]["Tables"]["blueprints"]["Row"];
