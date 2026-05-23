@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { MobileNav } from "@/components/mobile-nav";
 import { Sidebar } from "@/components/sidebar";
 import { UserMenu } from "@/components/user-menu";
+import { safeGetUser } from "@/lib/supabase/auth";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function AppLayout({
@@ -11,9 +12,7 @@ export default async function AppLayout({
   children: React.ReactNode;
 }) {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { user } = await safeGetUser(supabase, "app-layout");
   if (!user) redirect("/login");
 
   return (
