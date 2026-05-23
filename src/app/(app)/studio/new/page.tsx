@@ -17,10 +17,14 @@ export default async function NewBriefPage({ searchParams }: Props) {
 
   const { data: session } = await supabase
     .from("sessions")
-    .select("id")
+    .select("id, mode")
     .eq("id", sessionId)
     .eq("user_id", user.id)
     .maybeSingle();
   if (!session) notFound();
-  redirect(`/sessions/${session.id}?step=generate`);
+  redirect(
+    session.mode === "dual"
+      ? `/sessions/${session.id}/workbench?step=compare`
+      : `/sessions/${session.id}`,
+  );
 }

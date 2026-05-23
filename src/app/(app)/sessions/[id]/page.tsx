@@ -1,11 +1,11 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { Settings2 } from "lucide-react";
 
 import { AnalysisPanel } from "./analysis-panel";
 import { ExtendedAnalysisPanel } from "./extended-analysis-panel";
 import { loadDualSessionPageData, loadSingleSessionPageData } from "./page-data";
-import { WorkbenchClient } from "./workbench/workbench-client";
+import { ProjectOverviewPage } from "@/components/projects/project-overview-page";
 import { GeneratePanel } from "@/components/sessions/generate-panel";
 import { VariantList } from "@/components/sessions/variant-list";
 import { MetaRow } from "@/components/meta-row";
@@ -15,6 +15,7 @@ import {
   type WorkflowStageItem,
 } from "@/components/workflow-stage-bar";
 import { Button } from "@/components/ui/button";
+import { deriveProjectOverview } from "@/lib/projects/overview";
 import { createClient } from "@/lib/supabase/server";
 import { formatDate, formatRelativeTime } from "@/lib/utils";
 
@@ -24,6 +25,7 @@ type SessionPageProps = {
   }>;
   searchParams: Promise<{
     step?: string;
+    panel?: string;
   }>;
 };
 
@@ -32,7 +34,7 @@ export default async function SessionDetailPage({
   searchParams,
 }: SessionPageProps) {
   const { id } = await params;
-  const { step } = await searchParams;
+  const query = await searchParams;
   const supabase = await createClient();
   const {
     data: { user },
@@ -42,8 +44,6 @@ export default async function SessionDetailPage({
     notFound();
   }
 
-  // Dual-mode sessions live at /workbench. Branch early so we don't run the
-  // single-mode queries below for them.
   const { data: sessionMode } = await supabase
     .from("sessions")
     .select("mode")
@@ -51,6 +51,11 @@ export default async function SessionDetailPage({
     .eq("user_id", user.id)
     .maybeSingle();
   if (sessionMode?.mode === "dual") {
+    const legacyTarget = getDualWorkbenchRedirect(query);
+    if (legacyTarget) {
+      redirect(`/sessions/${id}/workbench${legacyTarget}`);
+    }
+
     const dualData = await loadDualSessionPageData({
       supabase,
       sessionId: id,
@@ -58,28 +63,20 @@ export default async function SessionDetailPage({
     });
     if (!dualData) notFound();
 
-    const initialStep =
-      step === "upload" ||
-      step === "analysis" ||
-      step === "compare" ||
-      step === "generate"
-        ? step
-        : undefined;
+    const overview = deriveProjectOverview({
+      sessionId: dualData.session.id,
+      books: dualData.books,
+      bookSynthesisByBook: dualData.bookSynthesisByBook,
+      blueprintStatus: dualData.blueprintStatus,
+      variants: dualData.variants,
+    });
 
     return (
-      <WorkbenchClient
-        session={dualData.session}
+      <ProjectOverviewPage
+        sessionId={dualData.session.id}
+        sessionName={dualData.session.name}
+        overview={overview}
         books={dualData.books}
-        chapters={dualData.chapters}
-        briefs={dualData.briefs}
-        bookSynthesisByBook={dualData.bookSynthesisByBook}
-        blueprintId={dualData.blueprintId}
-        blueprintStatus={dualData.blueprintStatus}
-        blueprintUpdatedAt={dualData.blueprintUpdatedAt}
-        blueprintConfirmedAt={dualData.blueprintConfirmedAt}
-        blueprint={dualData.blueprint}
-        variants={dualData.variants}
-        initialStep={initialStep}
       />
     );
   }
@@ -216,6 +213,26 @@ export default async function SessionDetailPage({
       </section>
     </div>
   );
+}
+
+function getDualWorkbenchRedirect(query: {
+  step?: string;
+  panel?: string;
+}) {
+  if (query.panel === "results") {
+    return "?step=generate";
+  }
+
+  if (
+    query.step === "upload" ||
+    query.step === "analysis" ||
+    query.step === "compare" ||
+    query.step === "generate"
+  ) {
+    return `?step=${query.step}`;
+  }
+
+  return null;
 }
 
 function getStageItems({
