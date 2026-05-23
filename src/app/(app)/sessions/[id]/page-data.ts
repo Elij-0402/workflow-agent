@@ -53,7 +53,7 @@ export type DualSessionPageData = {
   variants: Array<
     Pick<
       VariantRow,
-      "id" | "title" | "config" | "content" | "word_count" | "blueprint_id" | "created_at"
+      "id" | "title" | "scope" | "config" | "content" | "word_count" | "blueprint_id" | "created_at"
     >
   >;
 };
@@ -123,7 +123,7 @@ export async function loadDualSessionPageData(params: {
       .maybeSingle(),
     supabase
       .from("variants")
-      .select("id, title, config, content, word_count, blueprint_id, created_at")
+      .select("id, title, scope, config, content, word_count, blueprint_id, created_at")
       .eq("session_id", sessionId)
       .eq("user_id", userId)
       .order("created_at", { ascending: false }),
