@@ -4,7 +4,7 @@ import { expect, test, type Page } from "@playwright/test";
 const DEFAULT_MODEL = "deepseek-chat";
 const uploadFile = path.resolve(
   process.cwd(),
-  "scripts/spike-chunking/runs/smoke-test-novel.txt"
+  "tests/e2e/fixtures/smoke-test-novel.txt"
 );
 const ANALYSIS_COMPLETE_TEXT = "三项分析已经完成。需要时可以单独重跑某一项。";
 

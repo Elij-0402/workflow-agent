@@ -12,7 +12,7 @@ NovelFusion AI — Next.js 15 + Supabase SaaS. Users upload a `.txt` novel, get 
 npm run dev         # next dev --turbopack (http://localhost:3000)
 npm run build       # next build
 npm run start       # next start (after build)
-npm run lint        # next lint (ESLint flat config via eslint-config-next)
+npm run lint        # next lint (legacy .eslintrc.json + eslint-config-next)
 npm run type-check  # tsc --noEmit  — use this, the build does not type-check
 
 # Tests use node:test directly; there is no test runner script.
