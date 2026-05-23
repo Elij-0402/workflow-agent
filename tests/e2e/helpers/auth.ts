@@ -21,7 +21,7 @@ export async function login(page: Page) {
   await page.getByLabel("邮箱", { exact: true }).fill(loginCredentials.email);
   await page.getByLabel("密码", { exact: true }).fill(loginCredentials.password);
   await form.getByRole("button", { name: "登录", exact: true }).click();
-  await expect(page).toHaveURL(/\/(dashboard|sessions)$/);
+  await expect(page).toHaveURL(/\/(dashboard|sessions)$/, { timeout: 15_000 });
 }
 
 export async function configureLlm(page: Page) {

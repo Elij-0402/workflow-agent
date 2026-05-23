@@ -7,6 +7,7 @@ import type { z } from "zod";
 import { getUserLLMClient } from "@/lib/llm/dispatch";
 import { LLMError, type LLMClientError, asLLMClientError } from "@/lib/llm/errors";
 import { estimateUsageCostCNY, normalizeUsage } from "@/lib/llm/pricing";
+import { resolveStructuredObjectMode } from "@/lib/llm/structured-output";
 import type { Database } from "@/lib/types";
 
 const DEFAULT_TIMEOUT_MS = 60_000;
@@ -133,6 +134,7 @@ export async function runLLMObject<TSchema extends z.ZodTypeAny>({
     const result = await withTimeout(
       generateObject({
         model: llm.openai(llm.model),
+        mode: resolveStructuredObjectMode(llm.provider),
         schema,
         system,
         prompt,
@@ -248,6 +250,7 @@ export async function streamLLMObject<TSchema extends z.ZodTypeAny>({
 
   const result = streamObject({
     model: llm.openai(llm.model),
+    mode: resolveStructuredObjectMode(llm.provider),
     schema,
     system,
     prompt,

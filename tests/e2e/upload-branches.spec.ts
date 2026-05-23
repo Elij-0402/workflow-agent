@@ -7,11 +7,12 @@ import { resolveUploadFixturePaths } from "./helpers/upload-fixtures";
 const [singleFile] = resolveUploadFixturePaths(1);
 const [fileA, fileB] = resolveUploadFixturePaths(2);
 const [tripleA, tripleB, tripleC] = resolveUploadFixturePaths(3);
+const dualUploadPath = "/upload?mode=dual";
 
 test.describe("dual upload branches", () => {
   test.beforeEach(async ({ page }) => {
     await login(page);
-    await page.goto("/upload");
+    await page.goto(dualUploadPath);
   });
 
   test("blocks submission when only one file is selected", async ({ page }) => {

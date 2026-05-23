@@ -57,12 +57,12 @@ export default async function StudioBriefPage({ params }: Props) {
   return (
     <div className="app-page">
       <PageHeader
-        label="brief"
+        label="创意简报"
         title={row.title || "未命名简报"}
-        description={`所属任务：${session?.name ?? "未知"}`}
+        description={`所属项目：${session?.name ?? "未知"}`}
         action={
           <Button asChild variant="outline" size="sm">
-            <Link href={backHref}>返回任务</Link>
+            <Link href={backHref}>返回项目</Link>
           </Button>
         }
       />

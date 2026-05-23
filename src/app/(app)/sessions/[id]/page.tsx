@@ -1,11 +1,11 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { Settings2 } from "lucide-react";
 
 import { AnalysisPanel } from "./analysis-panel";
 import { ExtendedAnalysisPanel } from "./extended-analysis-panel";
 import { loadDualSessionPageData, loadSingleSessionPageData } from "./page-data";
-import { WorkbenchClient } from "./workbench/workbench-client";
+import { ProjectOverviewPage } from "@/components/projects/project-overview-page";
 import { GeneratePanel } from "@/components/sessions/generate-panel";
 import { VariantList } from "@/components/sessions/variant-list";
 import { MetaRow } from "@/components/meta-row";
@@ -15,6 +15,7 @@ import {
   type WorkflowStageItem,
 } from "@/components/workflow-stage-bar";
 import { Button } from "@/components/ui/button";
+import { deriveProjectOverview } from "@/lib/projects/overview";
 import { createClient } from "@/lib/supabase/server";
 import { formatDate, formatRelativeTime } from "@/lib/utils";
 
@@ -24,6 +25,7 @@ type SessionPageProps = {
   }>;
   searchParams: Promise<{
     step?: string;
+    panel?: string;
   }>;
 };
 
@@ -32,7 +34,7 @@ export default async function SessionDetailPage({
   searchParams,
 }: SessionPageProps) {
   const { id } = await params;
-  const { step } = await searchParams;
+  const query = await searchParams;
   const supabase = await createClient();
   const {
     data: { user },
@@ -42,8 +44,6 @@ export default async function SessionDetailPage({
     notFound();
   }
 
-  // Dual-mode sessions live at /workbench. Branch early so we don't run the
-  // single-mode queries below for them.
   const { data: sessionMode } = await supabase
     .from("sessions")
     .select("mode")
@@ -51,6 +51,11 @@ export default async function SessionDetailPage({
     .eq("user_id", user.id)
     .maybeSingle();
   if (sessionMode?.mode === "dual") {
+    const legacyTarget = getDualWorkbenchRedirect(query);
+    if (legacyTarget) {
+      redirect(`/sessions/${id}/workbench${legacyTarget}`);
+    }
+
     const dualData = await loadDualSessionPageData({
       supabase,
       sessionId: id,
@@ -58,28 +63,20 @@ export default async function SessionDetailPage({
     });
     if (!dualData) notFound();
 
-    const initialStep =
-      step === "upload" ||
-      step === "analysis" ||
-      step === "compare" ||
-      step === "generate"
-        ? step
-        : undefined;
+    const overview = deriveProjectOverview({
+      sessionId: dualData.session.id,
+      books: dualData.books,
+      bookSynthesisByBook: dualData.bookSynthesisByBook,
+      blueprintStatus: dualData.blueprintStatus,
+      variants: dualData.variants,
+    });
 
     return (
-      <WorkbenchClient
-        session={dualData.session}
+      <ProjectOverviewPage
+        sessionId={dualData.session.id}
+        sessionName={dualData.session.name}
+        overview={overview}
         books={dualData.books}
-        chapters={dualData.chapters}
-        briefs={dualData.briefs}
-        bookSynthesisByBook={dualData.bookSynthesisByBook}
-        blueprintId={dualData.blueprintId}
-        blueprintStatus={dualData.blueprintStatus}
-        blueprintUpdatedAt={dualData.blueprintUpdatedAt}
-        blueprintConfirmedAt={dualData.blueprintConfirmedAt}
-        blueprint={dualData.blueprint}
-        variants={dualData.variants}
-        initialStep={initialStep}
       />
     );
   }
@@ -126,16 +123,16 @@ export default async function SessionDetailPage({
   return (
     <div className="app-page">
       <PageHeader
-        label="session"
+        label="项目"
         title={book.title}
         description={currentStepDescription}
         action={headerAction}
         meta={
           <MetaRow
             items={[
-              { label: "uploaded", value: formatDate(book.created_at) },
+              { label: "导入时间", value: formatDate(book.created_at) },
               {
-                label: "updated",
+                label: "最近更新",
                 value: formatRelativeTime(session.updated_at),
               },
             ]}
@@ -148,12 +145,12 @@ export default async function SessionDetailPage({
       <MetaRow
         items={[
           {
-            label: "words",
+            label: "字数",
             value: book.word_count?.toLocaleString("zh-CN") ?? "0",
           },
-          { label: "chapters", value: String(chapterCount) },
-          { label: "encoding", value: typeof metadata.encoding === "string" ? metadata.encoding : "未知" },
-          { label: "analysis", value: `${safeAnalyses.length} / 3` },
+          { label: "章节", value: String(chapterCount) },
+          { label: "编码", value: typeof metadata.encoding === "string" ? metadata.encoding : "未知" },
+          { label: "分析", value: `${safeAnalyses.length} / 3` },
         ]}
       />
 
@@ -163,10 +160,10 @@ export default async function SessionDetailPage({
             <div>
               <p className="eyebrow-label">overview</p>
               <h2 className="mt-2 font-display text-[24px] italic leading-tight text-foreground">
-                任务概览
+                项目总览
               </h2>
               <p className="mt-3 max-w-3xl text-[13.5px] leading-7 text-muted-foreground">
-                当前版本先围绕单份文本建立完整的研究与生成路径。后续多书对比、双视角分析和来源映射会接入同一块结构。
+                当前是单书兼容模式，仍然沿用同一条项目主线：分析、判断、生成结果。后续多书对比和蓝图能力会优先落在双书项目里。
               </p>
             </div>
             <div className="surface-subtle p-4">
@@ -216,6 +213,26 @@ export default async function SessionDetailPage({
       </section>
     </div>
   );
+}
+
+function getDualWorkbenchRedirect(query: {
+  step?: string;
+  panel?: string;
+}) {
+  if (query.panel === "results") {
+    return "?step=generate";
+  }
+
+  if (
+    query.step === "upload" ||
+    query.step === "analysis" ||
+    query.step === "compare" ||
+    query.step === "generate"
+  ) {
+    return `?step=${query.step}`;
+  }
+
+  return null;
 }
 
 function getStageItems({

@@ -6,7 +6,8 @@ App Router 路由组 + API Route Handlers。父级 `D:\workflow-agent\CLAUDE.md`
 
 - `(auth)/` — 公开页（`/login`）。`actions.ts` 导出 `submitPasswordAuth` / `signOut`。
 - `(app)/` — 需登录。group `layout.tsx` 服务端 `supabase.auth.getUser()`，未登录跳 `/login`，否则渲染 `Sidebar` + `UserMenu`。
-- `(app)/sessions/[id]/page.tsx` 服务端检查 `sessions.mode`：dual 则 `redirect('/sessions/${id}/workbench')`，single 走 legacy 三件套（`AnalysisPanel` / `GeneratePanel` / `VariantList`）。
+- `(app)/sessions/[id]/page.tsx` 是 session 根入口：single 走 legacy 三件套（`AnalysisPanel` / `GeneratePanel` / `VariantList`）；dual 渲染项目概览页，作为工作流总入口。
+- `(app)/sessions/[id]/workbench/page.tsx` 是 dual 的深工作台，承载章节分析、蓝图确认和生成流程。
 - `middleware.ts` → `@/lib/supabase/middleware:updateSession` 在每个非静态请求刷新 cookie，`PUBLIC_PATHS = ["/login"]`，其他未登录路径重定向到 `/login?redirect=<原路径>`。
 
 ## Server Action 返回 shape（铁律）
@@ -18,6 +19,8 @@ App Router 路由组 + API Route Handlers。父级 `D:\workflow-agent\CLAUDE.md`
 ## Single vs Dual 模式分流
 
 - legacy `/api/analyze` 和 `/api/generate` 对 `sessions.mode='dual'` 主动返回 **409**，防止旧 UI 绕开 blueprint 闸门
+- dual 根路由 `/sessions/[id]` 默认显示概览；深流程在 `/sessions/[id]/workbench`
+- 兼容旧链接：`/sessions/[id]?step=upload|analysis|compare|generate` 会重定向到 `/sessions/[id]/workbench?step=...`；`?panel=results` 会重定向到 `/sessions/[id]/workbench?step=generate`
 - dual 必须走 `/api/generate-v2`，**强制要求** `blueprints.status='confirmed'`
 - chapter 级分析走 `/api/analyze/chapter`，book 级综合走 `/api/analyze/book`
 - blueprint CRUD 走 `/api/blueprint` PATCH，状态变更走 `/api/blueprint/confirm` 和 `/unconfirm`

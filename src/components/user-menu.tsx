@@ -38,7 +38,7 @@ export function UserMenu({ email }: { email: string }) {
         >
           <div className="flex flex-col gap-0.5">
             <span className="font-mono text-[10.5px] uppercase tracking-[0.10em] text-muted-foreground">
-              signed in as
+              当前账号
             </span>
             <span className="truncate text-[13px] text-foreground">
               {email}

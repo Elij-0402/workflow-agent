@@ -2,18 +2,27 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { History, Settings } from "lucide-react";
+import {
+  FolderKanban,
+  GitCompare,
+  LibraryBig,
+  Settings,
+  Sparkles,
+} from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
 type NavItem = {
   href: string;
   label: string;
-  icon: typeof History;
+  icon: typeof FolderKanban;
 };
 
 const NAV_ITEMS: NavItem[] = [
-  { href: "/sessions", label: "任务", icon: History },
+  { href: "/sessions", label: "项目", icon: FolderKanban },
+  { href: "/studio", label: "创作台", icon: Sparkles },
+  { href: "/compare", label: "对比", icon: GitCompare },
+  { href: "/library", label: "资料库", icon: LibraryBig },
 ];
 
 const FOOTER_ITEMS: NavItem[] = [
@@ -64,7 +73,10 @@ function NavLink({
   onNavigate?: () => void;
 }) {
   const { href, label, icon: Icon } = item;
-  const active = pathname === href || pathname.startsWith(`${href}/`);
+  const active =
+    pathname === href ||
+    pathname.startsWith(`${href}/`) ||
+    (href === "/sessions" && pathname === "/");
   return (
     <Link
       href={href}

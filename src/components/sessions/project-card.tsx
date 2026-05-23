@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { MoreVertical } from "lucide-react";
+import { ArrowRight, MoreVertical } from "lucide-react";
 
 import {
   DropdownMenu,
@@ -9,7 +9,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { SessionStatusBadge } from "@/components/ui/status-badge";
 import { cn, formatDate, formatRelativeTime } from "@/lib/utils";
 
 type ProjectSession = {
@@ -17,6 +16,13 @@ type ProjectSession = {
   name: string;
   status: string;
   mode: "single" | "dual" | string;
+  modeLabel: string;
+  modeTone: "primary" | "muted";
+  stageLabel: string;
+  nextActionLabel: string;
+  nextHref: string;
+  progressLabel: string;
+  lastActivityLabel: string;
   created_at: string;
   updated_at: string;
   archived_at?: string | null;
@@ -35,7 +41,7 @@ export function ProjectCard({
   onRestore,
   onDelete,
 }: ProjectCardProps) {
-  const href = `/sessions/${session.id}`;
+  const href = session.nextHref || `/sessions/${session.id}`;
   const isDual = session.mode === "dual";
   const isArchived = Boolean(session.archived_at);
 
@@ -43,6 +49,7 @@ export function ProjectCard({
     <div
       className={cn(
         "surface-panel group relative flex h-full flex-col p-5 transition-colors hover:border-primary/60 focus-within:border-primary/60",
+        isDual && "border-primary/25 bg-primary/5",
       )}
     >
       <Link
@@ -53,8 +60,8 @@ export function ProjectCard({
 
       <div className="relative z-10 flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <p className="mono-label-sm">
-            {isDual ? "双书任务" : "单书兼容任务"}
+          <p className={cn("mono-label-sm", session.modeTone === "primary" && "text-primary")}>
+            {session.modeLabel}
           </p>
         </div>
         <div className="flex items-center gap-1">
@@ -72,24 +79,56 @@ export function ProjectCard({
       </h3>
 
       <div className="relative z-10 mt-3 flex flex-wrap items-center gap-2">
-        <SessionStatusBadge status={session.status} />
-        <span className="text-[12px] text-muted-foreground">
-          {isDual ? "上传 → 分析 → 对比 → 生成" : "兼容旧流程"}
+        <StagePill label={session.stageLabel} tone={session.modeTone} />
+        <span className="text-[12px] text-muted-foreground leading-6">
+          {session.progressLabel}
         </span>
       </div>
 
+      <div className="relative z-10 mt-4 rounded-md border border-border/60 bg-background/40 px-4 py-3">
+        <p className="mono-label-sm">下一步</p>
+        <p className="mt-2 text-[14px] font-medium text-foreground">
+          {session.nextActionLabel}
+        </p>
+        <p className="mt-1 text-[12px] leading-6 text-muted-foreground">
+          {session.lastActivityLabel}
+        </p>
+      </div>
+
       <div className="relative z-10 mt-auto flex items-end justify-between gap-3 border-t border-border/60 pt-5">
-        <div className="space-y-0.5 text-[12px] text-muted-foreground">
-          <div>updated · {formatRelativeTime(session.updated_at)}</div>
+        <div className="space-y-1 text-[12px] text-muted-foreground">
+          <div>最近更新 · {formatRelativeTime(session.updated_at)}</div>
           <div className="text-muted-foreground/70">
-            created · {formatDate(session.created_at)}
+            创建于 · {formatDate(session.created_at)}
           </div>
         </div>
-        <span className="text-[12px] text-muted-foreground transition-colors group-hover:text-foreground">
-          查看
+        <span className="inline-flex items-center gap-1 text-[12px] text-muted-foreground transition-colors group-hover:text-foreground">
+          进入
+          <ArrowRight className="h-3.5 w-3.5" aria-hidden />
         </span>
       </div>
     </div>
+  );
+}
+
+function StagePill({
+  label,
+  tone,
+}: {
+  label: string;
+  tone: "primary" | "muted";
+}) {
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center rounded-full border px-2.5 py-1 text-[11px]",
+        tone === "primary"
+          ? "border-primary/30 bg-primary/10 text-primary"
+          : "border-border bg-muted text-muted-foreground",
+      )}
+    >
+      {label}
+    </span>
   );
 }
 

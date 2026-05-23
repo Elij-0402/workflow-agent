@@ -1,6 +1,7 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+import { safeGetUser } from "@/lib/supabase/auth";
 import type { Database } from "@/lib/types";
 
 const PUBLIC_PATHS = ["/login"];
@@ -39,9 +40,15 @@ export async function updateSession(request: NextRequest) {
     },
   );
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { user, authError } = await safeGetUser(
+    supabase,
+    "middleware",
+    request.nextUrl.pathname,
+  );
+
+  if (authError) {
+    return supabaseResponse;
+  }
 
   const pathname = request.nextUrl.pathname;
   const isPublic = PUBLIC_PATHS.some((p) => pathname.startsWith(p));
