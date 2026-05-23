@@ -59,6 +59,33 @@ test("deriveProjectOverview returns blueprint confirmation summary when both boo
   ]);
 });
 
+test("deriveProjectOverview returns analysis-focused summary when only one book has book synthesis", () => {
+  const result = deriveProjectOverview({
+    sessionId: "session-1",
+    books: [{ chapter_count: 10 }, { chapter_count: 12 }],
+    bookSynthesisByBook: ["book-1"],
+    blueprintStatus: "draft",
+    variants: [],
+  });
+
+  assert.equal(result.statusLabel, "等待完成分析");
+  assert.equal(result.progressLabel, "已完成 1 / 2 本整书分析");
+  assert.deepEqual(result.nextAction, {
+    label: "进入工作台继续分析",
+    href: "/sessions/session-1/workbench",
+  });
+  assert.deepEqual(result.editorialBullets, [
+    "先让两本书都形成整书级判断，再讨论融合策略。",
+    "当前阶段适合继续沉淀章节摘要与基础世界观信息。",
+    "不要过早进入生成，先把双书理解补齐。",
+  ]);
+  assert.deepEqual(result.keyResults, [
+    { label: "参考小说", value: "2 / 2" },
+    { label: "整书分析", value: "1 / 2" },
+    { label: "蓝图状态", value: "草稿" },
+  ]);
+});
+
 test("deriveProjectOverview returns results summary when confirmed blueprint already has variants", () => {
   const loaderCompatibleVariants: DualSessionPageData["variants"] = [
     {

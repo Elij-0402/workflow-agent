@@ -5,7 +5,7 @@ import { Settings2 } from "lucide-react";
 import { AnalysisPanel } from "./analysis-panel";
 import { ExtendedAnalysisPanel } from "./extended-analysis-panel";
 import { loadDualSessionPageData, loadSingleSessionPageData } from "./page-data";
-import { WorkbenchClient } from "./workbench/workbench-client";
+import { ProjectOverviewPage } from "@/components/projects/project-overview-page";
 import { GeneratePanel } from "@/components/sessions/generate-panel";
 import { VariantList } from "@/components/sessions/variant-list";
 import { MetaRow } from "@/components/meta-row";
@@ -15,6 +15,7 @@ import {
   type WorkflowStageItem,
 } from "@/components/workflow-stage-bar";
 import { Button } from "@/components/ui/button";
+import { deriveProjectOverview } from "@/lib/projects/overview";
 import { createClient } from "@/lib/supabase/server";
 import { formatDate, formatRelativeTime } from "@/lib/utils";
 
@@ -22,17 +23,12 @@ type SessionPageProps = {
   params: Promise<{
     id: string;
   }>;
-  searchParams: Promise<{
-    step?: string;
-  }>;
 };
 
 export default async function SessionDetailPage({
   params,
-  searchParams,
 }: SessionPageProps) {
   const { id } = await params;
-  const { step } = await searchParams;
   const supabase = await createClient();
   const {
     data: { user },
@@ -42,8 +38,6 @@ export default async function SessionDetailPage({
     notFound();
   }
 
-  // Dual-mode sessions live at /workbench. Branch early so we don't run the
-  // single-mode queries below for them.
   const { data: sessionMode } = await supabase
     .from("sessions")
     .select("mode")
@@ -58,28 +52,20 @@ export default async function SessionDetailPage({
     });
     if (!dualData) notFound();
 
-    const initialStep =
-      step === "upload" ||
-      step === "analysis" ||
-      step === "compare" ||
-      step === "generate"
-        ? step
-        : undefined;
+    const overview = deriveProjectOverview({
+      sessionId: dualData.session.id,
+      books: dualData.books,
+      bookSynthesisByBook: dualData.bookSynthesisByBook,
+      blueprintStatus: dualData.blueprintStatus,
+      variants: dualData.variants,
+    });
 
     return (
-      <WorkbenchClient
-        session={dualData.session}
+      <ProjectOverviewPage
+        sessionId={dualData.session.id}
+        sessionName={dualData.session.name}
+        overview={overview}
         books={dualData.books}
-        chapters={dualData.chapters}
-        briefs={dualData.briefs}
-        bookSynthesisByBook={dualData.bookSynthesisByBook}
-        blueprintId={dualData.blueprintId}
-        blueprintStatus={dualData.blueprintStatus}
-        blueprintUpdatedAt={dualData.blueprintUpdatedAt}
-        blueprintConfirmedAt={dualData.blueprintConfirmedAt}
-        blueprint={dualData.blueprint}
-        variants={dualData.variants}
-        initialStep={initialStep}
       />
     );
   }
