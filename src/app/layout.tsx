@@ -7,6 +7,7 @@ import {
   Noto_Serif_SC,
 } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
+import { appBackgroundColor } from "@/lib/theme";
 import "./globals.css";
 
 const display = Instrument_Serif({
@@ -51,12 +52,12 @@ const zhSans = Noto_Sans_SC({
 });
 
 export const metadata: Metadata = {
-  title: "NovelFusion · Atelier",
+  title: "NovelFusion",
   description: "多源小说智能分析与变体生成工作室",
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0E0F0C",
+  themeColor: appBackgroundColor(),
 };
 
 export default function RootLayout({
@@ -72,23 +73,7 @@ export default function RootLayout({
     >
       <body className="min-h-screen bg-background font-sans antialiased">
         {children}
-        <Toaster
-          richColors
-          position="top-right"
-          theme="dark"
-          duration={6000}
-          toastOptions={{
-            classNames: {
-              toast:
-                "border border-border bg-card text-foreground rounded-[3px] font-sans text-[13px]",
-              title: "font-sans text-[13px] leading-6",
-              description: "font-sans text-[12px] leading-6 text-muted-foreground",
-              success: "border-l-[3px] border-l-flash",
-              error: "border-l-[3px] border-l-destructive",
-              info: "border-l-[3px] border-l-primary",
-            },
-          }}
-        />
+        <Toaster />
       </body>
     </html>
   );

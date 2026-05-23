@@ -29,11 +29,11 @@
 - `/studio`：简报编辑、SSE 大纲预览、逐章迭代生成
 - 扩展四维度分析：文笔 / 情绪弧 / 节奏图 / 悬念网格
 - `/compare`：最多 6 个会话并排对比、AI 洞察与导出
-- 会话软归档（migration 0005）、`/design-system` 设计参考页
+- 会话软归档（migration 0005）、`/library` 资料库；`/design-system` 设计参考页（仅开发访问）
 
 ## 技术栈
 
-- Next.js 15 (App Router, Turbopack) + TypeScript（strict）
+- Next.js 15 (App Router) + TypeScript（strict）；可选 `npm run dev:turbo`
 - Shadcn UI (new-york) + Tailwind CSS v3.4
 - Supabase（Auth + Postgres + Storage + RLS）
 - Vercel AI SDK v4（`@ai-sdk/openai`，通过 `createOpenAI({ baseURL })` 适配任意 OpenAI-compatible 网关）

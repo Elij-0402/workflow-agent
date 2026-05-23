@@ -79,7 +79,7 @@ function Multi({
         [ {label}
         {selected.length > 0 ? ` · ${selected.length}` : ""} ]
       </summary>
-      <div className="absolute z-10 mt-1 max-h-60 w-52 overflow-auto rounded-[3px] border border-border bg-popover p-2 shadow-brass-soft">
+      <div className="absolute z-10 mt-1 max-h-60 w-52 overflow-auto rounded-[3px] border border-border bg-popover p-2 shadow-panel">
         <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.12em] text-primary/70">
           {`// ${zh}`}
         </p>

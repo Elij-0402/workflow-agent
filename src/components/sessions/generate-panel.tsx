@@ -2,18 +2,15 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ChevronDown, ChevronUp, Loader2, Sparkles } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
-import { Button } from "@/components/ui/button";
-import { Form } from "@/components/ui/form";
 import { toastError } from "@/lib/error-toast";
 import type { LLMClientError } from "@/lib/llm/errors";
 import { GenerateConfigSchema, type GenerateConfig, type SessionStatus } from "@/lib/types";
 
-import { AdvancedOptions, QuickGenerateForm } from "./generate-form-fields";
+import { GenerateForm } from "./generate-form";
 
 type GeneratePanelProps = {
   sessionId: string;
@@ -45,7 +42,6 @@ export function GeneratePanel({
   const [pending, setPending] = useState(false);
   const [startedAt, setStartedAt] = useState<number | null>(null);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
-  const [showAdvanced, setShowAdvanced] = useState(false);
   const form = useForm<GenerateConfig>({
     resolver: zodResolver(GenerateConfigSchema),
     defaultValues: GenerateConfigSchema.parse({}),
@@ -145,59 +141,18 @@ export function GeneratePanel({
       </div>
 
       <div className="surface-panel p-7">
-        <Form {...form}>
-          <form
-            className="flex flex-col gap-7"
-            onSubmit={form.handleSubmit((values) => void onSubmit(values))}
-          >
-            <QuickGenerateForm
-              form={form}
-              disabled={pending || Boolean(blockReason)}
-              innovation={innovation}
-            />
-
-            <div className="border-t border-dashed border-border/60 pt-5">
-              <button
-                type="button"
-                className="inline-flex items-center gap-2 text-[12px] text-muted-foreground transition-colors hover:text-foreground"
-                onClick={() => setShowAdvanced((current) => !current)}
-                aria-expanded={showAdvanced}
-              >
-                {showAdvanced ? (
-                  <ChevronUp className="h-3.5 w-3.5" />
-                ) : (
-                  <ChevronDown className="h-3.5 w-3.5" />
-                )}
-                高级设置
-              </button>
-
-              {showAdvanced ? (
-                <div className="mt-5">
-                  <AdvancedOptions form={form} disabled={pending || Boolean(blockReason)} />
-                </div>
-              ) : null}
-            </div>
-
-            <div className="flex flex-col gap-3 border-t border-dashed border-border/60 pt-5 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-[11px] text-muted-foreground">
-                {variantCount > 0 ? "每次生成会追加新版本，不会覆盖旧版本。" : "结果会保存到当前任务。"}
-              </p>
-              <Button type="submit" disabled={pending || Boolean(blockReason)}>
-                {pending ? (
-                  <>
-                    <Loader2 className="animate-spin" />
-                    生成中…
-                  </>
-                ) : (
-                  <>
-                    <Sparkles />
-                    {variantCount > 0 ? "再生成一版" : "生成变体"}
-                  </>
-                )}
-              </Button>
-            </div>
-          </form>
-        </Form>
+        <GenerateForm
+          form={form}
+          pending={pending}
+          disabled={Boolean(blockReason)}
+          innovation={innovation}
+          variantCount={variantCount}
+          footerNote={
+            variantCount > 0 ? "每次生成会追加新版本，不会覆盖旧版本。" : "结果会保存到当前任务。"
+          }
+          submitLabel={variantCount > 0 ? "再生成一版" : "生成变体"}
+          onSubmit={onSubmit}
+        />
       </div>
     </section>
   );

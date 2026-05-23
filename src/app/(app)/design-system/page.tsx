@@ -12,7 +12,7 @@ export default function DesignSystemPage() {
       <PageHeader
         label="design system"
         title="Linear 风格指南"
-        description="保留 NovelFusion 的暖色暗调与 Serif 标题，去除 Atelier Terminal 装饰，作为后续所有页面的视觉与交互锚点。"
+        description="冷色暗底、靛蓝主色与 Instrument Serif 标题；token 与 globals.css 一致，作为后续页面的视觉与交互锚点。"
       />
       <DesignSystemClient />
     </div>

@@ -34,7 +34,8 @@ dual 现在有两层入口：
 - `batch-tracker` —— 批量章节分析进度跟踪（concurrency=3 跑批时显示每章状态）
 - `hint-banner` —— 工作台上下文提示横幅，文案派生自 `src/lib/workbench/derive-hint.ts`
 - `onboarding-card` —— 首次进入工作台的引导卡片
-- `workbench-mode-switcher` —— 视图模式切换（章节树 / blueprint / variant 等子视图之间）
+
+`PipelineBar` 仅在蓝图（compare）与生成（generate）步骤显示；analysis 步骤用 `WorkflowStageBar` + `HintBanner`。
 
 如果新增交互组件：dual 专属 → 这里；single 也能用 → 放 `src/components/sessions/`。
 

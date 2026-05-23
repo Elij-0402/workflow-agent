@@ -2,12 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ChevronDown, ChevronUp, Loader2, Sparkles } from "lucide-react";
+import { Loader2, Sparkles } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
+import { GenerateForm } from "@/components/sessions/generate-form";
 import { Button } from "@/components/ui/button";
-import { Form } from "@/components/ui/form";
 import {
   Sheet,
   SheetContent,
@@ -15,7 +15,6 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { AdvancedOptions, QuickGenerateForm } from "@/components/sessions/generate-form-fields";
 import { toastError } from "@/lib/error-toast";
 import type { LLMClientError } from "@/lib/llm/errors";
 import { GenerateConfigSchema, type GenerateConfig } from "@/lib/types";
@@ -33,7 +32,6 @@ type GenerateResponse =
 
 export function GenerateDrawer({ open, onOpenChange, blueprintId, onGenerated }: Props) {
   const [pending, setPending] = useState(false);
-  const [showAdvanced, setShowAdvanced] = useState(false);
   const form = useForm<GenerateConfig>({
     resolver: zodResolver(GenerateConfigSchema),
     defaultValues: GenerateConfigSchema.parse({}),
@@ -42,7 +40,6 @@ export function GenerateDrawer({ open, onOpenChange, blueprintId, onGenerated }:
 
   useEffect(() => {
     if (!open) {
-      setShowAdvanced(false);
       setPending(false);
       form.reset(GenerateConfigSchema.parse({}));
     }
@@ -85,64 +82,49 @@ export function GenerateDrawer({ open, onOpenChange, blueprintId, onGenerated }:
           </SheetTitle>
           <SheetDescription>常用参数留在首屏；视角、文风、额外要求收进高级选项。</SheetDescription>
         </SheetHeader>
-        <Form {...form}>
-          <form
-            className="flex min-h-0 flex-1 flex-col"
-            onSubmit={form.handleSubmit((values) => void onSubmit(values))}
-          >
-            <div className="flex-1 overflow-y-auto px-6 py-6">
-              <QuickGenerateForm form={form} disabled={pending} innovation={innovation} />
-              <div className="mt-7 border-t border-dashed border-border/60 pt-5">
-                <button
-                  type="button"
-                  className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.10em] text-primary/85 transition-colors hover:text-primary"
-                  onClick={() => setShowAdvanced((c) => !c)}
-                  aria-expanded={showAdvanced}
-                >
-                  {showAdvanced ? (
-                    <ChevronUp className="h-3.5 w-3.5" />
-                  ) : (
-                    <ChevronDown className="h-3.5 w-3.5" />
-                  )}
-                  {"// advanced options"}
-                </button>
-                {showAdvanced ? (
-                  <div className="mt-5">
-                    <AdvancedOptions form={form} disabled={pending} />
-                  </div>
-                ) : null}
+        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-6 py-6">
+          <GenerateForm
+            form={form}
+            pending={pending}
+            disabled={false}
+            innovation={innovation}
+            variantCount={0}
+            footerNote=""
+            submitLabel="生成新版本"
+            advancedToggleClassName="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.10em] text-primary/85 transition-colors hover:text-primary"
+            onSubmit={onSubmit}
+            footer={
+              <div className="flex items-center justify-between gap-3 border-t border-dashed border-border/60 bg-card pt-4">
+                <p className="font-mono text-[10.5px] uppercase tracking-[0.08em] text-muted-foreground">
+                  {"// 提交后约 30-60 秒"}
+                </p>
+                <div className="flex items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={() => onOpenChange(false)}
+                    disabled={pending}
+                  >
+                    取消
+                  </Button>
+                  <Button type="submit" disabled={pending}>
+                    {pending ? (
+                      <>
+                        <Loader2 className="animate-spin" />
+                        生成中…
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles />
+                        生成新版本
+                      </>
+                    )}
+                  </Button>
+                </div>
               </div>
-            </div>
-            <div className="flex items-center justify-between gap-3 border-t border-dashed border-border/60 bg-card px-6 py-4">
-              <p className="font-mono text-[10.5px] uppercase tracking-[0.08em] text-muted-foreground">
-                {"// 提交后约 30-60 秒"}
-              </p>
-              <div className="flex items-center gap-2">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  onClick={() => onOpenChange(false)}
-                  disabled={pending}
-                >
-                  取消
-                </Button>
-                <Button type="submit" disabled={pending}>
-                  {pending ? (
-                    <>
-                      <Loader2 className="animate-spin" />
-                      生成中…
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles />
-                      生成新版本
-                    </>
-                  )}
-                </Button>
-              </div>
-            </div>
-          </form>
-        </Form>
+            }
+          />
+        </div>
       </SheetContent>
     </Sheet>
   );

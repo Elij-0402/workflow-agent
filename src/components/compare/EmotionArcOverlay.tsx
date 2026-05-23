@@ -13,6 +13,7 @@ import {
   YAxis,
 } from "recharts";
 
+import { CompareEmptyHint } from "@/components/compare/CompareEmptyHint";
 import { getBookColorHsl } from "@/lib/compare/book-color";
 import { useSyncContext } from "@/lib/compare/sync-context";
 import { EmotionArcResultSchema, type EmotionArcResult } from "@/lib/types";
@@ -66,11 +67,7 @@ export function EmotionArcOverlay({
   const ruler = hoverChapter ?? anchorChapter;
 
   if (series.length === 0) {
-    return (
-      <div className="surface-subtle px-4 py-6 text-center font-mono text-[12px] uppercase tracking-[0.08em] text-muted-foreground/70">
-        无可用情感曲线数据
-      </div>
-    );
+    return <CompareEmptyHint message="无可用情感曲线数据" />;
   }
 
   return (

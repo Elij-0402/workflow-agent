@@ -602,16 +602,6 @@ export function WorkbenchClient(props: Props) {
             title="第 2 步 · 分析两本参考小说"
             description="先把两本参考书的章节分析完，再做整书汇总。分析完成后，系统会开放双书对比和融合蓝图。"
           />
-          <PipelineBar
-            importedCount={props.books.length}
-            chapterTotals={chapterTotals}
-            bookSynthesisDone={{
-              a: a ? synthesisSet.has(a.id) : false,
-              b: b ? synthesisSet.has(b.id) : false,
-            }}
-            blueprintStatus={blueprintStatus}
-            variantCount={props.variants.length}
-          />
           <HintBanner hint={hint} />
           {batchState ? (
             <BatchTracker
@@ -651,6 +641,16 @@ export function WorkbenchClient(props: Props) {
           <StepIntro
             title="第 3 步 · 对比并整理骨架"
             description="这里把两本参考小说的章节素材、人物关系、世界规则和情节节点合并成一份融合蓝图。确认蓝图后才开放最终生成。"
+          />
+          <PipelineBar
+            importedCount={props.books.length}
+            chapterTotals={chapterTotals}
+            bookSynthesisDone={{
+              a: a ? synthesisSet.has(a.id) : false,
+              b: b ? synthesisSet.has(b.id) : false,
+            }}
+            blueprintStatus={blueprintStatus}
+            variantCount={props.variants.length}
           />
           <CollapsedChaptersBar
             a={a}
@@ -709,6 +709,16 @@ export function WorkbenchClient(props: Props) {
           <StepIntro
             title="第 4 步 · 生成新小说"
             description="蓝图确认后，从这里生成新的融合版本。生成完成后，可以继续累积多个版本并直接对比它们。"
+          />
+          <PipelineBar
+            importedCount={props.books.length}
+            chapterTotals={chapterTotals}
+            bookSynthesisDone={{
+              a: a ? synthesisSet.has(a.id) : false,
+              b: b ? synthesisSet.has(b.id) : false,
+            }}
+            blueprintStatus={blueprintStatus}
+            variantCount={props.variants.length}
           />
           <div className="surface-panel flex flex-col gap-4 p-6">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">

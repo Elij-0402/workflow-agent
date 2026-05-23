@@ -28,13 +28,6 @@ export default async function AppLayout({
         <div className="flex min-w-0 flex-1 flex-col">
           <header className="sticky top-0 z-30 flex h-16 items-center border-b border-border/70 bg-background/90 px-4 backdrop-blur md:px-6">
             <MobileNav />
-            <div className="ml-3 hidden min-w-0 flex-1 md:flex">
-              <div className="flex h-10 w-full max-w-md items-center rounded-md border border-border/70 bg-card/70 px-3">
-                <span className="text-[12px] text-muted-foreground">
-                  搜索项目、简报或生成结果
-                </span>
-              </div>
-            </div>
             <div className="ml-auto flex items-center gap-3">
               <div className="hidden text-right md:block">
                 <p className="mono-label-sm">工作台</p>

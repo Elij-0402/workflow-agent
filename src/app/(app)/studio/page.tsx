@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Layers3, Sparkles } from "lucide-react";
 
+import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
 import { BriefCreateSheet } from "@/components/studio/brief-create-sheet";
 import { Button } from "@/components/ui/button";
@@ -135,14 +136,11 @@ export default async function StudioPage({ searchParams }: Props) {
           ))}
         </section>
       ) : (
-        <div className="surface-panel flex flex-col items-center justify-center gap-4 px-6 py-14 text-center">
-          <h3 className="text-[18px] font-semibold leading-tight text-foreground">
-            还没有可用简报
-          </h3>
-          <p className="max-w-md text-[13px] leading-6 text-muted-foreground">
-            先在某个项目下创建一份创意简报，用它来约束人物、情节、文风和保留规则。
-          </p>
-        </div>
+        <EmptyState
+          title="还没有可用简报"
+          description="先在某个项目下创建一份创意简报，用它来约束人物、情节、文风和保留规则。"
+          className="py-14"
+        />
       )}
     </div>
   );

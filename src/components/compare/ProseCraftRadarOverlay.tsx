@@ -11,6 +11,7 @@ import {
   Tooltip,
 } from "recharts";
 
+import { CompareEmptyHint } from "@/components/compare/CompareEmptyHint";
 import { getBookColorHsl } from "@/lib/compare/book-color";
 import { ProseCraftResultSchema, type ProseCraftResult } from "@/lib/types";
 
@@ -130,11 +131,7 @@ export function ProseCraftRadarOverlay({
   const series = useMemo(() => parseSeries(books), [books]);
 
   if (series.length === 0) {
-    return (
-      <div className="surface-subtle px-4 py-6 text-center font-mono text-[12px] uppercase tracking-[0.08em] text-muted-foreground/70">
-        无可用写作技法数据
-      </div>
-    );
+    return <CompareEmptyHint message="无可用写作技法数据" />;
   }
 
   return (

@@ -31,7 +31,7 @@ export function EmptyState({
           aria-hidden
         />
       ) : null}
-      <h3 className="text-[18px] font-medium leading-tight text-foreground">
+      <h3 className="text-[18px] font-semibold leading-tight text-foreground">
         {title}
       </h3>
       {description ? (

@@ -9,7 +9,9 @@ NovelFusion AI — Next.js 15 + Supabase SaaS. Users upload a `.txt` novel, get 
 ## Commands
 
 ```bash
-npm run dev         # next dev --turbopack (http://localhost:3000)
+npm run dev         # next dev (http://localhost:3000)
+npm run dev:turbo   # next dev --turbopack
+npm run reset-dev   # Windows: clear .next via scripts/reset-dev.ps1
 npm run build       # next build
 npm run start       # next start (after build)
 npm run lint        # next lint (legacy .eslintrc.json + eslint-config-next)
@@ -33,7 +35,7 @@ Four nested AGENTS.md files own local conventions — read whichever sits closes
 
 - `src/app/AGENTS.md` — App Router groups, Server Action shape, single-vs-dual route gating, V0.3 route map.
 - `src/lib/AGENTS.md` — Supabase clients, BYOK/crypto, prompt registry, blueprint + brief Zod gates.
-- `src/components/AGENTS.md` — Atelier Terminal theme, font CSS variables, shadcn config, component subdirectory layout.
+- `src/components/AGENTS.md` — indigo dark / Linear-style theme, font CSS variables, shadcn config, component subdirectory layout.
 - `src/components/workbench/AGENTS.md` — dual-mode workbench state flow, cost-estimate gate, file inventory.
 
 ### Route layout (App Router with route groups)
@@ -98,7 +100,7 @@ Bucket `novels` is private, 50 MB cap, MIME-restricted (`text/plain`, `text/mark
 - **Path alias**: `@/*` → `./src/*`. Use it for all internal imports.
 - **TypeScript**: strict mode on. `noEmit: true` — type-check runs separately from build.
 - **Shadcn**: new-york style, neutral base, `cssVariables: true`. Add components under `src/components/ui/`; aliases live in `components.json`.
-- **Dark mode / UI theme**: "Atelier Terminal" — dark-only, forced via `className="dark"` on `<html>` in `src/app/layout.tsx`. Five Google fonts are wired as CSS variables (`--font-display` Instrument Serif, `--font-sans` Inter Tight, `--font-mono` JetBrains Mono, `--font-zh-serif` Noto Serif SC, `--font-zh-sans` Noto Sans SC); Tailwind references them by variable, so new components should use `font-sans` / `font-mono` / `font-display` rather than hard-coding families. The `Toaster` in `layout.tsx` is custom-themed — match its mono/border style for any new global UI chrome. No theme toggle.
+- **Dark mode / UI theme**: indigo dark / Linear-style reference (`/design-system`, dev-only) — dark-only, forced via `className="dark"` on `<html>` in `src/app/layout.tsx`. Color tokens live in `src/lib/theme-tokens.ts` (keep in sync with `globals.css`). Five Google fonts are wired as CSS variables (`--font-display` Instrument Serif, `--font-sans` Inter Tight, `--font-mono` JetBrains Mono, `--font-zh-serif` Noto Serif SC, `--font-zh-sans` Noto Sans SC); Tailwind references them by variable, so new components should use `font-sans` / `font-mono` / `font-display` rather than hard-coding families. Toaster styling is centralized in `src/components/ui/sonner.tsx`. No theme toggle.
 - **Local fixtures**: Test novels go in `samples/` (gitignored). The repo does not ship fixtures for the upload flow.
 - **Language**: UI copy and user-facing errors are Chinese; code identifiers, comments, commit messages are English.
 
@@ -180,7 +182,7 @@ One brief per project (multiple briefs per session allowed). Columns: `id`, `use
 
 ### UI surface
 
-`/studio` lists briefs grouped by project. `/studio/new?sessionId=…` opens the BriefEditor in create mode. `/studio/[briefId]` shows BriefEditor (4 tabs: persona / plot / style / retention) + `OutlineStreamer` (SSE client). `/compare?sessionIds=a,b,c` shows up to 6 sessions side-by-side across all analysis dimensions. `/sessions/archived` lists soft-deleted sessions. `/design-system` is the Linear-style visual reference (Atelier Terminal residual).
+`/studio` lists briefs grouped by project. `/studio/new?sessionId=…` opens the BriefEditor in create mode. `/studio/[briefId]` shows BriefEditor (4 tabs: persona / plot / style / retention) + `OutlineStreamer` (SSE client). `/compare?sessionIds=a,b,c` shows up to 6 sessions side-by-side across all analysis dimensions. `/library` lists archived sessions; `/sessions/archived` redirects there. `/design-system` is a dev-only visual reference (not linked from app nav).
 
 ## gstack
 

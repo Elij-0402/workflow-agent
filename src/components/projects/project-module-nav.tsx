@@ -4,7 +4,6 @@ import { cn } from "@/lib/utils";
 
 const MODULES = [
   { key: "概览", href: (sessionId: string) => `/sessions/${sessionId}` },
-  { key: "参考书", href: (sessionId: string) => `/sessions/${sessionId}/workbench?step=analysis` },
   { key: "分析图谱", href: (sessionId: string) => `/sessions/${sessionId}/workbench?step=analysis` },
   { key: "蓝图工作台", href: (sessionId: string) => `/sessions/${sessionId}/workbench` },
   { key: "创意简报", href: (sessionId: string) => `/studio?sessionId=${sessionId}` },

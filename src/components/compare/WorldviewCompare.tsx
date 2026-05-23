@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 
+import { CompareEmptyHint } from "@/components/compare/CompareEmptyHint";
 import { Badge } from "@/components/ui/badge";
 import { getBookColorHsl } from "@/lib/compare/book-color";
 import { useDrawer } from "@/lib/compare/drawer-context";
@@ -86,11 +87,7 @@ export function WorldviewCompare({ books }: { books: Book[] }) {
   );
 
   if (series.length === 0) {
-    return (
-      <div className="surface-subtle px-4 py-6 text-center font-mono text-[12px] uppercase tracking-[0.08em] text-muted-foreground/70">
-        无可用世界观数据
-      </div>
-    );
+    return <CompareEmptyHint message="无可用世界观数据" />;
   }
 
   return (

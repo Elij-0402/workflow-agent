@@ -1,15 +1,15 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { FileText, Loader2, UploadCloud } from "lucide-react";
 import { toast } from "sonner";
 
-import { finalizeNovelUpload, initNovelUpload } from "@/lib/upload/actions";
 import { MAX_UPLOAD_BYTES, validateUploadFile } from "@/lib/upload/shared";
-import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { cn, formatBytes } from "@/lib/utils";
+
+import { useNovelUpload } from "./use-novel-upload";
 
 type SlotFile = {
   file: File;
@@ -19,13 +19,11 @@ type SlotFile = {
 
 export function DualUploadForm() {
   const router = useRouter();
-  const supabase = useMemo(() => createClient(), []);
+  const { uploadNovel, pending, statusText } = useNovelUpload();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const [selectedBooks, setSelectedBooks] = useState<SlotFile[]>([]);
   const [selectionIssue, setSelectionIssue] = useState<string | null>(null);
-  const [pending, setPending] = useState(false);
-  const [statusText, setStatusText] = useState<string | null>(null);
 
   const canSubmit = selectedBooks.length === 2 && !selectionIssue;
 
@@ -65,50 +63,6 @@ export function DualUploadForm() {
     );
   }
 
-  async function uploadOne(
-    book: SlotFile,
-    sessionId: string | undefined,
-    position: 0 | 1,
-  ): Promise<{ ok: true; sessionId: string } | { ok: false; error: string }> {
-    setStatusText(`// uploading reference ${position + 1}…`);
-
-    const initResult = await initNovelUpload({
-      filename: book.name,
-      size: book.size,
-      contentType: book.file.type,
-      mode: "dual",
-      sessionId,
-      position,
-    });
-    if ("error" in initResult) {
-      return { ok: false, error: initResult.error ?? "上传失败。" };
-    }
-
-    const { error: uploadError } = await supabase.storage
-      .from("novels")
-      .upload(initResult.storageObjectPath, book.file, {
-        contentType: book.file.type || "text/plain",
-        upsert: false,
-      });
-    if (uploadError) {
-      return { ok: false, error: "上传原始文件失败，请稍后重试。" };
-    }
-
-    const finalize = await finalizeNovelUpload({
-      sessionId: initResult.sessionId,
-      storageObjectPath: initResult.storageObjectPath,
-      filename: book.name,
-      size: book.size,
-      contentType: book.file.type,
-      position: initResult.position,
-    });
-    if ("error" in finalize) {
-      return { ok: false, error: finalize.error ?? "上传失败。" };
-    }
-
-    return { ok: true, sessionId: initResult.sessionId };
-  }
-
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
@@ -139,29 +93,30 @@ export function DualUploadForm() {
       }
     }
 
-    setPending(true);
-    try {
-      const firstResult = await uploadOne(selectedBooks[0], undefined, 0);
-      if (!firstResult.ok) {
-        toast.error(`参考书 1：${firstResult.error}`);
-        return;
-      }
-
-      const secondResult = await uploadOne(selectedBooks[1], firstResult.sessionId, 1);
-      if (!secondResult.ok) {
-        toast.error(`参考书 2：${secondResult.error}`);
-        router.push(`/sessions/${firstResult.sessionId}`);
-        return;
-      }
-
-      toast.success("两本参考书已导入，正在进入蓝图工作台。");
-      router.push(`/sessions/${firstResult.sessionId}`);
-    } catch {
-      toast.error("上传失败，请稍后重试。");
-    } finally {
-      setPending(false);
-      setStatusText(null);
+    const firstResult = await uploadNovel({
+      file: selectedBooks[0].file,
+      mode: "dual",
+      position: 0,
+    });
+    if (!firstResult.ok) {
+      toast.error(`参考书 1：${firstResult.error}`);
+      return;
     }
+
+    const secondResult = await uploadNovel({
+      file: selectedBooks[1].file,
+      mode: "dual",
+      sessionId: firstResult.sessionId,
+      position: 1,
+    });
+    if (!secondResult.ok) {
+      toast.error(`参考书 2：${secondResult.error}`);
+      router.push(`/sessions/${firstResult.sessionId}`);
+      return;
+    }
+
+    toast.success("两本参考书已导入，正在进入蓝图工作台。");
+    router.push(secondResult.redirectTo);
   }
 
   return (

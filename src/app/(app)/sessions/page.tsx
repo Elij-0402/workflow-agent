@@ -1,6 +1,7 @@
 import { BookOpen, FolderKanban } from "lucide-react";
 import Link from "next/link";
 
+import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
@@ -46,16 +47,6 @@ export default async function SessionsPage() {
                 先处理待确认蓝图的项目，再推进可生成项目。生成结果和创意简报都回到项目主线上管理。
               </p>
             </div>
-            <div className="grid min-w-[240px] grid-cols-2 gap-3">
-              <QuickStat
-                label="待确认蓝图"
-                value={String(summary?.waitingBlueprintCount ?? 0)}
-              />
-              <QuickStat
-                label="活跃简报"
-                value={String(summary?.activeBriefCount ?? 0)}
-              />
-            </div>
           </div>
         </div>
 
@@ -83,7 +74,7 @@ export default async function SessionsPage() {
             <LinkCard
               href="/library"
               title="资料库"
-              description="查看归档项目和最近生成结果。"
+              description="查看已归档的项目列表。"
             />
           </div>
         </div>
@@ -99,27 +90,22 @@ export default async function SessionsPage() {
       {sessions.length > 0 ? (
         <SessionsClient sessions={sessions} view="active" recentEvents={recentEvents} />
       ) : (
-        <div className="surface-panel flex flex-col items-center justify-center gap-4 px-6 py-14 text-center">
-          <BookOpen
-            className="h-12 w-12 text-primary/60"
-            strokeWidth={1.5}
-            aria-hidden
-          />
-          <h3 className="text-[18px] font-semibold leading-tight text-foreground">
-            还没有项目
-          </h3>
-          <p className="max-w-md text-[13px] leading-6 text-muted-foreground">
-            先创建一个双书项目，把两本参考小说导入进来。后续的分析、蓝图、简报和结果都会挂在同一个项目下面。
-          </p>
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <Button asChild>
-              <Link href="/create">开始新项目</Link>
-            </Button>
-            <Button asChild variant="outline">
-              <Link href="/upload?mode=single">进入单书兼容流程</Link>
-            </Button>
-          </div>
-        </div>
+        <EmptyState
+          icon={BookOpen}
+          title="还没有项目"
+          description="先创建一个双书项目，把两本参考小说导入进来。后续的分析、蓝图、简报和结果都会挂在同一个项目下面。"
+          className="py-14"
+          action={
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <Button asChild>
+                <Link href="/create">开始新项目</Link>
+              </Button>
+              <Button asChild variant="outline">
+                <Link href="/upload?mode=single">进入单书兼容流程</Link>
+              </Button>
+            </div>
+          }
+        />
       )}
     </div>
   );
@@ -132,15 +118,6 @@ function MetricCard({ label, value }: { label: string; value: string }) {
       <p className="mt-3 text-[26px] font-semibold leading-none text-foreground">
         {value}
       </p>
-    </div>
-  );
-}
-
-function QuickStat({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="surface-subtle px-4 py-3">
-      <p className="mono-label-sm">{label}</p>
-      <p className="mt-2 text-[18px] font-semibold text-foreground">{value}</p>
     </div>
   );
 }

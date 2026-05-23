@@ -72,17 +72,14 @@ export function LoginForm({ redirectPath }: { redirectPath: string }) {
       </section>
 
       <div className="surface-panel relative bg-card p-6 sm:p-7">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <p className="eyebrow-label">account</p>
-            <h2 className="mt-2 text-[24px] font-semibold leading-tight text-foreground">
-              {mode === "login" ? "登录" : "注册"}
-            </h2>
-            <p className="mt-2 text-[13px] leading-6 text-muted-foreground">
-              {copy.tagline}
-            </p>
-          </div>
-          <p className="text-[12px] text-muted-foreground">2 / 2</p>
+        <div>
+          <p className="eyebrow-label">account</p>
+          <h2 className="mt-2 text-[24px] font-semibold leading-tight text-foreground">
+            {mode === "login" ? "登录" : "注册"}
+          </h2>
+          <p className="mt-2 text-[13px] leading-6 text-muted-foreground">
+            {copy.tagline}
+          </p>
         </div>
 
         <div className="mt-5 flex gap-1 border-b border-border/70">
@@ -118,7 +115,7 @@ export function LoginForm({ redirectPath }: { redirectPath: string }) {
                 id="email"
                 name="email"
                 type="email"
-                placeholder="you@example.com"
+                placeholder="name@example.com"
                 required
                 autoComplete="email"
                 className="pl-9"
@@ -135,7 +132,7 @@ export function LoginForm({ redirectPath }: { redirectPath: string }) {
                 id="password"
                 name="password"
                 type="password"
-                placeholder="min 8 chars"
+                placeholder="至少 8 位字符"
                 required
                 minLength={8}
                 autoComplete={
@@ -168,7 +165,7 @@ export function LoginForm({ redirectPath }: { redirectPath: string }) {
             {copy.alt}
             <button
               type="button"
-              className="ml-2 text-foreground hover:text-primary"
+              className="ml-2 rounded-[2px] text-foreground hover:text-primary focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary/60"
               onClick={() => setMode(mode === "login" ? "register" : "login")}
               disabled={pending}
             >

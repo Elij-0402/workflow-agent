@@ -46,11 +46,8 @@ const config: Config = {
         flash: "hsl(var(--flash))",
         locked: "hsl(var(--locked))",
         blocked: "hsl(var(--blocked))",
-        brass: {
-          DEFAULT: "hsl(var(--primary))",
-        },
-        "brass-soft": {
-          DEFAULT: "hsl(var(--brass-soft))",
+        accentMuted: {
+          DEFAULT: "hsl(var(--accent-muted))",
         },
         chart: {
           "1": "hsl(var(--chart-1))",
@@ -58,6 +55,7 @@ const config: Config = {
           "3": "hsl(var(--chart-3))",
           "4": "hsl(var(--chart-4))",
           "5": "hsl(var(--chart-5))",
+          "6": "hsl(var(--chart-6))",
         },
       },
       borderRadius: {
@@ -115,8 +113,8 @@ const config: Config = {
         ],
       },
       boxShadow: {
-        "brass-soft":
-          "inset 0 0 0 1px hsl(var(--brass-soft) / 0.45), 0 8px 32px -16px hsl(var(--brass-soft) / 0.45)",
+        panel:
+          "inset 0 0 0 1px hsl(var(--accent-muted) / 0.45), 0 8px 32px -16px hsl(var(--accent-muted) / 0.45)",
         terminal: "0 0 0 1px hsl(var(--border))",
       },
       keyframes: {

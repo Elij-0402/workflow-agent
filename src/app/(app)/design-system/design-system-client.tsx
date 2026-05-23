@@ -48,6 +48,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
+import { COLOR_TOKENS } from "@/lib/theme-tokens";
 
 const SECTIONS = [
   { id: "principles", label: "原则" },
@@ -227,19 +228,6 @@ function PrinciplesSection() {
     </Section>
   );
 }
-
-const COLOR_TOKENS = [
-  { name: "background", value: "75 8% 5%", role: "页面底色" },
-  { name: "card", value: "75 9% 9%", role: "卡片/面板" },
-  { name: "muted", value: "75 8% 11%", role: "次级背景" },
-  { name: "accent", value: "75 8% 14%", role: "hover 高亮" },
-  { name: "border", value: "75 8% 18%", role: "细边框" },
-  { name: "foreground", value: "48 26% 86%", role: "主文字 (≥70%)" },
-  { name: "muted-foreground", value: "48 12% 56%", role: "次文字 (~20%)" },
-  { name: "primary", value: "44 56% 47%", role: "品牌·CTA (≤5%)" },
-  { name: "destructive", value: "8 56% 51%", role: "破坏性操作 (≤1%)" },
-  { name: "flash", value: "132 23% 54%", role: "成功/已锁定" },
-];
 
 function ColorSection() {
   return (

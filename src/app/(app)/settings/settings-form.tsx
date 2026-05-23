@@ -6,6 +6,7 @@ import { Eye, EyeOff, Loader2, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 
 import { fetchAvailableModels, saveLLMConfig, testLLMConnection } from "./actions";
+import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -187,15 +188,12 @@ export function SettingsForm({
   return (
     <div className="app-page">
       <div className="max-w-2xl">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <h1 className="text-[20px] font-medium leading-tight text-foreground">模型配置</h1>
-            <p className="mt-1.5 text-[13px] text-muted-foreground">
-              连接你的 OpenAI-compatible 接口，用于小说分析与生成。
-            </p>
-          </div>
-          <StatusBadge status={status} />
-        </div>
+        <PageHeader
+          label="设置"
+          title="模型配置"
+          description="连接你的 OpenAI-compatible 接口，用于小说分析与生成。设计参考页 /design-system 仅开发访问，不在导航中展示。"
+          action={<StatusBadge status={status} />}
+        />
         <UsageSummary usageSummary={usageSummary} />
 
         <form ref={formRef} onSubmit={onSubmit} className="mt-7 flex flex-col gap-6">

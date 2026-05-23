@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { toMarkdown, useClipboard } from "@/lib/compare/clipboard";
 import { toastError } from "@/lib/error-toast";
+import { appBackgroundColor } from "@/lib/theme";
 
 function downloadFile(filename: string, content: string | Blob, mime: string) {
   const blob = content instanceof Blob ? content : new Blob([content], { type: mime });
@@ -52,7 +53,7 @@ export function ExportMenu({ snapshotRef }: { snapshotRef: RefObject<HTMLElement
     setBusy(true);
     try {
       const dataUrl = await toPng(target, {
-        backgroundColor: "hsl(75 8% 5%)",
+        backgroundColor: appBackgroundColor(),
         pixelRatio: 2,
         cacheBust: true,
         style: { transform: "none" },

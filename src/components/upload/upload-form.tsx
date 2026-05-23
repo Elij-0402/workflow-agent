@@ -1,15 +1,15 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronDown, ChevronUp, FileText, Loader2, UploadCloud } from "lucide-react";
 import { toast } from "sonner";
 
-import { finalizeNovelUpload, initNovelUpload } from "@/lib/upload/actions";
-import { MAX_UPLOAD_BYTES, validateUploadFile } from "@/lib/upload/shared";
-import { createClient } from "@/lib/supabase/client";
+import { MAX_UPLOAD_BYTES } from "@/lib/upload/shared";
 import { Button } from "@/components/ui/button";
 import { formatBytes } from "@/lib/utils";
+
+import { useNovelUpload } from "./use-novel-upload";
 
 export function UploadForm({
   mode = "single",
@@ -21,13 +21,11 @@ export function UploadForm({
   position?: 0 | 1;
 } = {}) {
   const router = useRouter();
-  const supabase = useMemo(() => createClient(), []);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const [pending, setPending] = useState(false);
+  const { uploadNovel, pending, statusText } = useNovelUpload();
   const [filename, setFilename] = useState("");
   const [filesize, setFilesize] = useState<number | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [statusText, setStatusText] = useState<string | null>(null);
   const [helpOpen, setHelpOpen] = useState(false);
   const referenceLabel =
     mode === "dual" ? (position === 0 ? "参考书 1" : "参考书 2") : "小说文本";
@@ -41,71 +39,20 @@ export function UploadForm({
       return;
     }
 
-    const fileError = validateUploadFile({
-      name: selectedFile.name,
-      size: selectedFile.size,
-      type: selectedFile.type,
+    const result = await uploadNovel({
+      file: selectedFile,
+      mode,
+      sessionId,
+      position,
     });
 
-    if (fileError) {
-      toast.error(fileError);
+    if (!result.ok) {
+      toast.error(result.error);
       return;
     }
 
-    setPending(true);
-    setStatusText("// init upload session…");
-
-    try {
-      const initResult = await initNovelUpload({
-        filename: selectedFile.name,
-        size: selectedFile.size,
-        contentType: selectedFile.type,
-        mode,
-        sessionId,
-        position,
-      });
-
-      if ("error" in initResult) {
-        toast.error(initResult.error);
-        return;
-      }
-
-      setStatusText("// streaming to private storage…");
-      const { error: uploadError } = await supabase.storage
-        .from("novels")
-        .upload(initResult.storageObjectPath, selectedFile, {
-          contentType: selectedFile.type || "text/plain",
-          upsert: false,
-        });
-
-      if (uploadError) {
-        toast.error("上传原始文件失败，请稍后重试。");
-        return;
-      }
-
-      setStatusText("// parsing text + writing session…");
-      const finalizeResult = await finalizeNovelUpload({
-        sessionId: initResult.sessionId,
-        storageObjectPath: initResult.storageObjectPath,
-        filename: selectedFile.name,
-        size: selectedFile.size,
-        contentType: selectedFile.type,
-        position: initResult.position,
-      });
-
-      if ("error" in finalizeResult) {
-        toast.error(finalizeResult.error);
-        return;
-      }
-
-      toast.success(finalizeResult.message ?? "上传成功。");
-      router.push(finalizeResult.redirectTo);
-    } catch {
-      toast.error("上传失败，请稍后重试。");
-    } finally {
-      setPending(false);
-      setStatusText(null);
-    }
+    toast.success(result.message ?? "上传成功。");
+    router.push(result.redirectTo);
   };
 
   return (

@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 
+import { CompareEmptyHint } from "@/components/compare/CompareEmptyHint";
 import { getBookColorHsl } from "@/lib/compare/book-color";
 import { useSyncContext } from "@/lib/compare/sync-context";
 import { SuspenseGridResultSchema, type SuspenseGridResult } from "@/lib/types";
@@ -56,11 +57,7 @@ export function SuspenseGridOverlay({ books }: { books: Book[] }) {
   const xMax = maxChapterOf(series);
 
   if (series.length === 0) {
-    return (
-      <div className="surface-subtle px-4 py-6 text-center font-mono text-[12px] uppercase tracking-[0.08em] text-muted-foreground/70">
-        无可用悬念分布数据
-      </div>
-    );
+    return <CompareEmptyHint message="无可用悬念分布数据" />;
   }
 
   const width = 880;

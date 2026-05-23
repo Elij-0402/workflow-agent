@@ -15,6 +15,7 @@ import {
 } from "recharts";
 
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { CompareEmptyHint } from "@/components/compare/CompareEmptyHint";
 import { getBookColorHsl } from "@/lib/compare/book-color";
 import { useSyncContext } from "@/lib/compare/sync-context";
 import { PacingMapResultSchema, type PacingMapResult } from "@/lib/types";
@@ -296,11 +297,7 @@ export function PacingOverlay({
   const [view, setView] = useState<View>("split");
 
   if (series.length === 0) {
-    return (
-      <div className="surface-subtle px-4 py-6 text-center font-mono text-[12px] uppercase tracking-[0.08em] text-muted-foreground/70">
-        无可用节奏数据
-      </div>
-    );
+    return <CompareEmptyHint message="无可用节奏数据" />;
   }
 
   const rowHeight =

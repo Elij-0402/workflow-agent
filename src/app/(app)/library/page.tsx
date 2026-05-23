@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArchiveRestore, LibraryBig } from "lucide-react";
 
+import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
@@ -52,19 +53,12 @@ export default async function LibraryPage() {
       {sessions.length > 0 ? (
         <SessionsClient sessions={sessions} view="archived" />
       ) : (
-        <div className="surface-panel flex flex-col items-center justify-center gap-4 px-6 py-14 text-center">
-          <ArchiveRestore
-            className="h-12 w-12 text-primary/60"
-            strokeWidth={1.5}
-            aria-hidden
-          />
-          <h3 className="text-[18px] font-semibold leading-tight text-foreground">
-            资料库还是空的
-          </h3>
-          <p className="max-w-md text-[13px] leading-6 text-muted-foreground">
-            暂时还没有归档项目。需要清理主列表时，把不急着推进的项目移到这里。
-          </p>
-        </div>
+        <EmptyState
+          icon={ArchiveRestore}
+          title="资料库还是空的"
+          description="暂时还没有归档项目。需要清理主列表时，把不急着推进的项目移到这里。"
+          className="py-14"
+        />
       )}
     </div>
   );

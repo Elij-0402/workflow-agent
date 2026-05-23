@@ -142,18 +142,6 @@ export default async function SessionDetailPage({
 
       <WorkflowStageBar items={stageItems} />
 
-      <MetaRow
-        items={[
-          {
-            label: "字数",
-            value: book.word_count?.toLocaleString("zh-CN") ?? "0",
-          },
-          { label: "章节", value: String(chapterCount) },
-          { label: "编码", value: typeof metadata.encoding === "string" ? metadata.encoding : "未知" },
-          { label: "分析", value: `${safeAnalyses.length} / 3` },
-        ]}
-      />
-
       <section className="grid gap-9">
         <div className="surface-panel p-6">
           <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_300px]">
