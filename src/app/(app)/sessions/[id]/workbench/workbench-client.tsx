@@ -467,9 +467,7 @@ export function WorkbenchClient(props: Props) {
       return;
     setActiveStep(step);
     router.replace(
-      step === "upload"
-        ? `/sessions/${props.session.id}`
-        : `/sessions/${props.session.id}?step=${step}`,
+      `/sessions/${props.session.id}/workbench?step=${step}`,
     );
   }
 

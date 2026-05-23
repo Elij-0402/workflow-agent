@@ -5,8 +5,8 @@ import { cn } from "@/lib/utils";
 const MODULES = [
   { key: "概览", href: (sessionId: string) => `/sessions/${sessionId}` },
   { key: "工作台", href: (sessionId: string) => `/sessions/${sessionId}/workbench` },
-  { key: "简报", href: (sessionId: string) => `/studio/new?sessionId=${sessionId}` },
-  { key: "结果", href: (sessionId: string) => `/sessions/${sessionId}?panel=results` },
+  { key: "简报", href: (sessionId: string) => `/sessions/${sessionId}/workbench?step=compare` },
+  { key: "结果", href: (sessionId: string) => `/sessions/${sessionId}/workbench?step=generate` },
 ] as const;
 
 export function ProjectModuleNav({

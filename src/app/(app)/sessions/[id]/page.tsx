@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { Settings2 } from "lucide-react";
 
@@ -23,12 +23,18 @@ type SessionPageProps = {
   params: Promise<{
     id: string;
   }>;
+  searchParams: Promise<{
+    step?: string;
+    panel?: string;
+  }>;
 };
 
 export default async function SessionDetailPage({
   params,
+  searchParams,
 }: SessionPageProps) {
   const { id } = await params;
+  const query = await searchParams;
   const supabase = await createClient();
   const {
     data: { user },
@@ -45,6 +51,11 @@ export default async function SessionDetailPage({
     .eq("user_id", user.id)
     .maybeSingle();
   if (sessionMode?.mode === "dual") {
+    const legacyTarget = getDualWorkbenchRedirect(query);
+    if (legacyTarget) {
+      redirect(`/sessions/${id}/workbench${legacyTarget}`);
+    }
+
     const dualData = await loadDualSessionPageData({
       supabase,
       sessionId: id,
@@ -202,6 +213,26 @@ export default async function SessionDetailPage({
       </section>
     </div>
   );
+}
+
+function getDualWorkbenchRedirect(query: {
+  step?: string;
+  panel?: string;
+}) {
+  if (query.panel === "results") {
+    return "?step=generate";
+  }
+
+  if (
+    query.step === "upload" ||
+    query.step === "analysis" ||
+    query.step === "compare" ||
+    query.step === "generate"
+  ) {
+    return `?step=${query.step}`;
+  }
+
+  return null;
 }
 
 function getStageItems({
