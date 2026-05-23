@@ -4,14 +4,18 @@ import { createOpenAI } from "@ai-sdk/openai";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { decrypt } from "@/lib/crypto";
+import {
+  LLM_BASE_URL_FORMAT_MESSAGE,
+  LLM_CONFIG_REQUIRED_MESSAGE,
+  LLM_SAVED_API_KEY_DECRYPT_FAILED_MESSAGE,
+  validateCompatibleBaseUrl,
+} from "@/lib/llm-config";
 import type { Database } from "@/lib/types";
 
 export async function getUserLLMClient(supabase: SupabaseClient<Database>) {
   const { data: config, error } = await supabase
     .from("llm_config")
-    .select(
-      "id, provider, base_url, api_key_encrypted, model, temperature, max_tokens"
-    )
+    .select("id, base_url, api_key_encrypted, model, temperature, max_tokens")
     .maybeSingle();
 
   if (error) {
@@ -19,15 +23,30 @@ export async function getUserLLMClient(supabase: SupabaseClient<Database>) {
   }
 
   if (!config) {
-    throw new Error("请先在设置页保存模型配置。");
+    throw new Error(LLM_CONFIG_REQUIRED_MESSAGE);
   }
 
-  const apiKey = await decrypt(config.api_key_encrypted);
+  const compatibility = validateCompatibleBaseUrl(config.base_url);
+  if (!compatibility.ok) {
+    throw new Error(
+      compatibility.message === LLM_BASE_URL_FORMAT_MESSAGE
+        ? LLM_CONFIG_REQUIRED_MESSAGE
+        : compatibility.message
+    );
+  }
+
+  let apiKey: string;
+  try {
+    apiKey = await decrypt(config.api_key_encrypted);
+  } catch {
+    throw new Error(LLM_SAVED_API_KEY_DECRYPT_FAILED_MESSAGE);
+  }
+
   const openai = createOpenAI({
     apiKey,
     baseURL: config.base_url,
-    compatibility: config.provider === "openai" ? "strict" : "compatible",
-    name: config.provider,
+    compatibility: compatibility.provider === "openai" ? "strict" : "compatible",
+    name: compatibility.provider,
   });
 
   return {

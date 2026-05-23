@@ -24,15 +24,15 @@ export function UserMenu({ email }: { email: string }) {
         <Button
           variant="ghost"
           size="icon"
-          className="h-8 w-8 rounded-full p-0"
+          className="size-9 rounded-full p-0"
           aria-label="账户菜单"
         >
-          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-[11px] font-medium text-foreground">
+          <span className="flex size-9 items-center justify-center rounded-full border border-border/80 bg-accent/60 text-[11px] font-medium text-foreground">
             {initials}
           </span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56">
+      <DropdownMenuContent align="end" className="w-56 border-border/80 bg-popover/95">
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col">
             <span className="text-xs text-muted-foreground">已登录</span>

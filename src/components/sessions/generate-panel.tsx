@@ -30,6 +30,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { cn } from "@/lib/utils";
 import {
   GenerateConfigSchema,
@@ -116,6 +117,15 @@ export function GeneratePanel({
   }, [pending, startedAt]);
 
   async function onSubmit(values: GenerateConfig) {
+    // Cost guard: each re-generation hits the LLM and burns BYOK tokens.
+    // Confirm if the session already has variants.
+    if (variantCount > 0 && typeof window !== "undefined") {
+      const ok = window.confirm(
+        `再生成一个版本会再次调用模型并消耗你的 BYOK 配额。当前已有 ${variantCount} 个版本，继续？`
+      );
+      if (!ok) return;
+    }
+
     setPending(true);
     setStartedAt(Date.now());
 
@@ -151,6 +161,7 @@ export function GeneratePanel({
   return (
     <section id="generate-panel" className="space-y-5">
       <div className="space-y-2">
+        <p className="eyebrow-label">Generate</p>
         <h2 className="text-[20px] font-medium tracking-tight text-foreground">
           生成结果
         </h2>
@@ -169,10 +180,10 @@ export function GeneratePanel({
         ) : null}
       </div>
 
-      <div className="rounded-lg border border-border/60 bg-card/40 p-6">
+      <div className="surface-panel p-6">
         <Form {...form}>
           <form
-            className="space-y-6"
+            className="flex flex-col gap-6"
             onSubmit={form.handleSubmit((values) => void onSubmit(values))}
           >
             <QuickGenerateForm
@@ -181,7 +192,7 @@ export function GeneratePanel({
               innovation={innovation}
             />
 
-            <div className="border-t border-border/60 pt-5">
+            <div className="border-t border-border/70 pt-5">
               <button
                 type="button"
                 className="inline-flex items-center gap-2 text-[13px] text-muted-foreground transition-colors hover:text-foreground"
@@ -206,7 +217,7 @@ export function GeneratePanel({
               ) : null}
             </div>
 
-            <div className="flex flex-col gap-3 border-t border-border/60 pt-5 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col gap-3 border-t border-border/70 pt-5 sm:flex-row sm:items-center sm:justify-between">
               <p className="text-xs leading-5 text-muted-foreground">
                 {variantCount > 0
                   ? "新结果会追加保存，不会覆盖现有版本。"
@@ -246,12 +257,12 @@ function QuickGenerateForm({
   const outputScope = form.watch("output_scope");
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-6">
       <FormField
         control={form.control}
         name="output_scope"
         render={({ field }) => (
-          <FormItem className="space-y-3">
+          <FormItem className="flex flex-col gap-3">
             <FormLabel>结果范围</FormLabel>
             <ChoiceGrid
               options={OUTPUT_SCOPE_OPTIONS}
@@ -274,7 +285,7 @@ function QuickGenerateForm({
         control={form.control}
         name="strategy"
         render={({ field }) => (
-          <FormItem className="space-y-3">
+          <FormItem className="flex flex-col gap-3">
             <FormLabel>改写方式</FormLabel>
             <ChoiceGrid
               options={STRATEGY_OPTIONS}
@@ -297,7 +308,7 @@ function QuickGenerateForm({
         control={form.control}
         name="innovation"
         render={({ field }) => (
-          <FormItem className="space-y-3">
+          <FormItem className="flex flex-col gap-3">
             <div className="flex items-center justify-between gap-3">
               <FormLabel>创新强度</FormLabel>
               <span className="text-[13px] text-foreground">{innovation} / 10</span>
@@ -336,7 +347,7 @@ function AdvancedOptions({
   disabled: boolean;
 }) {
   return (
-    <div className="space-y-5">
+    <div className="flex flex-col gap-5">
       <div className="grid gap-5 lg:grid-cols-2">
         <FormField
           control={form.control}
@@ -437,28 +448,28 @@ function ChoiceGrid<T extends string>({
   onChange: (value: T) => void;
 }) {
   return (
-    <div className="grid gap-2 sm:grid-cols-3">
-      {options.map((option) => {
-        const active = option.value === value;
-
-        return (
-          <button
-            key={option.value}
-            type="button"
-            disabled={disabled}
-            aria-pressed={active}
-            className={cn(
-              "rounded-lg border px-3 py-3 text-left text-[13px] transition-colors",
-              active
-                ? "border-primary/50 bg-primary/10 text-foreground"
-                : "border-border/60 bg-background/20 text-muted-foreground hover:text-foreground"
-            )}
-            onClick={() => onChange(option.value)}
-          >
-            <span className="font-medium">{option.label}</span>
-          </button>
-        );
-      })}
-    </div>
+    <ToggleGroup
+      type="single"
+      value={value}
+      onValueChange={(next) => {
+        if (next) onChange(next as T);
+      }}
+      className="grid gap-2 sm:grid-cols-3"
+    >
+      {options.map((option) => (
+        <ToggleGroupItem
+          key={option.value}
+          value={option.value}
+          disabled={disabled}
+          variant="outline"
+          className={cn(
+            "h-auto w-full justify-start rounded-[7px] px-3 py-3 text-left text-[13px]",
+            value === option.value ? "border-primary/50 bg-primary/10 text-foreground" : ""
+          )}
+        >
+          <span className="font-medium">{option.label}</span>
+        </ToggleGroupItem>
+      ))}
+    </ToggleGroup>
   );
 }

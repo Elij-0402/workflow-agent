@@ -1,0 +1,4 @@
+# gitignore everything in runs/ except this file and gitkeep markers
+*
+!.gitignore
+!smoke-test-novel.txt

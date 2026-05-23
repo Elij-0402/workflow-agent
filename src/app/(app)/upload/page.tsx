@@ -3,10 +3,11 @@ import { PageHeader } from "@/components/page-header";
 
 export default function UploadPage() {
   return (
-    <div className="mx-auto flex w-full max-w-[960px] flex-col gap-8 px-4 py-8 sm:px-6 md:px-8 md:py-10">
+    <div className="app-page">
       <PageHeader
+        label="Import"
         title="开始新任务"
-        description="上传一份小说文本，直接进入分析页。"
+        description="导入一份小说文本，系统会创建新的研究任务，并把清洗后的内容接入后续分析与生成流程。"
       />
       <UploadForm />
     </div>

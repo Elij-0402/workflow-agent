@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient, createServiceClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import { cleanNovelText } from "@/lib/text/clean";
 import { decodeNovelBuffer } from "@/lib/text/decode";
 
@@ -132,8 +132,7 @@ export async function finalizeNovelUpload(input: FinalizeNovelUploadInput) {
     };
   }
 
-  const serviceSupabase = createServiceClient();
-  const { data: fileBlob, error: downloadError } = await serviceSupabase.storage
+  const { data: fileBlob, error: downloadError } = await supabase.storage
     .from("novels")
     .download(input.storageObjectPath);
 

@@ -22,7 +22,7 @@ export function AppNav({ onNavigate, className }: AppNavProps) {
   const pathname = usePathname();
 
   return (
-    <nav className={cn("space-y-1", className)} aria-label="主导航">
+    <nav className={cn("flex flex-col gap-1", className)} aria-label="主导航">
       {APP_NAV_ITEMS.map(({ href, label, icon: Icon }) => {
         const active = pathname === href || pathname.startsWith(`${href}/`);
 
@@ -33,10 +33,10 @@ export function AppNav({ onNavigate, className }: AppNavProps) {
             onClick={onNavigate}
             aria-current={active ? "page" : undefined}
             className={cn(
-              "group flex min-w-0 items-center gap-3 rounded-md px-3 py-2.5 text-[13px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+              "group flex min-w-0 items-center gap-3 rounded-[7px] border px-3 py-2.5 text-[13px] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
               active
-                ? "bg-muted text-foreground"
-                : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                ? "border-border bg-accent/80 text-foreground"
+                : "border-transparent text-muted-foreground hover:border-border/70 hover:bg-accent/40 hover:text-foreground"
             )}
           >
             <Icon
@@ -47,7 +47,10 @@ export function AppNav({ onNavigate, className }: AppNavProps) {
               )}
               strokeWidth={1.75}
             />
-            <span className="min-w-0 truncate">{label}</span>
+            <span className="min-w-0 flex-1 truncate">{label}</span>
+            {active ? (
+              <span className="h-1.5 w-1.5 rounded-full bg-primary" aria-hidden="true" />
+            ) : null}
           </Link>
         );
       })}

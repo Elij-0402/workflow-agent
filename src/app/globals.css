@@ -6,50 +6,51 @@
   html {
     color-scheme: dark;
     -webkit-tap-highlight-color: transparent;
+    background: hsl(228 16% 6%);
   }
   :root {
-    --background: 0 0% 100%;
-    --foreground: 220 9% 13%;
-    --card: 0 0% 100%;
-    --card-foreground: 220 9% 13%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 220 9% 13%;
-    --primary: 232 53% 60%;
+    --background: 228 16% 6%;
+    --foreground: 220 20% 94%;
+    --card: 228 15% 8%;
+    --card-foreground: 220 20% 94%;
+    --popover: 228 15% 8%;
+    --popover-foreground: 220 20% 94%;
+    --primary: 233 77% 67%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 220 14% 96%;
-    --secondary-foreground: 220 9% 13%;
-    --muted: 220 14% 96%;
-    --muted-foreground: 220 6% 42%;
-    --accent: 220 14% 96%;
-    --accent-foreground: 220 9% 13%;
-    --destructive: 0 70% 50%;
+    --secondary: 228 13% 11%;
+    --secondary-foreground: 220 18% 91%;
+    --muted: 228 12% 10%;
+    --muted-foreground: 220 9% 62%;
+    --accent: 228 12% 12%;
+    --accent-foreground: 220 20% 94%;
+    --destructive: 0 68% 56%;
     --destructive-foreground: 0 0% 100%;
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 232 53% 60%;
-    --radius: 0.5rem;
+    --border: 228 10% 18%;
+    --input: 228 10% 18%;
+    --ring: 233 77% 67%;
+    --radius: 0.45rem;
   }
 
   .dark {
-    --background: 240 6% 4%;
-    --foreground: 210 4% 96%;
-    --card: 220 6% 7%;
-    --card-foreground: 210 4% 96%;
-    --popover: 220 6% 8%;
-    --popover-foreground: 210 4% 96%;
-    --primary: 232 53% 60%;
+    --background: 228 16% 6%;
+    --foreground: 220 20% 94%;
+    --card: 228 15% 8%;
+    --card-foreground: 220 20% 94%;
+    --popover: 228 15% 8%;
+    --popover-foreground: 220 20% 94%;
+    --primary: 233 77% 67%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 220 5% 12%;
-    --secondary-foreground: 210 4% 96%;
-    --muted: 220 5% 11%;
-    --muted-foreground: 218 7% 57%;
-    --accent: 220 5% 13%;
-    --accent-foreground: 210 4% 96%;
-    --destructive: 0 60% 50%;
+    --secondary: 228 13% 11%;
+    --secondary-foreground: 220 18% 91%;
+    --muted: 228 12% 10%;
+    --muted-foreground: 220 9% 62%;
+    --accent: 228 12% 12%;
+    --accent-foreground: 220 20% 94%;
+    --destructive: 0 68% 56%;
     --destructive-foreground: 0 0% 98%;
-    --border: 220 6% 14%;
-    --input: 220 6% 14%;
-    --ring: 232 53% 60%;
+    --border: 228 10% 18%;
+    --input: 228 10% 18%;
+    --ring: 233 77% 67%;
   }
 }
 
@@ -61,6 +62,9 @@
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1, "ss01" 1, "ss03" 1;
     text-rendering: optimizeLegibility;
+    background-image:
+      radial-gradient(circle at top, hsl(233 77% 67% / 0.08), transparent 30%),
+      linear-gradient(180deg, hsl(228 16% 7%), hsl(228 16% 6%));
   }
   a,
   button {
@@ -73,6 +77,47 @@
   * {
     scrollbar-width: thin;
     scrollbar-color: hsl(var(--border)) transparent;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    letter-spacing: 0;
+  }
+}
+
+@layer components {
+  .app-shell-grid {
+    @apply mx-auto flex w-full max-w-[1440px] gap-0 px-0;
+  }
+
+  .app-page {
+    @apply mx-auto flex w-full max-w-[1240px] flex-col gap-8 px-4 py-6 sm:px-6 lg:px-8 lg:py-8;
+  }
+
+  .surface-panel {
+    @apply rounded-[8px] border border-border/80 bg-card/80 backdrop-blur-sm;
+  }
+
+  .surface-subtle {
+    @apply rounded-[8px] border border-border/70 bg-muted/30;
+  }
+
+  .eyebrow-label {
+    @apply text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground/70;
+  }
+
+  .data-label {
+    @apply text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground/70;
+  }
+
+  .reading-prose {
+    @apply text-[14px] leading-8 text-foreground;
+  }
+
+  .reading-prose p + p {
+    margin-top: 1rem;
   }
 }
 

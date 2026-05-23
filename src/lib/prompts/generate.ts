@@ -1,10 +1,13 @@
 import type { GenerateAnalyses, GenerateConfig } from "@/lib/types";
 
+import { UNTRUSTED_NOVEL_RULE, wrapUntrustedNovel } from "./safety";
+
 export const GENERATE_SYSTEM_PROMPT = `你是一名中文小说变体创作助手。
 
 请基于结构化分析结果与原文片段，生成一个自洽、可读、可直接展示的中文小说变体，并严格返回符合 schema 的 JSON。
 
 要求：
+0. ${UNTRUSTED_NOVEL_RULE}
 1. 只输出 JSON，不要输出解释、前言、Markdown 或代码块。
 2. title 使用简洁中文标题，优先体现这次变体的核心变化。
 3. content 直接输出正文或大纲内容，不要解释你的创作过程。
@@ -97,7 +100,7 @@ export function buildGenerateUserPrompt({
     "【叙事分析】",
     JSON.stringify(analyses.narrative, null, 2),
     `【原书片段（前 ${excerpt.length.toLocaleString("zh-CN")} 字符）】`,
-    excerpt.trim() || "无可用原文片段。",
+    excerpt.trim() ? wrapUntrustedNovel(excerpt) : "无可用原文片段。",
     "【执行要求】\n- 结果必须是中文。\n- content 内保留自然换行。\n- 不要复述输入 JSON。\n- 不要输出 schema 之外的字段。",
   ].join("\n\n");
 }

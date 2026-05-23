@@ -8,7 +8,7 @@ export default async function SettingsPage() {
   const { data: config } = await supabase
     .from("llm_config")
     .select(
-      "id, provider, base_url, api_key_encrypted, model, temperature, max_tokens"
+      "id, base_url, api_key_encrypted, model, temperature, max_tokens, updated_at"
     )
     .maybeSingle();
 
@@ -21,12 +21,15 @@ export default async function SettingsPage() {
     }
   }
 
+  const status = config
+    ? ({ kind: "saved", updatedAt: config.updated_at } as const)
+    : ({ kind: "unconfigured" } as const);
+
   return (
     <SettingsForm
       initialConfig={
         config
           ? {
-              provider: config.provider,
               base_url: config.base_url,
               model: config.model,
               temperature: config.temperature,
@@ -35,6 +38,7 @@ export default async function SettingsPage() {
           : null
       }
       maskedApiKey={maskedApiKey}
+      status={status}
     />
   );
 }

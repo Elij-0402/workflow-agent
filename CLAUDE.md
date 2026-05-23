@@ -37,7 +37,7 @@ Tests are colocated as `*.test.ts` next to the file they cover and use `node:tes
 - `src/lib/supabase/server.ts` → `createServiceClient()` — **service role**, bypasses RLS. Only in trusted server contexts and only with an explicit `.eq("user_id", user.id)` filter. Never import into a client bundle.
 
 ### BYOK + single-model pattern (load-bearing — do not redesign)
-Every LLM call (the 3 analysis dimensions and variant generation) reads the user's single `llm_config` row, decrypts the API key, and dispatches to a user-provided OpenAI-compatible endpoint via `@ai-sdk/openai`'s `createOpenAI({ baseURL })`. There is one model per user; tasks differ only by system prompt. Do not add per-task model selection or expand to a multi-preset UI — that was migration 0002's whole point.
+Every LLM call (the 3 analysis dimensions and variant generation) reads the user's single `llm_config` row, decrypts the API key, and dispatches to a user-provided OpenAI-compatible endpoint via `@ai-sdk/openai`'s `createOpenAI({ baseURL })`. Supported endpoints are OpenAI, DeepSeek, and custom OpenAI-compatible gateways. Anthropic native endpoints are out of scope here. There is one model per user; tasks differ only by system prompt. Do not add per-task model selection or expand to a multi-preset UI — that was migration 0002's whole point.
 
 - `src/lib/crypto.ts` — AES-GCM (`webcrypto`) wrapper. `ENCRYPTION_KEY` is a 32-byte base64 secret loaded from env. **Server-only**; the module would crash in a browser bundle, but the bigger reason is the threat model: the key must never reach the client. Exposes `encrypt`, `decrypt`, `maskApiKey`.
 - `src/lib/llm-config.ts` — Zod `LLMConfigFormSchema` + the `LLMConfig` row type + `parseLLMConfigFormData` (with `allowEmptyApiKey` so the settings form lets users edit other fields without re-typing the key) + `selectLegacyPresetForMigration` (used by migration 0002's data move).
@@ -49,6 +49,7 @@ API keys must never appear in: client bundles, component props, URLs, server log
 Schema in `supabase/migrations/`. Run them in order in the SQL Editor.
 - `0001_init.sql` — initial schema with **`llm_presets`** (multiple per user) plus `sessions`, `books`, `analyses`, `variants`, the `novels` storage bucket, the `touch_updated_at` trigger, and RLS policies `auth.uid() = user_id` on every table.
 - `0002_simplify_auth_and_llm_config.sql` — collapses presets into a single **`llm_config`** row per user (uniqueness via `user_id unique`), data-migrates from `llm_presets` preferring `is_default=true` then oldest, renames `preset_id` → `llm_config_id` on `analyses`/`variants`, drops `llm_presets`. Any new code must target `llm_config` / `llm_config_id`, not the legacy `llm_presets` / `preset_id` names.
+- `0003_restrict_llm_providers_to_openai_compatible.sql` — rewrites legacy `anthropic` rows to `custom` and tightens `llm_config.provider` to `openai | deepseek | custom`.
 
 Domain enums (mirror these in `src/lib/types.ts` if you change the SQL):
 - `sessions.status`: `draft | uploaded | analyzing | analyzed | generating | done`
@@ -86,5 +87,47 @@ Rotating `ENCRYPTION_KEY` invalidates every stored `api_key_encrypted` and force
 
 ## V0.1 status — what's wired vs stubbed
 
-Wired: email/password auth, route gating, sidebar shell, `llm_config` CRUD + AES-GCM encryption.
-Stubbed: `/upload`, `/sessions`, `/dashboard` (placeholder cards). LLM dispatch routes and `.txt` cleaning are not yet implemented; that's the next slice of work.
+Wired: email/password auth, route gating, sidebar shell, `llm_config` CRUD + AES-GCM encryption, `/upload` form (`src/components/upload/upload-form.tsx` + `src/lib/upload/actions.ts`), `/sessions` list, `/dashboard` (queries `llm_config` + `sessions` + `variants`), `src/lib/llm/dispatch.ts` (`getUserLLMClient`), `src/lib/text/clean.ts` + `decode.ts`, three dimension prompts (`src/lib/prompts/{worldview,characters,narrative}.ts`) and the variant generate prompt (`src/lib/prompts/generate.ts`), API routes `src/app/api/analyze/route.ts` and `src/app/api/generate/route.ts`.
+Stubbed / V2: variant UI polish, cards/export, multi-session selection, payment/pricing experiment, dedicated chunking layer for >150 万字 novels.
+
+## gstack
+
+Use gstack's `/browse` skill for ALL web browsing. NEVER use `mcp__claude-in-chrome__*` tools.
+
+Available skills:
+
+- `/office-hours`
+- `/plan-ceo-review`
+- `/plan-eng-review`
+- `/plan-design-review`
+- `/design-consultation`
+- `/design-shotgun`
+- `/design-html`
+- `/review`
+- `/ship`
+- `/land-and-deploy`
+- `/canary`
+- `/benchmark`
+- `/browse`
+- `/connect-chrome`
+- `/qa`
+- `/qa-only`
+- `/design-review`
+- `/setup-browser-cookies`
+- `/setup-deploy`
+- `/setup-gbrain`
+- `/retro`
+- `/investigate`
+- `/document-release`
+- `/document-generate`
+- `/codex`
+- `/cso`
+- `/autoplan`
+- `/plan-devex-review`
+- `/devex-review`
+- `/careful`
+- `/freeze`
+- `/guard`
+- `/unfreeze`
+- `/gstack-upgrade`
+- `/learn`

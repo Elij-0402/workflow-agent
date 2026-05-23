@@ -12,6 +12,7 @@ import {
   ANALYSIS_DIMENSIONS,
   DIMENSION_LABELS,
   type AnalysisDimension,
+  type SessionStatus,
 } from "@/lib/types";
 
 type AnalysisState = "pending" | "loading" | "done" | "error";
@@ -25,6 +26,7 @@ type PanelProps = {
   sessionId: string;
   analyses: AnalysisRecord[];
   llmConfigured: boolean;
+  sessionStatus: SessionStatus;
 };
 
 type DimensionStatus = {
@@ -99,6 +101,7 @@ export function AnalysisPanel({
   sessionId,
   analyses,
   llmConfigured,
+  sessionStatus,
 }: PanelProps) {
   const router = useRouter();
   const initialMap = useMemo<Record<AnalysisDimension, DimensionStatus>>(() => {
@@ -140,7 +143,10 @@ export function AnalysisPanel({
     });
   }, [initialMap]);
 
-  async function runDimension(dimension: AnalysisDimension) {
+  async function runDimension(
+    dimension: AnalysisDimension,
+    options?: { refresh?: boolean }
+  ) {
     setItems((current) => ({
       ...current,
       [dimension]: {
@@ -182,7 +188,9 @@ export function AnalysisPanel({
           result: payload.result,
         },
       }));
-      router.refresh();
+      if (options?.refresh !== false) {
+        router.refresh();
+      }
     } catch {
       setItems((current) => ({
         ...current,
@@ -196,14 +204,17 @@ export function AnalysisPanel({
   }
 
   async function runAll() {
-    await Promise.allSettled(
-      ANALYSIS_DIMENSIONS.map((dimension) => runDimension(dimension))
-    );
+    for (const dimension of ANALYSIS_DIMENSIONS) {
+      // Keep single-dimension failures isolated, but avoid provider burst and status races.
+      await runDimension(dimension, { refresh: false });
+    }
+    router.refresh();
   }
 
   const hasLoading = ANALYSIS_DIMENSIONS.some(
     (dimension) => items[dimension].state === "loading"
   );
+  const blockedByGenerating = sessionStatus === "generating";
   const doneCount = ANALYSIS_DIMENSIONS.filter(
     (dimension) => items[dimension].state === "done"
   ).length;
@@ -213,6 +224,7 @@ export function AnalysisPanel({
     <section id="analysis-panel" className="space-y-5">
       <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div className="space-y-2">
+          <p className="eyebrow-label">Analysis</p>
           <h2 className="text-[20px] font-medium tracking-tight text-foreground">
             分析结果
           </h2>
@@ -225,11 +237,18 @@ export function AnalysisPanel({
             <p className="text-[13px] leading-6 text-amber-200">
               开始分析前，先完成模型设置。
             </p>
+          ) : blockedByGenerating ? (
+            <p className="text-[13px] leading-6 text-amber-200">
+              当前正在生成，暂不可重新分析。
+            </p>
           ) : null}
         </div>
 
         {!allDone ? (
-          <Button onClick={runAll} disabled={!llmConfigured || hasLoading}>
+          <Button
+            onClick={() => void runAll()}
+            disabled={!llmConfigured || hasLoading || blockedByGenerating}
+          >
             {hasLoading ? (
               <>
                 <Loader2 className="animate-spin" />
@@ -245,7 +264,7 @@ export function AnalysisPanel({
         ) : null}
       </div>
 
-      <div className="overflow-hidden rounded-lg border border-border/60 bg-background/20">
+      <div className="overflow-hidden rounded-[8px] border border-border/70 bg-card/58">
         {ANALYSIS_DIMENSIONS.map((dimension, index) => {
           const item = items[dimension];
           const canShowDetail = Boolean(item.result);
@@ -256,13 +275,13 @@ export function AnalysisPanel({
               key={dimension}
               className={cn(
                 "px-5 py-4",
-                index > 0 ? "border-t border-border/60" : ""
+                index > 0 ? "border-t border-border/70" : ""
               )}
             >
               <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                 <div className="min-w-0 space-y-2">
                   <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                    <h3 className="text-[15px] font-medium text-foreground">
+                    <h3 className="text-[14px] font-medium text-foreground">
                       {DIMENSION_LABELS[dimension]}
                     </h3>
                     <span className={cn("text-[13px]", statusCopy.className)}>
@@ -278,8 +297,22 @@ export function AnalysisPanel({
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => void runDimension(dimension)}
-                    disabled={!llmConfigured || item.state === "loading"}
+                    onClick={() => {
+                      // Cost guard: re-running a finished dimension burns BYOK
+                      // tokens. Confirm before re-spending the user's quota.
+                      if (item.state === "done" && typeof window !== "undefined") {
+                        const ok = window.confirm(
+                          `重新分析「${DIMENSION_LABELS[dimension]}」会再次调用模型并消耗你的 BYOK 配额。继续？`
+                        );
+                        if (!ok) return;
+                      }
+                      void runDimension(dimension);
+                    }}
+                    disabled={
+                      !llmConfigured ||
+                      blockedByGenerating ||
+                      item.state === "loading"
+                    }
                   >
                     {item.state === "loading" ? (
                       <>
@@ -322,7 +355,7 @@ export function AnalysisPanel({
               </div>
 
               {canShowDetail && expanded[dimension] ? (
-                <div className="mt-4 border-t border-border/60 pt-4">
+                <div className="mt-4 border-t border-border/70 pt-4">
                   <AnalysisDetail dimension={dimension} result={item.result} />
                 </div>
               ) : null}

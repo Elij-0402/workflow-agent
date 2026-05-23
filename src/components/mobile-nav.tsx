@@ -7,19 +7,20 @@ import { Menu, Plus } from "lucide-react";
 import { AppNav } from "@/components/app-nav";
 import { Button } from "@/components/ui/button";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
 export function MobileNav() {
   const [open, setOpen] = useState(false);
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild>
         <Button
           variant="ghost"
           size="icon"
@@ -28,12 +29,15 @@ export function MobileNav() {
         >
           <Menu aria-hidden="true" />
         </Button>
-      </DialogTrigger>
-      <DialogContent className="left-0 top-0 h-dvh max-w-[320px] translate-x-0 translate-y-0 gap-0 rounded-none border-r border-border/70 p-0 shadow-2xl data-[state=closed]:slide-out-to-left-full data-[state=open]:slide-in-from-left-full">
-        <div className="border-b border-border/60 px-5 py-4">
-          <DialogTitle className="text-[14px] font-medium">NovelFusion</DialogTitle>
-          <DialogDescription className="mt-1 text-[12px]">创作工具</DialogDescription>
-        </div>
+      </SheetTrigger>
+      <SheetContent
+        side="left"
+        className="w-[304px] border-r border-border/70 bg-background/96 p-0 shadow-2xl"
+      >
+        <SheetHeader className="border-b border-border/70 px-5 py-4">
+          <SheetTitle className="text-[14px] font-medium">NovelFusion</SheetTitle>
+          <SheetDescription className="text-[12px]">创作工作区</SheetDescription>
+        </SheetHeader>
 
         <div className="px-5 py-5">
           <Button asChild className="h-10 w-full justify-center">
@@ -44,10 +48,13 @@ export function MobileNav() {
           </Button>
         </div>
 
-        <div className="border-t border-border/60 px-3 py-4">
+        <div className="border-t border-border/70 px-3 py-4">
+          <p className="px-3 pb-3 text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground/68">
+            Workspace
+          </p>
           <AppNav onNavigate={() => setOpen(false)} />
         </div>
-      </DialogContent>
-    </Dialog>
+      </SheetContent>
+    </Sheet>
   );
 }

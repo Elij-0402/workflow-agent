@@ -3,14 +3,36 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { getUserLLMClient } from "@/lib/llm/dispatch";
+import { isUserFixableLLMConfigMessage } from "@/lib/llm-config";
 import { ANALYSIS_TEXT_CHAR_LIMIT, ANALYSIS_DIMENSION_CONFIG } from "@/lib/prompts";
-import { ANALYSIS_DIMENSIONS, type AnalysisDimension } from "@/lib/types";
+import { wrapUntrustedNovel } from "@/lib/prompts/safety";
 import { createClient } from "@/lib/supabase/server";
+import {
+  getSessionStatusAfterAnalysis,
+  shouldEnterAnalyzingStatus,
+} from "@/lib/session-status";
+import { ANALYSIS_DIMENSIONS, type AnalysisDimension } from "@/lib/types";
+
+export const runtime = "nodejs";
+export const maxDuration = 300;
 
 const requestSchema = z.object({
   sessionId: z.string().uuid(),
   dimension: z.enum(ANALYSIS_DIMENSIONS as [AnalysisDimension, ...AnalysisDimension[]]),
 });
+
+const ANALYSIS_LOCKED_MESSAGE = "当前正在生成，暂不可重新分析。";
+const ANALYSIS_GENERIC_FAILURE = "分析失败，请稍后重试。";
+
+class RouteError extends Error {
+  constructor(
+    message: string,
+    readonly status: number
+  ) {
+    super(message);
+    this.name = "RouteError";
+  }
+}
 
 function jsonError(message: string, status: number) {
   return NextResponse.json({ error: message }, { status });
@@ -48,6 +70,10 @@ export async function POST(request: Request) {
     return jsonError("未找到对应会话。", 404);
   }
 
+  if (session.status === "generating") {
+    return jsonError(ANALYSIS_LOCKED_MESSAGE, 409);
+  }
+
   const { data: book, error: bookError } = await supabase
     .from("books")
     .select("id, cleaned_content")
@@ -63,25 +89,36 @@ export async function POST(request: Request) {
     return jsonError("当前书籍内容不可用。", 400);
   }
 
-  if (session.status === "uploaded") {
-    await supabase
-      .from("sessions")
-      .update({ status: "analyzing" })
-      .eq("id", session.id)
-      .eq("user_id", user.id)
-      .eq("status", "uploaded");
-  }
-
   const promptConfig = ANALYSIS_DIMENSION_CONFIG[parsedBody.dimension];
   const excerpt = book.cleaned_content.slice(0, ANALYSIS_TEXT_CHAR_LIMIT);
+  let currentStatus = session.status;
+  let statusFlipped = false;
+  let analysisSaved = false;
 
   try {
     const llm = await getUserLLMClient(supabase);
+
+    if (shouldEnterAnalyzingStatus(currentStatus)) {
+      const { error: statusError } = await supabase
+        .from("sessions")
+        .update({ status: "analyzing" })
+        .eq("id", session.id)
+        .eq("user_id", user.id)
+        .eq("status", "uploaded");
+
+      if (statusError) {
+        throw new RouteError("更新会话状态失败，请稍后再试。", 500);
+      }
+
+      currentStatus = "analyzing";
+      statusFlipped = true;
+    }
+
     const result = await generateObject({
       model: llm.openai(llm.model),
       schema: promptConfig.schema,
       system: promptConfig.systemPrompt,
-      prompt: excerpt,
+      prompt: wrapUntrustedNovel(excerpt),
       temperature: llm.temperature,
       maxTokens: llm.maxTokens,
     });
@@ -106,21 +143,47 @@ export async function POST(request: Request) {
     );
 
     if (upsertError) {
-      return jsonError("保存分析结果失败，请稍后再试。", 500);
+      throw new RouteError("保存分析结果失败，请稍后再试。", 500);
     }
 
-    const { count } = await supabase
-      .from("analyses")
-      .select("*", { count: "exact", head: true })
-      .eq("book_id", book.id)
-      .eq("user_id", user.id);
+    analysisSaved = true;
 
-    if (count === ANALYSIS_DIMENSIONS.length) {
-      await supabase
+    const [
+      { count: analysisCount, error: analysisCountError },
+      { count: variantCount, error: variantCountError },
+    ] = await Promise.all([
+      supabase
+        .from("analyses")
+        .select("*", { count: "exact", head: true })
+        .eq("book_id", book.id)
+        .eq("user_id", user.id),
+      supabase
+        .from("variants")
+        .select("*", { count: "exact", head: true })
+        .eq("session_id", session.id)
+        .eq("user_id", user.id),
+    ]);
+
+    if (analysisCountError || variantCountError) {
+      throw new RouteError("更新会话状态失败，请稍后再试。", 500);
+    }
+
+    const nextStatus = getSessionStatusAfterAnalysis({
+      analysisCount: analysisCount ?? 0,
+      totalAnalyses: ANALYSIS_DIMENSIONS.length,
+      variantCount: variantCount ?? 0,
+    });
+
+    if (nextStatus !== currentStatus) {
+      const { error: statusError } = await supabase
         .from("sessions")
-        .update({ status: "analyzed" })
+        .update({ status: nextStatus })
         .eq("id", session.id)
         .eq("user_id", user.id);
+
+      if (statusError) {
+        throw new RouteError("更新会话状态失败，请稍后再试。", 500);
+      }
     }
 
     return NextResponse.json({
@@ -129,10 +192,24 @@ export async function POST(request: Request) {
       result: result.object,
     });
   } catch (error) {
+    // Restore session.status if we flipped it but never saved an analysis row.
+    // Mirrors the rollback pattern in src/app/api/generate/route.ts.
+    if (statusFlipped && !analysisSaved) {
+      await supabase
+        .from("sessions")
+        .update({ status: "uploaded" })
+        .eq("id", session.id)
+        .eq("user_id", user.id);
+    }
+
+    if (error instanceof RouteError) {
+      return jsonError(error.message, error.status);
+    }
+
     const message =
-      error instanceof Error && error.message === "请先在设置页保存模型配置。"
+      error instanceof Error && isUserFixableLLMConfigMessage(error.message)
         ? error.message
-        : "分析失败，请稍后重试。";
-    return jsonError(message, 500);
+        : ANALYSIS_GENERIC_FAILURE;
+    return jsonError(message, message === ANALYSIS_GENERIC_FAILURE ? 500 : 409);
   }
 }
