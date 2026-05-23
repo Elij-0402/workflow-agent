@@ -10,7 +10,7 @@ export default async function SessionsPage() {
   const supabase = await createClient();
   const { data: sessions } = await supabase
     .from("sessions")
-    .select("id, name, status, created_at, updated_at")
+    .select("id, name, status, mode, created_at, updated_at")
     .order("updated_at", { ascending: false });
 
   return (
@@ -29,14 +29,19 @@ export default async function SessionsPage() {
             return (
               <li key={session.id}>
                 <Link
-                  href={`/sessions/${session.id}`}
+                  href={session.mode === "dual" ? `/sessions/${session.id}/workbench` : `/sessions/${session.id}`}
                   className="flex min-w-0 items-center gap-3 border-t border-border/70 px-5 py-4 transition-colors first:border-t-0 hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
                 >
                   <div className="flex min-w-0 flex-1 items-center gap-3">
                     <StatusDot status={session.status} />
                     <div className="min-w-0">
-                      <div className="truncate text-[14px] font-medium text-foreground">
-                        {session.name}
+                      <div className="flex items-center gap-2">
+                        <div className="truncate text-[14px] font-medium text-foreground">
+                          {session.name}
+                        </div>
+                        <span className="rounded-[5px] border border-border/60 px-1.5 py-0.5 text-[10.5px] text-muted-foreground">
+                          {session.mode === "dual" ? "双书" : "单书"}
+                        </span>
                       </div>
                       <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[12px] text-muted-foreground">
                         <span>{status.label}</span>

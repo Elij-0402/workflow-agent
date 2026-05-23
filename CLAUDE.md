@@ -90,6 +90,26 @@ Rotating `ENCRYPTION_KEY` invalidates every stored `api_key_encrypted` and force
 Wired: email/password auth, route gating, sidebar shell, `llm_config` CRUD + AES-GCM encryption, `/upload` form (`src/components/upload/upload-form.tsx` + `src/lib/upload/actions.ts`), `/sessions` list, `/dashboard` (queries `llm_config` + `sessions` + `variants`), `src/lib/llm/dispatch.ts` (`getUserLLMClient`), `src/lib/text/clean.ts` + `decode.ts`, three dimension prompts (`src/lib/prompts/{worldview,characters,narrative}.ts`) and the variant generate prompt (`src/lib/prompts/generate.ts`), API routes `src/app/api/analyze/route.ts` and `src/app/api/generate/route.ts`.
 Stubbed / V2: variant UI polish, cards/export, multi-session selection, payment/pricing experiment, dedicated chunking layer for >150 万字 novels.
 
+## V0.2 — Dual-book blueprint workbench
+
+Wired in dual mode (`sessions.mode='dual'`):
+- `/upload?mode=dual` flow + workbench empty-slot "添加第二本书" link
+- `/sessions/[id]/workbench` page (server component fetches everything, hands a `WorkbenchClient` shell with: chapter tree per book, candidate picker, blueprint editor, pipeline bar, variant comparison)
+- New tables: `chapters`, `blueprints` (see `supabase/migrations/0004_multi_book_blueprint_workbench.sql`)
+- `analyses` extended with `scope` ('book'|'chapter') and `chapter_id`; partial unique indexes split book-scope vs chapter-scope to handle NULL chapter_id correctly
+- `variants.blueprint_id` (nullable for legacy single-mode rows; required in app layer for dual)
+- API: `/api/chapters/parse`, `/api/analyze/chapter`, `/api/analyze/book`, `/api/blueprint` (PATCH), `/api/blueprint/confirm`, `/api/blueprint/unconfirm`, `/api/generate-v2`
+- Prompts: `src/lib/prompts/chapter-brief.ts`, `book-synthesis.ts`, `generate-from-blueprint.ts`
+- Blueprint lib: `src/lib/blueprint/{schema,merge}.ts` — Zod schema validates every write, `applyCandidate` dedupes by per-section identity key + source dedup
+- Variant diff: `src/lib/diff/variant-diff.ts` — three-layer (meta / structure / paragraph LCS, normalize whitespace+punct)
+- Cost estimator: `src/lib/cost/estimate.ts` — pre-batch confirmation modal
+
+Old single-book sessions (`mode='single'`) keep the legacy `AnalysisPanel`/`GeneratePanel`/`VariantList` path; `src/app/(app)/sessions/[id]/page.tsx` server-side redirects dual to `/workbench`. Legacy `/api/analyze` and `/api/generate` reject dual sessions explicitly (409) so the old UI cannot accidentally bypass the blueprint gate.
+
+Constraint: every blueprint write goes through `BlueprintSchema.parse`. `/api/generate-v2` requires `blueprints.status='confirmed'`. Chapter-level analysis is client-orchestrated (no worker) — concurrency cap 3 in `src/app/(app)/sessions/[id]/workbench/chapter-batch.ts`, with a cost-estimate modal before each batch.
+
+Type aliases: `LegacyAnalysisDimension` is the 3-dim subset used by legacy code paths (analysis-panel, ANALYSIS_DIMENSION_CONFIG); `AnalysisDimension` now also includes `chapter_brief` and `book_synthesis` for dual-mode analyses rows.
+
 ## gstack
 
 Use gstack's `/browse` skill for ALL web browsing. NEVER use `mcp__claude-in-chrome__*` tools.

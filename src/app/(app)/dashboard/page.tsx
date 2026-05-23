@@ -21,7 +21,7 @@ export default async function DashboardPage() {
       .maybeSingle(),
     supabase
       .from("sessions")
-      .select("id, name, status, created_at, updated_at")
+      .select("id, name, status, mode, created_at, updated_at")
       .order("updated_at", { ascending: false })
       .limit(1),
   ]);
@@ -41,7 +41,9 @@ export default async function DashboardPage() {
     ? getSessionStatusMeta(latestSession.status)
     : null;
   const latestActionLabel = latestSession
-    ? getSessionActionLabel(latestSession.status, latestVariantCount)
+    ? latestSession.mode === "dual"
+      ? "打开工作台"
+      : getSessionActionLabel(latestSession.status, latestVariantCount)
     : null;
 
   return (
@@ -100,7 +102,7 @@ export default async function DashboardPage() {
 
                 <div className="grid gap-3 border-t border-border/70 pt-5 sm:grid-cols-[auto_auto_1fr] sm:items-center">
                   <Button asChild className="h-10 px-4">
-                    <Link href={`/sessions/${latestSession.id}`}>
+                    <Link href={latestSession.mode === "dual" ? `/sessions/${latestSession.id}/workbench` : `/sessions/${latestSession.id}`}>
                       {latestActionLabel}
                       <ArrowRight aria-hidden="true" />
                     </Link>

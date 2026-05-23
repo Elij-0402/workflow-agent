@@ -11,7 +11,15 @@ import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { formatBytes } from "@/lib/utils";
 
-export function UploadForm() {
+export function UploadForm({
+  mode = "single",
+  sessionId,
+  position,
+}: {
+  mode?: "single" | "dual";
+  sessionId?: string;
+  position?: 0 | 1;
+} = {}) {
   const router = useRouter();
   const supabase = useMemo(() => createClient(), []);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -49,6 +57,9 @@ export function UploadForm() {
         filename: selectedFile.name,
         size: selectedFile.size,
         contentType: selectedFile.type,
+        mode,
+        sessionId,
+        position,
       });
 
       if ("error" in initResult) {
@@ -76,6 +87,7 @@ export function UploadForm() {
         filename: selectedFile.name,
         size: selectedFile.size,
         contentType: selectedFile.type,
+        position: initResult.position,
       });
 
       if ("error" in finalizeResult) {
