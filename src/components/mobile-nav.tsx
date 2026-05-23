@@ -36,7 +36,7 @@ export function MobileNav() {
       >
         <SheetHeader className="border-b border-border/70 px-5 py-4">
           <SheetTitle>NovelFusion</SheetTitle>
-          <SheetDescription className="sr-only">主导航菜单</SheetDescription>
+          <SheetDescription className="sr-only">产品主导航</SheetDescription>
         </SheetHeader>
 
         <div className="px-5 py-5">
@@ -45,9 +45,9 @@ export function MobileNav() {
             variant="default"
             className="h-10 w-full justify-center"
           >
-            <Link href="/upload" onClick={() => setOpen(false)}>
+            <Link href="/create" onClick={() => setOpen(false)}>
               <Plus aria-hidden="true" />
-              新建任务
+              新建项目
             </Link>
           </Button>
         </div>

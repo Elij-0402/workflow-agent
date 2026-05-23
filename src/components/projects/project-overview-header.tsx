@@ -19,11 +19,11 @@ export function ProjectOverviewHeader({
 }) {
   return (
     <PageHeader
-      label="project"
+      label="项目总览"
       title={title}
       description={progressLabel}
       action={
-        <Button asChild variant="terminal">
+        <Button asChild>
           <Link href={nextAction.href}>
             {nextAction.label}
             <ArrowRight aria-hidden="true" />
@@ -33,8 +33,8 @@ export function ProjectOverviewHeader({
       meta={
         <MetaRow
           items={[
-            { label: "status", value: statusLabel },
-            { label: "next", value: nextAction.label },
+            { label: "状态", value: statusLabel },
+            { label: "下一步", value: nextAction.label },
           ]}
         />
       }

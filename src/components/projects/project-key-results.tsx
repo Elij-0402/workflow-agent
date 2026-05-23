@@ -8,9 +8,9 @@ export function ProjectKeyResults({
   return (
     <section className="surface-panel p-6">
       <div>
-        <p className="eyebrow-label">key results</p>
+        <p className="eyebrow-label">项目状态</p>
         <h2 className="mt-2 text-[20px] font-semibold leading-tight text-foreground">
-          项目状态
+          高层进度
         </h2>
       </div>
 

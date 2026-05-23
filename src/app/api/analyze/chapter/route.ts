@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { getUserLLMClient } from "@/lib/llm/dispatch";
+import { resolveStructuredObjectMode } from "@/lib/llm/structured-output";
 import { isUserFixableLLMConfigMessage } from "@/lib/llm-config";
 import {
   CHAPTER_BRIEF_SYSTEM_PROMPT,
@@ -62,6 +63,7 @@ export async function POST(req: Request) {
     const llm = await getUserLLMClient(supabase);
     const result = await generateObject({
       model: llm.openai(llm.model),
+      mode: resolveStructuredObjectMode(llm.provider),
       schema: ChapterBriefResultSchema,
       system: CHAPTER_BRIEF_SYSTEM_PROMPT,
       prompt: buildChapterBriefUserPrompt({

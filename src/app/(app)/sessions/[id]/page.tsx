@@ -123,16 +123,16 @@ export default async function SessionDetailPage({
   return (
     <div className="app-page">
       <PageHeader
-        label="session"
+        label="项目"
         title={book.title}
         description={currentStepDescription}
         action={headerAction}
         meta={
           <MetaRow
             items={[
-              { label: "uploaded", value: formatDate(book.created_at) },
+              { label: "导入时间", value: formatDate(book.created_at) },
               {
-                label: "updated",
+                label: "最近更新",
                 value: formatRelativeTime(session.updated_at),
               },
             ]}
@@ -145,12 +145,12 @@ export default async function SessionDetailPage({
       <MetaRow
         items={[
           {
-            label: "words",
+            label: "字数",
             value: book.word_count?.toLocaleString("zh-CN") ?? "0",
           },
-          { label: "chapters", value: String(chapterCount) },
-          { label: "encoding", value: typeof metadata.encoding === "string" ? metadata.encoding : "未知" },
-          { label: "analysis", value: `${safeAnalyses.length} / 3` },
+          { label: "章节", value: String(chapterCount) },
+          { label: "编码", value: typeof metadata.encoding === "string" ? metadata.encoding : "未知" },
+          { label: "分析", value: `${safeAnalyses.length} / 3` },
         ]}
       />
 
@@ -160,10 +160,10 @@ export default async function SessionDetailPage({
             <div>
               <p className="eyebrow-label">overview</p>
               <h2 className="mt-2 font-display text-[24px] italic leading-tight text-foreground">
-                任务概览
+                项目总览
               </h2>
               <p className="mt-3 max-w-3xl text-[13.5px] leading-7 text-muted-foreground">
-                当前版本先围绕单份文本建立完整的研究与生成路径。后续多书对比、双视角分析和来源映射会接入同一块结构。
+                当前是单书兼容模式，仍然沿用同一条项目主线：分析、判断、生成结果。后续多书对比和蓝图能力会优先落在双书项目里。
               </p>
             </div>
             <div className="surface-subtle p-4">

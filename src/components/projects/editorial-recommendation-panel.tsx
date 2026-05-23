@@ -7,9 +7,9 @@ export function EditorialRecommendationPanel({
     <section className="surface-panel p-6">
       <div className="flex flex-col gap-4">
         <div>
-          <p className="eyebrow-label">editorial recommendation</p>
+          <p className="eyebrow-label">系统判断</p>
           <h2 className="mt-2 text-[20px] font-semibold leading-tight text-foreground">
-            当前建议
+            编辑建议
           </h2>
         </div>
 

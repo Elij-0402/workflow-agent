@@ -64,7 +64,7 @@ export function BriefCreateSheet({ sessions }: Props) {
               还没有可用项目。
             </p>
             <Button asChild className="mt-3 w-full">
-              <Link href="/upload" onClick={() => setOpen(false)}>
+              <Link href="/create" onClick={() => setOpen(false)}>
                 导入新项目
               </Link>
             </Button>

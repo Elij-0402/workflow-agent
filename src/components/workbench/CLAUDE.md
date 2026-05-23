@@ -4,7 +4,12 @@ dual-mode (`sessions.mode='dual'`) 专属 UI。父级 `src/components/CLAUDE.md`
 
 ## 路由入口
 
-`src/app/(app)/sessions/[id]/page.tsx` 服务端检测 `mode='dual'` 时 `redirect('/sessions/${id}/workbench')`。dual 永远走这里，**不会回退到 legacy single-mode 三件套**。
+dual 现在有两层入口：
+
+- `src/app/(app)/sessions/[id]/page.tsx` 是项目概览页入口，负责聚合进度、关键结果和模块导航
+- `src/app/(app)/sessions/[id]/workbench/page.tsx` 是深工作台入口，负责执行章节分析、蓝图编辑与生成
+
+从概览页进入 workbench 是 dual 的标准路径；single 仍停留在根页的 legacy 三件套，不会落到本目录。
 
 ## 状态流
 

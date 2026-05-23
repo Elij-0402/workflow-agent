@@ -23,6 +23,7 @@ const admin = createClient(
   env.NEXT_PUBLIC_SUPABASE_URL,
   env.SUPABASE_SERVICE_ROLE_KEY,
 );
+const dualUploadPath = "/upload?mode=dual";
 
 async function finishAnalyses(page: Page) {
   const sessionId = page.url().match(/\/sessions\/([0-9a-f-]+)/)?.[1];
@@ -184,7 +185,7 @@ test("smoke flow: login, configure, upload, analyze, and generate", async ({
   await login(page);
   await configureLlm(page);
 
-  await page.goto("/upload");
+  await page.goto(dualUploadPath);
   await page.locator('input[type="file"]').setInputFiles([uploadFileA, uploadFileB]);
   await expect(page.getByText(path.basename(uploadFileA), { exact: false })).toBeVisible();
   await expect(page.getByText(path.basename(uploadFileB), { exact: false })).toBeVisible();
@@ -193,6 +194,8 @@ test("smoke flow: login, configure, upload, analyze, and generate", async ({
   await expect(page).toHaveURL(/\/sessions\/[0-9a-f-]+$/, {
     timeout: 30_000,
   });
+  const overviewUrl = page.url();
+  await page.goto(`${overviewUrl}/workbench`);
   await expect(
     page.getByRole("heading", {
       name: "第 2 步 · 分析两本参考小说",
