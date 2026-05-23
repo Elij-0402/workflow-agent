@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "test": "node --import tsx --test src/lib/auth/password-auth.test.ts src/lib/llm-config.test.ts src/lib/prompts/generate.test.ts src/lib/text/clean.test.ts"
   },
   "dependencies": {
     "@ai-sdk/openai": "^1.0.10",
