@@ -3,15 +3,16 @@ import Link from "next/link";
 import { Settings2 } from "lucide-react";
 
 import { AnalysisPanel } from "./analysis-panel";
+import { ExtendedAnalysisPanel } from "./extended-analysis-panel";
 import { GeneratePanel } from "@/components/sessions/generate-panel";
 import { VariantList } from "@/components/sessions/variant-list";
 import { MetaRow } from "@/components/meta-row";
 import { PageHeader } from "@/components/page-header";
 import { WorkflowStageBar, type WorkflowStageItem } from "@/components/workflow-stage-bar";
 import { Button } from "@/components/ui/button";
-import { ANALYSIS_DIMENSION_CONFIG } from "@/lib/prompts";
+import { ANALYSIS_DIMENSION_CONFIG, EXTENDED_ANALYSIS_DIMENSION_CONFIG } from "@/lib/prompts";
 import { createClient } from "@/lib/supabase/server";
-import type { LegacyAnalysisDimension, VariantRow } from "@/lib/types";
+import type { ExtendedAnalysisDimension, LegacyAnalysisDimension, VariantRow } from "@/lib/types";
 import { formatDate, formatRelativeTime } from "@/lib/utils";
 
 type SessionPageProps = {
@@ -103,6 +104,20 @@ export default async function SessionDetailPage({ params }: SessionPageProps) {
       return config.schema.safeParse(item.result).success;
     },
   );
+  const safeExtendedAnalyses = (analyses ?? []).filter(
+    (
+      item,
+    ): item is {
+      dimension: ExtendedAnalysisDimension;
+      result: unknown;
+    } => {
+      if (!item.dimension || !item.result) return false;
+      const config =
+        EXTENDED_ANALYSIS_DIMENSION_CONFIG[item.dimension as ExtendedAnalysisDimension];
+      if (!config) return false;
+      return config.schema.safeParse(item.result).success;
+    },
+  );
   const safeVariants = (variants ?? []) as Array<
     Pick<VariantRow, "id" | "title" | "config" | "content" | "word_count" | "created_at">
   >;
@@ -110,11 +125,11 @@ export default async function SessionDetailPage({ params }: SessionPageProps) {
   const hasVariants = safeVariants.length > 0;
   const currentStepDescription = !hasCompleteAnalysis
     ? Boolean(llmConfig)
-      ? "先完成三项分析，再进入生成。"
-      : "当前还不能开始分析，先去补上模型设置。"
+      ? "完成三项分析后可生成"
+      : "需先配置模型"
     : hasVariants
-      ? "结果已经生成完成。你可以继续查看，或再生成一个版本。"
-      : "分析已经准备好，下一步直接生成结果。";
+      ? "结果已生成，可继续查看或再生成一个版本"
+      : "分析已准备好，可直接生成结果";
   const stageItems = getStageItems({
     hasCompleteAnalysis,
     variantCount: safeVariants.length,
@@ -125,6 +140,10 @@ export default async function SessionDetailPage({ params }: SessionPageProps) {
         <Settings2 aria-hidden="true" />
         去设置
       </Link>
+    </Button>
+  ) : hasCompleteAnalysis ? (
+    <Button asChild variant="outline" size="sm">
+      <Link href={`/studio/new?sessionId=${session.id}`}>新建创意简报</Link>
     </Button>
   ) : undefined;
 
@@ -195,6 +214,12 @@ export default async function SessionDetailPage({ params }: SessionPageProps) {
               analyses={safeAnalyses}
               llmConfigured={Boolean(llmConfig)}
               sessionStatus={session.status}
+            />
+            <ExtendedAnalysisPanel
+              bookId={book.id}
+              analyses={safeExtendedAnalyses}
+              llmConfigured={Boolean(llmConfig)}
+              disabled={session.status === "generating"}
             />
           </>
         ) : (

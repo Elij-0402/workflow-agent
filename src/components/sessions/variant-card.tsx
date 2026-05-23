@@ -55,7 +55,7 @@ export function VariantCard({ variant }: VariantCardProps) {
           </div>
         </div>
 
-        <p className="italic-cap max-h-24 overflow-hidden whitespace-pre-wrap text-[13.5px] leading-7 text-muted-foreground">
+        <p className="max-h-24 overflow-hidden whitespace-pre-wrap text-[13.5px] leading-7 text-muted-foreground">
           {preview || "暂无正文内容。"}
         </p>
 
@@ -84,7 +84,7 @@ export function VariantCard({ variant }: VariantCardProps) {
                 </DialogDescription>
               </DialogHeader>
               <div className="overflow-y-auto px-7 pb-7 pt-5">
-                <article className="reading-prose italic-cap max-w-[78ch] whitespace-pre-wrap">
+                <article className="reading-prose max-w-[78ch] whitespace-pre-wrap">
                   {variant.content}
                 </article>
               </div>

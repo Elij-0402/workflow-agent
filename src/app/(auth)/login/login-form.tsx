@@ -60,10 +60,7 @@ export function LoginForm({ redirectPath }: { redirectPath: string }) {
       <section className="hidden lg:flex lg:flex-col lg:gap-10">
         <div className="max-w-[560px]">
           <div className="mb-8">
-            <p className="font-mono text-[10.5px] uppercase tracking-[0.18em] text-primary/80">
-              {"// atelier · v0.2"}
-            </p>
-            <div className="mt-3 leading-none">
+            <div className="leading-none">
               <span className="font-display text-[40px] italic text-foreground">Novel</span>
               <span className="font-mono text-[24px] text-primary">·fusion</span>
             </div>
@@ -103,9 +100,6 @@ export function LoginForm({ redirectPath }: { redirectPath: string }) {
           />
         </div>
 
-        <p className="font-mono text-[10.5px] uppercase tracking-[0.14em] text-muted-foreground/60">
-          ┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
-        </p>
       </section>
 
       <div className="surface-panel relative bg-card p-7">
@@ -128,7 +122,7 @@ export function LoginForm({ redirectPath }: { redirectPath: string }) {
             disabled={pending}
             className="terminal-tab"
           >
-            [ login ]
+            登录
           </button>
           <button
             type="button"
@@ -137,7 +131,7 @@ export function LoginForm({ redirectPath }: { redirectPath: string }) {
             disabled={pending}
             className="terminal-tab"
           >
-            [ register ]
+            注册
           </button>
         </div>
 
@@ -146,7 +140,7 @@ export function LoginForm({ redirectPath }: { redirectPath: string }) {
           <input type="hidden" name="redirect" value={redirectPath} />
 
           <div className="flex flex-col gap-2">
-            <Label htmlFor="email">{"// email"}</Label>
+            <Label htmlFor="email">邮箱</Label>
             <div className="relative">
               <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-primary/60" />
               <Input
@@ -165,7 +159,7 @@ export function LoginForm({ redirectPath }: { redirectPath: string }) {
           </div>
 
           <div className="flex flex-col gap-2">
-            <Label htmlFor="password">{"// password"}</Label>
+            <Label htmlFor="password">密码</Label>
             <div className="relative">
               <LockKeyhole className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-primary/60" />
               <Input

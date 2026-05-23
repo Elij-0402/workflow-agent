@@ -2,16 +2,20 @@ import { BookOpen } from "lucide-react";
 import Link from "next/link";
 
 import { PageHeader } from "@/components/page-header";
-import { ProjectCard } from "@/components/sessions/project-card";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
+
+import { SessionsClient } from "./SessionsClient";
 
 export default async function SessionsPage() {
   const supabase = await createClient();
   const { data: sessions } = await supabase
     .from("sessions")
-    .select("id, name, status, mode, created_at, updated_at")
+    .select("id, name, status, mode, archived_at, created_at, updated_at")
+    .is("archived_at", null)
     .order("updated_at", { ascending: false });
+
+  const list = sessions ?? [];
 
   return (
     <div className="app-page">
@@ -19,19 +23,15 @@ export default async function SessionsPage() {
         label="projects"
         title="我的项目"
         description="导入和分析过的所有项目都在这里。"
+        action={
+          <Button asChild variant="outline" size="sm">
+            <Link href="/sessions/archived">归档夹</Link>
+          </Button>
+        }
       />
 
-      {sessions && sessions.length > 0 ? (
-        <>
-          <div className="flex items-center justify-between font-mono text-[10.5px] uppercase tracking-[0.12em] text-primary/80">
-            <span>{`// archive · ${sessions.length} projects`}</span>
-          </div>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {sessions.map((session) => (
-              <ProjectCard key={session.id} session={session} />
-            ))}
-          </div>
-        </>
+      {list.length > 0 ? (
+        <SessionsClient sessions={list} view="active" />
       ) : (
         <div className="surface-panel flex flex-col items-center justify-center gap-4 px-6 py-16 text-center">
           <BookOpen className="h-12 w-12 text-primary/60" strokeWidth={1.5} aria-hidden />

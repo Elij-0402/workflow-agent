@@ -122,9 +122,7 @@ export function UploadForm({
             </p>
           </div>
 
-          <div className="frame-corners relative rounded-[3px] border border-dashed border-border bg-background/40 p-6">
-            <span className="frame-tr" aria-hidden />
-            <span className="frame-bl" aria-hidden />
+          <div className="relative rounded-[3px] border border-dashed border-border bg-background/40 p-6">
             <input
               ref={fileInputRef}
               id="file"
@@ -248,7 +246,7 @@ export function UploadForm({
             ) : (
               <ChevronDown className="h-3.5 w-3.5" />
             )}
-            {"// help · file requirements"}
+            {"文件要求"}
           </button>
 
           <div className="mt-4 flex flex-col gap-3 text-[13px] leading-7 text-muted-foreground">

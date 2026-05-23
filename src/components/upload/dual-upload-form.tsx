@@ -237,13 +237,10 @@ function FileSlot({
   return (
     <section
       className={cn(
-        "surface-panel frame-corners relative flex min-h-[260px] flex-col gap-5 p-6",
+        "surface-panel relative flex min-h-[260px] flex-col gap-5 p-6",
         ready ? "border-primary/40" : "",
       )}
     >
-      <span className="frame-tr" aria-hidden />
-      <span className="frame-bl" aria-hidden />
-
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-primary/85">
@@ -287,7 +284,7 @@ function FileSlot({
           </p>
           {slot === "B" ? (
             <p className="mt-2 font-mono text-[10.5px] uppercase tracking-[0.08em] text-muted-foreground">
-              {"// 可留空 · 之后再补"}
+              {"可留空 · 之后再补"}
             </p>
           ) : null}
         </div>

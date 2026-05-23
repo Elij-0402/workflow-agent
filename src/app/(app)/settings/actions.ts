@@ -156,7 +156,7 @@ export async function fetchAvailableModels(formData: FormData) {
 
   const models = normalizeModelsPayload(json);
   if (models.length === 0) {
-    return { error: "未返回任何模型。" };
+    return { error: "未找到可用模型" };
   }
 
   return { ok: true as const, models };

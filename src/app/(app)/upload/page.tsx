@@ -48,12 +48,10 @@ export default async function UploadPage({ searchParams }: { searchParams: SP })
 function ModePicker({ current }: { current: "single" | "dual" }) {
   return (
     <div className="surface-panel flex items-center gap-1 border-b border-border px-4 py-2.5">
-      <Tab href="/upload?mode=single" active={current === "single"} label="single" />
-      <Tab href="/upload?mode=dual" active={current === "dual"} label="dual" />
-      <p className="ml-auto pr-2 font-mono text-[10.5px] uppercase tracking-[0.10em] text-muted-foreground">
-        {current === "dual"
-          ? "// dual · 两本书融合成新文本"
-          : "// single · 标准三维分析 + 一键生成"}
+      <Tab href="/upload?mode=single" active={current === "single"} label="单本" />
+      <Tab href="/upload?mode=dual" active={current === "dual"} label="双本融合" />
+      <p className="ml-auto pr-2 text-[12px] text-muted-foreground">
+        {current === "dual" ? "两本书融合成新文本" : "标准三维分析 + 生成"}
       </p>
     </div>
   );
@@ -62,7 +60,7 @@ function ModePicker({ current }: { current: "single" | "dual" }) {
 function Tab({ href, active, label }: { href: string; active: boolean; label: string }) {
   return (
     <Link href={href} data-active={active} className="terminal-tab">
-      [ {label} ]
+      {label}
     </Link>
   );
 }

@@ -24,6 +24,7 @@ type Props = {
   briefs: Brief[];
   chapterStatus: Record<string, "idle" | "running" | "done" | "error">;
   synthesisDone: boolean;
+  blueprintLocked?: boolean;
   onRunChapter: (chapterId: string) => void;
   onRunBatch: () => void;
   onSynthesize: () => void;
@@ -37,6 +38,7 @@ export function ChapterTree({
   briefs,
   chapterStatus,
   synthesisDone,
+  blueprintLocked = false,
   onRunChapter,
   onRunBatch,
   onSynthesize,
@@ -137,9 +139,16 @@ export function ChapterTree({
       <FilterBar options={filterOptions} value={filter} onChange={setFilter} />
       <div className="flex-1 overflow-auto">
         {visibleChapters.length === 0 ? (
-          <p className="p-4 font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
-            {chapters.length === 0 ? "// empty — no chapters" : "// no chapters match filter"}
-          </p>
+          <div className="flex flex-col gap-1 p-4">
+            <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground/70">
+              {chapters.length === 0 ? "// empty · chapters" : "// empty · filter"}
+            </p>
+            <p className="text-[13px] leading-7 text-muted-foreground">
+              {chapters.length === 0
+                ? "暂无章节数据，等待上传完成或重新解析。"
+                : "没有匹配的章节，调整筛选条件再试。"}
+            </p>
+          </div>
         ) : (
           visibleChapters.map((c) => (
             <ChapterCard
@@ -147,6 +156,7 @@ export function ChapterTree({
               chapter={c}
               brief={briefByChapter.get(c.id) ?? null}
               status={chapterStatus[c.id] ?? "idle"}
+              blueprintLocked={blueprintLocked}
               onAnalyze={() => onRunChapter(c.id)}
               onAddCandidate={onAddCandidate}
             />
