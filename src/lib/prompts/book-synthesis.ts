@@ -1,4 +1,6 @@
 export const BOOK_SYNTHESIS_BRIEFS_LIMIT = 200;
+export const BOOK_SYNTHESIS_PROMPT_VERSION = "2026-05-22";
+export const BOOK_SYNTHESIS_SCHEMA_VERSION = "1";
 
 export const BOOK_SYNTHESIS_SYSTEM_PROMPT = `你是中文小说研究助手。
 

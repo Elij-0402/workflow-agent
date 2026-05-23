@@ -10,6 +10,8 @@ import {
 import { getSafeRedirectPath } from "@/lib/auth/redirect";
 import { createClient } from "@/lib/supabase/server";
 
+export { getSafeRedirectPath };
+
 export async function submitPasswordAuth(formData: FormData) {
   const redirectTo = getSafeRedirectPath(formData);
 

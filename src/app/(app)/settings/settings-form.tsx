@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Eye, EyeOff, Loader2, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 
-import { fetchAvailableModels, saveLLMConfig } from "./actions";
+import { fetchAvailableModels, saveLLMConfig, testLLMConnection } from "./actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,9 +16,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  getClientErrorActionLabel,
+  getClientErrorMessage,
+  type LLMClientError,
+} from "@/lib/llm/errors";
 import { cn } from "@/lib/utils";
 
-type Status = { kind: "unconfigured" } | { kind: "saved"; updatedAt: string };
+type Status =
+  | { kind: "unconfigured" }
+  | { kind: "unverified"; updatedAt: string }
+  | { kind: "ok"; updatedAt: string; lastValidatedAt: string | null; lastConnectionOkAt: string | null }
+  | { kind: "error"; updatedAt: string; lastValidatedAt: string | null; detail: string };
 
 type ProviderKey = "openai" | "deepseek" | "custom";
 
@@ -43,15 +52,43 @@ type SettingsFormProps = {
   } | null;
   maskedApiKey: string | null;
   status: Status;
+  usageSummary: {
+    calls: number;
+    failures: number;
+    estimatedCostCNY: number;
+  };
 };
 
-export function SettingsForm({ initialConfig, maskedApiKey, status }: SettingsFormProps) {
+function showClientError(error: LLMClientError) {
+  const actionLabel = getClientErrorActionLabel(error.action);
+  if (actionLabel) {
+    toast.error(error.userMessage, {
+      action: {
+        label: actionLabel,
+        onClick: () => {
+          if (error.action === "retry") window.location.reload();
+          if (error.action === "open_settings") window.location.href = "/settings";
+        },
+      },
+    });
+    return;
+  }
+  toast.error(getClientErrorMessage(error));
+}
+
+export function SettingsForm({
+  initialConfig,
+  maskedApiKey,
+  status,
+  usageSummary,
+}: SettingsFormProps) {
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
   const autoFetched = useRef(false);
 
   const [savingConfig, startSave] = useTransition();
   const [fetchingModels, startFetch] = useTransition();
+  const [testingConnection, startConnectionTest] = useTransition();
 
   const [provider, setProvider] = useState<ProviderKey>(
     detectProvider(initialConfig?.base_url ?? ""),
@@ -64,9 +101,12 @@ export function SettingsForm({ initialConfig, maskedApiKey, status }: SettingsFo
     initialConfig?.model ? [initialConfig.model] : [],
   );
   const [savedModelStale, setSavedModelStale] = useState(false);
-  const [manualModel, setManualModel] = useState(false);
+  const [manualModel, setManualModel] = useState(true);
   const [temperature, setTemperature] = useState(String(initialConfig?.temperature ?? 0.7));
   const [maxTokens, setMaxTokens] = useState(String(initialConfig?.max_tokens ?? 4096));
+  const [connectionHint, setConnectionHint] = useState<string | null>(
+    status.kind === "error" ? status.detail : null,
+  );
 
   const hasSavedKey = Boolean(maskedApiKey);
   const canFetch = baseUrl.trim().length > 0 && (apiKey.length > 0 || hasSavedKey);
@@ -83,12 +123,13 @@ export function SettingsForm({ initialConfig, maskedApiKey, status }: SettingsFo
 
     startSave(async () => {
       const result = await saveLLMConfig(formData);
-      if (result?.error) {
-        toast.error(result.error);
+      if ("error" in result) {
+        showClientError(result.error);
         return;
       }
 
-      toast.success(result?.message ?? "配置已保存。");
+      toast.success(result.message ?? "配置已保存。");
+      setConnectionHint("已保存。是否需要立即测试连接？");
       setApiKey("");
       setShowKey(false);
       router.refresh();
@@ -102,7 +143,7 @@ export function SettingsForm({ initialConfig, maskedApiKey, status }: SettingsFo
     startFetch(async () => {
       const result = await fetchAvailableModels(formData);
       if ("error" in result) {
-        if (!silent) toast.error(result.error);
+        if (!silent) showClientError(result.error);
         return;
       }
 
@@ -112,8 +153,25 @@ export function SettingsForm({ initialConfig, maskedApiKey, status }: SettingsFo
       setModelOptions(merged);
       setSavedModelStale(isStale);
       if (!model && fetched[0]) setModel(fetched[0]);
-      setManualModel(false);
-      if (!silent) toast.success(`已获取 ${fetched.length} 个模型`);
+      if (fetched.length > 0) setManualModel(false);
+      setConnectionHint(result.message);
+      if (!silent) toast.success(result.message);
+    });
+  };
+
+  const onTestConnection = () => {
+    if (!formRef.current) return;
+    const formData = new FormData(formRef.current);
+    startConnectionTest(async () => {
+      const result = await testLLMConnection(formData);
+      if ("error" in result) {
+        setConnectionHint(result.error.userMessage);
+        showClientError(result.error);
+        return;
+      }
+      setConnectionHint(result.message);
+      toast.success(result.message);
+      router.refresh();
     });
   };
 
@@ -138,10 +196,9 @@ export function SettingsForm({ initialConfig, maskedApiKey, status }: SettingsFo
           </div>
           <StatusBadge status={status} />
         </div>
+        <UsageSummary usageSummary={usageSummary} />
 
         <form ref={formRef} onSubmit={onSubmit} className="mt-7 flex flex-col gap-6">
-          <input type="hidden" name="base_url" value={baseUrl} />
-
           <div className="flex flex-col gap-2.5">
             <Label>提供商</Label>
             <div className="grid grid-cols-3 gap-2">
@@ -162,15 +219,19 @@ export function SettingsForm({ initialConfig, maskedApiKey, status }: SettingsFo
                 </button>
               ))}
             </div>
-            {provider === "custom" ? (
-              <Input
-                placeholder="https://your-gateway.example.com/v1"
-                value={baseUrl}
-                onChange={(event) => setBaseUrl(event.target.value)}
-                disabled={savingConfig}
-                className="mt-1 h-10"
-              />
-            ) : null}
+          </div>
+
+          <div className="flex flex-col gap-2.5">
+            <Label htmlFor="base_url">Base URL</Label>
+            <Input
+              id="base_url"
+              name="base_url"
+              placeholder="https://your-gateway.example.com/v1"
+              value={baseUrl}
+              onChange={(event) => setBaseUrl(event.target.value)}
+              disabled={savingConfig}
+              className="h-10"
+            />
           </div>
 
           <div className="flex flex-col gap-2.5">
@@ -214,7 +275,7 @@ export function SettingsForm({ initialConfig, maskedApiKey, status }: SettingsFo
                 onClick={() => setManualModel((v) => !v)}
                 className="text-[12px] text-muted-foreground transition hover:text-foreground"
               >
-                {manualModel ? "从列表选择" : "手动输入"}
+                {manualModel ? "改用下拉列表" : "endpoint 不支持？手动输入"}
               </button>
             </div>
 
@@ -280,7 +341,7 @@ export function SettingsForm({ initialConfig, maskedApiKey, status }: SettingsFo
                 ) : (
                   <>
                     <RefreshCw className="h-4 w-4" />
-                    刷新模型
+                    获取可用模型
                   </>
                 )}
               </Button>
@@ -289,6 +350,9 @@ export function SettingsForm({ initialConfig, maskedApiKey, status }: SettingsFo
             {savedModelStale ? (
               <p className="text-[12px] text-destructive">已保存的模型不在新列表中，请重新选择。</p>
             ) : null}
+            <p className="text-[12px] text-muted-foreground">
+              默认建议直接手动输入模型名。模型列表探测只是辅助能力，不是保存前置条件。
+            </p>
           </div>
 
           <details className="group rounded-[3px] border border-border/60">
@@ -338,9 +402,32 @@ export function SettingsForm({ initialConfig, maskedApiKey, status }: SettingsFo
             </div>
           </details>
 
+          <div className="rounded-[3px] border border-border/60 p-4">
+            <div className="flex flex-wrap items-center gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onTestConnection}
+                disabled={!canFetch || testingConnection || savingConfig}
+              >
+                {testingConnection ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    测试中…
+                  </>
+                ) : (
+                  "测试连接"
+                )}
+              </Button>
+              <span className="text-[12px] text-muted-foreground">
+                {connectionHint ?? "保存只验证格式；测试连接才会验证接口是否真的可用。"}
+              </span>
+            </div>
+          </div>
+
           <div className="flex items-center justify-between gap-3 border-t border-border/60 pt-5">
             <p className="text-[12px] text-muted-foreground">API Key 仅在服务端加密存储。</p>
-            <Button type="submit" disabled={savingConfig}>
+            <Button type="submit" disabled={savingConfig || testingConnection}>
               {savingConfig ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -372,12 +459,57 @@ function StatusBadge({ status }: { status: Status }) {
     );
   }
 
+  if (status.kind === "unverified") {
+    return (
+      <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border bg-muted px-2.5 py-1 text-[11px] text-muted-foreground">
+        <span className="size-1.5 rounded-full bg-muted-foreground/50" />
+        已保存 · 未验证
+      </span>
+    );
+  }
+
+  if (status.kind === "error") {
+    return (
+      <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-destructive/40 bg-destructive/10 px-2.5 py-1 text-[11px] text-destructive">
+        <span className="size-1.5 rounded-full bg-destructive" />
+        上次验证失败
+      </span>
+    );
+  }
+
   const suffix = mounted ? ` · ${relativeTime(status.updatedAt)}` : "";
   return (
     <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-flash/40 bg-flash/10 px-2.5 py-1 text-[11px] text-flash">
       <span className="size-1.5 rounded-full bg-flash" />
-      已保存{suffix}
+      已验证可用{suffix}
     </span>
+  );
+}
+
+function UsageSummary({
+  usageSummary,
+}: {
+  usageSummary: {
+    calls: number;
+    failures: number;
+    estimatedCostCNY: number;
+  };
+}) {
+  return (
+    <div className="mt-5 grid grid-cols-3 gap-2 rounded-[3px] border border-border/60 p-3 text-[12px]">
+      <div>
+        <p className="text-muted-foreground">近 7 天调用</p>
+        <p className="mt-1 text-[16px] text-foreground">{usageSummary.calls}</p>
+      </div>
+      <div>
+        <p className="text-muted-foreground">近 7 天失败</p>
+        <p className="mt-1 text-[16px] text-foreground">{usageSummary.failures}</p>
+      </div>
+      <div>
+        <p className="text-muted-foreground">近 7 天成本</p>
+        <p className="mt-1 text-[16px] text-foreground">¥{usageSummary.estimatedCostCNY}</p>
+      </div>
+    </div>
   );
 }
 

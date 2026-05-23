@@ -8,6 +8,7 @@ import {
   CHAPTER_BRIEF_SYSTEM_PROMPT,
   buildChapterBriefUserPrompt,
 } from "@/lib/prompts/chapter-brief";
+import { saveAnalysis } from "@/lib/analysis-store";
 import { createClient } from "@/lib/supabase/server";
 import { ChapterBriefResultSchema } from "@/lib/types";
 
@@ -71,24 +72,22 @@ export async function POST(req: Request) {
       maxTokens: Math.min(2048, llm.maxTokens),
     });
 
-    const { error: upErr } = await supabase.from("analyses").upsert(
-      {
-        book_id: body.bookId,
-        user_id: user.id,
-        scope: "chapter",
-        chapter_id: body.chapterId,
-        dimension: "chapter_brief",
-        result: result.object,
-        llm_config_id: llm.configId,
-        prompt_tokens: Number.isFinite(result.usage.promptTokens)
-          ? result.usage.promptTokens
-          : null,
-        completion_tokens: Number.isFinite(result.usage.completionTokens)
-          ? result.usage.completionTokens
-          : null,
-      },
-      { onConflict: "book_id,chapter_id,dimension" },
-    );
+    const { error: upErr } = await saveAnalysis({
+      supabase,
+      userId: user.id,
+      bookId: body.bookId,
+      scope: "chapter",
+      chapterId: body.chapterId,
+      dimension: "chapter_brief",
+      result: result.object,
+      llmConfigId: llm.configId,
+      promptTokens: Number.isFinite(result.usage.promptTokens)
+        ? result.usage.promptTokens
+        : null,
+      completionTokens: Number.isFinite(result.usage.completionTokens)
+        ? result.usage.completionTokens
+        : null,
+    });
     if (upErr) {
       return NextResponse.json({ error: "保存分析失败。" }, { status: 500 });
     }

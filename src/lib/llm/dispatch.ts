@@ -15,7 +15,7 @@ import type { Database } from "@/lib/types";
 export async function getUserLLMClient(supabase: SupabaseClient<Database>) {
   const { data: config, error } = await supabase
     .from("llm_config")
-    .select("id, base_url, api_key_encrypted, model, temperature, max_tokens")
+    .select("id, user_id, base_url, api_key_encrypted, model, temperature, max_tokens")
     .maybeSingle();
 
   if (error) {
@@ -52,6 +52,8 @@ export async function getUserLLMClient(supabase: SupabaseClient<Database>) {
   return {
     openai,
     model: config.model,
+    provider: compatibility.provider,
+    userId: config.user_id,
     configId: config.id,
     temperature: config.temperature,
     maxTokens: config.max_tokens,

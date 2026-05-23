@@ -20,7 +20,7 @@ export function deriveHint(input: HintInput): Hint {
   if (input.importedCount < 2) {
     return {
       step: "import",
-      text: "// next · 上传第 2 本书 · 让系统知道你想融合什么",
+      text: "// next · 补充参考书 2 · 补齐后再进入分析和融合流程",
     };
   }
 
@@ -38,14 +38,14 @@ export function deriveHint(input: HintInput): Hint {
   if (!input.bookSynthesisDone.a && !input.bookSynthesisDone.b) {
     return {
       step: "synth",
-      text: "// next · 两本书都待整书汇总 · 在章节区点击「整书汇总」",
+      text: "// next · 两本参考书都待整书汇总 · 在章节区点击「整书汇总」",
     };
   }
   if (!input.bookSynthesisDone.a) {
-    return { step: "synth", text: "// next · 等待书 A 整书汇总" };
+    return { step: "synth", text: "// next · 等待参考书 1 整书汇总" };
   }
   if (!input.bookSynthesisDone.b) {
-    return { step: "synth", text: "// next · 等待书 B 整书汇总" };
+    return { step: "synth", text: "// next · 等待参考书 2 整书汇总" };
   }
 
   if (input.blueprintStatus !== "confirmed") {
@@ -71,7 +71,7 @@ export function deriveHint(input: HintInput): Hint {
   if (input.variantCount >= 2) {
     return {
       step: "generate",
-      text: "// next · 切到 variants 模式对比 A/B 变体",
+      text: "// next · 切到 variants 模式对比多个生成版本",
     };
   }
 

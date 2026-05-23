@@ -30,6 +30,10 @@ type FinalizeNovelUploadInput = {
   position?: 0 | 1;
 };
 
+function isValidDualPosition(position: unknown): position is 0 | 1 {
+  return position === 0 || position === 1;
+}
+
 export async function initNovelUpload(input: InitNovelUploadInput) {
   const supabase = await createClient();
   const {
@@ -55,6 +59,11 @@ export async function initNovelUpload(input: InitNovelUploadInput) {
   const requestedMode = input.mode ?? "single";
 
   if (requestedMode === "dual" && input.sessionId) {
+    const requestedPosition = input.position ?? 1;
+    if (!isValidDualPosition(requestedPosition)) {
+      return { error: "当前任务最多支持 2 本参考小说。" };
+    }
+
     const { data: existingSession, error: existingErr } = await supabase
       .from("sessions")
       .select("id, mode")
@@ -66,16 +75,17 @@ export async function initNovelUpload(input: InitNovelUploadInput) {
       return { error: "未找到目标双书任务。" };
     }
 
-    const position = input.position ?? 1;
-    const { data: positionBusy } = await supabase
+    const { data: occupiedBooks } = await supabase
       .from("books")
-      .select("id")
-      .eq("session_id", input.sessionId)
-      .eq("position", position)
-      .maybeSingle();
+      .select("id, position")
+      .eq("session_id", input.sessionId);
 
-    if (positionBusy) {
-      return { error: "该位置已有书，请删除后再上传。" };
+    if ((occupiedBooks?.length ?? 0) >= 2) {
+      return { error: "当前任务最多支持 2 本参考小说。" };
+    }
+
+    if (occupiedBooks?.some((book) => book.position === requestedPosition)) {
+      return { error: "该参考书位置已有文件，请删除后再上传。" };
     }
 
     return {
@@ -86,7 +96,7 @@ export async function initNovelUpload(input: InitNovelUploadInput) {
         input.sessionId,
         safeFilename,
       ),
-      position,
+      position: requestedPosition,
     };
   }
 
@@ -164,6 +174,9 @@ export async function finalizeNovelUpload(input: FinalizeNovelUploadInput) {
   }
 
   const position = input.position ?? 0;
+  if (session.mode === "dual" && !isValidDualPosition(position)) {
+    return { error: "当前任务最多支持 2 本参考小说。" };
+  }
   const sessionName = getSessionName(safeFilename);
 
   // In dual mode the books table can hold both slots; find the row at this position.

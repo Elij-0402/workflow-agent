@@ -1,10 +1,13 @@
-import { streamObject } from "ai";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { getUserLLMClient } from "@/lib/llm/dispatch";
+import { validateConfirmedBlueprintForBrief } from "@/lib/brief-workflow";
+import { asLLMClientError } from "@/lib/llm/errors";
+import { streamLLMObject } from "@/lib/llm/runtime";
 import {
   OutlineSchema,
+  PREVIEW_OUTLINE_PROMPT_VERSION,
+  PREVIEW_OUTLINE_SCHEMA_VERSION,
   PREVIEW_OUTLINE_SYSTEM_PROMPT,
   buildPreviewOutlineUserPrompt,
 } from "@/lib/prompts/preview-outline";
@@ -60,55 +63,82 @@ export async function POST(req: Request) {
 
   const { data: bp } = await supabase
     .from("blueprints")
-    .select("id, status, sections")
+    .select("id, session_id, status, sections")
     .eq("session_id", briefRow.session_id)
     .eq("user_id", user.id)
     .maybeSingle();
-  if (!bp) {
-    return NextResponse.json({ error: "项目尚无蓝图，无法预生成大纲。" }, { status: 409 });
+  const blueprintCheck = validateConfirmedBlueprintForBrief({
+    brief: briefRow,
+    blueprint: bp,
+  });
+  if (!blueprintCheck.ok) {
+    return NextResponse.json({ error: blueprintCheck.message }, { status: blueprintCheck.status });
   }
-  if (bp.status !== "confirmed") {
-    return NextResponse.json({ error: "请先在工作台确认蓝图。" }, { status: 409 });
-  }
+  const confirmedBlueprint = bp!;
 
   const briefSection = composeBriefIntoPrompt(briefParsed.data);
   const userPrompt = buildPreviewOutlineUserPrompt({
-    blueprint: bp.sections,
+    blueprint: confirmedBlueprint.sections,
     briefSection,
     targetChapterCount: body.targetChapterCount,
   });
 
   return sseResponse(async (emit) => {
-    const llm = await getUserLLMClient(supabase);
-    const result = streamObject({
-      model: llm.openai(llm.model),
-      schema: OutlineSchema,
-      system: PREVIEW_OUTLINE_SYSTEM_PROMPT,
-      prompt: userPrompt,
-      temperature: llm.temperature,
-      maxTokens: Math.min(4096, llm.maxTokens),
-    });
+    let result: Awaited<ReturnType<typeof streamLLMObject<typeof OutlineSchema>>>;
+    try {
+      result = await streamLLMObject({
+        supabase,
+        route: "/api/generate/preview",
+        operation: "preview_outline",
+        schema: OutlineSchema,
+        system: PREVIEW_OUTLINE_SYSTEM_PROMPT,
+        prompt: userPrompt,
+        promptVersion: PREVIEW_OUTLINE_PROMPT_VERSION,
+        schemaVersion: PREVIEW_OUTLINE_SCHEMA_VERSION,
+        maxTokens: 4096,
+        cacheSeed: {
+          briefId: briefRow.id,
+          sessionId: briefRow.session_id,
+          targetChapterCount: body.targetChapterCount ?? null,
+        },
+      });
+    } catch (error) {
+      emit({
+        type: "error",
+        message: asLLMClientError(error, {
+          code: "llm_request_failed",
+          userMessage: "生成失败，请稍后重试。",
+          retryable: true,
+        }).userMessage,
+      });
+      return;
+    }
 
     for await (const partial of result.partialObjectStream) {
       emit({ type: "partial", data: partial });
     }
 
-    let object: unknown;
+    let finalized: Awaited<ReturnType<typeof result.finalize>>;
     try {
-      object = await result.object;
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : "stream failed";
-      emit({ type: "error", message: `生成失败：${msg}` });
+      finalized = await result.finalize();
+    } catch (error) {
+      emit({
+        type: "error",
+        message: asLLMClientError(error, {
+          code: "llm_request_failed",
+          userMessage: "生成失败，请稍后重试。",
+          retryable: true,
+        }).userMessage,
+      });
       return;
     }
 
-    const validated = OutlineSchema.safeParse(object);
+    const validated = OutlineSchema.safeParse(finalized.object);
     if (!validated.success) {
       emit({ type: "error", message: "大纲格式校验失败，请重试。" });
       return;
     }
 
-    const usage = await result.usage;
     const { data: variant, error } = await supabase
       .from("variants")
       .insert({
@@ -125,9 +155,15 @@ export async function POST(req: Request) {
         },
         content: JSON.stringify(validated.data, null, 2),
         word_count: null,
-        llm_config_id: llm.configId,
+        llm_config_id: finalized.llm.configId,
         brief_id: briefRow.id,
         scope: "outline",
+        prompt_version: PREVIEW_OUTLINE_PROMPT_VERSION,
+        schema_version: PREVIEW_OUTLINE_SCHEMA_VERSION,
+        prompt_tokens: finalized.usage.promptTokens,
+        completion_tokens: finalized.usage.completionTokens,
+        estimated_cost_cny: finalized.estimatedCostCNY,
+        cache_key: finalized.cacheKey,
       })
       .select("id")
       .single();
@@ -142,9 +178,11 @@ export async function POST(req: Request) {
         outline: validated.data,
         variantId: variant.id,
         usage: {
-          prompt_tokens: Number.isFinite(usage.promptTokens) ? usage.promptTokens : null,
-          completion_tokens: Number.isFinite(usage.completionTokens)
-            ? usage.completionTokens
+          prompt_tokens: Number.isFinite(finalized.usage.promptTokens)
+            ? finalized.usage.promptTokens
+            : null,
+          completion_tokens: Number.isFinite(finalized.usage.completionTokens)
+            ? finalized.usage.completionTokens
             : null,
         },
       },

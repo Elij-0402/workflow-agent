@@ -4,6 +4,7 @@ import { Settings2 } from "lucide-react";
 
 import { AnalysisPanel } from "./analysis-panel";
 import { ExtendedAnalysisPanel } from "./extended-analysis-panel";
+import { loadDualSessionPageData, loadSingleSessionPageData } from "./page-data";
 import { WorkbenchClient } from "./workbench/workbench-client";
 import { GeneratePanel } from "@/components/sessions/generate-panel";
 import { VariantList } from "@/components/sessions/variant-list";
@@ -14,19 +15,7 @@ import {
   type WorkflowStageItem,
 } from "@/components/workflow-stage-bar";
 import { Button } from "@/components/ui/button";
-import { BlueprintSchema, emptyBlueprint } from "@/lib/blueprint/schema";
-import {
-  ANALYSIS_DIMENSION_CONFIG,
-  EXTENDED_ANALYSIS_DIMENSION_CONFIG,
-} from "@/lib/prompts";
 import { createClient } from "@/lib/supabase/server";
-import {
-  ChapterBriefResultSchema,
-  type ChapterBriefResult,
-  type ExtendedAnalysisDimension,
-  type LegacyAnalysisDimension,
-  type VariantRow,
-} from "@/lib/types";
 import { formatDate, formatRelativeTime } from "@/lib/utils";
 
 type SessionPageProps = {
@@ -36,11 +25,6 @@ type SessionPageProps = {
   searchParams: Promise<{
     step?: string;
   }>;
-};
-
-type BookMetadata = {
-  encoding?: string;
-  chapters?: unknown[];
 };
 
 export default async function SessionDetailPage({
@@ -67,121 +51,12 @@ export default async function SessionDetailPage({
     .eq("user_id", user.id)
     .maybeSingle();
   if (sessionMode?.mode === "dual") {
-    const { data: session } = await supabase
-      .from("sessions")
-      .select("id, name, mode, created_at, updated_at")
-      .eq("id", id)
-      .eq("user_id", user.id)
-      .maybeSingle();
-    if (!session) notFound();
-
-    const { data: books } = await supabase
-      .from("books")
-      .select("id, title, position, word_count, chapter_count, created_at")
-      .eq("session_id", id)
-      .eq("user_id", user.id)
-      .order("position", { ascending: true });
-
-    const bookIds = (books ?? []).map((b) => b.id);
-    const [chaptersResult, analysesResult, blueprintResult, variantsResult] =
-      await Promise.all([
-        bookIds.length
-          ? supabase
-              .from("chapters")
-              .select("id, book_id, index, title, start_char, end_char, source")
-              .in("book_id", bookIds)
-              .eq("user_id", user.id)
-              .order("index", { ascending: true })
-          : Promise.resolve({ data: [] as const }),
-        bookIds.length
-          ? supabase
-              .from("analyses")
-              .select("book_id, chapter_id, scope, dimension, result")
-              .in("book_id", bookIds)
-              .eq("user_id", user.id)
-          : Promise.resolve({ data: [] as const }),
-        supabase
-          .from("blueprints")
-          .select("id, status, sections, confirmed_at, updated_at")
-          .eq("session_id", id)
-          .eq("user_id", user.id)
-          .maybeSingle(),
-        supabase
-          .from("variants")
-          .select(
-            "id, title, config, content, word_count, blueprint_id, created_at",
-          )
-          .eq("session_id", id)
-          .eq("user_id", user.id)
-          .order("created_at", { ascending: false }),
-      ]);
-
-    const chapters = (chaptersResult.data ?? []) as Array<{
-      id: string;
-      book_id: string;
-      index: number;
-      title: string;
-      start_char: number;
-      end_char: number;
-      source: "regex" | "length-chunk" | "manual";
-    }>;
-    const analyses = (analysesResult.data ?? []) as Array<{
-      book_id: string;
-      chapter_id: string | null;
-      scope: "book" | "chapter";
-      dimension: string;
-      result: unknown;
-    }>;
-    const variants = (variantsResult.data ?? []) as Array<
-      Pick<
-        VariantRow,
-        | "id"
-        | "title"
-        | "config"
-        | "content"
-        | "word_count"
-        | "blueprint_id"
-        | "created_at"
-      >
-    >;
-
-    const briefs = analyses
-      .filter(
-        (a) =>
-          a.scope === "chapter" &&
-          a.dimension === "chapter_brief" &&
-          a.chapter_id,
-      )
-      .map((a) => {
-        const parsed = ChapterBriefResultSchema.safeParse(a.result);
-        return parsed.success
-          ? {
-              book_id: a.book_id,
-              chapter_id: a.chapter_id as string,
-              result: parsed.data,
-            }
-          : null;
-      })
-      .filter(
-        (
-          x,
-        ): x is {
-          book_id: string;
-          chapter_id: string;
-          result: ChapterBriefResult;
-        } => x !== null,
-      );
-
-    const bookSynthesisByBook = new Set(
-      analyses
-        .filter((a) => a.scope === "book" && a.dimension === "book_synthesis")
-        .map((a) => a.book_id),
-    );
-
-    const blueprintRow = blueprintResult.data;
-    const blueprint = blueprintRow
-      ? BlueprintSchema.parse(blueprintRow.sections ?? {})
-      : emptyBlueprint();
+    const dualData = await loadDualSessionPageData({
+      supabase,
+      sessionId: id,
+      userId: user.id,
+    });
+    if (!dualData) notFound();
 
     const initialStep =
       step === "upload" ||
@@ -193,106 +68,43 @@ export default async function SessionDetailPage({
 
     return (
       <WorkbenchClient
-        session={session}
-        books={books ?? []}
-        chapters={chapters}
-        briefs={briefs}
-        bookSynthesisByBook={[...bookSynthesisByBook]}
-        blueprintId={blueprintRow?.id ?? null}
-        blueprintStatus={blueprintRow?.status ?? "draft"}
-        blueprintUpdatedAt={blueprintRow?.updated_at ?? null}
-        blueprintConfirmedAt={blueprintRow?.confirmed_at ?? null}
-        blueprint={blueprint}
-        variants={variants}
+        session={dualData.session}
+        books={dualData.books}
+        chapters={dualData.chapters}
+        briefs={dualData.briefs}
+        bookSynthesisByBook={dualData.bookSynthesisByBook}
+        blueprintId={dualData.blueprintId}
+        blueprintStatus={dualData.blueprintStatus}
+        blueprintUpdatedAt={dualData.blueprintUpdatedAt}
+        blueprintConfirmedAt={dualData.blueprintConfirmedAt}
+        blueprint={dualData.blueprint}
+        variants={dualData.variants}
         initialStep={initialStep}
       />
     );
   }
 
-  const [{ data: session }, { data: book }, { data: llmConfig }] =
-    await Promise.all([
-      supabase
-        .from("sessions")
-        .select("id, name, status, created_at, updated_at")
-        .eq("id", id)
-        .eq("user_id", user.id)
-        .maybeSingle(),
-      supabase
-        .from("books")
-        .select("id, title, word_count, chapter_count, metadata, created_at")
-        .eq("session_id", id)
-        .eq("user_id", user.id)
-        .maybeSingle(),
-      supabase.from("llm_config").select("id").maybeSingle(),
-    ]);
+  const singleData = await loadSingleSessionPageData({
+    supabase,
+    sessionId: id,
+    userId: user.id,
+  });
+  if (!singleData) notFound();
 
-  if (!session || !book) {
-    notFound();
-  }
-
-  const { data: analyses } = await supabase
-    .from("analyses")
-    .select("dimension, result")
-    .eq("user_id", user.id)
-    .eq("book_id", book.id)
-    .order("created_at", { ascending: true });
-
-  const { data: variants } = await supabase
-    .from("variants")
-    .select("id, title, config, content, word_count, created_at")
-    .eq("session_id", session.id)
-    .eq("user_id", user.id)
-    .order("created_at", { ascending: false });
-
-  const metadata = (book.metadata ?? {}) as BookMetadata;
-  const chapterCount =
-    book.chapter_count ??
-    (Array.isArray(metadata.chapters) ? metadata.chapters.length : 0);
-  // Validate each stored analysis row against its current dimension schema.
-  // Rows that fail safeParse (schema drift, partial writes, garbage from a
-  // misbehaving model) are dropped here so the UI treats them as "not yet
-  // analyzed" — the user can re-run the dimension cleanly instead of seeing
-  // half-rendered or "undefined" copy from a stale shape.
-  const safeAnalyses = (analyses ?? []).filter(
-    (
-      item,
-    ): item is {
-      dimension: LegacyAnalysisDimension;
-      result: unknown;
-    } => {
-      if (!item.dimension || !item.result) return false;
-      const config =
-        ANALYSIS_DIMENSION_CONFIG[item.dimension as LegacyAnalysisDimension];
-      if (!config) return false;
-      return config.schema.safeParse(item.result).success;
-    },
-  );
-  const safeExtendedAnalyses = (analyses ?? []).filter(
-    (
-      item,
-    ): item is {
-      dimension: ExtendedAnalysisDimension;
-      result: unknown;
-    } => {
-      if (!item.dimension || !item.result) return false;
-      const config =
-        EXTENDED_ANALYSIS_DIMENSION_CONFIG[
-          item.dimension as ExtendedAnalysisDimension
-        ];
-      if (!config) return false;
-      return config.schema.safeParse(item.result).success;
-    },
-  );
-  const safeVariants = (variants ?? []) as Array<
-    Pick<
-      VariantRow,
-      "id" | "title" | "config" | "content" | "word_count" | "created_at"
-    >
-  >;
+  const {
+    session,
+    book,
+    llmConfigured,
+    chapterCount,
+    safeAnalyses,
+    safeExtendedAnalyses,
+    safeVariants,
+  } = singleData;
+  const metadata = book.metadata ?? {};
   const hasCompleteAnalysis = safeAnalyses.length === 3;
   const hasVariants = safeVariants.length > 0;
   const currentStepDescription = !hasCompleteAnalysis
-    ? Boolean(llmConfig)
+    ? llmConfigured
       ? "完成三项分析后可生成"
       : "需先配置模型"
     : hasVariants
@@ -302,7 +114,7 @@ export default async function SessionDetailPage({
     hasCompleteAnalysis,
     variantCount: safeVariants.length,
   });
-  const headerAction = !llmConfig ? (
+  const headerAction = !llmConfigured ? (
     <Button asChild>
       <Link href="/settings">
         <Settings2 aria-hidden="true" />
@@ -340,7 +152,7 @@ export default async function SessionDetailPage({
             value: book.word_count?.toLocaleString("zh-CN") ?? "0",
           },
           { label: "chapters", value: String(chapterCount) },
-          { label: "encoding", value: metadata.encoding ?? "未知" },
+          { label: "encoding", value: typeof metadata.encoding === "string" ? metadata.encoding : "未知" },
           { label: "analysis", value: `${safeAnalyses.length} / 3` },
         ]}
       />
@@ -375,7 +187,7 @@ export default async function SessionDetailPage({
             <GeneratePanel
               sessionId={session.id}
               sessionStatus={session.status}
-              llmConfigured={Boolean(llmConfig)}
+              llmConfigured={llmConfigured}
               hasCompleteAnalysis={hasCompleteAnalysis}
               variantCount={safeVariants.length}
             />
@@ -383,13 +195,13 @@ export default async function SessionDetailPage({
             <AnalysisPanel
               sessionId={session.id}
               analyses={safeAnalyses}
-              llmConfigured={Boolean(llmConfig)}
+              llmConfigured={llmConfigured}
               sessionStatus={session.status}
             />
             <ExtendedAnalysisPanel
               bookId={book.id}
               analyses={safeExtendedAnalyses}
-              llmConfigured={Boolean(llmConfig)}
+              llmConfigured={llmConfigured}
               disabled={session.status === "generating"}
             />
           </>
@@ -397,7 +209,7 @@ export default async function SessionDetailPage({
           <AnalysisPanel
             sessionId={session.id}
             analyses={safeAnalyses}
-            llmConfigured={Boolean(llmConfig)}
+            llmConfigured={llmConfigured}
             sessionStatus={session.status}
           />
         )}

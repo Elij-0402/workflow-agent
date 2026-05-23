@@ -1,5 +1,11 @@
 import { toast } from "sonner";
 
+import {
+  getClientErrorActionLabel,
+  getClientErrorMessage,
+  type LLMClientError,
+} from "@/lib/llm/errors";
+
 type ErrorAction = { label: string; href: string };
 
 const PATTERNS: Array<{ test: RegExp; action: ErrorAction }> = [
@@ -16,7 +22,31 @@ function matchAction(message: string): ErrorAction | null {
   return null;
 }
 
-export function toastError(message: string) {
+export function toastError(error: string | LLMClientError) {
+  if (typeof error !== "string") {
+    const actionLabel = getClientErrorActionLabel(error.action);
+    if (actionLabel) {
+      toast.error(error.userMessage, {
+        action: {
+          label: actionLabel,
+          onClick: () => {
+            if (typeof window === "undefined") return;
+            if (error.action === "retry") {
+              window.location.reload();
+              return;
+            }
+            window.location.href = "/settings";
+          },
+        },
+      });
+      return;
+    }
+
+    toast.error(getClientErrorMessage(error));
+    return;
+  }
+
+  const message = error;
   const action = matchAction(message);
   if (action) {
     toast.error(message, {

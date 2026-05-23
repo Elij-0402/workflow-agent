@@ -16,6 +16,9 @@ export const OutlineSchema = z.object({
 });
 export type Outline = z.infer<typeof OutlineSchema>;
 
+export const PREVIEW_OUTLINE_PROMPT_VERSION = "preview-outline-v1";
+export const PREVIEW_OUTLINE_SCHEMA_VERSION = "outline-schema-v1";
+
 export const PREVIEW_OUTLINE_SYSTEM_PROMPT = `你是中文小说大纲设计助手。
 
 基于用户提供的蓝图（Blueprint）和创意简报（CreativeBrief），合成一份新版本的大纲，严格返回符合 schema 的 JSON。

@@ -34,6 +34,11 @@ export type LLMConfig = {
   model: string;
   temperature: number;
   max_tokens: number;
+  last_validated_at: string | null;
+  last_connection_ok_at: string | null;
+  last_connection_error: string | null;
+  last_connection_status: "unverified" | "ok" | "error";
+  encryption_version: number;
   created_at: string;
   updated_at: string;
 };

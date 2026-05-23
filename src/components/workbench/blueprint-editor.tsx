@@ -97,13 +97,14 @@ export function BlueprintEditor({
         expectedUpdatedAt: bpUpdatedAt,
       }),
     });
-    const j = (await res.json()) as { ok?: true; updated_at?: string; error?: string };
-    if (!res.ok || !j.ok || !j.updated_at) {
+    const j = (await res.json()) as { ok?: true; id?: string; updated_at?: string; error?: string };
+    if (!res.ok || !j.ok || !j.id || !j.updated_at) {
       toast.error(j.error ?? "保存蓝图失败。");
       return;
     }
+    setBpId(j.id);
     setBpUpdatedAt(j.updated_at);
-    onSaved(next, j.updated_at, bpId ?? "");
+    onSaved(next, j.updated_at, j.id);
   }
 
   async function confirm() {

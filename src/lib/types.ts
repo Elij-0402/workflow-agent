@@ -463,6 +463,10 @@ export type Database = {
           llm_config_id: string | null;
           prompt_tokens: number | null;
           completion_tokens: number | null;
+          prompt_version: string | null;
+          schema_version: string | null;
+          estimated_cost_cny: number | null;
+          cache_key: string | null;
           created_at: string;
         };
         Insert: {
@@ -476,12 +480,20 @@ export type Database = {
           llm_config_id?: string | null;
           prompt_tokens?: number | null;
           completion_tokens?: number | null;
+          prompt_version?: string | null;
+          schema_version?: string | null;
+          estimated_cost_cny?: number | null;
+          cache_key?: string | null;
           created_at?: string;
         };
         Update: Partial<{
           result: unknown;
           prompt_tokens: number | null;
           completion_tokens: number | null;
+          prompt_version: string | null;
+          schema_version: string | null;
+          estimated_cost_cny: number | null;
+          cache_key: string | null;
         }>;
         Relationships: [];
       };
@@ -500,6 +512,12 @@ export type Database = {
           parent_variant_id: string | null;
           scope: "outline" | "chapter" | "full";
           chapter_index: number | null;
+          prompt_version: string | null;
+          schema_version: string | null;
+          prompt_tokens: number | null;
+          completion_tokens: number | null;
+          estimated_cost_cny: number | null;
+          cache_key: string | null;
           created_at: string;
         };
         Insert: {
@@ -516,6 +534,12 @@ export type Database = {
           parent_variant_id?: string | null;
           scope?: "outline" | "chapter" | "full";
           chapter_index?: number | null;
+          prompt_version?: string | null;
+          schema_version?: string | null;
+          prompt_tokens?: number | null;
+          completion_tokens?: number | null;
+          estimated_cost_cny?: number | null;
+          cache_key?: string | null;
           created_at?: string;
         };
         Update: Partial<{
@@ -524,6 +548,62 @@ export type Database = {
           word_count: number | null;
           scope: "outline" | "chapter" | "full";
           chapter_index: number | null;
+          prompt_version: string | null;
+          schema_version: string | null;
+          prompt_tokens: number | null;
+          completion_tokens: number | null;
+          estimated_cost_cny: number | null;
+          cache_key: string | null;
+        }>;
+        Relationships: [];
+      };
+      llm_usage_events: {
+        Row: {
+          id: string;
+          user_id: string;
+          llm_config_id: string;
+          route: string;
+          operation: string;
+          provider: string;
+          model: string;
+          prompt_version: string;
+          schema_version: string;
+          cache_key: string | null;
+          prompt_tokens: number | null;
+          completion_tokens: number | null;
+          total_tokens: number | null;
+          estimated_cost_cny: number | null;
+          success: boolean;
+          error_code: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          llm_config_id: string;
+          route: string;
+          operation: string;
+          provider: string;
+          model: string;
+          prompt_version: string;
+          schema_version: string;
+          cache_key?: string | null;
+          prompt_tokens?: number | null;
+          completion_tokens?: number | null;
+          total_tokens?: number | null;
+          estimated_cost_cny?: number | null;
+          success?: boolean;
+          error_code?: string | null;
+          created_at?: string;
+        };
+        Update: Partial<{
+          cache_key: string | null;
+          prompt_tokens: number | null;
+          completion_tokens: number | null;
+          total_tokens: number | null;
+          estimated_cost_cny: number | null;
+          success: boolean;
+          error_code: string | null;
         }>;
         Relationships: [];
       };

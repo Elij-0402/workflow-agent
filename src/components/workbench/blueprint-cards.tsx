@@ -29,7 +29,7 @@ type WithBaseProps<T> = {
 function bookLabel(books: BookLookup[], bookId: string): string {
   const b = books.find((x) => x.id === bookId);
   if (!b) return "未知书";
-  return b.position === 0 ? "书 A" : "书 B";
+  return b.position === 0 ? "参考书 1" : "参考书 2";
 }
 
 function chapterLabel(chapters: ChapterLookup, chapterId: string | null): string | null {

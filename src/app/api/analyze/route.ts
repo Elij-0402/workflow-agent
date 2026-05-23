@@ -1,9 +1,9 @@
-import { generateObject } from "ai";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { getUserLLMClient } from "@/lib/llm/dispatch";
-import { isUserFixableLLMConfigMessage } from "@/lib/llm-config";
+import { saveAnalysis } from "@/lib/analysis-store";
+import { asLLMClientError } from "@/lib/llm/errors";
+import { runLLMObject } from "@/lib/llm/runtime";
 import { ANALYSIS_TEXT_CHAR_LIMIT, ANALYSIS_DIMENSION_CONFIG } from "@/lib/prompts";
 import { wrapUntrustedNovel } from "@/lib/prompts/safety";
 import { createClient } from "@/lib/supabase/server";
@@ -99,8 +99,6 @@ export async function POST(request: Request) {
   let analysisSaved = false;
 
   try {
-    const llm = await getUserLLMClient(supabase);
-
     if (shouldEnterAnalyzingStatus(currentStatus)) {
       const { error: statusError } = await supabase
         .from("sessions")
@@ -117,33 +115,37 @@ export async function POST(request: Request) {
       statusFlipped = true;
     }
 
-    const result = await generateObject({
-      model: llm.openai(llm.model),
+    const result = await runLLMObject({
+      supabase,
+      route: "/api/analyze",
+      operation: `analysis:${parsedBody.dimension}`,
       schema: promptConfig.schema,
       system: promptConfig.systemPrompt,
       prompt: wrapUntrustedNovel(excerpt),
-      temperature: llm.temperature,
-      maxTokens: llm.maxTokens,
+      promptVersion: promptConfig.promptVersion,
+      schemaVersion: promptConfig.schemaVersion,
+      cacheSeed: {
+        bookId: book.id,
+        dimension: parsedBody.dimension,
+        excerpt,
+      },
     });
 
-    const { error: upsertError } = await supabase.from("analyses").upsert(
-      {
-        book_id: book.id,
-        user_id: user.id,
-        dimension: parsedBody.dimension,
-        result: result.object,
-        llm_config_id: llm.configId,
-        prompt_tokens: Number.isFinite(result.usage.promptTokens)
-          ? result.usage.promptTokens
-          : null,
-        completion_tokens: Number.isFinite(result.usage.completionTokens)
-          ? result.usage.completionTokens
-          : null,
-      },
-      {
-        onConflict: "book_id,dimension",
-      },
-    );
+    const { error: upsertError } = await saveAnalysis({
+      supabase,
+      userId: user.id,
+      bookId: book.id,
+      scope: "book",
+      dimension: parsedBody.dimension,
+      result: result.object,
+      llmConfigId: result.llm.configId,
+      promptTokens: result.usage.promptTokens,
+      completionTokens: result.usage.completionTokens,
+      promptVersion: promptConfig.promptVersion,
+      schemaVersion: promptConfig.schemaVersion,
+      estimatedCostCNY: result.estimatedCostCNY,
+      cacheKey: result.cacheKey,
+    });
 
     if (upsertError) {
       throw new RouteError("保存分析结果失败，请稍后再试。", 500);
@@ -209,10 +211,14 @@ export async function POST(request: Request) {
       return jsonError(error.message, error.status);
     }
 
-    const message =
-      error instanceof Error && isUserFixableLLMConfigMessage(error.message)
-        ? error.message
-        : ANALYSIS_GENERIC_FAILURE;
-    return jsonError(message, message === ANALYSIS_GENERIC_FAILURE ? 500 : 409);
+    const clientError = asLLMClientError(error, {
+      code: "llm_request_failed",
+      userMessage: ANALYSIS_GENERIC_FAILURE,
+      retryable: true,
+    });
+    return NextResponse.json(
+      { error: clientError },
+      { status: clientError.userMessage === ANALYSIS_GENERIC_FAILURE ? 500 : 409 },
+    );
   }
 }

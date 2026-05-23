@@ -59,6 +59,16 @@ samples/
 # playwright MCP / local visual verification artifacts
 .playwright-mcp/
 /login-*.png
+.codex-artifacts/
+.codex/run-logs/
+
+# local upload docs assets
+docs/*.txt
+docs/*.png
+docs/*.jpg
+docs/*.jpeg
+docs/*.webp
+docs/*.gif
 
 # Auto Claude data directory
 .auto-claude/

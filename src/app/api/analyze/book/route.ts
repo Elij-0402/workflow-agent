@@ -9,6 +9,7 @@ import {
   pickBriefsForSynthesis,
   type BriefEntry,
 } from "@/lib/prompts/book-synthesis";
+import { saveAnalysis } from "@/lib/analysis-store";
 import { createClient } from "@/lib/supabase/server";
 import { BookSynthesisResultSchema, ChapterBriefResultSchema } from "@/lib/types";
 
@@ -91,24 +92,21 @@ export async function POST(req: Request) {
       maxTokens: Math.min(4096, llm.maxTokens),
     });
 
-    const { error: upErr } = await supabase.from("analyses").upsert(
-      {
-        book_id: body.bookId,
-        user_id: user.id,
-        scope: "book",
-        chapter_id: null,
-        dimension: "book_synthesis",
-        result: result.object,
-        llm_config_id: llm.configId,
-        prompt_tokens: Number.isFinite(result.usage.promptTokens)
-          ? result.usage.promptTokens
-          : null,
-        completion_tokens: Number.isFinite(result.usage.completionTokens)
-          ? result.usage.completionTokens
-          : null,
-      },
-      { onConflict: "book_id,dimension" },
-    );
+    const { error: upErr } = await saveAnalysis({
+      supabase,
+      userId: user.id,
+      bookId: body.bookId,
+      scope: "book",
+      dimension: "book_synthesis",
+      result: result.object,
+      llmConfigId: llm.configId,
+      promptTokens: Number.isFinite(result.usage.promptTokens)
+        ? result.usage.promptTokens
+        : null,
+      completionTokens: Number.isFinite(result.usage.completionTokens)
+        ? result.usage.completionTokens
+        : null,
+    });
     if (upErr) {
       return NextResponse.json({ error: "保存整书汇总失败。" }, { status: 500 });
     }

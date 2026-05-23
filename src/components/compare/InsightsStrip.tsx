@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useClipboard } from "@/lib/compare/clipboard";
 import { toastError } from "@/lib/error-toast";
+import type { LLMClientError } from "@/lib/llm/errors";
 import { DIMENSION_LABELS, type AnalysisDimension } from "@/lib/types";
 import { toast } from "sonner";
 
@@ -44,7 +45,11 @@ export function InsightsStrip({ sessionIds }: { sessionIds: string[] }) {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ sessionIds }),
       });
-      const data = (await res.json()) as { ok?: boolean; insights?: Insight[]; error?: string };
+      const data = (await res.json()) as {
+        ok?: boolean;
+        insights?: Insight[];
+        error?: string | LLMClientError;
+      };
       if (!res.ok || !data.ok || !data.insights) {
         toastError(data.error ?? "生成失败");
         return;

@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { toastError } from "@/lib/error-toast";
+import type { LLMClientError } from "@/lib/llm/errors";
 import { GenerateConfigSchema, type GenerateConfig, type SessionStatus } from "@/lib/types";
 
 import { AdvancedOptions, QuickGenerateForm } from "./generate-form-fields";
@@ -30,7 +31,7 @@ type GenerateResponse =
       wordCount: number;
     }
   | {
-      error: string;
+      error: string | LLMClientError;
     };
 
 export function GeneratePanel({
