@@ -34,7 +34,7 @@ export function MobileNav() {
         side="left"
         className="w-[304px] border-r border-border bg-background p-0"
       >
-        <SheetHeader className="border-b border-dashed border-border/70 px-5 py-4">
+        <SheetHeader className="border-b border-border/70 px-5 py-4">
           <SheetTitle>NovelFusion</SheetTitle>
           <SheetDescription className="sr-only">主导航菜单</SheetDescription>
         </SheetHeader>

@@ -1,6 +1,5 @@
 import { redirect } from "next/navigation";
 
-import { CommandPalette } from "@/components/command-palette";
 import { MobileNav } from "@/components/mobile-nav";
 import { Sidebar } from "@/components/sidebar";
 import { UserMenu } from "@/components/user-menu";
@@ -39,7 +38,6 @@ export default async function AppLayout({
           </main>
         </div>
       </div>
-      <CommandPalette />
     </div>
   );
 }

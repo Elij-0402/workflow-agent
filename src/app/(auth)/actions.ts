@@ -3,13 +3,12 @@
 import { redirect } from "next/navigation";
 import { ZodError } from "zod";
 
-import { mapPasswordAuthErrorMessage, parsePasswordAuthFormData } from "@/lib/auth/password-auth";
+import {
+  mapPasswordAuthErrorMessage,
+  parsePasswordAuthFormData,
+} from "@/lib/auth/password-auth";
+import { getSafeRedirectPath } from "@/lib/auth/redirect";
 import { createClient } from "@/lib/supabase/server";
-
-function getSafeRedirectPath(formData: FormData) {
-  const redirectPath = String(formData.get("redirect") ?? "/dashboard");
-  return redirectPath.startsWith("/") ? redirectPath : "/dashboard";
-}
 
 export async function submitPasswordAuth(formData: FormData) {
   const redirectTo = getSafeRedirectPath(formData);
@@ -38,29 +37,25 @@ export async function submitPasswordAuth(formData: FormData) {
 
     if (!data.session) {
       return {
-        error: "当前 Supabase 仍启用了邮箱确认。请在 Auth 设置里关闭邮箱确认后再使用密码注册。",
+        error:
+          "当前 Supabase 仍启用了邮箱确认。请在 Auth 设置里关闭邮箱确认后再使用密码注册。",
       };
     }
+  } else {
+    const { error } = await supabase.auth.signInWithPassword({
+      email: parsed.email,
+      password: parsed.password,
+    });
 
-    return {
-      ok: true,
-      message: "注册成功，已为你登录。",
-      redirectTo,
-    };
-  }
-
-  const { error } = await supabase.auth.signInWithPassword({
-    email: parsed.email,
-    password: parsed.password,
-  });
-
-  if (error) {
-    return { error: mapPasswordAuthErrorMessage(error.message) };
+    if (error) {
+      return { error: mapPasswordAuthErrorMessage(error.message) };
+    }
   }
 
   return {
     ok: true,
-    message: "登录成功。",
+    message:
+      parsed.mode === "register" ? "注册成功，已为你登录。" : "登录成功。",
     redirectTo,
   };
 }

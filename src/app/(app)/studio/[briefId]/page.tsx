@@ -6,7 +6,10 @@ import { OutlineStreamer } from "@/components/creative-brief/outline-streamer";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
-import { CreativeBriefSchema, type CreativeBrief } from "@/lib/types/creative-brief";
+import {
+  CreativeBriefSchema,
+  type CreativeBrief,
+} from "@/lib/types/creative-brief";
 
 type Props = {
   params: Promise<{ briefId: string }>;
@@ -48,9 +51,7 @@ export default async function StudioBriefPage({ params }: Props) {
     .maybeSingle();
 
   const backHref = session
-    ? session.mode === "dual"
-      ? `/sessions/${session.id}/workbench`
-      : `/sessions/${session.id}`
+    ? `/sessions/${session.id}${session.mode === "dual" ? "?step=generate" : ""}`
     : "/studio";
 
   return (
@@ -58,17 +59,21 @@ export default async function StudioBriefPage({ params }: Props) {
       <PageHeader
         label="brief"
         title={row.title || "未命名简报"}
-        description={`所属项目：${session?.name ?? "未知"}`}
+        description={`所属任务：${session?.name ?? "未知"}`}
         action={
           <Button asChild variant="outline" size="sm">
-            <Link href={backHref}>返回项目</Link>
+            <Link href={backHref}>返回任务</Link>
           </Button>
         }
       />
-      <BriefEditor mode={{ kind: "edit", briefId }} initial={initial} />
-      <section className="border-t border-dashed border-border/60 pt-6">
-        <OutlineStreamer briefId={briefId} />
-      </section>
+      <div className="grid gap-6 xl:grid-cols-2 xl:gap-8">
+        <div className="min-w-0">
+          <BriefEditor mode={{ kind: "edit", briefId }} initial={initial} />
+        </div>
+        <section className="min-w-0 xl:border-l xl:border-border/60 xl:pl-8">
+          <OutlineStreamer briefId={briefId} />
+        </section>
+      </div>
     </div>
   );
 }

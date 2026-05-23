@@ -23,10 +23,10 @@ export function UserMenu({ email }: { email: string }) {
         <Button
           variant="ghost"
           size="icon"
-          className="size-9 rounded-full p-0"
+          className="size-9 rounded-md p-0"
           aria-label="账户菜单"
         >
-          <span className="flex size-9 items-center justify-center rounded-full border border-primary/50 bg-card font-mono text-[11px] uppercase text-primary">
+          <span className="flex size-9 items-center justify-center rounded-md border border-border bg-card text-[11px] font-medium uppercase text-foreground">
             {initials}
           </span>
         </Button>
@@ -40,7 +40,9 @@ export function UserMenu({ email }: { email: string }) {
             <span className="font-mono text-[10.5px] uppercase tracking-[0.10em] text-muted-foreground">
               signed in as
             </span>
-            <span className="truncate text-[13px] text-foreground">{email}</span>
+            <span className="truncate text-[13px] text-foreground">
+              {email}
+            </span>
           </div>
         </DropdownMenuItem>
         <DropdownMenuSeparator />

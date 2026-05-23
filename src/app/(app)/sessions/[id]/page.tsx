@@ -1,23 +1,40 @@
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Settings2 } from "lucide-react";
 
 import { AnalysisPanel } from "./analysis-panel";
 import { ExtendedAnalysisPanel } from "./extended-analysis-panel";
+import { WorkbenchClient } from "./workbench/workbench-client";
 import { GeneratePanel } from "@/components/sessions/generate-panel";
 import { VariantList } from "@/components/sessions/variant-list";
 import { MetaRow } from "@/components/meta-row";
 import { PageHeader } from "@/components/page-header";
-import { WorkflowStageBar, type WorkflowStageItem } from "@/components/workflow-stage-bar";
+import {
+  WorkflowStageBar,
+  type WorkflowStageItem,
+} from "@/components/workflow-stage-bar";
 import { Button } from "@/components/ui/button";
-import { ANALYSIS_DIMENSION_CONFIG, EXTENDED_ANALYSIS_DIMENSION_CONFIG } from "@/lib/prompts";
+import { BlueprintSchema, emptyBlueprint } from "@/lib/blueprint/schema";
+import {
+  ANALYSIS_DIMENSION_CONFIG,
+  EXTENDED_ANALYSIS_DIMENSION_CONFIG,
+} from "@/lib/prompts";
 import { createClient } from "@/lib/supabase/server";
-import type { ExtendedAnalysisDimension, LegacyAnalysisDimension, VariantRow } from "@/lib/types";
+import {
+  ChapterBriefResultSchema,
+  type ChapterBriefResult,
+  type ExtendedAnalysisDimension,
+  type LegacyAnalysisDimension,
+  type VariantRow,
+} from "@/lib/types";
 import { formatDate, formatRelativeTime } from "@/lib/utils";
 
 type SessionPageProps = {
   params: Promise<{
     id: string;
+  }>;
+  searchParams: Promise<{
+    step?: string;
   }>;
 };
 
@@ -26,8 +43,12 @@ type BookMetadata = {
   chapters?: unknown[];
 };
 
-export default async function SessionDetailPage({ params }: SessionPageProps) {
+export default async function SessionDetailPage({
+  params,
+  searchParams,
+}: SessionPageProps) {
   const { id } = await params;
+  const { step } = await searchParams;
   const supabase = await createClient();
   const {
     data: { user },
@@ -46,24 +67,164 @@ export default async function SessionDetailPage({ params }: SessionPageProps) {
     .eq("user_id", user.id)
     .maybeSingle();
   if (sessionMode?.mode === "dual") {
-    redirect(`/sessions/${id}/workbench`);
-  }
-
-  const [{ data: session }, { data: book }, { data: llmConfig }] = await Promise.all([
-    supabase
+    const { data: session } = await supabase
       .from("sessions")
-      .select("id, name, status, created_at, updated_at")
+      .select("id, name, mode, created_at, updated_at")
       .eq("id", id)
       .eq("user_id", user.id)
-      .maybeSingle(),
-    supabase
+      .maybeSingle();
+    if (!session) notFound();
+
+    const { data: books } = await supabase
       .from("books")
-      .select("id, title, word_count, chapter_count, metadata, created_at")
+      .select("id, title, position, word_count, chapter_count, created_at")
       .eq("session_id", id)
       .eq("user_id", user.id)
-      .maybeSingle(),
-    supabase.from("llm_config").select("id").maybeSingle(),
-  ]);
+      .order("position", { ascending: true });
+
+    const bookIds = (books ?? []).map((b) => b.id);
+    const [chaptersResult, analysesResult, blueprintResult, variantsResult] =
+      await Promise.all([
+        bookIds.length
+          ? supabase
+              .from("chapters")
+              .select("id, book_id, index, title, start_char, end_char, source")
+              .in("book_id", bookIds)
+              .eq("user_id", user.id)
+              .order("index", { ascending: true })
+          : Promise.resolve({ data: [] as const }),
+        bookIds.length
+          ? supabase
+              .from("analyses")
+              .select("book_id, chapter_id, scope, dimension, result")
+              .in("book_id", bookIds)
+              .eq("user_id", user.id)
+          : Promise.resolve({ data: [] as const }),
+        supabase
+          .from("blueprints")
+          .select("id, status, sections, confirmed_at, updated_at")
+          .eq("session_id", id)
+          .eq("user_id", user.id)
+          .maybeSingle(),
+        supabase
+          .from("variants")
+          .select(
+            "id, title, config, content, word_count, blueprint_id, created_at",
+          )
+          .eq("session_id", id)
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false }),
+      ]);
+
+    const chapters = (chaptersResult.data ?? []) as Array<{
+      id: string;
+      book_id: string;
+      index: number;
+      title: string;
+      start_char: number;
+      end_char: number;
+      source: "regex" | "length-chunk" | "manual";
+    }>;
+    const analyses = (analysesResult.data ?? []) as Array<{
+      book_id: string;
+      chapter_id: string | null;
+      scope: "book" | "chapter";
+      dimension: string;
+      result: unknown;
+    }>;
+    const variants = (variantsResult.data ?? []) as Array<
+      Pick<
+        VariantRow,
+        | "id"
+        | "title"
+        | "config"
+        | "content"
+        | "word_count"
+        | "blueprint_id"
+        | "created_at"
+      >
+    >;
+
+    const briefs = analyses
+      .filter(
+        (a) =>
+          a.scope === "chapter" &&
+          a.dimension === "chapter_brief" &&
+          a.chapter_id,
+      )
+      .map((a) => {
+        const parsed = ChapterBriefResultSchema.safeParse(a.result);
+        return parsed.success
+          ? {
+              book_id: a.book_id,
+              chapter_id: a.chapter_id as string,
+              result: parsed.data,
+            }
+          : null;
+      })
+      .filter(
+        (
+          x,
+        ): x is {
+          book_id: string;
+          chapter_id: string;
+          result: ChapterBriefResult;
+        } => x !== null,
+      );
+
+    const bookSynthesisByBook = new Set(
+      analyses
+        .filter((a) => a.scope === "book" && a.dimension === "book_synthesis")
+        .map((a) => a.book_id),
+    );
+
+    const blueprintRow = blueprintResult.data;
+    const blueprint = blueprintRow
+      ? BlueprintSchema.parse(blueprintRow.sections ?? {})
+      : emptyBlueprint();
+
+    const initialStep =
+      step === "upload" ||
+      step === "analysis" ||
+      step === "compare" ||
+      step === "generate"
+        ? step
+        : undefined;
+
+    return (
+      <WorkbenchClient
+        session={session}
+        books={books ?? []}
+        chapters={chapters}
+        briefs={briefs}
+        bookSynthesisByBook={[...bookSynthesisByBook]}
+        blueprintId={blueprintRow?.id ?? null}
+        blueprintStatus={blueprintRow?.status ?? "draft"}
+        blueprintUpdatedAt={blueprintRow?.updated_at ?? null}
+        blueprintConfirmedAt={blueprintRow?.confirmed_at ?? null}
+        blueprint={blueprint}
+        variants={variants}
+        initialStep={initialStep}
+      />
+    );
+  }
+
+  const [{ data: session }, { data: book }, { data: llmConfig }] =
+    await Promise.all([
+      supabase
+        .from("sessions")
+        .select("id, name, status, created_at, updated_at")
+        .eq("id", id)
+        .eq("user_id", user.id)
+        .maybeSingle(),
+      supabase
+        .from("books")
+        .select("id, title, word_count, chapter_count, metadata, created_at")
+        .eq("session_id", id)
+        .eq("user_id", user.id)
+        .maybeSingle(),
+      supabase.from("llm_config").select("id").maybeSingle(),
+    ]);
 
   if (!session || !book) {
     notFound();
@@ -85,7 +246,8 @@ export default async function SessionDetailPage({ params }: SessionPageProps) {
 
   const metadata = (book.metadata ?? {}) as BookMetadata;
   const chapterCount =
-    book.chapter_count ?? (Array.isArray(metadata.chapters) ? metadata.chapters.length : 0);
+    book.chapter_count ??
+    (Array.isArray(metadata.chapters) ? metadata.chapters.length : 0);
   // Validate each stored analysis row against its current dimension schema.
   // Rows that fail safeParse (schema drift, partial writes, garbage from a
   // misbehaving model) are dropped here so the UI treats them as "not yet
@@ -99,7 +261,8 @@ export default async function SessionDetailPage({ params }: SessionPageProps) {
       result: unknown;
     } => {
       if (!item.dimension || !item.result) return false;
-      const config = ANALYSIS_DIMENSION_CONFIG[item.dimension as LegacyAnalysisDimension];
+      const config =
+        ANALYSIS_DIMENSION_CONFIG[item.dimension as LegacyAnalysisDimension];
       if (!config) return false;
       return config.schema.safeParse(item.result).success;
     },
@@ -113,13 +276,18 @@ export default async function SessionDetailPage({ params }: SessionPageProps) {
     } => {
       if (!item.dimension || !item.result) return false;
       const config =
-        EXTENDED_ANALYSIS_DIMENSION_CONFIG[item.dimension as ExtendedAnalysisDimension];
+        EXTENDED_ANALYSIS_DIMENSION_CONFIG[
+          item.dimension as ExtendedAnalysisDimension
+        ];
       if (!config) return false;
       return config.schema.safeParse(item.result).success;
     },
   );
   const safeVariants = (variants ?? []) as Array<
-    Pick<VariantRow, "id" | "title" | "config" | "content" | "word_count" | "created_at">
+    Pick<
+      VariantRow,
+      "id" | "title" | "config" | "content" | "word_count" | "created_at"
+    >
   >;
   const hasCompleteAnalysis = safeAnalyses.length === 3;
   const hasVariants = safeVariants.length > 0;
@@ -141,11 +309,7 @@ export default async function SessionDetailPage({ params }: SessionPageProps) {
         去设置
       </Link>
     </Button>
-  ) : hasCompleteAnalysis ? (
-    <Button asChild variant="outline" size="sm">
-      <Link href={`/studio/new?sessionId=${session.id}`}>新建创意简报</Link>
-    </Button>
-  ) : undefined;
+  ) : null;
 
   return (
     <div className="app-page">
@@ -158,7 +322,10 @@ export default async function SessionDetailPage({ params }: SessionPageProps) {
           <MetaRow
             items={[
               { label: "uploaded", value: formatDate(book.created_at) },
-              { label: "updated", value: formatRelativeTime(session.updated_at) },
+              {
+                label: "updated",
+                value: formatRelativeTime(session.updated_at),
+              },
             ]}
           />
         }
@@ -168,7 +335,10 @@ export default async function SessionDetailPage({ params }: SessionPageProps) {
 
       <MetaRow
         items={[
-          { label: "words", value: book.word_count?.toLocaleString("zh-CN") ?? "0" },
+          {
+            label: "words",
+            value: book.word_count?.toLocaleString("zh-CN") ?? "0",
+          },
           { label: "chapters", value: String(chapterCount) },
           { label: "encoding", value: metadata.encoding ?? "未知" },
           { label: "analysis", value: `${safeAnalyses.length} / 3` },
@@ -193,7 +363,8 @@ export default async function SessionDetailPage({ params }: SessionPageProps) {
                 {getStageSummary(hasCompleteAnalysis, hasVariants)}
               </p>
               <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
-                analysis {safeAnalyses.length}/3 · variants {safeVariants.length}
+                analysis {safeAnalyses.length}/3 · variants{" "}
+                {safeVariants.length}
               </p>
             </div>
           </div>
@@ -254,7 +425,9 @@ function getStageItems({
     {
       key: "analysis",
       label: "完成分析",
-      description: hasCompleteAnalysis ? "三项分析已经准备好。" : "先完成世界观、人物和叙事分析。",
+      description: hasCompleteAnalysis
+        ? "三项分析已经准备好。"
+        : "先完成世界观、人物和叙事分析。",
       state: hasCompleteAnalysis ? "done" : "current",
     },
     {

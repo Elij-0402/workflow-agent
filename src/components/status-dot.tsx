@@ -53,21 +53,34 @@ export function getSessionStatusMeta(status: string) {
   );
 }
 
+const SR_LABEL: Record<string, string> = {
+  draft: "草稿",
+  uploaded: "已上传",
+  analyzing: "分析中",
+  generating: "生成中",
+  analyzed: "已分析",
+  done: "已完成",
+};
+
 export function StatusDot({ status, className }: { status: string; className?: string }) {
   const meta = getSessionStatusMeta(status);
   const pulsing = status === "analyzing" || status === "generating";
+  const srLabel = SR_LABEL[status] ?? status;
 
   return (
-    <span
-      className={cn(
-        "inline-flex h-3 w-3 shrink-0 items-center justify-center font-mono text-[11px] leading-none",
-        meta.dot,
-        pulsing && "animate-pulse",
-        className,
-      )}
-      aria-hidden="true"
-    >
-      {meta.glyph}
-    </span>
+    <>
+      <span
+        className={cn(
+          "inline-flex h-3 w-3 shrink-0 items-center justify-center font-mono text-[11px] leading-none",
+          meta.dot,
+          pulsing && "animate-pulse",
+          className,
+        )}
+        aria-hidden="true"
+      >
+        {meta.glyph}
+      </span>
+      <span className="sr-only">{srLabel}</span>
+    </>
   );
 }

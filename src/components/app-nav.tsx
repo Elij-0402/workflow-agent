@@ -2,28 +2,22 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { GitCompare, History, LayoutDashboard, Palette, Settings, Sparkles, Upload } from "lucide-react";
+import { History, PlusSquare, Settings } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
 type NavItem = {
   href: string;
   label: string;
-  icon: typeof LayoutDashboard;
+  icon: typeof PlusSquare;
 };
 
 const NAV_ITEMS: NavItem[] = [
-  { href: "/dashboard", label: "概览", icon: LayoutDashboard },
-  { href: "/sessions", label: "项目", icon: History },
-  { href: "/upload", label: "新建项目", icon: Upload },
-  { href: "/compare", label: "对比研究", icon: GitCompare },
-  { href: "/studio", label: "生成实验台", icon: Sparkles },
+  { href: "/upload", label: "新建任务", icon: PlusSquare },
+  { href: "/sessions", label: "任务", icon: History },
 ];
 
 const FOOTER_ITEMS: NavItem[] = [
-  ...(process.env.NODE_ENV !== "production"
-    ? [{ href: "/design-system", label: "设计系统", icon: Palette }]
-    : []),
   { href: "/settings", label: "设置", icon: Settings },
 ];
 
@@ -40,11 +34,21 @@ export function AppNav({ onNavigate, className }: AppNavProps) {
   return (
     <nav className={cn("flex flex-col gap-0.5", className)} aria-label="主导航">
       {NAV_ITEMS.map((item) => (
-        <NavLink key={item.href} item={item} pathname={pathname} onNavigate={onNavigate} />
+        <NavLink
+          key={item.href}
+          item={item}
+          pathname={pathname}
+          onNavigate={onNavigate}
+        />
       ))}
       <div className="mt-2 flex flex-col gap-0.5 border-t border-dashed border-border/40 pt-2">
         {FOOTER_ITEMS.map((item) => (
-          <NavLink key={item.href} item={item} pathname={pathname} onNavigate={onNavigate} />
+          <NavLink
+            key={item.href}
+            item={item}
+            pathname={pathname}
+            onNavigate={onNavigate}
+          />
         ))}
       </div>
     </nav>
@@ -69,7 +73,9 @@ function NavLink({
       aria-current={active ? "page" : undefined}
       className={cn(
         "group relative flex min-w-0 items-center gap-3 px-3 py-2.5 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary/40",
-        active ? "text-foreground" : "text-muted-foreground hover:text-foreground",
+        active
+          ? "text-foreground"
+          : "text-muted-foreground hover:text-foreground",
       )}
       style={{ transitionDuration: "var(--duration-fast)" }}
     >
@@ -85,7 +91,9 @@ function NavLink({
         aria-hidden="true"
         className={cn(
           "h-4 w-4 shrink-0 transition-colors",
-          active ? "text-primary" : "text-muted-foreground/70 group-hover:text-foreground",
+          active
+            ? "text-primary"
+            : "text-muted-foreground/70 group-hover:text-foreground",
         )}
         strokeWidth={1.5}
       />

@@ -13,9 +13,17 @@ export type WorkflowStageItem = {
 
 type WorkflowStageBarProps = {
   items: WorkflowStageItem[];
+  activeKey?: string;
+  disabledKeys?: string[];
+  onSelect?: (key: string) => void;
 };
 
-export function WorkflowStageBar({ items }: WorkflowStageBarProps) {
+export function WorkflowStageBar({
+  items,
+  activeKey,
+  disabledKeys = [],
+  onSelect,
+}: WorkflowStageBarProps) {
   return (
     <div className="surface-panel">
       <ol
@@ -24,7 +32,10 @@ export function WorkflowStageBar({ items }: WorkflowStageBarProps) {
       >
         {items.map((item, index) => {
           const isDone = item.state === "done";
-          const isCurrent = item.state === "current";
+          const isCurrent = activeKey
+            ? activeKey === item.key
+            : item.state === "current";
+          const isDisabled = disabledKeys.includes(item.key);
           const glyph = isDone ? "✓" : isCurrent ? "▷" : "·";
           const stepNo = String(index + 1).padStart(2, "0");
 
@@ -36,11 +47,20 @@ export function WorkflowStageBar({ items }: WorkflowStageBarProps) {
                 isCurrent && "bg-primary/5",
               )}
             >
-              <div className="flex items-start gap-3">
+              <button
+                type="button"
+                onClick={() => !isDisabled && onSelect?.(item.key)}
+                disabled={isDisabled || !onSelect}
+                className="flex w-full items-start gap-3 text-left disabled:cursor-not-allowed disabled:opacity-60"
+              >
                 <span
                   className={cn(
                     "mt-0.5 flex h-5 w-7 shrink-0 items-center justify-center font-mono text-[11px] tracking-[0.06em]",
-                    isDone ? "text-flash" : isCurrent ? "text-primary" : "text-muted-foreground/60",
+                    isDone
+                      ? "text-flash"
+                      : isCurrent
+                        ? "text-primary"
+                        : "text-muted-foreground/60",
                   )}
                   aria-hidden="true"
                 >
@@ -65,15 +85,19 @@ export function WorkflowStageBar({ items }: WorkflowStageBarProps) {
                     <span
                       className={cn(
                         "text-[13px]",
-                        isCurrent ? "font-display italic text-foreground" : "text-foreground",
+                        isCurrent
+                          ? "font-display italic text-foreground"
+                          : "text-foreground",
                       )}
                     >
                       {item.label}
                     </span>
                   </div>
-                  <p className="text-[12px] leading-5 text-muted-foreground">{item.description}</p>
+                  <p className="text-[12px] leading-5 text-muted-foreground">
+                    {item.description}
+                  </p>
                 </div>
-              </div>
+              </button>
             </li>
           );
         })}

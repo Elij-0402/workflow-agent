@@ -132,14 +132,30 @@ export function DesignSystemClient() {
   );
 }
 
-function SectionHeader({ id, num, title, hint }: { id: string; num: string; title: string; hint?: string }) {
+function SectionHeader({
+  id,
+  num,
+  title,
+  hint,
+}: {
+  id: string;
+  num: string;
+  title: string;
+  hint?: string;
+}) {
   return (
     <div className="flex items-baseline justify-between gap-4 border-b border-border pb-3">
       <div className="flex items-baseline gap-3">
-        <span className="font-mono text-[11px] text-muted-foreground/60">{num}</span>
+        <span className="font-mono text-[11px] text-muted-foreground/60">
+          {num}
+        </span>
         <h2 className="text-[18px] font-medium text-foreground">{title}</h2>
       </div>
-      {hint ? <p className="hidden text-[12px] text-muted-foreground sm:block">{hint}</p> : null}
+      {hint ? (
+        <p className="hidden text-[12px] text-muted-foreground sm:block">
+          {hint}
+        </p>
+      ) : null}
     </div>
   );
 }
@@ -153,19 +169,48 @@ function Section({ id, children }: { id: string; children: React.ReactNode }) {
 }
 
 const PRINCIPLES = [
-  { n: "01", t: "每个像素都有功能", d: "视觉元素必须服务于信息层级、状态或品牌识别。不为氛围装饰。" },
-  { n: "02", t: "静默优先", d: "默认低对比、低饱和。仅在需要注意时让主色发声。" },
-  { n: "03", t: "一屏一焦点", d: "每个路由解决一类任务。多面板堆砌应拆分为可切换视图。" },
-  { n: "04", t: "键盘是一等公民", d: "高频操作必须有快捷键并在 UI 中显式标注。" },
+  {
+    n: "01",
+    t: "每个像素都有功能",
+    d: "视觉元素必须服务于信息层级、状态或品牌识别。不为氛围装饰。",
+  },
+  {
+    n: "02",
+    t: "静默优先",
+    d: "默认低对比、低饱和。仅在需要注意时让主色发声。",
+  },
+  {
+    n: "03",
+    t: "一屏一焦点",
+    d: "每个路由解决一类任务。多面板堆砌应拆分为可切换视图。",
+  },
+  {
+    n: "04",
+    t: "键盘是一等公民",
+    d: "高频操作必须有快捷键并在 UI 中显式标注。",
+  },
   { n: "05", t: "反馈在 200ms 内开始", d: "禁止按钮按下后无任何变化等数秒。" },
-  { n: "06", t: "文案是 UI 的一部分", d: "陈述事实而非命令，给出可行动建议，不超过 60 字。" },
-  { n: "07", t: "拒绝小聪明装饰", d: "shimmer、blink、ASCII 边框等创意装饰一律不用。" },
+  {
+    n: "06",
+    t: "文案是 UI 的一部分",
+    d: "陈述事实而非命令，给出可行动建议，不超过 60 字。",
+  },
+  {
+    n: "07",
+    t: "拒绝小聪明装饰",
+    d: "shimmer、blink、ASCII 边框等创意装饰一律不用。",
+  },
 ];
 
 function PrinciplesSection() {
   return (
     <Section id="principles">
-      <SectionHeader id="principles" num="01" title="核心设计原则" hint="冲突时按 简洁 > 一致 > 美观 > 表达 排序" />
+      <SectionHeader
+        id="principles"
+        num="01"
+        title="核心设计原则"
+        hint="冲突时按 简洁 > 一致 > 美观 > 表达 排序"
+      />
       <div className="grid gap-3 sm:grid-cols-2">
         {PRINCIPLES.map((p) => (
           <div key={p.n} className="surface-panel p-4">
@@ -173,7 +218,9 @@ function PrinciplesSection() {
               <span className="font-mono text-[11px] text-primary">{p.n}</span>
               <h3 className="text-[14px] font-medium text-foreground">{p.t}</h3>
             </div>
-            <p className="mt-2 pl-7 text-[12.5px] leading-6 text-muted-foreground">{p.d}</p>
+            <p className="mt-2 pl-7 text-[12.5px] leading-6 text-muted-foreground">
+              {p.d}
+            </p>
           </div>
         ))}
       </div>
@@ -197,7 +244,12 @@ const COLOR_TOKENS = [
 function ColorSection() {
   return (
     <Section id="color">
-      <SectionHeader id="color" num="02" title="颜色 token" hint="一屏内主色实色填充元素 ≤ 1" />
+      <SectionHeader
+        id="color"
+        num="02"
+        title="颜色 token"
+        hint="一屏内主色实色填充元素 ≤ 1"
+      />
       <div className="surface-panel divide-y divide-border">
         {COLOR_TOKENS.map((c) => (
           <div key={c.name} className="flex items-center gap-4 px-4 py-3">
@@ -206,9 +258,15 @@ function ColorSection() {
               style={{ backgroundColor: `hsl(${c.value})` }}
             />
             <div className="grid flex-1 grid-cols-3 items-baseline gap-4">
-              <div className="font-mono text-[12px] text-foreground">--{c.name}</div>
-              <div className="font-mono text-[11px] text-muted-foreground">{c.value}</div>
-              <div className="text-[12.5px] text-muted-foreground">{c.role}</div>
+              <div className="font-mono text-[12px] text-foreground">
+                --{c.name}
+              </div>
+              <div className="font-mono text-[11px] text-muted-foreground">
+                {c.value}
+              </div>
+              <div className="text-[12.5px] text-muted-foreground">
+                {c.role}
+              </div>
             </div>
           </div>
         ))}
@@ -220,7 +278,12 @@ function ColorSection() {
 function TypeSection() {
   return (
     <Section id="type">
-      <SectionHeader id="type" num="03" title="字体系统" hint="display 仅 h1·情感页 / mono 仅数据·键盘" />
+      <SectionHeader
+        id="type"
+        num="03"
+        title="字体系统"
+        hint="display 仅 h1·情感页 / mono 仅数据·键盘"
+      />
       <div className="surface-panel divide-y divide-border">
         <TypeRow size="text-[28px]" label="H1 · 页面主标题">
           <span className="font-display italic">导入你的小说</span>
@@ -248,10 +311,20 @@ function TypeSection() {
   );
 }
 
-function TypeRow({ size, label, children }: { size: string; label: string; children: React.ReactNode }) {
+function TypeRow({
+  size,
+  label,
+  children,
+}: {
+  size: string;
+  label: string;
+  children: React.ReactNode;
+}) {
   return (
     <div className="grid grid-cols-[140px_minmax(0,1fr)] items-baseline gap-6 px-4 py-4">
-      <p className="font-mono text-[10.5px] uppercase tracking-[0.12em] text-muted-foreground/60">{label}</p>
+      <p className="font-mono text-[10.5px] uppercase tracking-[0.12em] text-muted-foreground/60">
+        {label}
+      </p>
       <p className={`${size} text-foreground`}>{children}</p>
     </div>
   );
@@ -269,15 +342,30 @@ const SPACING = [
 function SpacingSection() {
   return (
     <Section id="spacing">
-      <SectionHeader id="spacing" num="04" title="间距尺度" hint="页面内只用这 6 档" />
+      <SectionHeader
+        id="spacing"
+        num="04"
+        title="间距尺度"
+        hint="页面内只用这 6 档"
+      />
       <div className="surface-panel divide-y divide-border">
         {SPACING.map((s) => {
           const px = parseInt(s.px);
           return (
-            <div key={s.token} className="grid grid-cols-[100px_60px_minmax(0,1fr)] items-center gap-4 px-4 py-3">
-              <span className="font-mono text-[12px] text-foreground">{s.token}</span>
-              <span className="font-mono text-[11px] text-muted-foreground">{s.px}</span>
-              <div className="h-3 bg-primary/60" style={{ width: `${px * 4}px` }} />
+            <div
+              key={s.token}
+              className="grid grid-cols-[100px_60px_minmax(0,1fr)] items-center gap-4 px-4 py-3"
+            >
+              <span className="font-mono text-[12px] text-foreground">
+                {s.token}
+              </span>
+              <span className="font-mono text-[11px] text-muted-foreground">
+                {s.px}
+              </span>
+              <div
+                className="h-3 bg-primary/60"
+                style={{ width: `${px * 4}px` }}
+              />
             </div>
           );
         })}
@@ -289,14 +377,21 @@ function SpacingSection() {
 function SurfaceSection() {
   return (
     <Section id="surface">
-      <SectionHeader id="surface" num="05" title="Surface 三层级" hint="禁止嵌套 3 层及以上" />
+      <SectionHeader
+        id="surface"
+        num="05"
+        title="Surface 三层级"
+        hint="禁止嵌套 3 层及以上"
+      />
       <div className="rounded-[3px] border border-border/40 bg-background p-6">
         <p className="eyebrow-label mb-3">background</p>
         <div className="surface-panel p-5">
           <p className="eyebrow-label mb-3">surface-panel · 一级容器</p>
           <div className="surface-subtle p-4">
             <p className="eyebrow-label mb-2">surface-subtle · 二级容器</p>
-            <p className="text-[13px] text-muted-foreground">嵌套不超过 2 层。</p>
+            <p className="text-[13px] text-muted-foreground">
+              嵌套不超过 2 层。
+            </p>
           </div>
         </div>
       </div>
@@ -308,7 +403,12 @@ function ButtonSection() {
   const [loading, setLoading] = useState(false);
   return (
     <Section id="button">
-      <SectionHeader id="button" num="06" title="按钮 variant" hint="一屏主色填充按钮 ≤ 1 个" />
+      <SectionHeader
+        id="button"
+        num="06"
+        title="按钮 variant"
+        hint="一屏主色填充按钮 ≤ 1 个"
+      />
       <div className="surface-panel divide-y divide-border">
         <ButtonRow label="default · 主操作">
           <Button>提交</Button>
@@ -366,7 +466,13 @@ function ButtonSection() {
   );
 }
 
-function ButtonRow({ label, children }: { label: string; children: React.ReactNode }) {
+function ButtonRow({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
   return (
     <div className="grid grid-cols-[160px_minmax(0,1fr)] items-center gap-4 px-4 py-4">
       <p className="text-[12px] text-muted-foreground">{label}</p>
@@ -386,7 +492,11 @@ function FormSection() {
         </div>
         <div className="flex flex-col gap-2">
           <Label htmlFor="ds-desc">附加要求</Label>
-          <Textarea id="ds-desc" placeholder="例如：让主角性格更内敛" rows={3} />
+          <Textarea
+            id="ds-desc"
+            placeholder="例如：让主角性格更内敛"
+            rows={3}
+          />
         </div>
         <div className="flex flex-col gap-2">
           <Label htmlFor="ds-model">模型</Label>
@@ -417,7 +527,9 @@ function CardSection() {
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="surface-panel flex flex-col gap-3 p-5">
           <p className="eyebrow-label">project</p>
-          <h3 className="text-[16px] font-medium text-foreground">三体 · 重写实验</h3>
+          <h3 className="text-[16px] font-medium text-foreground">
+            三体 · 重写实验
+          </h3>
           <p className="text-[13px] leading-6 text-muted-foreground">
             基于原作世界观重新书写第一章，保留核心冲突。
           </p>
@@ -432,8 +544,12 @@ function CardSection() {
             <p className="eyebrow-label">stats · 30d</p>
             <Badge>active</Badge>
           </div>
-          <p className="font-mono text-[28px] font-medium text-foreground">17,432</p>
-          <p className="text-[12px] text-muted-foreground">tokens 消耗 · 较上月 -8%</p>
+          <p className="font-mono text-[28px] font-medium text-foreground">
+            17,432
+          </p>
+          <p className="text-[12px] text-muted-foreground">
+            tokens 消耗 · 较上月 -8%
+          </p>
         </div>
       </div>
     </Section>
@@ -443,7 +559,12 @@ function CardSection() {
 function BadgeSection() {
   return (
     <Section id="badge">
-      <SectionHeader id="badge" num="09" title="徽章" hint="状态标记，避免装饰用途" />
+      <SectionHeader
+        id="badge"
+        num="09"
+        title="徽章"
+        hint="状态标记，避免装饰用途"
+      />
       <div className="surface-panel flex flex-wrap gap-2 p-5">
         <Badge>default</Badge>
         <Badge variant="secondary">secondary</Badge>
@@ -464,13 +585,22 @@ function TabsSection() {
           <TabsTrigger value="blueprint">蓝图</TabsTrigger>
           <TabsTrigger value="variants">变体</TabsTrigger>
         </TabsList>
-        <TabsContent value="chapters" className="pt-4 text-[13px] text-muted-foreground">
+        <TabsContent
+          value="chapters"
+          className="pt-4 text-[13px] text-muted-foreground"
+        >
           章节列表视图
         </TabsContent>
-        <TabsContent value="blueprint" className="pt-4 text-[13px] text-muted-foreground">
+        <TabsContent
+          value="blueprint"
+          className="pt-4 text-[13px] text-muted-foreground"
+        >
           蓝图编辑视图
         </TabsContent>
-        <TabsContent value="variants" className="pt-4 text-[13px] text-muted-foreground">
+        <TabsContent
+          value="variants"
+          className="pt-4 text-[13px] text-muted-foreground"
+        >
           变体对比视图
         </TabsContent>
       </Tabs>
@@ -481,12 +611,20 @@ function TabsSection() {
 function ToastSection() {
   return (
     <Section id="toast">
-      <SectionHeader id="toast" num="11" title="Toast" hint="success 3s / error 5s · maxToasts 3" />
+      <SectionHeader
+        id="toast"
+        num="11"
+        title="Toast"
+        hint="success 3s / error 5s · maxToasts 3"
+      />
       <div className="surface-panel flex flex-wrap gap-2 p-5">
         <Button variant="outline" onClick={() => toast.success("分析完成")}>
           success
         </Button>
-        <Button variant="outline" onClick={() => toast.error("上传失败 · 文件超过 50MB")}>
+        <Button
+          variant="outline"
+          onClick={() => toast.error("上传失败 · 文件超过 50MB")}
+        >
           error
         </Button>
         <Button
@@ -509,7 +647,12 @@ function ToastSection() {
 function OverlaySection() {
   return (
     <Section id="overlay">
-      <SectionHeader id="overlay" num="12" title="弹层" hint="Dialog · 决策 / Sheet · 表单 / Popover · 微编辑" />
+      <SectionHeader
+        id="overlay"
+        num="12"
+        title="弹层"
+        hint="Dialog · 决策 / Sheet · 表单 / Popover · 微编辑"
+      />
       <div className="surface-panel flex flex-wrap gap-2 p-5">
         <Dialog>
           <DialogTrigger asChild>
@@ -533,7 +676,9 @@ function OverlaySection() {
           <SheetContent>
             <SheetHeader>
               <SheetTitle>生成变体</SheetTitle>
-              <SheetDescription>调整参数，确认后会消耗 BYOK 配额。</SheetDescription>
+              <SheetDescription>
+                调整参数，确认后会消耗 BYOK 配额。
+              </SheetDescription>
             </SheetHeader>
             <div className="mt-6 flex flex-col gap-4">
               <div className="flex flex-col gap-2">
@@ -552,7 +697,12 @@ function OverlaySection() {
 function LoadingSection() {
   return (
     <Section id="loading">
-      <SectionHeader id="loading" num="13" title="加载状态" hint="按场景选择，不要纯居中 spinner 遮罩" />
+      <SectionHeader
+        id="loading"
+        num="13"
+        title="加载状态"
+        hint="按场景选择，不要纯居中 spinner 遮罩"
+      />
       <div className="grid gap-3 md:grid-cols-3">
         <div className="surface-panel space-y-3 p-5">
           <p className="eyebrow-label">skeleton · 列表</p>
@@ -589,11 +739,22 @@ const EMPTY_STATES = [
 function EmptySection() {
   return (
     <Section id="empty">
-      <SectionHeader id="empty" num="14" title="空状态" hint="图标 · 标题 ≤12 字 · 说明 · 唯一行动" />
+      <SectionHeader
+        id="empty"
+        num="14"
+        title="空状态"
+        hint="图标 · 标题 ≤12 字 · 说明 · 唯一行动"
+      />
       <div className="grid gap-3 md:grid-cols-2">
         {EMPTY_STATES.map((e) => (
-          <div key={e.t} className="surface-panel flex flex-col items-center gap-2 px-5 py-10 text-center">
-            <e.icon className="size-6 text-muted-foreground/50" strokeWidth={1.5} />
+          <div
+            key={e.t}
+            className="surface-panel flex flex-col items-center gap-2 px-5 py-10 text-center"
+          >
+            <e.icon
+              className="size-6 text-muted-foreground/50"
+              strokeWidth={1.5}
+            />
             <p className="text-[14px] font-medium text-foreground">{e.t}</p>
             <p className="text-[12.5px] text-muted-foreground">{e.d}</p>
             <Button variant="outline" size="sm" className="mt-2">
@@ -607,24 +768,29 @@ function EmptySection() {
 }
 
 const KEYS = [
-  { combo: ["⌘", "K"], label: "命令面板" },
-  { combo: ["G", "D"], label: "Go to Dashboard" },
-  { combo: ["G", "S"], label: "Go to Sessions" },
-  { combo: ["G", ","], label: "Go to Settings" },
+  { combo: ["1", "-", "7"], label: "切换维度" },
+  { combo: ["F"], label: "聚焦当前维度" },
   { combo: ["J"], label: "下一项" },
   { combo: ["K"], label: "上一项" },
   { combo: ["Enter"], label: "进入选中项" },
   { combo: ["Esc"], label: "关闭弹层" },
-  { combo: ["?"], label: "显示快捷键" },
 ];
 
 function KeyboardSection() {
   return (
     <Section id="keyboard">
-      <SectionHeader id="keyboard" num="15" title="键盘快捷键" hint="高频操作必须在 UI 中标注快捷键" />
+      <SectionHeader
+        id="keyboard"
+        num="15"
+        title="键盘快捷键"
+        hint="高频操作必须在 UI 中标注快捷键"
+      />
       <div className="surface-panel divide-y divide-border">
         {KEYS.map((k) => (
-          <div key={k.label} className="flex items-center justify-between px-4 py-3">
+          <div
+            key={k.label}
+            className="flex items-center justify-between px-4 py-3"
+          >
             <span className="text-[13px] text-foreground">{k.label}</span>
             <div className="flex gap-1">
               {k.combo.map((c, i) => (
@@ -647,15 +813,26 @@ const COPY_PAIRS = [
   { bad: "请先配置你的模型", good: "配置模型后可使用" },
   { bad: "先完成三项分析。", good: "完成三项分析后可生成" },
   { bad: "当前还不能开始分析，先去补上模型设置。", good: "需先配置模型" },
-  { bad: "本次重试失败，当前仍保留上一次结果。", good: "重试失败，保留上次结果" },
+  {
+    bad: "本次重试失败，当前仍保留上一次结果。",
+    good: "重试失败，保留上次结果",
+  },
   { bad: "未返回任何模型。", good: "未找到可用模型" },
-  { bad: "再生成一个版本会消耗你的 BYOK 配额。", good: "生成新版本将消耗 BYOK 配额" },
+  {
+    bad: "再生成一个版本会消耗你的 BYOK 配额。",
+    good: "生成新版本将消耗 BYOK 配额",
+  },
 ];
 
 function CopySection() {
   return (
     <Section id="copy">
-      <SectionHeader id="copy" num="16" title="文案对照" hint="禁用：您 / 请先 / 一键 / 轻松 / 感叹号 / emoji" />
+      <SectionHeader
+        id="copy"
+        num="16"
+        title="文案对照"
+        hint="禁用：您 / 请先 / 一键 / 轻松 / 感叹号 / emoji"
+      />
       <div className="surface-panel divide-y divide-border">
         {COPY_PAIRS.map((p, i) => (
           <div key={i} className="grid gap-3 px-4 py-3 md:grid-cols-2">

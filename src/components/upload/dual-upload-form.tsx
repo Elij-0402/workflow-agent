@@ -37,7 +37,9 @@ export function DualUploadForm() {
   const canSubmit = hasA;
 
   function pickSlot(slot: SlotKey, file: File | null) {
-    const next: SlotFile = file ? { file, name: file.name, size: file.size } : EMPTY_SLOT;
+    const next: SlotFile = file
+      ? { file, name: file.name, size: file.size }
+      : EMPTY_SLOT;
     if (slot === "A") setSlotA(next);
     else setSlotB(next);
   }
@@ -128,7 +130,12 @@ export function DualUploadForm() {
 
     setPending(true);
     try {
-      const aResult = await uploadOne(slotA.file, undefined, 0, "// uploading book A…");
+      const aResult = await uploadOne(
+        slotA.file,
+        undefined,
+        0,
+        "// uploading book A…",
+      );
       if (!aResult.ok) {
         toast.error(`书 A：${aResult.error}`);
         return;
@@ -137,10 +144,17 @@ export function DualUploadForm() {
       const sessionId = aResult.sessionId;
 
       if (slotB.file) {
-        const bResult = await uploadOne(slotB.file, sessionId, 1, "// uploading book B…");
+        const bResult = await uploadOne(
+          slotB.file,
+          sessionId,
+          1,
+          "// uploading book B…",
+        );
         if (!bResult.ok) {
-          toast.error(`书 B：${bResult.error}（书 A 已保留，可在工作台继续上传 B）`);
-          router.push(`/sessions/${sessionId}/workbench`);
+          toast.error(
+            `书 B：${bResult.error}（书 A 已保留，可在工作台继续上传 B）`,
+          );
+          router.push(`/sessions/${sessionId}`);
           return;
         }
         toast.success("两本书都已上传。");
@@ -148,7 +162,7 @@ export function DualUploadForm() {
         toast.success("书 A 已上传，可在工作台继续上传 B。");
       }
 
-      router.push(`/sessions/${sessionId}/workbench`);
+      router.push(`/sessions/${sessionId}`);
     } catch {
       toast.error("上传失败，请稍后重试。");
     } finally {
@@ -158,7 +172,10 @@ export function DualUploadForm() {
   }
 
   return (
-    <form onSubmit={(event) => void onSubmit(event)} className="flex flex-col gap-5">
+    <form
+      onSubmit={(event) => void onSubmit(event)}
+      className="flex flex-col gap-5"
+    >
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <FileSlot
           slot="A"
@@ -250,7 +267,9 @@ function FileSlot({
             书 {slot}
           </h3>
         </div>
-        <span className="font-mono text-[24px] leading-none text-primary/55">{slot}</span>
+        <span className="font-mono text-[24px] leading-none text-primary/55">
+          {slot}
+        </span>
       </div>
 
       <input
@@ -269,16 +288,23 @@ function FileSlot({
               <FileText aria-hidden className="h-4 w-4" />
             </div>
             <div className="min-w-0 flex-1">
-              <div className="truncate font-mono text-[13px] text-foreground">{state.name}</div>
+              <div className="truncate font-mono text-[13px] text-foreground">
+                {state.name}
+              </div>
               <div className="mt-1 font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
-                {state.size == null ? "waiting…" : formatBytes(state.size)} · txt
+                {state.size == null ? "waiting…" : formatBytes(state.size)} ·
+                txt
               </div>
             </div>
           </div>
         </div>
       ) : (
         <div className="flex flex-1 flex-col items-center justify-center rounded-[2px] border border-dashed border-border/60 bg-background/30 px-4 py-8 text-center">
-          <UploadCloud className="h-10 w-10 text-primary/50" strokeWidth={1.5} aria-hidden />
+          <UploadCloud
+            className="h-10 w-10 text-primary/50"
+            strokeWidth={1.5}
+            aria-hidden
+          />
           <p className="mt-3 font-display text-[16px] italic leading-tight text-foreground">
             选择书 {slot} 的 .txt
           </p>
