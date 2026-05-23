@@ -22,7 +22,7 @@ test("marks session analyzed after all analyses complete with no variants", () =
       totalAnalyses: 3,
       variantCount: 0,
     }),
-    "analyzed"
+    "analyzed",
   );
 });
 
@@ -33,7 +33,7 @@ test("keeps session done after re-analysis when variants already exist", () => {
       totalAnalyses: 3,
       variantCount: 2,
     }),
-    "done"
+    "done",
   );
 });
 
@@ -44,7 +44,7 @@ test("keeps partial analysis sessions in analyzing state", () => {
       totalAnalyses: 3,
       variantCount: 0,
     }),
-    "analyzing"
+    "analyzing",
   );
 });
 

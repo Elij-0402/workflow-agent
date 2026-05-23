@@ -27,17 +27,23 @@ test("pickBriefsForSynthesis: keeps head/tail and forces turning-point chapters"
   const briefs: BriefEntry[] = Array.from({ length: 500 }, (_, i) => ({
     index: i + 1,
     brief: {
-      events:
-        i === 250
-          ? [{ title: "x", description: "y", is_turning_point: true }]
-          : [],
+      events: i === 250 ? [{ title: "x", description: "y", is_turning_point: true }] : [],
     },
   }));
   const picked = pickBriefsForSynthesis(briefs);
   assert.ok(picked.length <= 201, `picked.length=${picked.length} should be ≤ 201`);
-  assert.ok(picked.some((p) => p.index === 1), "missing head");
-  assert.ok(picked.some((p) => p.index === 500), "missing tail");
-  assert.ok(picked.some((p) => p.index === 251), "missing turning point");
+  assert.ok(
+    picked.some((p) => p.index === 1),
+    "missing head",
+  );
+  assert.ok(
+    picked.some((p) => p.index === 500),
+    "missing tail",
+  );
+  assert.ok(
+    picked.some((p) => p.index === 251),
+    "missing turning point",
+  );
   // indices sorted ascending
   const indices = picked.map((p) => p.index);
   const sorted = [...indices].sort((a, b) => a - b);

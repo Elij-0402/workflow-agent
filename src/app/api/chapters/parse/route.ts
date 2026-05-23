@@ -83,10 +83,7 @@ export async function POST(req: Request) {
     }
   } else {
     if (!body.chapters?.length) {
-      return NextResponse.json(
-        { error: "手工模式需要 chapters 数组。" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "手工模式需要 chapters 数组。" }, { status: 400 });
     }
     chapters = body.chapters.map((c, i) => ({
       index: i + 1,
@@ -97,11 +94,7 @@ export async function POST(req: Request) {
     }));
   }
 
-  await supabase
-    .from("chapters")
-    .delete()
-    .eq("book_id", body.bookId)
-    .eq("user_id", user.id);
+  await supabase.from("chapters").delete().eq("book_id", body.bookId).eq("user_id", user.id);
 
   const { error: insertErr } = await supabase.from("chapters").insert(
     chapters.map((c) => ({
@@ -112,7 +105,7 @@ export async function POST(req: Request) {
       start_char: c.startChar,
       end_char: c.endChar,
       source: c.source,
-    }))
+    })),
   );
   if (insertErr) {
     return NextResponse.json({ error: "章节写入失败。" }, { status: 500 });

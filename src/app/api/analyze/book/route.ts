@@ -59,14 +59,12 @@ export async function POST(req: Request) {
     .eq("scope", "chapter")
     .eq("dimension", "chapter_brief");
 
-  const briefByChapter = new Map(
-    (briefs ?? []).map((b) => [b.chapter_id as string, b.result])
-  );
+  const briefByChapter = new Map((briefs ?? []).map((b) => [b.chapter_id as string, b.result]));
   const missing = chapters.filter((c) => !briefByChapter.has(c.id));
   if (missing.length > 0) {
     return NextResponse.json(
       { error: `还有 ${missing.length} 个章节未完成 chapter_brief。` },
-      { status: 409 }
+      { status: 409 },
     );
   }
 
@@ -109,7 +107,7 @@ export async function POST(req: Request) {
           ? result.usage.completionTokens
           : null,
       },
-      { onConflict: "book_id,dimension" }
+      { onConflict: "book_id,dimension" },
     );
     if (upErr) {
       return NextResponse.json({ error: "保存整书汇总失败。" }, { status: 500 });

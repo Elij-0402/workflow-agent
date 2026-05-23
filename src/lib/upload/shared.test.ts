@@ -25,17 +25,17 @@ test("sanitizeStorageFilename converts unicode-heavy names into ascii-safe objec
 test("validateUploadFile rejects invalid files", () => {
   assert.equal(
     validateUploadFile({ name: "novel.pdf", size: 100, type: "application/pdf" }),
-    "当前仅支持上传 .txt 文本文件。"
+    "当前仅支持上传 .txt 文本文件。",
   );
   assert.equal(
     validateUploadFile({ name: "novel.txt", size: 0, type: "text/plain" }),
-    "文件内容为空，请重新选择。"
+    "文件内容为空，请重新选择。",
   );
 });
 
 test("buildStorageObjectPath uses sanitized filename", () => {
   assert.equal(
-    buildStorageObjectPath("user-1", "session-1", 'my:novel?.txt'),
-    "user-1/session-1/my_novel.txt"
+    buildStorageObjectPath("user-1", "session-1", "my:novel?.txt"),
+    "user-1/session-1/my_novel.txt",
   );
 });

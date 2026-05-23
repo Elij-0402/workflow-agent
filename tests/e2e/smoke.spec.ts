@@ -2,10 +2,7 @@ import path from "node:path";
 import { expect, test, type Page } from "@playwright/test";
 
 const DEFAULT_MODEL = "deepseek-chat";
-const uploadFile = path.resolve(
-  process.cwd(),
-  "tests/e2e/fixtures/smoke-test-novel.txt"
-);
+const uploadFile = path.resolve(process.cwd(), "tests/e2e/fixtures/smoke-test-novel.txt");
 const ANALYSIS_COMPLETE_TEXT = "三项分析已经完成。需要时可以单独重跑某一项。";
 
 function requireEnv(name: string): string {
@@ -65,9 +62,7 @@ async function finishAnalyses(page: Page) {
   await expect(doneText).toBeVisible();
 }
 
-test("smoke flow: login, configure, upload, analyze, and generate", async ({
-  page,
-}) => {
+test("smoke flow: login, configure, upload, analyze, and generate", async ({ page }) => {
   test.setTimeout(15 * 60 * 1000);
 
   await page.goto("/login");
@@ -120,8 +115,8 @@ test("smoke flow: login, configure, upload, analyze, and generate", async ({
   await finishAnalyses(page);
 
   await page.getByRole("button", { name: "生成结果", exact: true }).click();
-  await expect(
-    page.getByRole("heading", { name: "已生成结果", exact: true })
-  ).toBeVisible({ timeout: 5 * 60 * 1000 });
+  await expect(page.getByRole("heading", { name: "已生成结果", exact: true })).toBeVisible({
+    timeout: 5 * 60 * 1000,
+  });
   await expect(page.locator("article.reading-prose")).toBeVisible();
 });

@@ -3,10 +3,7 @@
 import { redirect } from "next/navigation";
 import { ZodError } from "zod";
 
-import {
-  mapPasswordAuthErrorMessage,
-  parsePasswordAuthFormData,
-} from "@/lib/auth/password-auth";
+import { mapPasswordAuthErrorMessage, parsePasswordAuthFormData } from "@/lib/auth/password-auth";
 import { createClient } from "@/lib/supabase/server";
 
 function getSafeRedirectPath(formData: FormData) {
@@ -41,8 +38,7 @@ export async function submitPasswordAuth(formData: FormData) {
 
     if (!data.session) {
       return {
-        error:
-          "当前 Supabase 仍启用了邮箱确认。请在 Auth 设置里关闭邮箱确认后再使用密码注册。",
+        error: "当前 Supabase 仍启用了邮箱确认。请在 Auth 设置里关闭邮箱确认后再使用密码注册。",
       };
     }
 

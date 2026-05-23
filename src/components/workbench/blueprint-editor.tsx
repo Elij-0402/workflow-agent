@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Loader2, Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -12,23 +12,30 @@ import {
   type BlueprintSection,
   type BlueprintStatus,
 } from "@/lib/blueprint/schema";
-import { GenerateConfigSchema, type GenerateConfig } from "@/lib/types";
 
 import {
-  BlueprintSectionTable,
-  type SectionColumn,
-} from "./blueprint-section";
+  BlueprintCardList,
+  CharacterCard,
+  ConflictCard,
+  PlotBeatCard,
+  RelationshipCard,
+  ThemeCard,
+  WorldRuleCard,
+  type BookLookup,
+  type ChapterLookup,
+} from "./blueprint-cards";
+import { GenerateDrawer } from "./generate-drawer";
 
 type Status = BlueprintStatus;
 
-const TABS: Array<{ key: BlueprintSection; label: string }> = [
-  { key: "characters", label: "人物" },
-  { key: "relationships", label: "人物关系" },
-  { key: "world_rules", label: "世界规则" },
-  { key: "conflicts", label: "核心冲突" },
-  { key: "plot_beats", label: "章节节点" },
-  { key: "viewpoint", label: "视角与节奏" },
-  { key: "themes", label: "主题" },
+const TABS: Array<{ key: BlueprintSection; label: string; token: string }> = [
+  { key: "characters", label: "人物", token: "characters" },
+  { key: "relationships", label: "人物关系", token: "relationships" },
+  { key: "world_rules", label: "世界规则", token: "world" },
+  { key: "conflicts", label: "核心冲突", token: "conflicts" },
+  { key: "plot_beats", label: "章节节点", token: "beats" },
+  { key: "viewpoint", label: "视角与节奏", token: "viewpoint" },
+  { key: "themes", label: "主题", token: "themes" },
 ];
 
 type Props = {
@@ -38,6 +45,8 @@ type Props = {
   status: Status;
   updatedAt: string | null;
   pendingCandidate: Candidate | null;
+  books: BookLookup[];
+  chapters: ChapterLookup;
   onSaved: (next: Blueprint, ts: string, id: string) => void;
   onStatusChange: (s: Status, confirmedAt: string | null) => void;
   onCandidateConsumed: () => void;
@@ -51,6 +60,8 @@ export function BlueprintEditor({
   status,
   updatedAt,
   pendingCandidate,
+  books,
+  chapters,
   onSaved,
   onStatusChange,
   onCandidateConsumed,
@@ -60,11 +71,9 @@ export function BlueprintEditor({
   const [bp, setBp] = useState<Blueprint>(blueprint);
   const [bpId, setBpId] = useState<string | null>(blueprintId);
   const [bpUpdatedAt, setBpUpdatedAt] = useState<string | null>(updatedAt);
-  const [generating, setGenerating] = useState(false);
   const [showGenerate, setShowGenerate] = useState(false);
   const disabled = status === "confirmed";
 
-  // Apply any pending candidate from the chapter cards.
   useEffect(() => {
     if (!pendingCandidate) return;
     if (disabled) {
@@ -131,33 +140,14 @@ export function BlueprintEditor({
     }
   }
 
-  async function generateVariant(config: GenerateConfig) {
-    if (!bpId) {
-      // Server hasn't returned the blueprint row id yet — save first to create it.
-      toast.error("请先保存蓝图。");
-      return;
-    }
-    setGenerating(true);
-    try {
-      const res = await fetch("/api/generate-v2", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ blueprintId: bpId, config }),
-      });
-      const j = (await res.json()) as { ok?: true; error?: string };
-      if (!res.ok || !j.ok) {
-        toast.error(j.error ?? "生成失败。");
-        return;
-      }
-      toast.success("变体已生成。");
-      setShowGenerate(false);
-      onVariantGenerated();
-    } finally {
-      setGenerating(false);
-    }
+  async function moveBeat(fromIdx: number, toIdx: number) {
+    const beats = [...bp.plot_beats];
+    if (toIdx < 0 || toIdx >= beats.length) return;
+    const [moved] = beats.splice(fromIdx, 1);
+    beats.splice(toIdx, 0, moved);
+    await save({ ...bp, plot_beats: renumberBeats(beats) });
   }
 
-  // Keep bp/state in sync when the parent reloads.
   useEffect(() => {
     setBp(blueprint);
     setBpUpdatedAt(updatedAt);
@@ -165,37 +155,42 @@ export function BlueprintEditor({
   }, [blueprint, updatedAt, blueprintId]);
 
   return (
-    <div className="surface-panel flex h-[360px] flex-col">
-      <div className="flex items-center justify-between border-b border-border/60 px-3 py-2">
-        <nav className="flex gap-1 text-[12px]">
+    <div className="surface-panel flex min-h-0 flex-1 flex-col">
+      <div className="flex items-center justify-between gap-3 border-b border-dashed border-border/60 px-4 py-2.5">
+        <nav className="flex flex-wrap gap-0.5">
           {TABS.map((t) => (
             <button
               key={t.key}
+              data-active={active === t.key}
               onClick={() => setActive(t.key)}
-              className={`rounded-[6px] px-2 py-1 ${
-                active === t.key
-                  ? "bg-accent text-foreground"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
+              className="terminal-tab"
+              title={t.label}
             >
-              {t.label}
+              [ {t.token} ]
             </button>
           ))}
         </nav>
-        <div className="flex items-center gap-2 text-[12px] text-muted-foreground">
-          状态：{status === "confirmed" ? "已确认" : "草稿"}
+        <div className="flex shrink-0 items-center gap-2">
+          <span
+            className={`font-mono text-[10.5px] uppercase tracking-[0.12em] ${
+              status === "confirmed" ? "text-flash" : "text-primary/85"
+            }`}
+          >
+            {status === "confirmed" ? "// confirmed" : "// draft"}
+          </span>
           {status === "confirmed" ? (
             <>
-              <Button size="sm" variant="ghost" onClick={() => void unlock()}>
-                解锁
-              </Button>
               <Button
                 size="sm"
-                disabled={generating}
-                onClick={() => setShowGenerate(true)}
+                variant="ghost"
+                className="font-mono uppercase tracking-[0.08em]"
+                onClick={() => void unlock()}
               >
-                {generating ? <Loader2 className="animate-spin" /> : <Sparkles />}
-                生成变体
+                $ unlock
+              </Button>
+              <Button size="sm" onClick={() => setShowGenerate(true)}>
+                <Sparkles />
+                生成新版本
               </Button>
             </>
           ) : (
@@ -210,24 +205,286 @@ export function BlueprintEditor({
           <ViewpointEditor
             bp={bp}
             disabled={disabled}
-            onSave={(patch) =>
-              void save({ ...bp, viewpoint: { ...bp.viewpoint, ...patch } })
-            }
+            onSave={(patch) => void save({ ...bp, viewpoint: { ...bp.viewpoint, ...patch } })}
           />
-        ) : (
-          <SectionTable
-            section={active}
-            bp={bp}
-            onSave={save}
+        ) : active === "characters" ? (
+          <BlueprintCardList
+            rows={bp.characters}
             disabled={disabled}
+            addLabel="新建角色"
+            emptyHint="还没有角色 · 从两本书的章节卡片勾选添加，或新建一个空角色。"
+            onAdd={() =>
+              void save({
+                ...bp,
+                characters: [
+                  ...bp.characters,
+                  {
+                    id: crypto.randomUUID(),
+                    notes: "",
+                    sources: [],
+                    name: "",
+                    role: "",
+                    traits: [],
+                    description: "",
+                  },
+                ],
+              })
+            }
+            renderRow={(row) => (
+              <CharacterCard
+                row={row}
+                disabled={disabled}
+                books={books}
+                chapters={chapters}
+                onChange={(patch) =>
+                  void save({
+                    ...bp,
+                    characters: bp.characters.map((r) =>
+                      r.id === row.id ? { ...r, ...patch } : r,
+                    ),
+                  })
+                }
+                onDelete={() =>
+                  void save({
+                    ...bp,
+                    characters: bp.characters.filter((r) => r.id !== row.id),
+                  })
+                }
+              />
+            )}
           />
-        )}
+        ) : active === "relationships" ? (
+          <BlueprintCardList
+            rows={bp.relationships}
+            disabled={disabled}
+            addLabel="新建关系"
+            emptyHint="还没有关系 · 从章节卡片勾选添加，或新建一对人物连接。"
+            onAdd={() =>
+              void save({
+                ...bp,
+                relationships: [
+                  ...bp.relationships,
+                  {
+                    id: crypto.randomUUID(),
+                    notes: "",
+                    sources: [],
+                    from: "",
+                    to: "",
+                    type: "",
+                    description: "",
+                  },
+                ],
+              })
+            }
+            renderRow={(row) => (
+              <RelationshipCard
+                row={row}
+                disabled={disabled}
+                books={books}
+                chapters={chapters}
+                onChange={(patch) =>
+                  void save({
+                    ...bp,
+                    relationships: bp.relationships.map((r) =>
+                      r.id === row.id ? { ...r, ...patch } : r,
+                    ),
+                  })
+                }
+                onDelete={() =>
+                  void save({
+                    ...bp,
+                    relationships: bp.relationships.filter((r) => r.id !== row.id),
+                  })
+                }
+              />
+            )}
+          />
+        ) : active === "world_rules" ? (
+          <BlueprintCardList
+            rows={bp.world_rules}
+            disabled={disabled}
+            addLabel="新建规则"
+            emptyHint="还没有世界规则 · 添加魔法体系、社会结构、限制等。"
+            onAdd={() =>
+              void save({
+                ...bp,
+                world_rules: [
+                  ...bp.world_rules,
+                  {
+                    id: crypto.randomUUID(),
+                    notes: "",
+                    sources: [],
+                    rule: "",
+                    description: "",
+                  },
+                ],
+              })
+            }
+            renderRow={(row) => (
+              <WorldRuleCard
+                row={row}
+                disabled={disabled}
+                books={books}
+                chapters={chapters}
+                onChange={(patch) =>
+                  void save({
+                    ...bp,
+                    world_rules: bp.world_rules.map((r) =>
+                      r.id === row.id ? { ...r, ...patch } : r,
+                    ),
+                  })
+                }
+                onDelete={() =>
+                  void save({
+                    ...bp,
+                    world_rules: bp.world_rules.filter((r) => r.id !== row.id),
+                  })
+                }
+              />
+            )}
+          />
+        ) : active === "conflicts" ? (
+          <BlueprintCardList
+            rows={bp.conflicts}
+            disabled={disabled}
+            addLabel="新建冲突"
+            emptyHint="还没有冲突 · 添加贯穿全篇的主要张力线。"
+            onAdd={() =>
+              void save({
+                ...bp,
+                conflicts: [
+                  ...bp.conflicts,
+                  {
+                    id: crypto.randomUUID(),
+                    notes: "",
+                    sources: [],
+                    title: "",
+                    description: "",
+                  },
+                ],
+              })
+            }
+            renderRow={(row) => (
+              <ConflictCard
+                row={row}
+                disabled={disabled}
+                books={books}
+                chapters={chapters}
+                onChange={(patch) =>
+                  void save({
+                    ...bp,
+                    conflicts: bp.conflicts.map((r) => (r.id === row.id ? { ...r, ...patch } : r)),
+                  })
+                }
+                onDelete={() =>
+                  void save({
+                    ...bp,
+                    conflicts: bp.conflicts.filter((r) => r.id !== row.id),
+                  })
+                }
+              />
+            )}
+          />
+        ) : active === "plot_beats" ? (
+          <BlueprintCardList
+            rows={bp.plot_beats}
+            disabled={disabled}
+            addLabel="新建节点"
+            emptyHint="还没有章节节点 · 添加故事推进的关键转折点。"
+            onAdd={() =>
+              void save({
+                ...bp,
+                plot_beats: [
+                  ...bp.plot_beats,
+                  {
+                    id: crypto.randomUUID(),
+                    notes: "",
+                    sources: [],
+                    title: "",
+                    description: "",
+                    order: bp.plot_beats.length + 1,
+                  },
+                ],
+              })
+            }
+            renderRow={(row, idx) => (
+              <PlotBeatCard
+                row={row}
+                disabled={disabled}
+                books={books}
+                chapters={chapters}
+                reorder={{
+                  canMoveUp: idx > 0,
+                  canMoveDown: idx < bp.plot_beats.length - 1,
+                  onMoveUp: () => void moveBeat(idx, idx - 1),
+                  onMoveDown: () => void moveBeat(idx, idx + 1),
+                }}
+                onChange={(patch) =>
+                  void save({
+                    ...bp,
+                    plot_beats: bp.plot_beats.map((r) =>
+                      r.id === row.id ? { ...r, ...patch } : r,
+                    ),
+                  })
+                }
+                onDelete={() =>
+                  void save({
+                    ...bp,
+                    plot_beats: renumberBeats(bp.plot_beats.filter((r) => r.id !== row.id)),
+                  })
+                }
+              />
+            )}
+          />
+        ) : active === "themes" ? (
+          <BlueprintCardList
+            rows={bp.themes}
+            disabled={disabled}
+            addLabel="新建主题"
+            emptyHint="还没有主题 · 添加贯穿故事的内在母题。"
+            onAdd={() =>
+              void save({
+                ...bp,
+                themes: [
+                  ...bp.themes,
+                  {
+                    id: crypto.randomUUID(),
+                    notes: "",
+                    sources: [],
+                    theme: "",
+                  },
+                ],
+              })
+            }
+            renderRow={(row) => (
+              <ThemeCard
+                row={row}
+                disabled={disabled}
+                books={books}
+                chapters={chapters}
+                onChange={(patch) =>
+                  void save({
+                    ...bp,
+                    themes: bp.themes.map((r) => (r.id === row.id ? { ...r, ...patch } : r)),
+                  })
+                }
+                onDelete={() =>
+                  void save({
+                    ...bp,
+                    themes: bp.themes.filter((r) => r.id !== row.id),
+                  })
+                }
+              />
+            )}
+          />
+        ) : null}
       </div>
       {showGenerate ? (
-        <GenerateConfigDialog
-          generating={generating}
-          onCancel={() => setShowGenerate(false)}
-          onSubmit={(config) => void generateVariant(config)}
+        <GenerateDrawer
+          open={showGenerate}
+          onOpenChange={setShowGenerate}
+          blueprintId={bpId}
+          onGenerated={onVariantGenerated}
         />
       ) : null}
     </div>
@@ -244,21 +501,24 @@ function ViewpointEditor({
   onSave: (patch: Partial<Blueprint["viewpoint"]>) => void;
 }) {
   return (
-    <div className="grid gap-2 p-3 text-[12.5px]">
+    <div className="grid gap-3 p-4 text-[13px]">
       <Field
-        label="视角模式"
+        label="// mode"
+        zh="视角模式"
         value={bp.viewpoint.mode}
         disabled={disabled}
         onChange={(mode) => onSave({ mode })}
       />
       <Field
-        label="节奏"
+        label="// pacing"
+        zh="节奏"
         value={bp.viewpoint.pacing}
         disabled={disabled}
         onChange={(pacing) => onSave({ pacing })}
       />
       <Field
-        label="备注"
+        label="// notes"
+        zh="备注"
         value={bp.viewpoint.notes}
         disabled={disabled}
         onChange={(notes) => onSave({ notes })}
@@ -269,20 +529,29 @@ function ViewpointEditor({
 
 function Field({
   label,
+  zh,
   value,
   disabled,
   onChange,
 }: {
   label: string;
+  zh: string;
   value: string;
   disabled: boolean;
   onChange: (v: string) => void;
 }) {
   return (
-    <label className="flex items-center gap-2">
-      <span className="w-20 text-muted-foreground">{label}</span>
+    <label className="flex items-start gap-3">
+      <span className="w-32 shrink-0 pt-2">
+        <span className="block font-mono text-[10.5px] uppercase tracking-[0.12em] text-primary/85">
+          {label}
+        </span>
+        <span className="block font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground/70">
+          {zh}
+        </span>
+      </span>
       <input
-        className="flex-1 rounded-[6px] border border-border/60 bg-background/40 px-2 py-1"
+        className="flex-1 rounded-[2px] border border-border bg-background/40 px-2 py-1.5 font-mono text-[12.5px] text-foreground focus:border-primary focus:outline-none"
         value={value}
         disabled={disabled}
         onChange={(e) => onChange(e.target.value)}
@@ -291,191 +560,6 @@ function Field({
   );
 }
 
-type ArraySection = Exclude<BlueprintSection, "viewpoint">;
-
-const COLUMNS_BY_SECTION: Record<
-  ArraySection,
-  ReadonlyArray<SectionColumn<Record<string, unknown> & { id: string; notes: string }>>
-> = {
-  characters: [
-    { key: "name", label: "名称" },
-    { key: "role", label: "角色" },
-    { key: "description", label: "描述" },
-  ],
-  relationships: [
-    { key: "from", label: "From" },
-    { key: "to", label: "To" },
-    { key: "type", label: "类型" },
-    { key: "description", label: "描述" },
-  ],
-  world_rules: [
-    { key: "rule", label: "规则" },
-    { key: "description", label: "描述" },
-  ],
-  conflicts: [
-    { key: "title", label: "标题" },
-    { key: "description", label: "描述" },
-  ],
-  plot_beats: [
-    { key: "title", label: "标题" },
-    { key: "description", label: "描述" },
-    { key: "order", label: "顺序", width: "70px", type: "number" },
-  ],
-  themes: [{ key: "theme", label: "主题" }],
-};
-
-function SectionTable({
-  section,
-  bp,
-  onSave,
-  disabled,
-}: {
-  section: ArraySection;
-  bp: Blueprint;
-  onSave: (next: Blueprint) => void;
-  disabled: boolean;
-}) {
-  const rows = bp[section] as Array<Record<string, unknown> & { id: string; notes: string }>;
-  const columns = COLUMNS_BY_SECTION[section];
-  return (
-    <BlueprintSectionTable
-      rows={rows}
-      columns={[...columns]}
-      disabled={disabled}
-      onChange={(id, patch) => {
-        const next = {
-          ...bp,
-          [section]: rows.map((r) => (r.id === id ? { ...r, ...patch } : r)),
-        };
-        onSave(next as Blueprint);
-      }}
-      onDelete={(id) => {
-        const next = { ...bp, [section]: rows.filter((r) => r.id !== id) };
-        onSave(next as Blueprint);
-      }}
-    />
-  );
-}
-
-function GenerateConfigDialog({
-  generating,
-  onCancel,
-  onSubmit,
-}: {
-  generating: boolean;
-  onCancel: () => void;
-  onSubmit: (config: GenerateConfig) => void;
-}) {
-  const [config, setConfig] = useState<GenerateConfig>(
-    GenerateConfigSchema.parse({})
-  );
-  return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40">
-      <div className="surface-panel w-[440px] space-y-3 p-5 text-[13px]">
-        <h3 className="text-[15px] font-medium">生成变体参数</h3>
-        <div className="grid grid-cols-2 gap-2">
-          <Select
-            label="策略"
-            value={config.strategy}
-            options={["a-dominant", "balanced", "theme-graft"]}
-            onChange={(strategy) =>
-              setConfig({ ...config, strategy: strategy as GenerateConfig["strategy"] })
-            }
-          />
-          <Select
-            label="视角"
-            value={config.viewpoint}
-            options={["keep", "first-person", "third-limited", "omniscient"]}
-            onChange={(viewpoint) =>
-              setConfig({
-                ...config,
-                viewpoint: viewpoint as GenerateConfig["viewpoint"],
-              })
-            }
-          />
-          <Select
-            label="文风"
-            value={config.style}
-            options={["keep", "modern", "classical", "web-novel"]}
-            onChange={(style) =>
-              setConfig({ ...config, style: style as GenerateConfig["style"] })
-            }
-          />
-          <Select
-            label="输出范围"
-            value={config.output_scope}
-            options={["single-chapter", "outline", "three-chapters"]}
-            onChange={(output_scope) =>
-              setConfig({
-                ...config,
-                output_scope: output_scope as GenerateConfig["output_scope"],
-              })
-            }
-          />
-          <label className="col-span-2 flex items-center gap-2">
-            <span className="w-20 text-muted-foreground">创新强度</span>
-            <input
-              type="number"
-              min={1}
-              max={10}
-              value={config.innovation}
-              onChange={(e) =>
-                setConfig({ ...config, innovation: Number(e.target.value) })
-              }
-              className="w-20 rounded-[6px] border border-border/60 bg-background/40 px-2 py-1"
-            />
-          </label>
-          <label className="col-span-2 flex items-start gap-2">
-            <span className="w-20 pt-1 text-muted-foreground">额外要求</span>
-            <textarea
-              value={config.extra_instructions}
-              onChange={(e) =>
-                setConfig({ ...config, extra_instructions: e.target.value })
-              }
-              className="min-h-[80px] flex-1 rounded-[6px] border border-border/60 bg-background/40 px-2 py-1"
-              maxLength={800}
-            />
-          </label>
-        </div>
-        <div className="flex justify-end gap-2">
-          <Button variant="ghost" onClick={onCancel} disabled={generating}>
-            取消
-          </Button>
-          <Button onClick={() => onSubmit(config)} disabled={generating}>
-            {generating ? <Loader2 className="animate-spin" /> : null}
-            生成
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function Select({
-  label,
-  value,
-  options,
-  onChange,
-}: {
-  label: string;
-  value: string;
-  options: string[];
-  onChange: (v: string) => void;
-}) {
-  return (
-    <label className="flex items-center gap-2">
-      <span className="w-20 text-muted-foreground">{label}</span>
-      <select
-        className="flex-1 rounded-[6px] border border-border/60 bg-background/40 px-2 py-1"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-      >
-        {options.map((o) => (
-          <option key={o} value={o}>
-            {o}
-          </option>
-        ))}
-      </select>
-    </label>
-  );
+function renumberBeats<T extends { order: number }>(beats: T[]): T[] {
+  return beats.map((b, idx) => ({ ...b, order: idx + 1 }));
 }

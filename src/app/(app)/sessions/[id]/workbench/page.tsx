@@ -27,21 +27,14 @@ export default async function WorkbenchPage({ params }: Props) {
 
   const { data: books } = await supabase
     .from("books")
-    .select(
-      "id, title, position, word_count, chapter_count, created_at"
-    )
+    .select("id, title, position, word_count, chapter_count, created_at")
     .eq("session_id", id)
     .eq("user_id", user.id)
     .order("position", { ascending: true });
 
   const bookIds = (books ?? []).map((b) => b.id);
 
-  const [
-    chaptersResult,
-    analysesResult,
-    blueprintResult,
-    variantsResult,
-  ] = await Promise.all([
+  const [chaptersResult, analysesResult, blueprintResult, variantsResult] = await Promise.all([
     bookIds.length
       ? supabase
           .from("chapters")
@@ -110,7 +103,7 @@ export default async function WorkbenchPage({ params }: Props) {
   const bookSynthesisByBook = new Set(
     analyses
       .filter((a) => a.scope === "book" && a.dimension === "book_synthesis")
-      .map((a) => a.book_id)
+      .map((a) => a.book_id),
   );
 
   const blueprintRow = blueprintResult.data;

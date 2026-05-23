@@ -254,7 +254,7 @@ export async function finalizeNovelUpload(input: FinalizeNovelUploadInput) {
       start_char: c.startChar,
       end_char: c.endChar,
       source: c.source,
-    }))
+    })),
   );
 
   if (chaptersInsertError) {
@@ -279,9 +279,7 @@ export async function finalizeNovelUpload(input: FinalizeNovelUploadInput) {
   }
 
   const redirectTo =
-    session.mode === "dual"
-      ? `/sessions/${session.id}/workbench`
-      : `/sessions/${session.id}`;
+    session.mode === "dual" ? `/sessions/${session.id}/workbench` : `/sessions/${session.id}`;
 
   return {
     ok: true as const,

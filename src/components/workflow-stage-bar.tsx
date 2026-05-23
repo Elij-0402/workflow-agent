@@ -17,48 +17,67 @@ type WorkflowStageBarProps = {
 
 export function WorkflowStageBar({ items }: WorkflowStageBarProps) {
   return (
-    <ol className="grid gap-3 lg:grid-cols-3" aria-label="任务进度">
-      {items.map((item, index) => {
-        const isDone = item.state === "done";
-        const isCurrent = item.state === "current";
+    <div className="surface-panel">
+      <ol
+        className="flex flex-col divide-y divide-dashed divide-border/60 lg:flex-row lg:divide-x lg:divide-y-0"
+        aria-label="任务进度"
+      >
+        {items.map((item, index) => {
+          const isDone = item.state === "done";
+          const isCurrent = item.state === "current";
+          const glyph = isDone ? "✓" : isCurrent ? "▷" : "·";
+          const stepNo = String(index + 1).padStart(2, "0");
 
-        return (
-          <li
-            key={item.key}
-            className={cn(
-              "surface-subtle relative px-4 py-4",
-              isCurrent
-                ? "border-primary/40 bg-primary/10"
-                : ""
-            )}
-          >
-            <div className="flex items-start gap-3">
-              <span
-                className={cn(
-                  "mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full border text-[11px] font-medium",
-                  isDone
-                    ? "border-emerald-500/40 bg-emerald-500/15 text-emerald-300"
-                    : isCurrent
-                      ? "border-primary/50 bg-primary/15 text-primary"
-                      : "border-border/70 text-muted-foreground"
-                )}
-                aria-hidden="true"
-              >
-                {isDone ? <Check className="h-3.5 w-3.5" /> : index + 1}
-              </span>
+          return (
+            <li
+              key={item.key}
+              className={cn(
+                "relative flex-1 px-5 py-4 transition-colors",
+                isCurrent && "bg-primary/5",
+              )}
+            >
+              <div className="flex items-start gap-3">
+                <span
+                  className={cn(
+                    "mt-0.5 flex h-5 w-7 shrink-0 items-center justify-center font-mono text-[11px] tracking-[0.06em]",
+                    isDone ? "text-flash" : isCurrent ? "text-primary" : "text-muted-foreground/60",
+                  )}
+                  aria-hidden="true"
+                >
+                  {stepNo}
+                </span>
 
-              <div className="min-w-0 space-y-1">
-                <div className="text-[13px] font-medium text-foreground">
-                  {item.label}
+                <div className="min-w-0 flex-1 space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={cn(
+                        "font-mono text-[12px]",
+                        isDone
+                          ? "text-flash"
+                          : isCurrent
+                            ? "text-primary"
+                            : "text-muted-foreground/50",
+                      )}
+                      aria-hidden="true"
+                    >
+                      {glyph}
+                    </span>
+                    <span
+                      className={cn(
+                        "text-[13px]",
+                        isCurrent ? "font-display italic text-foreground" : "text-foreground",
+                      )}
+                    >
+                      {item.label}
+                    </span>
+                  </div>
+                  <p className="text-[12px] leading-5 text-muted-foreground">{item.description}</p>
                 </div>
-                <p className="text-[12px] leading-5 text-muted-foreground">
-                  {item.description}
-                </p>
               </div>
-            </div>
-          </li>
-        );
-      })}
-    </ol>
+            </li>
+          );
+        })}
+      </ol>
+    </div>
   );
 }

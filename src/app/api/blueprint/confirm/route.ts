@@ -33,10 +33,7 @@ export async function POST(req: Request) {
   const parsed = BlueprintSchema.parse(bp.sections ?? {});
   const ready = blueprintReadyToConfirm(parsed);
   if (!ready.ok) {
-    return NextResponse.json(
-      { error: `蓝图缺少：${ready.missing.join(", ")}` },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: `蓝图缺少：${ready.missing.join(", ")}` }, { status: 400 });
   }
 
   const { error } = await supabase

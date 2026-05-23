@@ -1,15 +1,18 @@
-export default function AuthLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="relative min-h-screen overflow-hidden bg-background">
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,hsl(233_77%_67%/0.10),transparent_30%)]"
+        className="pointer-events-none absolute inset-0"
+        style={{
+          backgroundImage: [
+            "radial-gradient(circle at 6% -8%, hsl(44 56% 47% / 0.16), transparent 38%)",
+            "radial-gradient(circle at 96% 102%, hsl(132 23% 54% / 0.10), transparent 42%)",
+            "radial-gradient(circle at 50% 50%, hsl(75 10% 8% / 0.30), transparent 70%)",
+          ].join(", "),
+        }}
       />
-      <main className="relative z-10 mx-auto flex min-h-screen w-full max-w-[1240px] items-center px-6 py-10">
+      <main className="relative z-10 mx-auto flex min-h-screen w-full max-w-[1320px] items-center px-6 py-12">
         {children}
       </main>
     </div>

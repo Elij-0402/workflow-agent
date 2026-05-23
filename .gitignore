@@ -55,3 +55,21 @@ next-env.d.ts
 # local test fixtures (sample novels for upload testing)
 samples/
 !samples/README.md
+
+# playwright MCP / local visual verification artifacts
+.playwright-mcp/
+/login-*.png
+
+# Auto Claude data directory
+.auto-claude/
+
+# Auto Claude generated files
+.auto-claude-security.json
+.auto-claude-status
+.claude_settings.json
+.worktrees/
+.security-key
+logs/security/
+
+# third-party Claude Code agents (msitarzewski/agency-agents)
+.claude/agents/

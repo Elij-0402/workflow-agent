@@ -31,7 +31,7 @@ export async function getUserLLMClient(supabase: SupabaseClient<Database>) {
     throw new Error(
       compatibility.message === LLM_BASE_URL_FORMAT_MESSAGE
         ? LLM_CONFIG_REQUIRED_MESSAGE
-        : compatibility.message
+        : compatibility.message,
     );
   }
 

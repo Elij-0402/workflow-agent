@@ -3,9 +3,11 @@
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { BookPlus } from "lucide-react";
 import { toast } from "sonner";
 
 import { PageHeader } from "@/components/page-header";
+import { Button } from "@/components/ui/button";
 import { BlueprintEditor } from "@/components/workbench/blueprint-editor";
 import { ChapterTree } from "@/components/workbench/chapter-tree";
 import { CostEstimateModal } from "@/components/workbench/cost-estimate-modal";
@@ -73,12 +75,10 @@ export function WorkbenchClient(props: Props) {
 
   const [chapterStatus, setChapterStatus] = useState<ChapterStatus>({});
   const [pendingCandidate, setPendingCandidate] = useState<Candidate | null>(null);
-  const [blueprintStatus, setBlueprintStatus] = useState<BlueprintStatus>(
-    props.blueprintStatus
-  );
+  const [blueprintStatus, setBlueprintStatus] = useState<BlueprintStatus>(props.blueprintStatus);
   const [blueprintId, setBlueprintId] = useState<string | null>(props.blueprintId);
   const [blueprintUpdatedAt, setBlueprintUpdatedAt] = useState<string | null>(
-    props.blueprintUpdatedAt
+    props.blueprintUpdatedAt,
   );
   const [blueprint, setBlueprint] = useState<Blueprint>(props.blueprint);
 
@@ -92,9 +92,26 @@ export function WorkbenchClient(props: Props) {
   const a = props.books[0] ?? null;
   const b = props.books[1] ?? null;
 
-  const synthesisSet = useMemo(() => new Set(props.bookSynthesisByBook), [
-    props.bookSynthesisByBook,
-  ]);
+  const synthesisSet = useMemo(
+    () => new Set(props.bookSynthesisByBook),
+    [props.bookSynthesisByBook],
+  );
+
+  const booksLookup = useMemo(
+    () =>
+      props.books.map((b) => ({
+        id: b.id,
+        title: b.title,
+        position: b.position,
+      })),
+    [props.books],
+  );
+
+  const chaptersLookup = useMemo(() => {
+    const m = new Map<string, { index: number; title: string }>();
+    for (const c of props.chapters) m.set(c.id, { index: c.index, title: c.title });
+    return m;
+  }, [props.chapters]);
 
   const chapterTotals = useMemo(
     () =>
@@ -103,7 +120,7 @@ export function WorkbenchClient(props: Props) {
         const analyzed = props.briefs.filter((br) => br.book_id === book.id).length;
         return { bookId: book.id, total, analyzed };
       }),
-    [props.books, props.chapters, props.briefs]
+    [props.books, props.chapters, props.briefs],
   );
 
   // Keep editor state in sync after router.refresh().
@@ -144,8 +161,7 @@ export function WorkbenchClient(props: Props) {
       toast.info("该书所有章节已分析。");
       return;
     }
-    const avgChars =
-      targets.reduce((s, c) => s + (c.end_char - c.start_char), 0) / targets.length;
+    const avgChars = targets.reduce((s, c) => s + (c.end_char - c.start_char), 0) / targets.length;
     setCostModal({
       open: true,
       bookId,
@@ -204,7 +220,7 @@ export function WorkbenchClient(props: Props) {
   return (
     <div className="app-page">
       <PageHeader
-        label="Workbench"
+        label="workbench"
         title={props.session.name}
         description={
           a && b
@@ -215,7 +231,7 @@ export function WorkbenchClient(props: Props) {
         }
       />
 
-      <div className="flex h-[calc(100vh-220px)] min-h-[640px] flex-col gap-3">
+      <div className="flex h-[calc(100vh-260px)] min-h-[640px] flex-col gap-4">
         <PipelineBar
           importedCount={props.books.length}
           chapterTotals={chapterTotals}
@@ -226,10 +242,11 @@ export function WorkbenchClient(props: Props) {
           blueprintStatus={blueprintStatus}
           variantCount={props.variants.length}
         />
-        <div className="grid flex-1 grid-cols-2 gap-3 overflow-hidden">
+        <div className="grid h-[280px] shrink-0 grid-cols-2 gap-4 overflow-hidden">
           {a ? (
             <ChapterTree
               book={a}
+              position="A"
               chapters={props.chapters.filter((c) => c.book_id === a.id)}
               briefs={props.briefs.filter((br) => br.book_id === a.id)}
               chapterStatus={chapterStatus}
@@ -247,11 +264,12 @@ export function WorkbenchClient(props: Props) {
               }
             />
           ) : (
-            <EmptySlot label="还未上传 A 书" sessionId={props.session.id} position={0} />
+            <EmptySlot position="A" sessionId={props.session.id} positionIndex={0} />
           )}
           {b ? (
             <ChapterTree
               book={b}
+              position="B"
               chapters={props.chapters.filter((c) => c.book_id === b.id)}
               briefs={props.briefs.filter((br) => br.book_id === b.id)}
               chapterStatus={chapterStatus}
@@ -269,7 +287,7 @@ export function WorkbenchClient(props: Props) {
               }
             />
           ) : (
-            <EmptySlot label="还未上传 B 书" sessionId={props.session.id} position={1} />
+            <EmptySlot position="B" sessionId={props.session.id} positionIndex={1} />
           )}
         </div>
         <BlueprintEditor
@@ -279,6 +297,8 @@ export function WorkbenchClient(props: Props) {
           status={blueprintStatus}
           updatedAt={blueprintUpdatedAt}
           pendingCandidate={pendingCandidate}
+          books={booksLookup}
+          chapters={chaptersLookup}
           onSaved={(next, ts, id) => {
             setBlueprint(next);
             setBlueprintUpdatedAt(ts);
@@ -296,10 +316,7 @@ export function WorkbenchClient(props: Props) {
 
       {props.variants.length >= 2 ? (
         <section className="mt-4">
-          <VariantComparison
-            variants={props.variants}
-            confirmedAt={props.blueprintConfirmedAt}
-          />
+          <VariantComparison variants={props.variants} confirmedAt={props.blueprintConfirmedAt} />
         </section>
       ) : null}
 
@@ -321,25 +338,28 @@ export function WorkbenchClient(props: Props) {
 }
 
 function EmptySlot({
-  label,
-  sessionId,
   position,
+  sessionId,
+  positionIndex,
 }: {
-  label: string;
+  position: "A" | "B";
   sessionId: string;
-  position: 0 | 1;
+  positionIndex: 0 | 1;
 }) {
   return (
-    <div className="surface-panel flex items-center justify-center p-6">
-      <div className="text-center text-[13px] text-muted-foreground">
-        <p>{label}</p>
-        <Link
-          href={`/upload?mode=dual&sessionId=${sessionId}&position=${position}`}
-          className="mt-3 inline-flex h-9 items-center rounded-[7px] border border-border/70 bg-background/60 px-4 text-foreground hover:bg-accent/40"
-        >
-          上传文本
+    <div className="surface-panel flex flex-col items-center justify-center gap-4 p-8 text-center">
+      <BookPlus className="h-12 w-12 text-primary/60" strokeWidth={1.5} aria-hidden />
+      <h3 className="font-display text-[20px] italic leading-tight text-foreground">
+        还差第 {position} 本书
+      </h3>
+      <p className="max-w-xs text-[13px] leading-7 text-muted-foreground">
+        上传后这本书的章节会进入素材区，参与下方蓝图的合并。
+      </p>
+      <Button asChild>
+        <Link href={`/upload?mode=dual&sessionId=${sessionId}&position=${positionIndex}`}>
+          上传第 {position} 本书
         </Link>
-      </div>
+      </Button>
     </div>
   );
 }

@@ -2,12 +2,7 @@ export const MAX_UPLOAD_BYTES = 50 * 1024 * 1024;
 
 export const ALLOWED_FILE_EXTENSIONS = [".txt"];
 
-export const ALLOWED_MIME_TYPES = [
-  "text/plain",
-  "text/markdown",
-  "application/octet-stream",
-  "",
-];
+export const ALLOWED_MIME_TYPES = ["text/plain", "text/markdown", "application/octet-stream", ""];
 
 export type UploadFileMeta = {
   name: string;
@@ -43,8 +38,7 @@ export function getSessionName(filename: string) {
 export function isAllowedUploadFile({ name, type }: Pick<UploadFileMeta, "name" | "type">) {
   const lower = name.toLowerCase();
   return (
-    ALLOWED_FILE_EXTENSIONS.some((ext) => lower.endsWith(ext)) &&
-    ALLOWED_MIME_TYPES.includes(type)
+    ALLOWED_FILE_EXTENSIONS.some((ext) => lower.endsWith(ext)) && ALLOWED_MIME_TYPES.includes(type)
   );
 }
 

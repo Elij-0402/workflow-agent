@@ -23,19 +23,19 @@ Restore a clean repo working state after V0.2 ship so iteration can resume witho
 
 ## Inventory and disposition
 
-| Path | State | Action |
-|---|---|---|
-| `docs/1508.txt` (8 MB) | tracked | `git rm --cached`, physically move to `samples/` |
-| `docs/《斗破苍穹》小说全集txt版.txt` (18 MB) | tracked | same |
-| `samples/` | new | created; gitignored except `samples/README.md` |
-| `scripts/spike-chunking/runs/smoke-test-novel.txt` | tracked, 1.4 KB | `git mv` to `tests/e2e/fixtures/smoke-test-novel.txt` |
-| `tests/e2e/smoke.spec.ts:7` | references spike path | one-line edit to new fixture path |
-| `scripts/spike-chunking/` | tracked, ~50 KB | `git rm -r`; remove empty `scripts/` parent |
-| `AGENTS.md` (V0.1, 9 KB) | tracked | rewrite as short pointer at CLAUDE.md |
-| `README.md` (V0.1, 3.9 KB) | tracked | rewrite to V0.2 reality |
-| `CLAUDE.md` (V0.2, 11.5 KB) | tracked | small fix: "ESLint flat config" → legacy `.eslintrc.json` |
-| `.eslintrc.json` (42 B) | tracked, **active** | leave as is (used by `next lint`) |
-| `tsconfig.tsbuildinfo`, `.next/`, `test-results/`, `next-env.d.ts` | local-only, already in `.gitignore` | leave |
+| Path                                                               | State                               | Action                                                    |
+| ------------------------------------------------------------------ | ----------------------------------- | --------------------------------------------------------- |
+| `docs/1508.txt` (8 MB)                                             | tracked                             | `git rm --cached`, physically move to `samples/`          |
+| `docs/《斗破苍穹》小说全集txt版.txt` (18 MB)                       | tracked                             | same                                                      |
+| `samples/`                                                         | new                                 | created; gitignored except `samples/README.md`            |
+| `scripts/spike-chunking/runs/smoke-test-novel.txt`                 | tracked, 1.4 KB                     | `git mv` to `tests/e2e/fixtures/smoke-test-novel.txt`     |
+| `tests/e2e/smoke.spec.ts:7`                                        | references spike path               | one-line edit to new fixture path                         |
+| `scripts/spike-chunking/`                                          | tracked, ~50 KB                     | `git rm -r`; remove empty `scripts/` parent               |
+| `AGENTS.md` (V0.1, 9 KB)                                           | tracked                             | rewrite as short pointer at CLAUDE.md                     |
+| `README.md` (V0.1, 3.9 KB)                                         | tracked                             | rewrite to V0.2 reality                                   |
+| `CLAUDE.md` (V0.2, 11.5 KB)                                        | tracked                             | small fix: "ESLint flat config" → legacy `.eslintrc.json` |
+| `.eslintrc.json` (42 B)                                            | tracked, **active**                 | leave as is (used by `next lint`)                         |
+| `tsconfig.tsbuildinfo`, `.next/`, `test-results/`, `next-env.d.ts` | local-only, already in `.gitignore` | leave                                                     |
 
 ## Execution sequence (5 commits + 1 amend)
 

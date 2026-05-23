@@ -88,10 +88,7 @@ export const STYLE_LABELS: Record<GenerateConfig["style"], string> = {
   "web-novel": "网文",
 };
 
-export const OUTPUT_SCOPE_LABELS: Record<
-  GenerateConfig["output_scope"],
-  string
-> = {
+export const OUTPUT_SCOPE_LABELS: Record<GenerateConfig["output_scope"], string> = {
   "single-chapter": "单章",
   outline: "大纲",
   "three-chapters": "三章",

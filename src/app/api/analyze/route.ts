@@ -7,10 +7,7 @@ import { isUserFixableLLMConfigMessage } from "@/lib/llm-config";
 import { ANALYSIS_TEXT_CHAR_LIMIT, ANALYSIS_DIMENSION_CONFIG } from "@/lib/prompts";
 import { wrapUntrustedNovel } from "@/lib/prompts/safety";
 import { createClient } from "@/lib/supabase/server";
-import {
-  getSessionStatusAfterAnalysis,
-  shouldEnterAnalyzingStatus,
-} from "@/lib/session-status";
+import { getSessionStatusAfterAnalysis, shouldEnterAnalyzingStatus } from "@/lib/session-status";
 import { LEGACY_ANALYSIS_DIMENSIONS, type LegacyAnalysisDimension } from "@/lib/types";
 
 export const runtime = "nodejs";
@@ -18,7 +15,9 @@ export const maxDuration = 300;
 
 const requestSchema = z.object({
   sessionId: z.string().uuid(),
-  dimension: z.enum(LEGACY_ANALYSIS_DIMENSIONS as readonly [LegacyAnalysisDimension, ...LegacyAnalysisDimension[]]),
+  dimension: z.enum(
+    LEGACY_ANALYSIS_DIMENSIONS as readonly [LegacyAnalysisDimension, ...LegacyAnalysisDimension[]],
+  ),
 });
 
 const ANALYSIS_LOCKED_MESSAGE = "当前正在生成，暂不可重新分析。";
@@ -27,7 +26,7 @@ const ANALYSIS_GENERIC_FAILURE = "分析失败，请稍后重试。";
 class RouteError extends Error {
   constructor(
     message: string,
-    readonly status: number
+    readonly status: number,
   ) {
     super(message);
     this.name = "RouteError";
@@ -143,7 +142,7 @@ export async function POST(request: Request) {
       },
       {
         onConflict: "book_id,dimension",
-      }
+      },
     );
 
     if (upsertError) {
