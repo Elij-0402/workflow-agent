@@ -49,3 +49,5 @@
  GET /login 200 in 248ms
  GET / 307 in 273ms
  GET /login 200 in 252ms
+ GET / 307 in 589ms
+ GET /login 200 in 354ms
