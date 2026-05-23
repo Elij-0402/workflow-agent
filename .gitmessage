@@ -1,0 +1,9 @@
+<type>(<scope>): <中文简述，至少十个字>
+
+# type: feat | fix | docs | chore | refactor | test | ci
+# scope 可选，如 security、compare、workbench
+# 主题行禁止「1」或过短占位；正文可选
+
+# --- 示例 ---
+# feat(studio): 添加创作简报 SSE 大纲预览
+# fix(security): 收紧 Storage 下载 RLS 作用域

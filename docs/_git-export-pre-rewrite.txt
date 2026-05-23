@@ -1,0 +1,80 @@
+c94a819|2026-05-18|initial
+fcc8103|2026-05-18|initial1
+96adde8|2026-05-19|feat: implement server-side AES-GCM encryption for sensitive data and add LLM configuration schemas
+0be3cf0|2026-05-19|新增功能：添加变体列表组件和上传表单；增强侧边栏和状态点功能
+df8a653|2026-05-19|Add baseline CI workflow
+239e401|2026-05-19|Fix CI test runner for TypeScript tests
+fbe9e02|2026-05-19|Merge pull request #1 from Elij-0402/codex/ci-bootstrap
+64e1238|2026-05-19|1
+968a35a|2026-05-19|Fix Vercel upload flow for large novel files
+01ab4bc|2026-05-19|新增功能：更新移动端导航并添加页面标题组件
+0050ce3|2026-05-20|1
+b6b7517|2026-05-20|docs: sync CLAUDE.md to actual v0.1 state
+809219c|2026-05-20|spike: approach B chunking + map-reduce aggregation
+6f4bec1|2026-05-20|fix(security,reliability): SSRF guard, RLS-scoped download, analyze rollback, route maxDuration
+6eebdb2|2026-05-20|fix(safety): delimit untrusted novel content; validate stored analysis result schema
+90b40a8|2026-05-20|feat(ux): confirm before re-analyze / re-generate to prevent BYOK overspend
+3fe3dca|2026-05-20|test: add coverage for crypto + SSRF base-url validation; wire previously-orphaned suites
+5df2f7f|2026-05-20|Merge pull request #2 from Elij-0402/featuredev
+51f941a|2026-05-20|1
+2f35fab|2026-05-20|1
+8681054|2026-05-20|Merge branch 'featuredev' into main
+a032574|2026-05-20|docs: add multi-book chapter comparison + blueprint workbench design
+0601f9b|2026-05-20|docs: add implementation plan for multi-book blueprint workbench
+4990604|2026-05-20|feat(upload): sanitizeStorageFilename for Supabase-safe object keys
+ab91f32|2026-05-20|fix(navigation): drop redundant router.refresh() after router.push()
+db192fa|2026-05-20|chore(gitignore): ignore .artifacts/ and .superpowers/
+d145071|2026-05-20|feat(db): migration 0004 — multi-book + blueprint schema
+b8d7b9a|2026-05-20|feat(types): extend Database types for sessions.mode, books.position, chapters
+976e043|2026-05-20|feat(types): chapter_brief / book_synthesis schemas + analyses/blueprints/variants extensions
+d7069a1|2026-05-20|feat(chapters): extract detection to chapters.ts with extended regex + weak-signal + length-chunk fallback
+11d8014|2026-05-20|feat(upload): mode/position params + persist chapters table on finalize
+df32061|2026-05-20|feat(prompts): chapter-brief + book-synthesis + generate-from-blueprint
+31cf43f|2026-05-20|feat(blueprint): Zod schema + emptyBlueprint + applyCandidate/mergeSections
+c6b9ebf|2026-05-20|feat(api): backend routes for dual workbench + legacy mode gate
+4514671|2026-05-20|feat(diff): three-layer variant diff + chapter-batch cost estimator
+51a3231|2026-05-20|feat(workbench): dual-mode session detail page + UI components + variant comparison
+bd8409e|2026-05-20|feat(upload): mode picker + dual second-book slot
+a8963ff|2026-05-20|feat(wireup): sessions list mode badge + dashboard dual routing + CLAUDE.md update
+82c3a40|2026-05-20|docs: v0.2.1 stabilization sprint design
+6966dd9|2026-05-21|1
+56aff92|2026-05-21|chore: prune obsolete v0.2 design docs and e2e artifacts
+043dce4|2026-05-21|docs: design for project cleanup sprint
+f5df5db|2026-05-21|chore: untrack test novels and isolate in samples/ (gitignored)
+0bfae63|2026-05-21|chore: remove spike-chunking prototype; preserve e2e smoke fixture
+6fdb95e|2026-05-21|docs: collapse AGENTS.md to pointer at CLAUDE.md
+5c89e69|2026-05-21|docs: update README to v0.2 and fix CLAUDE.md eslint note
+395e45b|2026-05-21|chore(test): glob src/**/*.test.ts and dedupe @playwright/test
+ab393e9|2026-05-21|Merge branch 'main' of https://github.com/Elij-0402/workflow-agent
+2f129c4|2026-05-21|feat(ui): redesign UI to "Atelier Terminal" aesthetic
+a05b4d4|2026-05-21|chore: add auto-claude entries to .gitignore
+b12205e|2026-05-21|1
+b5c3312|2026-05-21|1
+bfd8888|2026-05-21|Refactor BlueprintEditor and related components for improved structure and functionality
+64ba500|2026-05-21|chore: apply prettier baseline
+47902b7|2026-05-21|chore: add boris-style PostToolUse format hook
+a8d997f|2026-05-21|1
+6b1a2c7|2026-05-21|feat: 添加反思钩子和相关配置，记录会话中的错误和修改
+94e2b49|2026-05-21|新增功能：扩展小说写作分析维度
+9e2a9f6|2026-05-22|feat: 添加格式化脚本并更新配置以使用该脚本
+f10144a|2026-05-22|feat: enhance variant comparison with tabbed interface and local storage support
+1368df3|2026-05-22|Refactor code structure for improved readability and maintainability
+819253e|2026-05-22|1
+3161a2d|2026-05-22|feat: localize text in OutlineStreamer and other components, add DismissibleTip and EmptyState components, enhance GeneratePanel and ProjectCard, improve error handling with toastError utility
+6f70a54|2026-05-22|feat: add design system page and improve UI text
+2701f3f|2026-05-22|feat: 更新 CLAUDE.md 文档，添加 V0.3 相关路由和功能说明，增强对新简报和分析维度的描述
+d0c7336|2026-05-22|feat: add Worldview comparison component and related utilities
+8fd1329|2026-05-22|feat(compare): add AI insights, clipboard, and export
+1bcd9d6|2026-05-22|feat: enhance sidebar with new project creation button and improve accessibility
+fcba54f|2026-05-22|refactor: remove unused components and improve UI consistency
+2742009|2026-05-23|feat: add prompt versioning and schema versioning across various prompts
+110587d|2026-05-23|Add NovelFusion project architecture spec
+19dc739|2026-05-23|Add project-centric app shell plan
+3c20976|2026-05-23|feat: add project overview derivation
+b94e99a|2026-05-23|feat: add dual project overview page
+86643b2|2026-05-23|fix: restore dual workbench routing
+f9c558c|2026-05-23|1
+80c5f70|2026-05-23|Merge branch 'codex/project-centric-app-shell'
+2ca9497|2026-05-24|feat: update project components with Chinese translations and new features
+21ae5be|2026-05-24|feat: implement project-centric app shell and UI overhaul
+807cfd9|2026-05-24|chore: update .gitignore and remove temporary log files

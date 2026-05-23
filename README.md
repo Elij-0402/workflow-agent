@@ -1,8 +1,8 @@
 # NovelFusion AI
 
-多源小说智能分析与变体生成平台。当前版本 **v0.2** —— 在 v0.1 三维度分析 + 变体生成
-闭环之上，新增 **双书蓝图工作台**（chapter-level brief → book synthesis → 结构化
-blueprint → 基于蓝图的变体生成 → 三层 variant diff）。
+多源小说智能分析与变体生成平台。当前版本 **v0.3** —— 在 v0.2 双书蓝图工作台之上，新增 **创作简报（Creative Brief）**、扩展四维度分析、Studio 大纲/逐章迭代与多会话对比。
+
+变更记录见 [CHANGELOG.md](CHANGELOG.md)。Git 历史于 **2026-05-24** 线性化合并为里程碑提交；旧 SHA 对照见 [docs/GIT_HISTORY.md](docs/GIT_HISTORY.md)，完整 80 条快照 tag：`archive/history-pre-rewrite-2026-05-24`。
 
 ## 功能
 
@@ -14,7 +14,7 @@ blueprint → 基于蓝图的变体生成 → 三层 variant diff）。
 - 三维度分析：世界观 / 人物 / 叙事
 - 流式生成变体小说
 
-### 双书模式（v0.2 新增）
+### 双书模式（v0.2）
 
 - 上传两本小说（`/upload?mode=dual`），自动切章后并发执行 chapter-brief 分析
 - 选取候选片段合成 book synthesis
@@ -22,6 +22,14 @@ blueprint → 基于蓝图的变体生成 → 三层 variant diff）。
 - 显式 confirm 后基于蓝图生成变体
 - 三层 variant diff：meta / structure / paragraph LCS（含标点和空白归一）
 - 批量分析前的 cost estimate 模态框
+
+### 创作简报与 Studio（v0.3 新增）
+
+- 四栏创作简报：人设 / 剧情 / 风格 / 保留规则（`creative_briefs`，migration 0006）
+- `/studio`：简报编辑、SSE 大纲预览、逐章迭代生成
+- 扩展四维度分析：文笔 / 情绪弧 / 节奏图 / 悬念网格
+- `/compare`：最多 6 个会话并排对比、AI 洞察与导出
+- 会话软归档（migration 0005）、`/design-system` 设计参考页
 
 ## 技术栈
 
@@ -48,6 +56,8 @@ npm install
 2. `supabase/migrations/0002_simplify_auth_and_llm_config.sql`
 3. `supabase/migrations/0003_restrict_llm_providers_to_openai_compatible.sql`
 4. `supabase/migrations/0004_multi_book_blueprint_workbench.sql`
+5. `supabase/migrations/0005_session_archival.sql`
+6. `supabase/migrations/0006_creative_briefs.sql`
 
 在 Authentication → Providers 启用 Email；在 Authentication → Email 中关闭
 Confirm email，确保密码注册后可直接进入应用。
@@ -132,7 +142,7 @@ npm run test:e2e:headed   # 带界面调试
 Smoke 用例执行链路：登录 → 保存 LLM 配置 → 上传 `tests/e2e/fixtures/smoke-test-novel.txt` →
 完成三项分析 → 生成首个变体。
 
-依赖：可用的 Supabase 环境、Storage 桶、已执行的所有 4 份迁移、可登录的测试账号、
+依赖：可用的 Supabase 环境、Storage 桶、已执行的全部 6 份迁移、可登录的测试账号、
 关闭了 Confirm email；会真实调用模型并消耗你的 BYOK 配额。
 
 ## 安全说明
@@ -146,7 +156,13 @@ Smoke 用例执行链路：登录 → 保存 LLM 配置 → 上传 `tests/e2e/fi
 - 解密操作只在 Server Action / Route Handler 中发生；API key 不会出现在客户端 bundle、
   组件 props、URL、服务端日志或错误响应中
 
+## 贡献与 Git 规范
+
+见 [CONTRIBUTING.md](CONTRIBUTING.md)（提交模板 `.gitmessage`、钩子 `.githooks/commit-msg`）。
+
 ## 文档
 
 - `CLAUDE.md` —— AI 协作时的项目须知 / 架构说明 / 约定（权威）
+- `CHANGELOG.md` —— 版本发布说明（中文）
+- `docs/GIT_HISTORY.md` —— 历史改写前后 SHA 映射
 - `docs/superpowers/specs/` —— 设计文档归档
