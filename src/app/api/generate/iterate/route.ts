@@ -7,6 +7,7 @@ import {
 } from "@/lib/brief-workflow";
 import { asLLMClientError } from "@/lib/llm/errors";
 import { streamLLMObject } from "@/lib/llm/runtime";
+import { assertWithinRateLimit } from "@/lib/rate-limit";
 import { composeBriefIntoPrompt } from "@/lib/prompts/brief-compose";
 import {
   ITERATE_CHAPTER_RESULT_SCHEMA,
@@ -17,6 +18,7 @@ import {
 } from "@/lib/prompts/iterate-chapter";
 import { OutlineSchema } from "@/lib/prompts/preview-outline";
 import { sseResponse } from "@/lib/streaming/sse";
+import { loadActiveSession } from "@/lib/sessions/guard";
 import { createClient } from "@/lib/supabase/server";
 import { countWords } from "@/lib/text/clean";
 import { CreativeBriefSchema } from "@/lib/types/creative-brief";
@@ -72,6 +74,17 @@ export async function POST(req: Request) {
   ]);
 
   if (!brief) return NextResponse.json({ error: "未找到简报。" }, { status: 404 });
+
+  const { guard } = await loadActiveSession(supabase, brief.session_id, user.id);
+  if (!guard.ok) {
+    return NextResponse.json({ error: guard.message }, { status: guard.status });
+  }
+
+  const rateLimit = await assertWithinRateLimit(supabase, user.id);
+  if (!rateLimit.ok) {
+    return NextResponse.json({ error: rateLimit.message }, { status: rateLimit.status });
+  }
+
   const outlineCheck = validateOutlineVariantForBrief({
     brief,
     outlineVariant,

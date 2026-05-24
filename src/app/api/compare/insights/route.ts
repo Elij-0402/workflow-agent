@@ -4,8 +4,10 @@ import { z } from "zod";
 import { distanceFor } from "@/lib/compare/distance";
 import { asLLMClientError } from "@/lib/llm/errors";
 import { runLLMObject } from "@/lib/llm/runtime";
+import { assertWithinRateLimit } from "@/lib/rate-limit";
 import { COMPARE_INSIGHTS_CONFIG } from "@/lib/prompts";
 import { COMPARE_INSIGHT_DIMENSIONS } from "@/lib/prompts/compare-insights";
+import { rejectArchivedSession } from "@/lib/sessions/guard";
 import { createClient } from "@/lib/supabase/server";
 import { DIMENSION_LABELS, type AnalysisDimension } from "@/lib/types";
 
@@ -162,7 +164,11 @@ export async function POST(req: Request) {
   const sessionIds = Array.from(new Set(body.sessionIds)).slice(0, MAX_SESSIONS);
 
   const [{ data: sessions }, { data: books }] = await Promise.all([
-    supabase.from("sessions").select("id, name, mode").in("id", sessionIds),
+    supabase
+      .from("sessions")
+      .select("id, name, mode, archived_at")
+      .in("id", sessionIds)
+      .eq("user_id", user.id),
     supabase
       .from("books")
       .select("id, session_id, title, position")
@@ -171,6 +177,12 @@ export async function POST(req: Request) {
 
   const safeSessions = sessions ?? [];
   const safeBooks = books ?? [];
+  for (const session of safeSessions) {
+    const guard = rejectArchivedSession(session);
+    if (!guard.ok) {
+      return jsonError(guard.message, guard.status);
+    }
+  }
   if (safeBooks.length < 2) {
     return jsonError("至少需要 2 本书的数据才能生成洞察。", 400);
   }
@@ -228,6 +240,11 @@ export async function POST(req: Request) {
 ${JSON.stringify(payload, null, 2)}`;
 
   try {
+    const rateLimit = await assertWithinRateLimit(supabase, user.id);
+    if (!rateLimit.ok) {
+      return jsonError(rateLimit.message, rateLimit.status);
+    }
+
     const result = await runLLMObject({
       supabase,
       route: "/api/compare/insights",

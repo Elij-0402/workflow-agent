@@ -78,7 +78,11 @@ export default async function SessionDetailPage({
         sessionId={dualData.session.id}
         sessionName={dualData.session.name}
         overview={overview}
-        books={dualData.books}
+        llmConfigured={dualData.llmConfigured}
+        books={dualData.books.map((book) => ({
+          ...book,
+          extendedAnalyses: dualData.extendedAnalysesByBook[book.id] ?? [],
+        }))}
       />
     );
   }
@@ -188,6 +192,12 @@ export default async function SessionDetailPage({
 
         {hasCompleteAnalysis ? (
           <>
+            <AnalysisPanel
+              sessionId={session.id}
+              analyses={safeAnalyses}
+              llmConfigured={llmConfigured}
+              sessionStatus={session.status}
+            />
             <GeneratePanel
               sessionId={session.id}
               sessionStatus={session.status}
@@ -196,12 +206,6 @@ export default async function SessionDetailPage({
               variantCount={safeVariants.length}
             />
             {hasVariants ? <VariantList variants={safeVariants} /> : null}
-            <AnalysisPanel
-              sessionId={session.id}
-              analyses={safeAnalyses}
-              llmConfigured={llmConfigured}
-              sessionStatus={session.status}
-            />
             <ExtendedAnalysisPanel
               bookId={book.id}
               analyses={safeExtendedAnalyses}

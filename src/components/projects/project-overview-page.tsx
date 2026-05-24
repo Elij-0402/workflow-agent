@@ -1,5 +1,7 @@
 import type { ProjectOverview } from "@/lib/projects/overview";
+import type { ExtendedAnalysisDimension } from "@/lib/types";
 
+import { ExtendedAnalysisPanel } from "@/app/(app)/sessions/[id]/extended-analysis-panel";
 import { EditorialRecommendationPanel } from "./editorial-recommendation-panel";
 import { ImportHealthPanel } from "./import-health-panel";
 import { ProjectKeyResults } from "./project-key-results";
@@ -15,7 +17,9 @@ type ProjectOverviewPageProps = {
     title: string;
     chapter_count: number | null;
     metadata: Record<string, unknown>;
+    extendedAnalyses?: Array<{ dimension: ExtendedAnalysisDimension; result: unknown }>;
   }>;
+  llmConfigured?: boolean;
 };
 
 export function ProjectOverviewPage({
@@ -23,6 +27,7 @@ export function ProjectOverviewPage({
   sessionName,
   overview,
   books,
+  llmConfigured = false,
 }: ProjectOverviewPageProps) {
   return (
     <div className="app-page">
@@ -58,6 +63,30 @@ export function ProjectOverviewPage({
       </div>
 
       <ImportHealthPanel books={books} />
+
+      {books.length > 0 ? (
+        <section className="space-y-6">
+          <div>
+            <p className="eyebrow-label">扩展分析</p>
+            <h2 className="mt-2 text-[20px] font-semibold leading-tight text-foreground">
+              写作技法与节奏洞察
+            </h2>
+            <p className="mt-2 max-w-3xl text-[13px] leading-6 text-muted-foreground">
+              针对每本参考书运行 prose_craft、emotion_arc、pacing_map、suspense_grid 四维扩展分析。
+            </p>
+          </div>
+          <div className="grid gap-6 xl:grid-cols-2">
+            {books.map((book) => (
+              <ExtendedAnalysisPanel
+                key={book.id}
+                bookId={book.id}
+                analyses={book.extendedAnalyses ?? []}
+                llmConfigured={llmConfigured}
+              />
+            ))}
+          </div>
+        </section>
+      ) : null}
 
       <section className="grid gap-6 xl:grid-cols-[minmax(0,1.15fr)_minmax(320px,.85fr)]">
         <div className="surface-panel p-6">

@@ -1,10 +1,11 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 
-import { BriefEditor } from "@/components/creative-brief/brief-editor";
-import { OutlineStreamer } from "@/components/creative-brief/outline-streamer";
+import { StudioWorkspace } from "@/components/creative-brief/studio-workspace";
+import type { ChapterVariantSummary } from "@/components/creative-brief/chapter-iterate-streamer";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
+import { OutlineSchema } from "@/lib/prompts/preview-outline";
 import { createClient } from "@/lib/supabase/server";
 import {
   CreativeBriefSchema,
@@ -43,12 +44,39 @@ export default async function StudioBriefPage({ params }: Props) {
     retention_rules: row.retention_rules,
   });
 
-  const { data: session } = await supabase
-    .from("sessions")
-    .select("id, name, mode")
-    .eq("id", row.session_id)
-    .eq("user_id", user.id)
-    .maybeSingle();
+  const [{ data: session }, { data: variants }] = await Promise.all([
+    supabase
+      .from("sessions")
+      .select("id, name, mode")
+      .eq("id", row.session_id)
+      .eq("user_id", user.id)
+      .maybeSingle(),
+    supabase
+      .from("variants")
+      .select("id, title, scope, content, word_count, chapter_index, created_at")
+      .eq("brief_id", briefId)
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: true }),
+  ]);
+
+  const outlineRows = (variants ?? []).filter((variant) => variant.scope === "outline");
+  const outlineVariant = outlineRows[outlineRows.length - 1] ?? null;
+  let initialOutline = null;
+  if (outlineVariant?.content) {
+    const parsed = OutlineSchema.safeParse(JSON.parse(outlineVariant.content));
+    if (parsed.success) initialOutline = parsed.data;
+  }
+
+  const initialChapterVariants: ChapterVariantSummary[] = (variants ?? [])
+    .filter((variant) => variant.scope === "chapter" && variant.chapter_index)
+    .map((variant) => ({
+      id: variant.id,
+      chapterIndex: variant.chapter_index as number,
+      title: variant.title,
+      content: variant.content,
+      wordCount: variant.word_count,
+      createdAt: variant.created_at,
+    }));
 
   const backHref = session
     ? `/sessions/${session.id}${session.mode === "dual" ? "?step=generate" : ""}`
@@ -66,14 +94,13 @@ export default async function StudioBriefPage({ params }: Props) {
           </Button>
         }
       />
-      <div className="grid gap-6 xl:grid-cols-2 xl:gap-8">
-        <div className="min-w-0">
-          <BriefEditor mode={{ kind: "edit", briefId }} initial={initial} />
-        </div>
-        <section className="min-w-0 xl:border-l xl:border-border/60 xl:pl-8">
-          <OutlineStreamer briefId={briefId} />
-        </section>
-      </div>
+      <StudioWorkspace
+        briefId={briefId}
+        initial={initial}
+        initialOutlineVariantId={outlineVariant?.id ?? null}
+        initialOutline={initialOutline}
+        initialChapterVariants={initialChapterVariants}
+      />
     </div>
   );
 }

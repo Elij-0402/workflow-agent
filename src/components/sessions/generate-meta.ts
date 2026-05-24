@@ -88,8 +88,30 @@ export const STYLE_LABELS: Record<GenerateConfig["style"], string> = {
   "web-novel": "网文",
 };
 
+export type VariantScope = "outline" | "chapter" | "full";
+
+export const VARIANT_SCOPE_LABELS: Record<VariantScope, string> = {
+  outline: "大纲",
+  chapter: "章节",
+  full: "全书",
+};
+
+export function formatVariantScopeLabel(
+  scope: VariantScope | null | undefined,
+  chapterIndex?: number | null,
+) {
+  if (scope === "chapter" && chapterIndex) {
+    return `章节 · 第 ${chapterIndex} 章`;
+  }
+  if (scope && scope in VARIANT_SCOPE_LABELS) {
+    return VARIANT_SCOPE_LABELS[scope as VariantScope];
+  }
+  return null;
+}
+
 export const OUTPUT_SCOPE_LABELS: Record<GenerateConfig["output_scope"], string> = {
   "single-chapter": "单章",
   outline: "大纲",
   "three-chapters": "三章",
 };
+

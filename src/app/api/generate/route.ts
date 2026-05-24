@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { asLLMClientError } from "@/lib/llm/errors";
 import { runLLMObject } from "@/lib/llm/runtime";
+import { assertWithinRateLimit } from "@/lib/rate-limit";
 import {
   buildGenerateUserPrompt,
   GENERATE_SYSTEM_PROMPT,
@@ -12,6 +13,7 @@ import {
   GENERATE_TITLE_FALLBACK,
   scopeToMaxTokens,
 } from "@/lib/prompts/generate";
+import { loadActiveSession } from "@/lib/sessions/guard";
 import {
   getSessionStatusAfterGenerateFailure,
   getSessionStatusAfterGenerateSuccess,
@@ -89,17 +91,10 @@ export async function POST(request: Request) {
     return jsonError("请求参数不正确。", 400);
   }
 
-  const { data: session, error: sessionError } = await supabase
-    .from("sessions")
-    .select("id, status, mode")
-    .eq("id", parsedBody.sessionId)
-    .eq("user_id", user.id)
-    .maybeSingle();
-
-  if (sessionError) {
-    return jsonError("读取会话失败，请稍后再试。", 500);
+  const { session, guard } = await loadActiveSession(supabase, parsedBody.sessionId, user.id);
+  if (!guard.ok) {
+    return jsonError(guard.message, guard.status);
   }
-
   if (!session) {
     return jsonError("未找到对应会话。", 404);
   }
@@ -182,6 +177,11 @@ export async function POST(request: Request) {
       }
 
       statusFlipped = true;
+    }
+
+    const rateLimit = await assertWithinRateLimit(supabase, user.id);
+    if (!rateLimit.ok) {
+      throw new RouteError(rateLimit.message, rateLimit.status);
     }
 
     const prompt = buildGenerateUserPrompt({

@@ -1,4 +1,3 @@
-import { generateObject } from "ai";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -7,15 +6,20 @@ import {
   getBookAnalysisMode,
   getBookProviderCompatibility,
 } from "@/lib/books/content";
+import { saveAnalysis } from "@/lib/analysis-store";
+import { asLLMClientError } from "@/lib/llm/errors";
 import { getUserLLMClient } from "@/lib/llm/dispatch";
-import { resolveStructuredObjectMode } from "@/lib/llm/structured-output";
+import { runLLMObject } from "@/lib/llm/runtime";
+import { assertWithinRateLimit } from "@/lib/rate-limit";
 import {
+  BOOK_SYNTHESIS_PROMPT_VERSION,
+  BOOK_SYNTHESIS_SCHEMA_VERSION,
   BOOK_SYNTHESIS_SYSTEM_PROMPT,
   buildBookSynthesisUserPrompt,
   pickBriefsForSynthesis,
   type BriefEntry,
 } from "@/lib/prompts/book-synthesis";
-import { saveAnalysis } from "@/lib/analysis-store";
+import { loadActiveSessionByBookId } from "@/lib/sessions/guard";
 import { createClient } from "@/lib/supabase/server";
 import { BookSynthesisResultSchema, ChapterBriefResultSchema } from "@/lib/types";
 
@@ -56,6 +60,16 @@ export async function POST(req: Request) {
     body = bodySchema.parse(await req.json());
   } catch {
     return NextResponse.json({ error: "请求参数不正确。" }, { status: 400 });
+  }
+
+  const { guard } = await loadActiveSessionByBookId(supabase, body.bookId, user.id);
+  if (!guard.ok) {
+    return NextResponse.json({ error: guard.message }, { status: guard.status });
+  }
+
+  const rateLimit = await assertWithinRateLimit(supabase, user.id);
+  if (!rateLimit.ok) {
+    return NextResponse.json({ error: rateLimit.message }, { status: rateLimit.status });
   }
 
   const [{ data: book }, { data: chapters }] = await Promise.all([
@@ -129,17 +143,24 @@ export async function POST(req: Request) {
         { status: 409 },
       );
     }
-    const result = await generateObject({
-      model: llm.openai(llm.model),
-      mode: resolveStructuredObjectMode(llm.provider),
+
+    const result = await runLLMObject({
+      supabase,
+      route: "/api/analyze/book",
+      operation: "book_synthesis",
       schema: BookSynthesisResultSchema,
       system: BOOK_SYNTHESIS_SYSTEM_PROMPT,
       prompt: buildBookSynthesisUserPrompt({
         bookTitle: book.title,
         briefs: sampled,
       }),
-      temperature: llm.temperature,
-      maxTokens: Math.min(4096, llm.maxTokens),
+      promptVersion: BOOK_SYNTHESIS_PROMPT_VERSION,
+      schemaVersion: BOOK_SYNTHESIS_SCHEMA_VERSION,
+      maxTokens: 4096,
+      cacheSeed: {
+        bookId: body.bookId,
+        briefDimension,
+      },
     });
 
     const { error: upErr } = await saveAnalysis({
@@ -149,19 +170,27 @@ export async function POST(req: Request) {
       scope: "book",
       dimension: "book_synthesis",
       result: result.object,
-      llmConfigId: llm.configId,
-      promptTokens: Number.isFinite(result.usage.promptTokens)
-        ? result.usage.promptTokens
-        : null,
-      completionTokens: Number.isFinite(result.usage.completionTokens)
-        ? result.usage.completionTokens
-        : null,
+      llmConfigId: result.llm.configId,
+      promptTokens: result.usage.promptTokens,
+      completionTokens: result.usage.completionTokens,
+      promptVersion: BOOK_SYNTHESIS_PROMPT_VERSION,
+      schemaVersion: BOOK_SYNTHESIS_SCHEMA_VERSION,
+      estimatedCostCNY: result.estimatedCostCNY,
+      cacheKey: result.cacheKey,
     });
     if (upErr) {
       return NextResponse.json({ error: "保存整书汇总失败。" }, { status: 500 });
     }
     return NextResponse.json({ ok: true, result: result.object });
-  } catch {
-    return NextResponse.json({ error: "整书汇总失败。" }, { status: 502 });
+  } catch (e) {
+    const clientError = asLLMClientError(e, {
+      code: "llm_request_failed",
+      userMessage: "整书汇总失败。",
+      retryable: true,
+    });
+    return NextResponse.json(
+      { error: clientError.userMessage },
+      { status: clientError.userMessage === "整书汇总失败。" ? 502 : 409 },
+    );
   }
 }

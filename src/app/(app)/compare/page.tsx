@@ -1,6 +1,8 @@
 import Link from "next/link";
+import { GitCompareArrows } from "lucide-react";
 
 import { CompareClient } from "./CompareClient";
+import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
@@ -149,9 +151,16 @@ export default async function ComparePage({
       {compareBooks.length > 0 ? (
         <CompareClient books={compareBooks} />
       ) : (
-        <div className="surface-panel px-6 py-12 text-center text-[13px] leading-7 text-muted-foreground">
-          先选择至少一个双书项目，再展开分析图谱。
-        </div>
+        <EmptyState
+          icon={GitCompareArrows}
+          title="还没有可对比的项目"
+          description="先选择至少一个双书项目，再在这里并排查看世界观、人物、叙事与扩展分析。"
+          action={
+            <Button asChild variant="outline">
+              <Link href="/sessions">前往项目列表</Link>
+            </Button>
+          }
+        />
       )}
     </div>
   );

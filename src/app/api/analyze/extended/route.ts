@@ -1,4 +1,3 @@
-import { generateObject } from "ai";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -8,11 +7,13 @@ import {
   resolveBookAnalysisView,
 } from "@/lib/books/content";
 import { saveAnalysis } from "@/lib/analysis-store";
+import { asLLMClientError } from "@/lib/llm/errors";
 import { getUserLLMClient } from "@/lib/llm/dispatch";
-import { resolveStructuredObjectMode } from "@/lib/llm/structured-output";
-import { isUserFixableLLMConfigMessage } from "@/lib/llm-config";
+import { runLLMObject } from "@/lib/llm/runtime";
+import { assertWithinRateLimit } from "@/lib/rate-limit";
 import { ANALYSIS_TEXT_CHAR_LIMIT, EXTENDED_ANALYSIS_DIMENSION_CONFIG } from "@/lib/prompts";
 import { wrapUntrustedNovel } from "@/lib/prompts/safety";
+import { loadActiveSessionByBookId } from "@/lib/sessions/guard";
 import { createClient } from "@/lib/supabase/server";
 import { EXTENDED_ANALYSIS_DIMENSIONS, type ExtendedAnalysisDimension } from "@/lib/types";
 
@@ -49,6 +50,16 @@ export async function POST(req: Request) {
     return jsonError("请求参数不正确。", 400);
   }
 
+  const { guard } = await loadActiveSessionByBookId(supabase, body.bookId, user.id);
+  if (!guard.ok) {
+    return jsonError(guard.message, guard.status);
+  }
+
+  const rateLimit = await assertWithinRateLimit(supabase, user.id);
+  if (!rateLimit.ok) {
+    return jsonError(rateLimit.message, rateLimit.status);
+  }
+
   const { data: book } = await supabase
     .from("books")
     .select("id, cleaned_content, metadata, storage_path")
@@ -74,14 +85,21 @@ export async function POST(req: Request) {
         409,
       );
     }
-    const result = await generateObject({
-      model: llm.openai(llm.model),
-      mode: resolveStructuredObjectMode(llm.provider),
+
+    const result = await runLLMObject({
+      supabase,
+      route: "/api/analyze/extended",
+      operation: `extended:${body.dimension}`,
       schema: promptConfig.schema,
       system: promptConfig.systemPrompt,
       prompt: wrapUntrustedNovel(excerpt),
-      temperature: llm.temperature,
-      maxTokens: llm.maxTokens,
+      promptVersion: promptConfig.promptVersion,
+      schemaVersion: promptConfig.schemaVersion,
+      cacheSeed: {
+        bookId: book.id,
+        dimension: body.dimension,
+        excerpt,
+      },
     });
 
     const { error: upErr } = await saveAnalysis({
@@ -91,13 +109,13 @@ export async function POST(req: Request) {
       scope: "book",
       dimension: body.dimension,
       result: result.object,
-      llmConfigId: llm.configId,
-      promptTokens: Number.isFinite(result.usage.promptTokens)
-        ? result.usage.promptTokens
-        : null,
-      completionTokens: Number.isFinite(result.usage.completionTokens)
-        ? result.usage.completionTokens
-        : null,
+      llmConfigId: result.llm.configId,
+      promptTokens: result.usage.promptTokens,
+      completionTokens: result.usage.completionTokens,
+      promptVersion: promptConfig.promptVersion,
+      schemaVersion: promptConfig.schemaVersion,
+      estimatedCostCNY: result.estimatedCostCNY,
+      cacheKey: result.cacheKey,
     });
     if (upErr) {
       return jsonError("保存分析结果失败。", 500);
@@ -109,8 +127,14 @@ export async function POST(req: Request) {
       result: result.object,
     });
   } catch (e) {
-    const msg =
-      e instanceof Error && isUserFixableLLMConfigMessage(e.message) ? e.message : GENERIC_FAILURE;
-    return jsonError(msg, msg === GENERIC_FAILURE ? 502 : 409);
+    const clientError = asLLMClientError(e, {
+      code: "llm_request_failed",
+      userMessage: GENERIC_FAILURE,
+      retryable: true,
+    });
+    return jsonError(
+      clientError.userMessage,
+      clientError.userMessage === GENERIC_FAILURE ? 502 : 409,
+    );
   }
 }

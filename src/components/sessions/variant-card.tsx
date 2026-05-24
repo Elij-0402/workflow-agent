@@ -16,17 +16,27 @@ import {
   STRATEGY_LABELS,
   STYLE_LABELS,
   VIEWPOINT_LABELS,
+  formatVariantScopeLabel,
+  type VariantScope,
 } from "./generate-meta";
 
 type VariantCardProps = {
-  variant: Pick<VariantRow, "id" | "title" | "config" | "content" | "word_count" | "created_at">;
+  variant: Pick<
+    VariantRow,
+    "id" | "title" | "config" | "content" | "word_count" | "created_at" | "scope" | "chapter_index"
+  >;
+  onDelete?: (id: string) => void;
 };
 
-export function VariantCard({ variant }: VariantCardProps) {
+export function VariantCard({ variant, onDelete }: VariantCardProps) {
   const preview =
     variant.content.length > 200
       ? `${variant.content.slice(0, 200).trim()}…`
       : variant.content.trim();
+  const scopeLabel = formatVariantScopeLabel(
+    variant.scope as VariantScope | null,
+    variant.chapter_index,
+  );
 
   return (
     <article className="surface-panel px-6 py-5">
@@ -38,6 +48,12 @@ export function VariantCard({ variant }: VariantCardProps) {
               {variant.title}
             </h3>
             <div className="flex flex-wrap gap-x-3 gap-y-1 font-mono text-[10.5px] uppercase tracking-[0.08em] text-muted-foreground">
+              {scopeLabel ? (
+                <>
+                  <span>{scopeLabel}</span>
+                  <span className="text-primary/40">·</span>
+                </>
+              ) : null}
               <span>{OUTPUT_SCOPE_LABELS[variant.config.output_scope]}</span>
               <span className="text-primary/40">·</span>
               <span>{STRATEGY_LABELS[variant.config.strategy]}</span>
@@ -66,30 +82,38 @@ export function VariantCard({ variant }: VariantCardProps) {
             <span>{variant.config.extra_instructions.trim() ? "含额外要求" : "默认要求"}</span>
           </div>
 
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button variant="outline" size="sm">
-                阅读全文 →
+          <div className="flex flex-wrap gap-2">
+            {onDelete ? (
+              <Button variant="outline" size="sm" onClick={() => onDelete(variant.id)}>
+                删除
               </Button>
-            </DialogTrigger>
-            <DialogContent className="h-[85vh] max-w-5xl gap-0 overflow-hidden bg-card p-0">
-              <DialogHeader className="border-b border-dashed border-border/60 px-6 py-5 text-left">
-                <DialogTitle>{variant.title}</DialogTitle>
-                <DialogDescription className="flex flex-wrap gap-x-3 gap-y-1 pt-2 font-mono text-[10.5px] uppercase tracking-[0.08em]">
-                  <span>{STRATEGY_LABELS[variant.config.strategy]}</span>
-                  <span>创新度 {variant.config.innovation}</span>
-                  <span>{VIEWPOINT_LABELS[variant.config.viewpoint]}</span>
-                  <span>{STYLE_LABELS[variant.config.style]}</span>
-                  <span>{OUTPUT_SCOPE_LABELS[variant.config.output_scope]}</span>
-                </DialogDescription>
-              </DialogHeader>
-              <div className="overflow-y-auto px-7 pb-7 pt-5">
-                <article className="reading-prose max-w-[78ch] whitespace-pre-wrap">
-                  {variant.content}
-                </article>
-              </div>
-            </DialogContent>
-          </Dialog>
+            ) : null}
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="sm">
+                  阅读全文 →
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="h-[85vh] max-w-5xl gap-0 overflow-hidden bg-card p-0">
+                <DialogHeader className="border-b border-dashed border-border/60 px-6 py-5 text-left">
+                  <DialogTitle>{variant.title}</DialogTitle>
+                  <DialogDescription className="flex flex-wrap gap-x-3 gap-y-1 pt-2 font-mono text-[10.5px] uppercase tracking-[0.08em]">
+                    {scopeLabel ? <span>{scopeLabel}</span> : null}
+                    <span>{STRATEGY_LABELS[variant.config.strategy]}</span>
+                    <span>创新度 {variant.config.innovation}</span>
+                    <span>{VIEWPOINT_LABELS[variant.config.viewpoint]}</span>
+                    <span>{STYLE_LABELS[variant.config.style]}</span>
+                    <span>{OUTPUT_SCOPE_LABELS[variant.config.output_scope]}</span>
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="overflow-y-auto px-7 pb-7 pt-5">
+                  <article className="reading-prose max-w-[78ch] whitespace-pre-wrap">
+                    {variant.content}
+                  </article>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
       </div>
     </article>

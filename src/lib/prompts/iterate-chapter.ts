@@ -1,5 +1,6 @@
 import { VariantResultSchema } from "@/lib/types";
 import type { Outline } from "./preview-outline";
+import { wrapUntrustedNovel } from "./safety";
 
 export const ITERATE_CHAPTER_SYSTEM_PROMPT = `你是中文小说撰写助手。
 
@@ -51,7 +52,7 @@ export function buildIterateChapterUserPrompt({
   if (previousContent) {
     parts.push("");
     parts.push("【上次稿件】");
-    parts.push(previousContent);
+    parts.push(wrapUntrustedNovel(previousContent));
   }
   if (feedback) {
     parts.push("");

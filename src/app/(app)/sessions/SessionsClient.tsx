@@ -26,7 +26,7 @@ type SessionsClientProps = {
 };
 
 type ConfirmState = null | {
-  kind: "single-delete" | "single-archive" | "single-restore";
+  kind: "single-delete" | "single-archive" | "single-restore" | "bulk-delete" | "bulk-archive" | "bulk-restore";
   ids: string[];
   action: "archive" | "restore" | "delete";
 };
@@ -38,8 +38,23 @@ export function SessionsClient({
 }: SessionsClientProps) {
   const router = useRouter();
   const [confirm, setConfirm] = useState<ConfirmState>(null);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [pending, startTransition] = useTransition();
   const grouped = groupSessionsByMode(sessions);
+  const selectionMode = selectedIds.length > 0;
+
+  const runBulk = async (ids: string[], action: "archive" | "restore" | "delete") => {
+    if (action === "delete" && view === "archived") {
+      await Promise.all(ids.map((id) => fetch(`/api/sessions/${id}?hard=true`, { method: "DELETE" })));
+      return { ok: true };
+    }
+    const res = await fetch("/api/sessions/bulk", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action, ids }),
+    });
+    return res.json().catch(() => ({}));
+  };
 
   const runSingle = async (
     id: string,
@@ -58,10 +73,14 @@ export function SessionsClient({
   const handleConfirm = () => {
     if (!confirm) return;
     startTransition(async () => {
-      const res = await runSingle(confirm.ids[0], confirm.action);
-      const json = await res.json().catch(() => ({}));
-      if (!res.ok || !json.ok) {
-        toast.error(json.error ?? "操作失败。");
+      const isBulk = confirm.ids.length > 1;
+      const res = isBulk
+        ? await runBulk(confirm.ids, confirm.action)
+        : await runSingle(confirm.ids[0], confirm.action).then((response) =>
+            response.json().catch(() => ({})),
+          );
+      if (!res.ok) {
+        toast.error(res.error ?? "操作失败。");
         return;
       }
       toast.success(
@@ -72,14 +91,62 @@ export function SessionsClient({
             : "已恢复",
       );
       setConfirm(null);
+      setSelectedIds([]);
       router.refresh();
     });
+  };
+
+  const toggleSelected = (id: string, checked: boolean) => {
+    setSelectedIds((current) =>
+      checked ? Array.from(new Set([...current, id])) : current.filter((item) => item !== id),
+    );
   };
 
   return (
     <>
       <div className={cn("grid gap-4 xl:grid-cols-[1.55fr_.85fr]", pending && "pointer-events-none opacity-60")}>
         <div className="space-y-8">
+          {selectionMode ? (
+            <div className="surface-panel flex flex-wrap items-center gap-3 p-4">
+              <p className="text-[13px] text-foreground">已选择 {selectedIds.length} 个项目</p>
+              {view === "active" ? (
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={() =>
+                    setConfirm({ kind: "bulk-archive", action: "archive", ids: selectedIds })
+                  }
+                >
+                  批量归档
+                </Button>
+              ) : (
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={() =>
+                    setConfirm({ kind: "bulk-restore", action: "restore", ids: selectedIds })
+                  }
+                >
+                  批量恢复
+                </Button>
+              )}
+              <Button
+                type="button"
+                size="sm"
+                variant="destructive"
+                onClick={() =>
+                  setConfirm({ kind: "bulk-delete", action: "delete", ids: selectedIds })
+                }
+              >
+                {view === "archived" ? "批量永久删除" : "批量删除"}
+              </Button>
+              <Button type="button" size="sm" variant="ghost" onClick={() => setSelectedIds([])}>
+                取消选择
+              </Button>
+            </div>
+          ) : null}
           {view === "active" ? (
             <>
               <SessionSection
@@ -88,6 +155,8 @@ export function SessionsClient({
                 sessions={grouped.dual}
                 view={view}
                 onAction={setConfirm}
+                selectedIds={selectedIds}
+                onSelectChange={toggleSelected}
               />
               <SessionSection
                 title="单书兼容"
@@ -95,11 +164,19 @@ export function SessionsClient({
                 sessions={grouped.single}
                 view={view}
                 onAction={setConfirm}
+                selectedIds={selectedIds}
+                onSelectChange={toggleSelected}
                 subdued
               />
             </>
           ) : (
-            <SessionGrid sessions={sessions} view={view} onAction={setConfirm} />
+            <SessionGrid
+              sessions={sessions}
+              view={view}
+              onAction={setConfirm}
+              selectedIds={selectedIds}
+              onSelectChange={toggleSelected}
+            />
           )}
         </div>
 
@@ -168,6 +245,8 @@ function SessionSection({
   sessions,
   view,
   onAction,
+  selectedIds = [],
+  onSelectChange,
   subdued = false,
 }: {
   title: string;
@@ -175,6 +254,8 @@ function SessionSection({
   sessions: SessionDashboardItem[];
   view: "active" | "archived";
   onAction: (state: ConfirmState) => void;
+  selectedIds?: string[];
+  onSelectChange?: (id: string, checked: boolean) => void;
   subdued?: boolean;
 }) {
   if (sessions.length === 0) return null;
@@ -192,7 +273,13 @@ function SessionSection({
           {description}
         </p>
       </div>
-      <SessionGrid sessions={sessions} view={view} onAction={onAction} />
+      <SessionGrid
+        sessions={sessions}
+        view={view}
+        onAction={onAction}
+        selectedIds={selectedIds}
+        onSelectChange={onSelectChange}
+      />
     </section>
   );
 }
@@ -201,17 +288,26 @@ function SessionGrid({
   sessions,
   view,
   onAction,
+  selectedIds = [],
+  onSelectChange,
 }: {
   sessions: SessionDashboardItem[];
   view: "active" | "archived";
   onAction: (state: ConfirmState) => void;
+  selectedIds?: string[];
+  onSelectChange?: (id: string, checked: boolean) => void;
 }) {
+  const selectable = Boolean(onSelectChange);
+
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
       {sessions.map((session) => (
         <ProjectCard
           key={session.id}
           session={session}
+          selectable={selectable}
+          selected={selectedIds.includes(session.id)}
+          onSelectChange={onSelectChange}
           onArchive={
             view === "active"
               ? (id) =>

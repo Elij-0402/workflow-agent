@@ -162,7 +162,7 @@ Smoke 用例执行链路：登录 → 保存 LLM 配置 → 上传 `tests/e2e/fi
 
 ## 文档
 
-- `CLAUDE.md` —— AI 协作时的项目须知 / 架构说明 / 约定（权威）
-- `CHANGELOG.md` —— 版本发布说明（中文）
-- `docs/GIT_HISTORY.md` —— 历史改写前后 SHA 映射
-- `docs/superpowers/specs/` —— 设计文档归档
+- [README.md](README.md) —— 项目概览与快速上手
+- [CONTRIBUTING.md](CONTRIBUTING.md) —— 贡献规范与开发约定
+- [CHANGELOG.md](CHANGELOG.md) —— 版本发布说明（中文）
+- [docs/GIT_HISTORY.md](docs/GIT_HISTORY.md) —— 历史改写前后 SHA 映射

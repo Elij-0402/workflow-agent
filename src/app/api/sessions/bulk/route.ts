@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { createClient } from "@/lib/supabase/server";
+import { deleteSessionStorageObjects } from "@/lib/sessions/storage-cleanup";
 
 export const runtime = "nodejs";
 
@@ -25,6 +26,7 @@ export async function POST(req: Request) {
   }
 
   if (body.action === "delete") {
+    await deleteSessionStorageObjects(supabase, body.ids, user.id);
     const { error } = await supabase
       .from("sessions")
       .delete()

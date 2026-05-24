@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { createClient } from "@/lib/supabase/server";
+import { loadActiveSession } from "@/lib/sessions/guard";
 import type { Database } from "@/lib/types";
 import { CreativeBriefSchema, CreativeBriefStatusSchema } from "@/lib/types/creative-brief";
 
@@ -64,6 +65,20 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     return NextResponse.json({ error: "无变更内容。" }, { status: 400 });
   }
 
+  const { data: briefRow } = await supabase
+    .from("creative_briefs")
+    .select("session_id")
+    .eq("id", parsedParams.data.id)
+    .eq("user_id", user.id)
+    .maybeSingle();
+  if (!briefRow) {
+    return NextResponse.json({ error: "未找到简报。" }, { status: 404 });
+  }
+  const { guard } = await loadActiveSession(supabase, briefRow.session_id, user.id);
+  if (!guard.ok) {
+    return NextResponse.json({ error: guard.message }, { status: guard.status });
+  }
+
   const update: Database["public"]["Tables"]["creative_briefs"]["Update"] = {};
   if (body.brief?.title !== undefined) update.title = body.brief.title;
   if (body.brief?.persona_directives !== undefined) {
@@ -101,6 +116,20 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
   const parsed = paramsSchema.safeParse(await params);
   if (!parsed.success) {
     return NextResponse.json({ error: "请求参数不正确。" }, { status: 400 });
+  }
+
+  const { data: briefRow } = await supabase
+    .from("creative_briefs")
+    .select("session_id")
+    .eq("id", parsed.data.id)
+    .eq("user_id", user.id)
+    .maybeSingle();
+  if (!briefRow) {
+    return NextResponse.json({ error: "未找到简报。" }, { status: 404 });
+  }
+  const { guard } = await loadActiveSession(supabase, briefRow.session_id, user.id);
+  if (!guard.ok) {
+    return NextResponse.json({ error: guard.message }, { status: guard.status });
   }
 
   const { error } = await supabase

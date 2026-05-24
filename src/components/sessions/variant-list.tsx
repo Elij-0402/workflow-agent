@@ -1,10 +1,13 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { ArrowDownAZ, ArrowUpDown, Clock, FileText, Sparkles } from "lucide-react";
+import { useMemo, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { ArrowDownAZ, ArrowUpDown, Clock, FileText, Sparkles, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 
 import type { VariantRow } from "@/lib/types";
 import { formatDate } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Toolbar } from "@/components/ui/toolbar";
 import {
@@ -12,11 +15,20 @@ import {
   STRATEGY_LABELS,
   STYLE_LABELS,
   VIEWPOINT_LABELS,
+  formatVariantScopeLabel,
+  type VariantScope,
 } from "./generate-meta";
 
 type VariantSlim = Pick<
   VariantRow,
-  "id" | "title" | "config" | "content" | "word_count" | "created_at"
+  | "id"
+  | "title"
+  | "config"
+  | "content"
+  | "word_count"
+  | "created_at"
+  | "scope"
+  | "chapter_index"
 >;
 
 type VariantListProps = {
@@ -27,10 +39,13 @@ type SortKey = "created_at" | "word_count";
 
 const TOOLBAR_THRESHOLD = 10;
 
-export function VariantList({ variants }: VariantListProps) {
-  const [activeId, setActiveId] = useState(variants[0]?.id ?? "");
+export function VariantList({ variants: initialVariants }: VariantListProps) {
+  const router = useRouter();
+  const [variants, setVariants] = useState(initialVariants);
+  const [activeId, setActiveId] = useState(initialVariants[0]?.id ?? "");
   const [query, setQuery] = useState("");
   const [sortKey, setSortKey] = useState<SortKey>("created_at");
+  const [pending, startTransition] = useTransition();
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -51,6 +66,21 @@ export function VariantList({ variants }: VariantListProps) {
     [activeId, filtered, variants],
   );
 
+  const handleDelete = (id: string) => {
+    if (!window.confirm("确定删除这个版本吗？此操作无法撤销。")) return;
+    startTransition(async () => {
+      const res = await fetch(`/api/variants/${id}`, { method: "DELETE" });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok || !json.ok) {
+        toast.error((json as { error?: string }).error ?? "删除失败。");
+        return;
+      }
+      setVariants((current) => current.filter((variant) => variant.id !== id));
+      toast.success("版本已删除。");
+      router.refresh();
+    });
+  };
+
   if (variants.length === 0 || !activeVariant) {
     return null;
   }
@@ -58,7 +88,7 @@ export function VariantList({ variants }: VariantListProps) {
   const showToolbar = variants.length > TOOLBAR_THRESHOLD;
 
   return (
-    <section className="space-y-5">
+    <section className={`space-y-5 ${pending ? "pointer-events-none opacity-60" : ""}`}>
       <div>
         <p className="eyebrow-label">结果</p>
         <h2 className="mt-2 font-display text-[28px] italic leading-[1.05] text-foreground">
@@ -119,6 +149,10 @@ export function VariantList({ variants }: VariantListProps) {
                       ? `${variant.content.slice(0, 96).trim()}…`
                       : variant.content.trim();
                   const versionTag = `v.${String(filtered.length - index).padStart(3, "0")}`;
+                  const scopeLabel = formatVariantScopeLabel(
+                    variant.scope as VariantScope | null,
+                    variant.chapter_index,
+                  );
 
                   return (
                     <button
@@ -150,6 +184,11 @@ export function VariantList({ variants }: VariantListProps) {
                       </div>
 
                       <div className="flex flex-wrap gap-1.5 font-mono text-[10px] uppercase tracking-[0.06em] text-muted-foreground">
+                        {scopeLabel ? (
+                          <span className="rounded-xs border border-primary/30 bg-primary/10 px-1.5 py-0.5 text-primary">
+                            {scopeLabel}
+                          </span>
+                        ) : null}
                         <span className="rounded-xs border border-border bg-muted/60 px-1.5 py-0.5">
                           {OUTPUT_SCOPE_LABELS[variant.config.output_scope]}
                         </span>
@@ -181,6 +220,19 @@ export function VariantList({ variants }: VariantListProps) {
                   {activeVariant.title}
                 </h3>
                 <div className="mt-3 flex flex-wrap gap-1.5 font-mono text-[10px] uppercase tracking-[0.06em] text-muted-foreground">
+                  {formatVariantScopeLabel(
+                    activeVariant.scope as VariantScope | null,
+                    activeVariant.chapter_index,
+                  ) ? (
+                    <ReadingBadge
+                      label={
+                        formatVariantScopeLabel(
+                          activeVariant.scope as VariantScope | null,
+                          activeVariant.chapter_index,
+                        )!
+                      }
+                    />
+                  ) : null}
                   <ReadingBadge
                     icon={FileText}
                     label={OUTPUT_SCOPE_LABELS[activeVariant.config.output_scope]}
@@ -195,8 +247,19 @@ export function VariantList({ variants }: VariantListProps) {
                 </div>
               </div>
 
-              <div className="font-mono text-[11px] uppercase tracking-[0.10em] text-primary/85">
-                {activeVariant.word_count?.toLocaleString("zh-CN") ?? "0"} 字
+              <div className="flex flex-col items-end gap-2">
+                <div className="font-mono text-[11px] uppercase tracking-[0.10em] text-primary/85">
+                  {activeVariant.word_count?.toLocaleString("zh-CN") ?? "0"} 字
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleDelete(activeVariant.id)}
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  删除版本
+                </Button>
               </div>
             </div>
           </div>

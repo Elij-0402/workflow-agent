@@ -33,6 +33,9 @@ type ProjectCardProps = {
   onArchive?: (id: string) => void;
   onRestore?: (id: string) => void;
   onDelete?: (id: string) => void;
+  selectable?: boolean;
+  selected?: boolean;
+  onSelectChange?: (id: string, checked: boolean) => void;
 };
 
 export function ProjectCard({
@@ -40,6 +43,9 @@ export function ProjectCard({
   onArchive,
   onRestore,
   onDelete,
+  selectable = false,
+  selected = false,
+  onSelectChange,
 }: ProjectCardProps) {
   const href = session.nextHref || `/sessions/${session.id}`;
   const isDual = session.mode === "dual";
@@ -65,6 +71,16 @@ export function ProjectCard({
           </p>
         </div>
         <div className="flex items-center gap-1">
+          {selectable ? (
+            <input
+              type="checkbox"
+              checked={selected}
+              onClick={(event) => event.stopPropagation()}
+              onChange={(event) => onSelectChange?.(session.id, event.target.checked)}
+              className="relative z-20 h-4 w-4 rounded border-border"
+              aria-label={`选择 ${session.name}`}
+            />
+          ) : null}
           <CardActions
             isArchived={isArchived}
             onArchive={onArchive ? () => onArchive(session.id) : undefined}

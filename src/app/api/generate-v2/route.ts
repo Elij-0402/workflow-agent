@@ -3,7 +3,10 @@ import { z } from "zod";
 
 import { asLLMClientError } from "@/lib/llm/errors";
 import { runLLMObject } from "@/lib/llm/runtime";
+import { assertWithinRateLimit } from "@/lib/rate-limit";
+import { BlueprintSchema, emptyBlueprint } from "@/lib/blueprint/schema";
 import { composeBriefIntoPrompt } from "@/lib/prompts/brief-compose";
+import { loadActiveSession } from "@/lib/sessions/guard";
 import {
   GENERATE_FROM_BLUEPRINT_SYSTEM_PROMPT,
   GENERATE_FROM_BLUEPRINT_PROMPT_VERSION,
@@ -50,6 +53,18 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "请先确认蓝图。" }, { status: 409 });
   }
 
+  const { guard } = await loadActiveSession(supabase, bp.session_id, user.id);
+  if (!guard.ok) {
+    return NextResponse.json({ error: guard.message }, { status: guard.status });
+  }
+
+  const rateLimit = await assertWithinRateLimit(supabase, user.id);
+  if (!rateLimit.ok) {
+    return NextResponse.json({ error: rateLimit.message }, { status: rateLimit.status });
+  }
+
+  const blueprint = BlueprintSchema.parse(bp.sections ?? emptyBlueprint());
+
   let briefSection = "";
   if (body.briefId) {
     const { data: briefRow } = await supabase
@@ -81,7 +96,7 @@ export async function POST(req: Request) {
 
   try {
     const userPrompt = buildGenerateFromBlueprintUserPrompt({
-      blueprint: bp.sections,
+      blueprint,
       config: body.config,
     });
     const finalPrompt = briefSection ? `${userPrompt}\n\n${briefSection}` : userPrompt;

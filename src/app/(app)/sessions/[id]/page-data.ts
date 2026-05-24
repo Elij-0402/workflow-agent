@@ -56,8 +56,13 @@ export type DualSessionPageData = {
   variants: Array<
     Pick<
       VariantRow,
-      "id" | "title" | "scope" | "config" | "content" | "word_count" | "blueprint_id" | "created_at"
+      "id" | "title" | "scope" | "config" | "content" | "word_count" | "blueprint_id" | "created_at" | "chapter_index"
     >
+  >;
+  llmConfigured: boolean;
+  extendedAnalysesByBook: Record<
+    string,
+    Array<{ dimension: ExtendedAnalysisDimension; result: unknown }>
   >;
 };
 
@@ -76,7 +81,10 @@ export type SingleSessionPageData = {
   safeAnalyses: Array<{ dimension: LegacyAnalysisDimension; result: unknown }>;
   safeExtendedAnalyses: Array<{ dimension: ExtendedAnalysisDimension; result: unknown }>;
   safeVariants: Array<
-    Pick<VariantRow, "id" | "title" | "config" | "content" | "word_count" | "created_at">
+    Pick<
+      VariantRow,
+      "id" | "title" | "config" | "content" | "word_count" | "created_at" | "scope" | "chapter_index"
+    >
   >;
 };
 
@@ -102,7 +110,8 @@ export async function loadDualSessionPageData(params: {
     .order("position", { ascending: true });
 
   const bookIds = (books ?? []).map((book) => book.id);
-  const [chaptersResult, analysesResult, blueprintResult, variantsResult] = await Promise.all([
+  const [chaptersResult, analysesResult, blueprintResult, variantsResult, llmConfigResult] =
+    await Promise.all([
     bookIds.length
       ? supabase
           .from("chapters")
@@ -126,10 +135,11 @@ export async function loadDualSessionPageData(params: {
       .maybeSingle(),
     supabase
       .from("variants")
-      .select("id, title, scope, config, content, word_count, blueprint_id, created_at")
+      .select("id, title, scope, config, content, word_count, blueprint_id, created_at, chapter_index")
       .eq("session_id", sessionId)
       .eq("user_id", userId)
       .order("created_at", { ascending: false }),
+    supabase.from("llm_config").select("id").maybeSingle(),
   ]);
 
   const chapters = (chaptersResult.data ?? []) as DualSessionPageData["chapters"];
@@ -169,6 +179,24 @@ export async function loadDualSessionPageData(params: {
     ),
   ];
 
+  const extendedAnalysesByBook: DualSessionPageData["extendedAnalysesByBook"] = {};
+  for (const bookId of bookIds) {
+    extendedAnalysesByBook[bookId] = analyses
+      .filter(
+        (analysis) =>
+          analysis.book_id === bookId &&
+          analysis.scope === "book" &&
+          analysis.dimension in EXTENDED_ANALYSIS_DIMENSION_CONFIG &&
+          analysis.result,
+      )
+      .flatMap((analysis) => {
+        const dimension = analysis.dimension as ExtendedAnalysisDimension;
+        const config = EXTENDED_ANALYSIS_DIMENSION_CONFIG[dimension];
+        if (!config || !config.schema.safeParse(analysis.result).success) return [];
+        return [{ dimension, result: analysis.result }];
+      });
+  }
+
   const blueprintRow = blueprintResult.data;
 
   return {
@@ -183,6 +211,8 @@ export async function loadDualSessionPageData(params: {
     blueprintConfirmedAt: blueprintRow?.confirmed_at ?? null,
     blueprint: blueprintRow ? BlueprintSchema.parse(blueprintRow.sections ?? {}) : emptyBlueprint(),
     variants: (variantsResult.data ?? []) as DualSessionPageData["variants"],
+    llmConfigured: Boolean(llmConfigResult.data),
+    extendedAnalysesByBook,
   };
 }
 
@@ -219,7 +249,7 @@ export async function loadSingleSessionPageData(params: {
 
   const { data: variants } = await supabase
     .from("variants")
-    .select("id, title, config, content, word_count, created_at")
+    .select("id, title, config, content, word_count, created_at, scope, chapter_index")
     .eq("session_id", session.id)
     .eq("user_id", userId)
     .order("created_at", { ascending: false });

@@ -81,6 +81,8 @@ type VariantRow = Pick<
   StoredVariantRow,
   | "id"
   | "title"
+  | "scope"
+  | "chapter_index"
   | "config"
   | "content"
   | "word_count"

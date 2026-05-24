@@ -4,6 +4,7 @@ import { z } from "zod";
 import { validateConfirmedBlueprintForBrief } from "@/lib/brief-workflow";
 import { asLLMClientError } from "@/lib/llm/errors";
 import { streamLLMObject } from "@/lib/llm/runtime";
+import { assertWithinRateLimit } from "@/lib/rate-limit";
 import {
   OutlineSchema,
   PREVIEW_OUTLINE_PROMPT_VERSION,
@@ -13,6 +14,7 @@ import {
 } from "@/lib/prompts/preview-outline";
 import { composeBriefIntoPrompt } from "@/lib/prompts/brief-compose";
 import { sseResponse } from "@/lib/streaming/sse";
+import { loadActiveSession } from "@/lib/sessions/guard";
 import { createClient } from "@/lib/supabase/server";
 import { CreativeBriefSchema } from "@/lib/types/creative-brief";
 
@@ -48,6 +50,16 @@ export async function POST(req: Request) {
     .maybeSingle();
   if (!briefRow) {
     return NextResponse.json({ error: "未找到简报。" }, { status: 404 });
+  }
+
+  const { guard } = await loadActiveSession(supabase, briefRow.session_id, user.id);
+  if (!guard.ok) {
+    return NextResponse.json({ error: guard.message }, { status: guard.status });
+  }
+
+  const rateLimit = await assertWithinRateLimit(supabase, user.id);
+  if (!rateLimit.ok) {
+    return NextResponse.json({ error: rateLimit.message }, { status: rateLimit.status });
   }
 
   const briefParsed = CreativeBriefSchema.safeParse({

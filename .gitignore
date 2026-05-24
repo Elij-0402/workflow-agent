@@ -47,6 +47,15 @@ next-env.d.ts
 .vscode/
 .idea/
 
+# local audit / MCP screenshots
+/tmp-audit-*.png
+
+# editor / agent local config (never commit)
+.claude/settings.local.json
+
+# skills toolchain lock (optional local only)
+skills-lock.json
+
 .vercel
 
 # local-only artifacts (build logs, brainstorming companion files)

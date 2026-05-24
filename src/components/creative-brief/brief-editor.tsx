@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Save, Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -87,11 +87,17 @@ export function BriefEditor({ mode, initial }: Props) {
   const [pending, startTransition] = useTransition();
 
   const conflicts = useMemo(() => detectBriefConflicts(brief), [brief]);
+  const lastConflictToastRef = useRef("");
 
   useEffect(() => {
-    if (conflicts.length === 0) return;
-    const msg = conflicts.join("\n");
-    toast.warning(`简报中存在冲突指令：\n${msg}`, { duration: 6000 });
+    if (conflicts.length === 0) {
+      lastConflictToastRef.current = "";
+      return;
+    }
+    const signature = conflicts.join("\n");
+    if (signature === lastConflictToastRef.current) return;
+    lastConflictToastRef.current = signature;
+    toast.warning(`简报中存在冲突指令：\n${signature}`, { duration: 6000 });
   }, [conflicts]);
 
   const handleSave = () => {

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { createClient } from "@/lib/supabase/server";
+import { loadActiveSession } from "@/lib/sessions/guard";
 import { CreativeBriefSchema } from "@/lib/types/creative-brief";
 
 export const runtime = "nodejs";
@@ -71,6 +72,11 @@ export async function POST(req: Request) {
     .maybeSingle();
   if (!session) {
     return NextResponse.json({ error: "未找到对应项目。" }, { status: 404 });
+  }
+
+  const { guard } = await loadActiveSession(supabase, body.sessionId, user.id);
+  if (!guard.ok) {
+    return NextResponse.json({ error: guard.message }, { status: guard.status });
   }
 
   const { data, error } = await supabase

@@ -9,9 +9,11 @@ import {
 import { saveAnalysis } from "@/lib/analysis-store";
 import { asLLMClientError } from "@/lib/llm/errors";
 import { runLLMObject } from "@/lib/llm/runtime";
+import { assertWithinRateLimit } from "@/lib/rate-limit";
 import { getUserLLMClient } from "@/lib/llm/dispatch";
 import { ANALYSIS_TEXT_CHAR_LIMIT, ANALYSIS_DIMENSION_CONFIG } from "@/lib/prompts";
 import { wrapUntrustedNovel } from "@/lib/prompts/safety";
+import { loadActiveSession } from "@/lib/sessions/guard";
 import { createClient } from "@/lib/supabase/server";
 import { getSessionStatusAfterAnalysis, shouldEnterAnalyzingStatus } from "@/lib/session-status";
 import { LEGACY_ANALYSIS_DIMENSIONS, type LegacyAnalysisDimension } from "@/lib/types";
@@ -60,17 +62,10 @@ export async function POST(request: Request) {
     return jsonError("请求参数不正确。", 400);
   }
 
-  const { data: session, error: sessionError } = await supabase
-    .from("sessions")
-    .select("id, status, mode")
-    .eq("id", parsedBody.sessionId)
-    .eq("user_id", user.id)
-    .maybeSingle();
-
-  if (sessionError) {
-    return jsonError("读取会话失败，请稍后再试。", 500);
+  const { session, guard } = await loadActiveSession(supabase, parsedBody.sessionId, user.id);
+  if (!guard.ok) {
+    return jsonError(guard.message, guard.status);
   }
-
   if (!session) {
     return jsonError("未找到对应会话。", 404);
   }
@@ -137,6 +132,11 @@ export async function POST(request: Request) {
 
       currentStatus = "analyzing";
       statusFlipped = true;
+    }
+
+    const rateLimit = await assertWithinRateLimit(supabase, user.id);
+    if (!rateLimit.ok) {
+      throw new RouteError(rateLimit.message, rateLimit.status);
     }
 
     const result = await runLLMObject({

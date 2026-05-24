@@ -1,4 +1,3 @@
-import { generateObject } from "ai";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -9,13 +8,17 @@ import {
   resolveBookAnalysisView,
 } from "@/lib/books/content";
 import { saveAnalysis } from "@/lib/analysis-store";
+import { asLLMClientError } from "@/lib/llm/errors";
 import { getUserLLMClient } from "@/lib/llm/dispatch";
-import { isUserFixableLLMConfigMessage } from "@/lib/llm-config";
-import { resolveStructuredObjectMode } from "@/lib/llm/structured-output";
+import { runLLMObject } from "@/lib/llm/runtime";
+import { assertWithinRateLimit } from "@/lib/rate-limit";
 import {
+  CHAPTER_BRIEF_PROMPT_VERSION,
+  CHAPTER_BRIEF_SCHEMA_VERSION,
   CHAPTER_BRIEF_SYSTEM_PROMPT,
   buildChapterBriefUserPrompt,
 } from "@/lib/prompts/chapter-brief";
+import { loadActiveSessionByBookId } from "@/lib/sessions/guard";
 import { createClient } from "@/lib/supabase/server";
 import { ChapterBriefResultSchema } from "@/lib/types";
 
@@ -39,6 +42,16 @@ export async function POST(req: Request) {
     body = bodySchema.parse(await req.json());
   } catch {
     return NextResponse.json({ error: "请求参数不正确。" }, { status: 400 });
+  }
+
+  const { guard } = await loadActiveSessionByBookId(supabase, body.bookId, user.id);
+  if (!guard.ok) {
+    return NextResponse.json({ error: guard.message }, { status: guard.status });
+  }
+
+  const rateLimit = await assertWithinRateLimit(supabase, user.id);
+  if (!rateLimit.ok) {
+    return NextResponse.json({ error: rateLimit.message }, { status: rateLimit.status });
   }
 
   const [{ data: chapter }, { data: book }] = await Promise.all([
@@ -87,17 +100,24 @@ export async function POST(req: Request) {
   const dimension = analysisMode === "block-fallback" ? "block_brief" : "chapter_brief";
 
   try {
-    const result = await generateObject({
-      model: llm.openai(llm.model),
-      mode: resolveStructuredObjectMode(llm.provider),
+    const result = await runLLMObject({
+      supabase,
+      route: "/api/analyze/chapter",
+      operation: dimension,
       schema: ChapterBriefResultSchema,
       system: CHAPTER_BRIEF_SYSTEM_PROMPT,
       prompt: buildChapterBriefUserPrompt({
         chapterTitle: chapter.title,
         chapterText,
       }),
-      temperature: llm.temperature,
-      maxTokens: Math.min(2048, llm.maxTokens),
+      promptVersion: CHAPTER_BRIEF_PROMPT_VERSION,
+      schemaVersion: CHAPTER_BRIEF_SCHEMA_VERSION,
+      maxTokens: 2048,
+      cacheSeed: {
+        bookId: body.bookId,
+        chapterId: body.chapterId,
+        dimension,
+      },
     });
 
     const { error: upErr } = await saveAnalysis({
@@ -108,13 +128,13 @@ export async function POST(req: Request) {
       chapterId: body.chapterId,
       dimension,
       result: result.object,
-      llmConfigId: llm.configId,
-      promptTokens: Number.isFinite(result.usage.promptTokens)
-        ? result.usage.promptTokens
-        : null,
-      completionTokens: Number.isFinite(result.usage.completionTokens)
-        ? result.usage.completionTokens
-        : null,
+      llmConfigId: result.llm.configId,
+      promptTokens: result.usage.promptTokens,
+      completionTokens: result.usage.completionTokens,
+      promptVersion: CHAPTER_BRIEF_PROMPT_VERSION,
+      schemaVersion: CHAPTER_BRIEF_SCHEMA_VERSION,
+      estimatedCostCNY: result.estimatedCostCNY,
+      cacheKey: result.cacheKey,
     });
     if (upErr) {
       return NextResponse.json({ error: "保存分析失败。" }, { status: 500 });
@@ -122,8 +142,14 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ ok: true, result: result.object });
   } catch (e) {
-    const msg =
-      e instanceof Error && isUserFixableLLMConfigMessage(e.message) ? e.message : "章节分析失败。";
-    return NextResponse.json({ error: msg }, { status: msg === "章节分析失败。" ? 502 : 409 });
+    const clientError = asLLMClientError(e, {
+      code: "llm_request_failed",
+      userMessage: "章节分析失败。",
+      retryable: true,
+    });
+    return NextResponse.json(
+      { error: clientError.userMessage },
+      { status: clientError.userMessage === "章节分析失败。" ? 502 : 409 },
+    );
   }
 }

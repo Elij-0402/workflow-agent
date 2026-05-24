@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { createClient } from "@/lib/supabase/server";
 import { expandToChapters } from "@/lib/text/chapters";
+import { loadActiveSessionByBookId } from "@/lib/sessions/guard";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -42,6 +43,11 @@ export async function POST(req: Request) {
     .maybeSingle();
   if (!book?.cleaned_content) {
     return NextResponse.json({ error: "当前书籍内容不可用。" }, { status: 404 });
+  }
+
+  const { guard } = await loadActiveSessionByBookId(supabase, body.bookId, user.id);
+  if (!guard.ok) {
+    return NextResponse.json({ error: guard.message }, { status: guard.status });
   }
 
   type ChapterRow = {
@@ -94,7 +100,12 @@ export async function POST(req: Request) {
     }));
   }
 
-  await supabase.from("chapters").delete().eq("book_id", body.bookId).eq("user_id", user.id);
+  const { data: existingChapters } = await supabase
+    .from("chapters")
+    .select("id")
+    .eq("book_id", body.bookId)
+    .eq("user_id", user.id);
+  const existingIds = (existingChapters ?? []).map((row) => row.id);
 
   const { error: insertErr } = await supabase.from("chapters").insert(
     chapters.map((c) => ({
@@ -109,6 +120,17 @@ export async function POST(req: Request) {
   );
   if (insertErr) {
     return NextResponse.json({ error: "章节写入失败。" }, { status: 500 });
+  }
+
+  if (existingIds.length > 0) {
+    const { error: deleteErr } = await supabase
+      .from("chapters")
+      .delete()
+      .in("id", existingIds)
+      .eq("user_id", user.id);
+    if (deleteErr) {
+      return NextResponse.json({ error: "章节替换失败。" }, { status: 500 });
+    }
   }
 
   await supabase
