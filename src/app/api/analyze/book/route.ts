@@ -2,6 +2,11 @@ import { generateObject } from "ai";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
+import {
+  getBookAnalysisBlockingReason,
+  getBookAnalysisMode,
+  getBookProviderCompatibility,
+} from "@/lib/books/content";
 import { getUserLLMClient } from "@/lib/llm/dispatch";
 import { resolveStructuredObjectMode } from "@/lib/llm/structured-output";
 import {
@@ -18,6 +23,26 @@ export const runtime = "nodejs";
 export const maxDuration = 180;
 
 const bodySchema = z.object({ bookId: z.string().uuid() });
+
+function filterBriefEntries(entries: BriefEntry[]) {
+  const seen = new Set<string>();
+  return entries.filter((entry) => {
+    const summary = (entry.brief.summary ?? "").trim();
+    const eventCount = Array.isArray(entry.brief.events) ? entry.brief.events.length : 0;
+    if (summary.length < 20 && eventCount === 0) {
+      return false;
+    }
+    const dedupeKey = JSON.stringify({
+      summary,
+      events: (entry.brief.events ?? []).slice(0, 3),
+    });
+    if (seen.has(dedupeKey)) {
+      return false;
+    }
+    seen.add(dedupeKey);
+    return true;
+  });
+}
 
 export async function POST(req: Request) {
   const supabase = await createClient();
@@ -36,7 +61,7 @@ export async function POST(req: Request) {
   const [{ data: book }, { data: chapters }] = await Promise.all([
     supabase
       .from("books")
-      .select("id, title")
+      .select("id, title, metadata")
       .eq("id", body.bookId)
       .eq("user_id", user.id)
       .maybeSingle(),
@@ -49,9 +74,16 @@ export async function POST(req: Request) {
   ]);
 
   if (!book) return NextResponse.json({ error: "未找到书籍。" }, { status: 404 });
+  const blockingReason = getBookAnalysisBlockingReason(book.metadata as Record<string, unknown> | null);
+  if (blockingReason) {
+    return NextResponse.json({ error: blockingReason }, { status: 409 });
+  }
   if (!chapters?.length) {
     return NextResponse.json({ error: "当前书籍没有章节。" }, { status: 400 });
   }
+
+  const analysisMode = getBookAnalysisMode(book.metadata as Record<string, unknown> | null);
+  const briefDimension = analysisMode === "block-fallback" ? "block_brief" : "chapter_brief";
 
   const { data: briefs } = await supabase
     .from("analyses")
@@ -59,13 +91,18 @@ export async function POST(req: Request) {
     .eq("book_id", body.bookId)
     .eq("user_id", user.id)
     .eq("scope", "chapter")
-    .eq("dimension", "chapter_brief");
+    .eq("dimension", briefDimension);
 
   const briefByChapter = new Map((briefs ?? []).map((b) => [b.chapter_id as string, b.result]));
   const missing = chapters.filter((c) => !briefByChapter.has(c.id));
   if (missing.length > 0) {
     return NextResponse.json(
-      { error: `还有 ${missing.length} 个章节未完成 chapter_brief。` },
+      {
+        error:
+          analysisMode === "block-fallback"
+            ? `还有 ${missing.length} 个片段未完成 block_brief。`
+            : `还有 ${missing.length} 个章节未完成 chapter_brief。`,
+      },
       { status: 409 },
     );
   }
@@ -77,10 +114,21 @@ export async function POST(req: Request) {
       brief: parsed.success ? parsed.data : { events: [] },
     };
   });
-  const sampled = pickBriefsForSynthesis(entries);
+  const filteredEntries = filterBriefEntries(entries);
+  const sampled = pickBriefsForSynthesis(filteredEntries);
 
   try {
     const llm = await getUserLLMClient(supabase);
+    const compatibility = getBookProviderCompatibility(
+      book.metadata as Record<string, unknown> | null,
+      llm.provider,
+    );
+    if (compatibility.status === "incompatible") {
+      return NextResponse.json(
+        { error: compatibility.reason ?? "当前模型不兼容该内容类型，请切换模型后再试。" },
+        { status: 409 },
+      );
+    }
     const result = await generateObject({
       model: llm.openai(llm.model),
       mode: resolveStructuredObjectMode(llm.provider),

@@ -28,11 +28,24 @@ import {
   type BlueprintSection,
   type BlueprintStatus,
 } from "@/lib/blueprint/schema";
+import {
+  getBookAnalysisBlockingReason,
+  getBookAnalysisMode,
+  getBookChapterGate,
+  getBookProviderCompatibility,
+  type AnalysisMode,
+} from "@/lib/books/content";
 import type {
   ChapterBriefResult,
   VariantRow as StoredVariantRow,
 } from "@/lib/types";
+import { cn } from "@/lib/utils";
+import { ANALYSIS_CAPABILITY_GUIDE } from "@/lib/workbench/analysis-display";
 import { deriveHint } from "@/lib/workbench/derive-hint";
+import {
+  deriveUploadBookDisplay,
+  deriveUploadStepSummary,
+} from "@/lib/workbench/upload-health";
 
 import { runBatch } from "./chapter-batch";
 
@@ -44,6 +57,7 @@ type BookRow = {
   position: number;
   word_count: number | null;
   chapter_count: number | null;
+  metadata?: Record<string, unknown>;
 };
 
 type ChapterRow = {
@@ -59,6 +73,7 @@ type ChapterRow = {
 type BriefRow = {
   book_id: string;
   chapter_id: string;
+  dimension: "chapter_brief" | "block_brief";
   result: ChapterBriefResult;
 };
 
@@ -122,6 +137,7 @@ export function WorkbenchClient(props: Props) {
   );
   const [blueprint, setBlueprint] = useState<Blueprint>(props.blueprint);
   const [generateOpen, setGenerateOpen] = useState(false);
+  const [analysisGuideExpanded, setAnalysisGuideExpanded] = useState(false);
 
   const [costModal, setCostModal] = useState<{
     open: boolean;
@@ -134,6 +150,25 @@ export function WorkbenchClient(props: Props) {
 
   const a = props.books[0] ?? null;
   const b = props.books[1] ?? null;
+  const bookModes = useMemo(
+    () =>
+      new Map(props.books.map((book) => [book.id, getBookAnalysisMode(book.metadata)])),
+    [props.books],
+  );
+  const bookGates = useMemo(
+    () =>
+      new Map(
+        props.books.map((book) => [
+          book.id,
+          {
+            gate: getBookChapterGate(book.metadata),
+            blockingReason: getBookAnalysisBlockingReason(book.metadata),
+            compatibility: getBookProviderCompatibility(book.metadata),
+          },
+        ]),
+      ),
+    [props.books],
+  );
 
   const synthesisSet = useMemo(
     () => new Set(props.bookSynthesisByBook),
@@ -164,15 +199,20 @@ export function WorkbenchClient(props: Props) {
         const total = props.chapters.filter(
           (chapter) => chapter.book_id === book.id,
         ).length;
+        const expectedDimension = bookModes.get(book.id) === "block-fallback" ? "block_brief" : "chapter_brief";
         const analyzed = props.briefs.filter(
-          (brief) => brief.book_id === book.id,
+          (brief) => brief.book_id === book.id && brief.dimension === expectedDimension,
         ).length;
         return { bookId: book.id, total, analyzed };
       }),
-    [props.books, props.chapters, props.briefs],
+    [props.books, props.chapters, props.briefs, bookModes],
   );
 
   const hasBothBooks = props.books.length === 2;
+  const uploadSummary = useMemo(
+    () => deriveUploadStepSummary(props.books),
+    [props.books],
+  );
   const allChaptersAnalyzed =
     hasBothBooks &&
     chapterTotals.length === 2 &&
@@ -187,7 +227,7 @@ export function WorkbenchClient(props: Props) {
   const compareDone = blueprintStatus === "confirmed";
   const hasVariants = props.variants.length > 0;
 
-  const recommendedStep: FlowStep = !hasBothBooks
+  const recommendedStep: FlowStep = !hasBothBooks || !uploadSummary.canEnterAnalysis
     ? "upload"
     : !analysisDone
       ? "analysis"
@@ -198,6 +238,7 @@ export function WorkbenchClient(props: Props) {
   const [activeStep, setActiveStep] = useState<FlowStep>(() =>
     resolveStep(props.initialStep, recommendedStep, {
       hasBothBooks,
+      canEnterAnalysis: uploadSummary.canEnterAnalysis,
       analysisDone,
       compareDone,
     }),
@@ -218,11 +259,17 @@ export function WorkbenchClient(props: Props) {
   useEffect(() => {
     const next = resolveStep(props.initialStep, recommendedStep, {
       hasBothBooks,
+      canEnterAnalysis: uploadSummary.canEnterAnalysis,
       analysisDone,
       compareDone,
     });
     setActiveStep((current) =>
-      isStepAllowed(current, { hasBothBooks, analysisDone, compareDone })
+      isStepAllowed(current, {
+        hasBothBooks,
+        canEnterAnalysis: uploadSummary.canEnterAnalysis,
+        analysisDone,
+        compareDone,
+      })
         ? current
         : next,
     );
@@ -230,6 +277,7 @@ export function WorkbenchClient(props: Props) {
     props.initialStep,
     recommendedStep,
     hasBothBooks,
+    uploadSummary.canEnterAnalysis,
     analysisDone,
     compareDone,
   ]);
@@ -265,6 +313,7 @@ export function WorkbenchClient(props: Props) {
     compareDone,
     variantCount: props.variants.length,
     chapterTotals,
+    uploadDescription: uploadSummary.description,
   });
 
   const disabledKeys = stageItems
@@ -272,6 +321,7 @@ export function WorkbenchClient(props: Props) {
       (item) =>
         !isStepAllowed(item.key as FlowStep, {
           hasBothBooks,
+          canEnterAnalysis: uploadSummary.canEnterAnalysis,
           analysisDone,
           compareDone,
         }),
@@ -279,6 +329,11 @@ export function WorkbenchClient(props: Props) {
     .map((item) => item.key);
 
   async function runChapter(bookId: string, chapterId: string) {
+    const gate = bookGates.get(bookId);
+    if (gate?.blockingReason) {
+      toast.error(gate.blockingReason);
+      return;
+    }
     setChapterStatus((state) => ({ ...state, [chapterId]: "running" }));
     try {
       const response = await fetch("/api/analyze/chapter", {
@@ -301,6 +356,11 @@ export function WorkbenchClient(props: Props) {
   }
 
   function askBatchConfirmation(bookId: string) {
+    const gate = bookGates.get(bookId);
+    if (gate?.blockingReason) {
+      toast.error(gate.blockingReason);
+      return;
+    }
     const targets = props.chapters
       .filter((chapter) => chapter.book_id === bookId)
       .filter(
@@ -448,6 +508,11 @@ export function WorkbenchClient(props: Props) {
   }, [batchState, props.chapters]);
 
   async function synthesizeBook(bookId: string) {
+    const gate = bookGates.get(bookId);
+    if (gate?.blockingReason) {
+      toast.error(gate.blockingReason);
+      return;
+    }
     const response = await fetch("/api/analyze/book", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -463,7 +528,14 @@ export function WorkbenchClient(props: Props) {
   }
 
   function navigateToStep(step: FlowStep) {
-    if (!isStepAllowed(step, { hasBothBooks, analysisDone, compareDone }))
+    if (
+      !isStepAllowed(step, {
+        hasBothBooks,
+        canEnterAnalysis: uploadSummary.canEnterAnalysis,
+        analysisDone,
+        compareDone,
+      })
+    )
       return;
     setActiveStep(step);
     router.replace(
@@ -481,6 +553,9 @@ export function WorkbenchClient(props: Props) {
             (chapter) => chapter.book_id === a.id,
           )}
           briefs={props.briefs.filter((brief) => brief.book_id === a.id)}
+          analysisMode={bookModes.get(a.id) ?? "chaptered"}
+          gateStatus={bookGates.get(a.id)?.gate.status ?? "pass"}
+          compatibilityStatus={bookGates.get(a.id)?.compatibility.status ?? "supported"}
           chapterStatus={chapterStatus}
           synthesisDone={synthesisSet.has(a.id)}
           blueprintLocked={blueprintStatus === "confirmed"}
@@ -511,6 +586,9 @@ export function WorkbenchClient(props: Props) {
             (chapter) => chapter.book_id === b.id,
           )}
           briefs={props.briefs.filter((brief) => brief.book_id === b.id)}
+          analysisMode={bookModes.get(b.id) ?? "chaptered"}
+          gateStatus={bookGates.get(b.id)?.gate.status ?? "pass"}
+          compatibilityStatus={bookGates.get(b.id)?.compatibility.status ?? "supported"}
           chapterStatus={chapterStatus}
           synthesisDone={synthesisSet.has(b.id)}
           blueprintLocked={blueprintStatus === "confirmed"}
@@ -539,7 +617,7 @@ export function WorkbenchClient(props: Props) {
   return (
     <div className="app-page">
       <PageHeader
-        label="task"
+        label="任务"
         title={props.session.name}
         description={
           a && b
@@ -583,15 +661,21 @@ export function WorkbenchClient(props: Props) {
           <div className="surface-panel flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-[13px] leading-6 text-muted-foreground">
               {hasBothBooks
-                ? "两本参考小说都已上传。现在可以开始分析章节和整书素材。"
+                ? uploadSummary.footerText
                 : "还缺 1 本参考小说。补齐后才会开放分析步骤。"}
             </p>
-            <Button
-              onClick={() => navigateToStep("analysis")}
-              disabled={!hasBothBooks}
-            >
-              开始分析
-            </Button>
+            {uploadSummary.hasBlocked ? (
+              <Button asChild variant="outline">
+                <Link href={`/sessions/${props.session.id}`}>{uploadSummary.actionLabel}</Link>
+              </Button>
+            ) : (
+              <Button
+                onClick={() => navigateToStep("analysis")}
+                disabled={!uploadSummary.canEnterAnalysis}
+              >
+                {uploadSummary.actionLabel}
+              </Button>
+            )}
           </div>
         </section>
       ) : null}
@@ -599,8 +683,12 @@ export function WorkbenchClient(props: Props) {
       {activeStep === "analysis" ? (
         <section className="space-y-5">
           <StepIntro
-            title="第 2 步 · 分析两本参考小说"
-            description="先把两本参考书的章节分析完，再做整书汇总。分析完成后，系统会开放双书对比和融合蓝图。"
+            title="第 2 步 · 拆解两本参考小说的结构、人物与叙事素材"
+            description="系统会先分别拆解每本参考书，优先按章节分析；若导入体检判断章节结构不稳，则自动改为分段分析。完成两本书的结构化摘要后，再进入整书汇总与后续对比整理。"
+          />
+          <AnalysisCapabilityPanel
+            expanded={analysisGuideExpanded}
+            onToggle={() => setAnalysisGuideExpanded((value) => !value)}
           />
           <HintBanner hint={hint} />
           {batchState ? (
@@ -723,8 +811,8 @@ export function WorkbenchClient(props: Props) {
           <div className="surface-panel flex flex-col gap-4 p-6">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <p className="eyebrow-label">generation</p>
-                <h2 className="mt-2 text-[20px] font-semibold leading-tight text-foreground">
+                <p className="eyebrow-label">生成阶段</p>
+                <h2 className="text-[20px] font-semibold leading-tight text-foreground">
                   生成结果
                 </h2>
                 <p className="mt-2 max-w-2xl text-[13px] leading-6 text-muted-foreground">
@@ -801,7 +889,12 @@ export function WorkbenchClient(props: Props) {
 function resolveStep(
   initialStep: FlowStep | undefined,
   fallback: FlowStep,
-  flags: { hasBothBooks: boolean; analysisDone: boolean; compareDone: boolean },
+  flags: {
+    hasBothBooks: boolean;
+    canEnterAnalysis: boolean;
+    analysisDone: boolean;
+    compareDone: boolean;
+  },
 ) {
   if (initialStep && isStepAllowed(initialStep, flags)) {
     return initialStep;
@@ -811,10 +904,15 @@ function resolveStep(
 
 function isStepAllowed(
   step: FlowStep,
-  flags: { hasBothBooks: boolean; analysisDone: boolean; compareDone: boolean },
+  flags: {
+    hasBothBooks: boolean;
+    canEnterAnalysis: boolean;
+    analysisDone: boolean;
+    compareDone: boolean;
+  },
 ) {
   if (step === "upload") return true;
-  if (step === "analysis") return flags.hasBothBooks;
+  if (step === "analysis") return flags.hasBothBooks && flags.canEnterAnalysis;
   if (step === "compare") return flags.analysisDone;
   return flags.compareDone;
 }
@@ -825,12 +923,14 @@ function getStageItems({
   compareDone,
   variantCount,
   chapterTotals,
+  uploadDescription,
 }: {
   hasBothBooks: boolean;
   analysisDone: boolean;
   compareDone: boolean;
   variantCount: number;
   chapterTotals: Array<{ bookId: string; total: number; analyzed: number }>;
+  uploadDescription: string;
 }): WorkflowStageItem[] {
   const totalChapters = chapterTotals.reduce(
     (sum, item) => sum + item.total,
@@ -845,9 +945,7 @@ function getStageItems({
     {
       key: "upload",
       label: "上传",
-      description: hasBothBooks
-        ? "两本参考小说都已上传。"
-        : "还需要补齐两本参考小说。",
+      description: hasBothBooks ? uploadDescription : "还需要补齐两本参考小说。",
       state: hasBothBooks ? "done" : "current",
     },
     {
@@ -899,6 +997,144 @@ function StepIntro({
   );
 }
 
+function AnalysisCapabilityPanel({
+  expanded,
+  onToggle,
+}: {
+  expanded: boolean;
+  onToggle: () => void;
+}) {
+  const guide = ANALYSIS_CAPABILITY_GUIDE;
+
+  return (
+    <div className="surface-panel p-5">
+      <div className="flex flex-col gap-3 border-b border-dashed border-border/60 pb-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="space-y-2">
+          <p className="eyebrow-label">分析能力说明</p>
+          <h3 className="text-[18px] font-semibold leading-tight text-foreground">
+            当前更适合做创作拆解，不是全维度精读
+          </h3>
+          <p className="max-w-3xl text-[13px] leading-7 text-muted-foreground">
+            {guide.shortSummary}
+          </p>
+          <p className="max-w-3xl text-[12px] leading-6 text-muted-foreground">
+            {guide.positioning}
+          </p>
+        </div>
+        <Button variant="outline" size="sm" onClick={onToggle}>
+          {expanded ? "收起完整说明" : "查看完整说明"}
+        </Button>
+      </div>
+
+      <div className="mt-4 grid gap-4 lg:grid-cols-3">
+        <InfoListCard
+          title="适合分析"
+          tone="normal"
+          items={guide.suitable}
+          footer="结构型信息相对稳定，适合先建立整书结构画像。"
+        />
+        <InfoListCard
+          title="部分支持"
+          tone="warning"
+          items={guide.partial}
+          footer="风格型信息可作参考，但不建议直接当作最终判断。"
+        />
+        <InfoListCard
+          title="建议人工复核"
+          tone="blocked"
+          items={guide.reviewNeeded}
+          footer="深层文学判断与长程伏线整理，仍建议结合人工精读。"
+        />
+      </div>
+
+      <div className="mt-4 grid gap-4 lg:grid-cols-2">
+        <div className="rounded-[4px] border border-border/70 bg-background/40 p-4">
+          <p className="text-[13px] font-medium text-foreground">双书互动流程</p>
+          <div className="mt-3 space-y-3">
+            <StageLine index="01" text={guide.processStages[0]} />
+            <StageLine index="02" text={guide.processStages[1]} />
+          </div>
+          <p className="mt-3 text-[12px] leading-6 text-muted-foreground">
+            两本书之间的互动、互补和冲突，不会在本步直接生成，而是在下一步“对比”中整理。
+          </p>
+        </div>
+        <div className="rounded-[4px] border border-border/70 bg-background/40 p-4">
+          <p className="text-[13px] font-medium text-foreground">结果可信度说明</p>
+          <ul className="mt-3 space-y-2 text-[12px] leading-6 text-muted-foreground">
+            {guide.trustNotes.map((item) => (
+              <li key={item}>• {item}</li>
+            ))}
+          </ul>
+          <div className="mt-3 rounded-[4px] border border-border/60 bg-background/50 p-3 text-[12px] text-muted-foreground">
+            结果预期：结构型信息相对稳定，风格型信息参考使用，深层文学判断需要人工复核。
+          </div>
+        </div>
+      </div>
+
+      {expanded ? (
+        <div className="mt-4 rounded-[4px] border border-border/70 bg-background/40 p-4">
+          <p className="text-[13px] font-medium text-foreground">推荐人工复核场景</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {guide.reviewScenarios.map((item) => (
+              <span
+                key={item}
+                className="rounded-full border border-border/70 px-2.5 py-1 text-[12px] text-muted-foreground"
+              >
+                {item}
+              </span>
+            ))}
+          </div>
+          <p className="mt-3 text-[12px] leading-6 text-muted-foreground">
+            批量分析只负责基础分析，不代表自动完成全部扩展维度。扩展分析适合在完成基础拆解后按需启用。
+          </p>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function InfoListCard({
+  title,
+  items,
+  footer,
+  tone,
+}: {
+  title: string;
+  items: string[];
+  footer: string;
+  tone: "normal" | "warning" | "blocked";
+}) {
+  return (
+    <div
+      className={cn(
+        "rounded-[4px] border p-4",
+        tone === "blocked"
+          ? "border-destructive/30 bg-destructive/5"
+          : tone === "warning"
+            ? "border-amber-400/30 bg-amber-500/5"
+            : "border-border/70 bg-background/40",
+      )}
+    >
+      <p className="text-[13px] font-medium text-foreground">{title}</p>
+      <ul className="mt-3 space-y-2 text-[12px] leading-6 text-muted-foreground">
+        {items.map((item) => (
+          <li key={item}>• {item}</li>
+        ))}
+      </ul>
+      <p className="mt-3 text-[12px] leading-6 text-muted-foreground">{footer}</p>
+    </div>
+  );
+}
+
+function StageLine({ index, text }: { index: string; text: string }) {
+  return (
+    <div className="flex items-start gap-3">
+      <span className="font-mono text-[11px] text-primary/80">{index}</span>
+      <p className="text-[12px] leading-6 text-muted-foreground">{text}</p>
+    </div>
+  );
+}
+
 function UploadBookCard({
   label,
   book,
@@ -914,16 +1150,20 @@ function UploadBookCard({
     );
   }
 
+  const display = deriveUploadBookDisplay(book);
+  const bookLabel = label === "A" ? "参考书 1" : "参考书 2";
+  const serialLabel = label === "A" ? "一" : "二";
+
   return (
     <div className="surface-panel flex min-h-[220px] flex-col gap-4 p-6">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <p className="eyebrow-label">book {label}</p>
+          <p className="eyebrow-label">{bookLabel}</p>
           <h3 className="mt-2 text-[20px] font-semibold leading-tight text-foreground">
-            {`参考书 ${label === "A" ? "1" : "2"} · ${book.title}`}
+            {`${bookLabel} · ${book.title}`}
           </h3>
         </div>
-        <span className="font-mono text-[24px] text-primary/50">{label}</span>
+        <span className="font-mono text-[24px] text-primary/50">{serialLabel}</span>
       </div>
       <div className="grid gap-3 sm:grid-cols-2">
         <Stat
@@ -933,19 +1173,83 @@ function UploadBookCard({
         <Stat
           label="章节"
           value={book.chapter_count?.toLocaleString("zh-CN") ?? "待切章"}
+          note={display.chapterWarning}
         />
+        <Stat
+          label="分析方式"
+          value={display.analysisMethodLabel}
+          note={display.analysisMethodHint}
+          tone={display.analysisMode === "block-fallback" ? "fallback" : "normal"}
+        />
+        <Stat
+          label="分析准入"
+          value={display.accessLabel}
+          note={display.accessHint}
+          tone={display.tone}
+        />
+      </div>
+      <div
+        className={cn(
+          "rounded-[3px] border px-4 py-3",
+          display.tone === "blocked"
+            ? "border-destructive/35 bg-destructive/8"
+            : display.tone === "warning"
+              ? "border-amber-400/35 bg-amber-500/8"
+              : display.tone === "fallback"
+                ? "border-sky-400/30 bg-sky-500/8"
+                : "border-border/70 bg-background/50",
+        )}
+      >
+        <p className="font-mono text-[10.5px] tracking-[0.10em] text-primary/80">
+          文本体检
+        </p>
+        <p className="mt-2 text-[14px] font-medium leading-6 text-foreground">
+          {display.healthHeadline}
+        </p>
+        <p className="mt-1 text-[13px] leading-6 text-muted-foreground">
+          {display.healthDetail}
+        </p>
+        <p className="mt-3 text-[12px] leading-6 text-muted-foreground">
+          {`内容类型：${display.contentTypeLabel} · 模型适配：${display.modelFitLabel}`}
+        </p>
       </div>
     </div>
   );
 }
 
-function Stat({ label, value }: { label: string; value: string }) {
+function Stat({
+  label,
+  value,
+  note,
+  tone = "normal",
+}: {
+  label: string;
+  value: string;
+  note?: string | null;
+  tone?: "normal" | "warning" | "blocked" | "fallback";
+}) {
   return (
     <div className="rounded-[3px] border border-border/70 bg-background/50 px-4 py-3">
-      <p className="font-mono text-[10.5px] uppercase tracking-[0.10em] text-primary/80">
+      <p className="font-mono text-[10.5px] tracking-[0.10em] text-primary/80">
         {label}
       </p>
-      <p className="mt-1 text-[13px] text-foreground">{value}</p>
+      <p
+        className={cn(
+          "mt-1 text-[13px] font-medium",
+          tone === "blocked"
+            ? "text-destructive"
+            : tone === "warning"
+              ? "text-amber-300"
+              : tone === "fallback"
+                ? "text-sky-300"
+                : "text-foreground",
+        )}
+      >
+        {value}
+      </p>
+      {note ? (
+        <p className="mt-1 text-[12px] leading-5 text-muted-foreground">{note}</p>
+      ) : null}
     </div>
   );
 }

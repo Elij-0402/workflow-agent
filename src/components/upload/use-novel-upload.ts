@@ -21,7 +21,7 @@ export function useNovelUpload() {
   async function uploadNovel(
     input: UploadNovelInput,
   ): Promise<
-    | { ok: true; sessionId: string; redirectTo: string; message?: string }
+    | { ok: true; sessionId: string; redirectTo: string; message?: string; warnings?: string[] }
     | { ok: false; error: string }
   > {
     const fileError = validateUploadFile({
@@ -81,6 +81,7 @@ export function useNovelUpload() {
         sessionId: initResult.sessionId,
         redirectTo: finalizeResult.redirectTo,
         message: finalizeResult.message,
+        warnings: finalizeResult.warnings,
       };
     } catch {
       return { ok: false, error: "上传失败，请稍后重试。" };

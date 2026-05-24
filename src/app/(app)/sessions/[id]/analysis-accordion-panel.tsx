@@ -33,10 +33,10 @@ type AnalysisRecord = {
 };
 
 const EXTENDED_TOKEN: Record<ExtendedAnalysisDimension, string> = {
-  prose_craft: "prose",
-  emotion_arc: "emotion",
-  pacing_map: "pacing",
-  suspense_grid: "suspense",
+  prose_craft: "写作技法",
+  emotion_arc: "情感曲线",
+  pacing_map: "节奏图谱",
+  suspense_grid: "悬念分布",
 };
 
 const EXTENDED_HELP: Record<ExtendedAnalysisDimension, string> = {
@@ -86,12 +86,12 @@ function getLegacyStatusCopy(state: AnalysisState) {
 }
 
 function getExtendedStatusCopy(state: AnalysisState) {
-  if (state === "done") return { label: "// done", className: "text-flash", glyph: "●" };
+  if (state === "done") return { label: "已完成", className: "text-flash", glyph: "●" };
   if (state === "loading") {
-    return { label: "// running", className: "text-primary animate-pulse", glyph: "◐" };
+    return { label: "分析中", className: "text-primary animate-pulse", glyph: "◐" };
   }
-  if (state === "error") return { label: "// error", className: "text-destructive", glyph: "✕" };
-  return { label: "// pending", className: "text-muted-foreground", glyph: "○" };
+  if (state === "error") return { label: "失败", className: "text-destructive", glyph: "✕" };
+  return { label: "待开始", className: "text-muted-foreground", glyph: "○" };
 }
 
 function getLegacyDimensionSummary(dimension: LegacyAnalysisDimension, item: DimensionStatus) {
@@ -310,7 +310,7 @@ function LegacyAnalysisAccordion({
                     onClick={() => {
                       if (item.state === "done" && typeof window !== "undefined") {
                         const ok = window.confirm(
-                          `重新分析「${DIMENSION_LABELS[dimension]}」将消耗 BYOK 配额。继续？`,
+                          `重新分析「${DIMENSION_LABELS[dimension]}」将消耗模型配额。继续？`,
                         );
                         if (!ok) return;
                       }
@@ -437,13 +437,12 @@ function ExtendedAnalysisAccordion({
   return (
     <section id="extended-analysis-panel" className="space-y-5">
       <div className="space-y-3">
-        <p className="eyebrow-label">extended analysis</p>
+        <p className="eyebrow-label">扩展分析</p>
         <h2 className="font-display text-[28px] italic leading-[1.05] text-foreground">
           扩展分析
         </h2>
         <p className="max-w-2xl text-[14px] leading-7 text-muted-foreground">
-          按需启用更深层的写作技法、情感曲线、节奏与悬念分析。这些维度会消耗额外
-          token，按需勾选。已完成 {doneCount} / {dimensions.length}。
+          按需启用更深层的写作技法、情感曲线、节奏与悬念分析。这些维度会消耗额外模型调用成本，按需启用即可。已完成 {doneCount} / {dimensions.length}。
         </p>
       </div>
 
@@ -457,8 +456,8 @@ function ExtendedAnalysisAccordion({
               <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                 <div className="min-w-0 space-y-2">
                   <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                    <span className="font-mono text-[10.5px] uppercase tracking-[0.14em] text-primary/85">
-                      {`// ${EXTENDED_TOKEN[dimension]}`}
+                    <span className="text-[12px] font-medium text-primary/85">
+                      {EXTENDED_TOKEN[dimension]}
                     </span>
                     <span className={cn("font-mono text-[11px]", meta.className)}>
                       {meta.glyph} {meta.label}
@@ -480,7 +479,7 @@ function ExtendedAnalysisAccordion({
                     onClick={() => {
                       if (item.state === "done" && typeof window !== "undefined") {
                         const ok = window.confirm(
-                          `重新分析「${DIMENSION_LABELS[dimension]}」将消耗 BYOK 配额。继续？`,
+                          `重新分析「${DIMENSION_LABELS[dimension]}」将消耗模型配额。继续？`,
                         );
                         if (!ok) return;
                       }

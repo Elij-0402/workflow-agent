@@ -18,19 +18,17 @@ export function FilterBar({ options, value, onChange }: Props) {
 
   return (
     <div className="flex flex-wrap items-center gap-2 border-b border-dashed border-border/60 px-3 py-2 text-[12px]">
-      <span className="font-mono text-[10.5px] uppercase tracking-[0.12em] text-primary/80">
-        {"// filter"}
+      <span className="text-[12px] font-medium text-primary/85">
+        筛选：
       </span>
       <Multi
-        label="characters"
-        zh="人物"
+        label="人物"
         all={options.characters}
         selected={value.characters}
         onChange={(characters) => onChange({ ...value, characters })}
       />
       <Multi
-        label="conflicts"
-        zh="冲突"
+        label="冲突"
         all={options.conflicts}
         selected={value.conflicts}
         onChange={(conflicts) => onChange({ ...value, conflicts })}
@@ -44,10 +42,10 @@ export function FilterBar({ options, value, onChange }: Props) {
       {hasFilter ? (
         <button
           type="button"
-          className="font-mono text-[10.5px] uppercase tracking-[0.10em] text-muted-foreground hover:text-primary"
+          className="text-[12px] text-muted-foreground hover:text-primary"
           onClick={() => onChange({ characters: [], conflicts: [], themeKeyword: "" })}
         >
-          $ clear
+          清空筛选
         </button>
       ) : null}
     </div>
@@ -56,13 +54,11 @@ export function FilterBar({ options, value, onChange }: Props) {
 
 function Multi({
   label,
-  zh,
   all,
   selected,
   onChange,
 }: {
   label: string;
-  zh: string;
   all: string[];
   selected: string[];
   onChange: (v: string[]) => void;
@@ -70,22 +66,22 @@ function Multi({
   return (
     <details className="relative">
       <summary
-        className={`cursor-pointer rounded-[2px] border px-2 py-1 font-mono text-[11px] uppercase tracking-[0.08em] transition-colors ${
+        className={`cursor-pointer rounded-[2px] border px-2 py-1 text-[12px] transition-colors ${
           selected.length > 0
             ? "border-primary bg-primary/10 text-primary"
             : "border-border text-muted-foreground hover:border-primary/60 hover:text-foreground"
         }`}
       >
-        [ {label}
-        {selected.length > 0 ? ` · ${selected.length}` : ""} ]
+        {label}
+        {selected.length > 0 ? `（${selected.length}）` : ""}
       </summary>
       <div className="absolute z-10 mt-1 max-h-60 w-52 overflow-auto rounded-[3px] border border-border bg-popover p-2 shadow-panel">
-        <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.12em] text-primary/70">
-          {`// ${zh}`}
+        <p className="mb-2 text-[12px] font-medium text-primary/80">
+          {label}
         </p>
         {all.length === 0 ? (
-          <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
-            {"// no options"}
+          <p className="text-[12px] text-muted-foreground">
+            暂无可选项
           </p>
         ) : null}
         {all.map((opt) => {

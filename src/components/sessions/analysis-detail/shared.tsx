@@ -10,8 +10,8 @@ import {
 
 export function InvalidResultNotice() {
   return (
-    <p className="bg-destructive/8 rounded-[3px] border border-destructive/40 px-3 py-3 font-mono text-[12px] uppercase tracking-[0.08em] text-destructive">
-      {"// schema invalid — please rerun this dimension"}
+    <p className="rounded-[3px] border border-destructive/40 bg-destructive/8 px-3 py-3 text-[12px] text-destructive">
+      当前结果结构异常，请重新运行这一项分析。
     </p>
   );
 }
@@ -27,7 +27,7 @@ export function DetailBlock({
 }) {
   return (
     <div className={className}>
-      <p className="data-label">{`// ${label}`}</p>
+      <p className="data-label">{label}</p>
       <p className="mt-2 rounded-[3px] border border-border bg-background/40 px-3 py-2 text-foreground">
         {value}
       </p>
@@ -40,8 +40,8 @@ export function SectionTitle({ title, token }: { title: string; token?: string }
     <div className="flex items-baseline gap-3">
       <h4 className="font-display text-[16px] italic text-foreground">{title}</h4>
       {token ? (
-        <span className="font-mono text-[10.5px] uppercase tracking-[0.10em] text-primary/70">
-          {`// ${token}`}
+        <span className="text-[11px] text-primary/75">
+          {token}
         </span>
       ) : null}
     </div>

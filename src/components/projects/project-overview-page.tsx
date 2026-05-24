@@ -1,6 +1,7 @@
 import type { ProjectOverview } from "@/lib/projects/overview";
 
 import { EditorialRecommendationPanel } from "./editorial-recommendation-panel";
+import { ImportHealthPanel } from "./import-health-panel";
 import { ProjectKeyResults } from "./project-key-results";
 import { ProjectModuleNav } from "./project-module-nav";
 import { ProjectOverviewHeader } from "./project-overview-header";
@@ -13,6 +14,7 @@ type ProjectOverviewPageProps = {
     id: string;
     title: string;
     chapter_count: number | null;
+    metadata: Record<string, unknown>;
   }>;
 };
 
@@ -54,6 +56,8 @@ export function ProjectOverviewPage({
           </section>
         </div>
       </div>
+
+      <ImportHealthPanel books={books} />
 
       <section className="grid gap-6 xl:grid-cols-[minmax(0,1.15fr)_minmax(320px,.85fr)]">
         <div className="surface-panel p-6">

@@ -2,14 +2,20 @@ import { generateObject } from "ai";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
+import {
+  getBookAnalysisBlockingReason,
+  getBookAnalysisMode,
+  getBookProviderCompatibility,
+  resolveBookAnalysisView,
+} from "@/lib/books/content";
+import { saveAnalysis } from "@/lib/analysis-store";
 import { getUserLLMClient } from "@/lib/llm/dispatch";
-import { resolveStructuredObjectMode } from "@/lib/llm/structured-output";
 import { isUserFixableLLMConfigMessage } from "@/lib/llm-config";
+import { resolveStructuredObjectMode } from "@/lib/llm/structured-output";
 import {
   CHAPTER_BRIEF_SYSTEM_PROMPT,
   buildChapterBriefUserPrompt,
 } from "@/lib/prompts/chapter-brief";
-import { saveAnalysis } from "@/lib/analysis-store";
 import { createClient } from "@/lib/supabase/server";
 import { ChapterBriefResultSchema } from "@/lib/types";
 
@@ -44,7 +50,7 @@ export async function POST(req: Request) {
       .maybeSingle(),
     supabase
       .from("books")
-      .select("id, cleaned_content")
+      .select("id, cleaned_content, metadata, storage_path")
       .eq("id", body.bookId)
       .eq("user_id", user.id)
       .maybeSingle(),
@@ -53,14 +59,34 @@ export async function POST(req: Request) {
   if (!chapter || chapter.book_id !== body.bookId) {
     return NextResponse.json({ error: "未找到章节。" }, { status: 404 });
   }
-  if (!book?.cleaned_content) {
+  if (!book) {
     return NextResponse.json({ error: "当前书籍内容不可用。" }, { status: 404 });
   }
 
-  const chapterText = book.cleaned_content.slice(chapter.start_char, chapter.end_char);
+  const blockingReason = getBookAnalysisBlockingReason(book.metadata);
+  if (blockingReason) {
+    return NextResponse.json({ error: blockingReason }, { status: 409 });
+  }
+
+  const llm = await getUserLLMClient(supabase);
+  const providerCompatibility = getBookProviderCompatibility(book.metadata, llm.provider);
+  if (providerCompatibility.status === "incompatible") {
+    return NextResponse.json(
+      { error: providerCompatibility.reason ?? "当前模型不兼容该内容类型，请切换模型后再试。" },
+      { status: 409 },
+    );
+  }
+
+  const cleanedContent = await resolveBookAnalysisView(supabase, book);
+  if (!cleanedContent) {
+    return NextResponse.json({ error: "当前书籍内容不可用。" }, { status: 404 });
+  }
+
+  const chapterText = cleanedContent.slice(chapter.start_char, chapter.end_char);
+  const analysisMode = getBookAnalysisMode(book.metadata);
+  const dimension = analysisMode === "block-fallback" ? "block_brief" : "chapter_brief";
 
   try {
-    const llm = await getUserLLMClient(supabase);
     const result = await generateObject({
       model: llm.openai(llm.model),
       mode: resolveStructuredObjectMode(llm.provider),
@@ -80,7 +106,7 @@ export async function POST(req: Request) {
       bookId: body.bookId,
       scope: "chapter",
       chapterId: body.chapterId,
-      dimension: "chapter_brief",
+      dimension,
       result: result.object,
       llmConfigId: llm.configId,
       promptTokens: Number.isFinite(result.usage.promptTokens)

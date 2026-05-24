@@ -1,9 +1,15 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
+import {
+  getBookAnalysisBlockingReason,
+  getBookProviderCompatibility,
+  resolveBookAnalysisView,
+} from "@/lib/books/content";
 import { saveAnalysis } from "@/lib/analysis-store";
 import { asLLMClientError } from "@/lib/llm/errors";
 import { runLLMObject } from "@/lib/llm/runtime";
+import { getUserLLMClient } from "@/lib/llm/dispatch";
 import { ANALYSIS_TEXT_CHAR_LIMIT, ANALYSIS_DIMENSION_CONFIG } from "@/lib/prompts";
 import { wrapUntrustedNovel } from "@/lib/prompts/safety";
 import { createClient } from "@/lib/supabase/server";
@@ -79,7 +85,7 @@ export async function POST(request: Request) {
 
   const { data: book, error: bookError } = await supabase
     .from("books")
-    .select("id, cleaned_content")
+    .select("id, cleaned_content, metadata, storage_path")
     .eq("session_id", session.id)
     .eq("user_id", user.id)
     .maybeSingle();
@@ -88,12 +94,30 @@ export async function POST(request: Request) {
     return jsonError("读取书籍内容失败，请稍后再试。", 500);
   }
 
-  if (!book?.cleaned_content) {
+  if (!book) {
     return jsonError("当前书籍内容不可用。", 400);
   }
 
+  const blockingReason = getBookAnalysisBlockingReason(book.metadata);
+  if (blockingReason) {
+    return jsonError(blockingReason, 409);
+  }
+
+  const llm = await getUserLLMClient(supabase);
+  const providerCompatibility = getBookProviderCompatibility(book.metadata, llm.provider);
+  if (providerCompatibility.status === "incompatible") {
+    return jsonError(
+      providerCompatibility.reason ?? "当前模型不兼容该内容类型，请切换模型后再试。",
+      409,
+    );
+  }
+
   const promptConfig = ANALYSIS_DIMENSION_CONFIG[parsedBody.dimension];
-  const excerpt = book.cleaned_content.slice(0, ANALYSIS_TEXT_CHAR_LIMIT);
+  const analysisView = await resolveBookAnalysisView(supabase, book);
+  if (!analysisView) {
+    return jsonError("当前书籍内容不可用。", 400);
+  }
+  const excerpt = analysisView.slice(0, ANALYSIS_TEXT_CHAR_LIMIT);
   let currentStatus = session.status;
   let statusFlipped = false;
   let analysisSaved = false;

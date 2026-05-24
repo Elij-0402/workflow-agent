@@ -20,7 +20,7 @@ export function PageHeader({
       <div className="min-w-0 max-w-3xl">
         <div className="flex flex-col gap-2">
           {label ? (
-            <p className="eyebrow-label">{label.toLowerCase()}</p>
+            <p className="eyebrow-label">{label}</p>
           ) : null}
           <h1 className="text-balance text-[24px] font-semibold leading-tight text-foreground sm:text-[28px]">
             {title}

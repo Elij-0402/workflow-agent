@@ -60,7 +60,7 @@ export function VariantList({ variants }: VariantListProps) {
   return (
     <section className="space-y-5">
       <div>
-        <p className="eyebrow-label">results</p>
+        <p className="eyebrow-label">结果</p>
         <h2 className="mt-2 font-display text-[28px] italic leading-[1.05] text-foreground">
           已生成结果
         </h2>
@@ -101,8 +101,8 @@ export function VariantList({ variants }: VariantListProps) {
               />
             </div>
           ) : (
-            <div className="border-b border-border/40 px-4 py-2.5 font-mono text-[10.5px] uppercase tracking-[0.12em] text-primary/80">
-              {`// variants · ${variants.length}`}
+            <div className="border-b border-border/40 px-4 py-2.5 text-[12px] text-primary/80">
+              {`版本数：${variants.length}`}
             </div>
           )}
           <ScrollArea className="max-h-[620px] min-h-[280px] flex-1">
@@ -176,7 +176,7 @@ export function VariantList({ variants }: VariantListProps) {
           <div className="border-b border-border/40 px-5 py-4">
             <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
               <div className="min-w-0 flex-1">
-                <p className="eyebrow-label">reader</p>
+                <p className="eyebrow-label">阅读区</p>
                 <h3 className="mt-1.5 font-display text-[24px] italic leading-tight text-foreground">
                   {activeVariant.title}
                 </h3>
@@ -213,19 +213,19 @@ export function VariantList({ variants }: VariantListProps) {
             <aside className="border-t border-border/40 bg-background/30 px-5 py-5 xl:border-l xl:border-t-0">
               <div className="flex flex-col gap-5">
                 <div>
-                  <p className="data-label">{"// generated"}</p>
+                  <p className="data-label">生成时间</p>
                   <p className="mt-2 font-mono text-[12px] text-foreground">
                     {formatDate(activeVariant.created_at)}
                   </p>
                 </div>
                 <div>
-                  <p className="data-label">{"// extra instructions"}</p>
+                  <p className="data-label">额外要求</p>
                   <p className="mt-2 text-[13px] leading-7 text-muted-foreground">
                     {activeVariant.config.extra_instructions.trim() || "默认要求"}
                   </p>
                 </div>
                 <div>
-                  <p className="data-label">{"// reader notes"}</p>
+                  <p className="data-label">阅读提示</p>
                   <p className="mt-2 text-[13px] leading-7 text-muted-foreground">
                     当前版本以稳定长文本阅读为主，后续会在同一区域接入多版本对照与来源映射。
                   </p>

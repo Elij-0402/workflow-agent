@@ -81,7 +81,7 @@ test("confirm step when blueprint ready", () => {
     blueprintReady: true,
   });
   assert.equal(h.step, "confirm");
-  assert.match(h.text, /可确认/);
+  assert.match(h.text, /确认条件/);
 });
 
 test("generate step when confirmed but no variant", () => {
@@ -109,5 +109,5 @@ test("generate step suggests comparison when variants ≥ 2", () => {
     variantCount: 3,
   });
   assert.equal(h.step, "generate");
-  assert.match(h.text, /多个生成版本/);
+  assert.match(h.text, /多个版本/);
 });

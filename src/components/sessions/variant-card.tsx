@@ -33,7 +33,7 @@ export function VariantCard({ variant }: VariantCardProps) {
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
           <div className="space-y-2">
-            <p className="eyebrow-label">variant</p>
+            <p className="eyebrow-label">版本</p>
             <h3 className="font-display text-[20px] italic leading-tight text-foreground">
               {variant.title}
             </h3>
@@ -42,7 +42,7 @@ export function VariantCard({ variant }: VariantCardProps) {
               <span className="text-primary/40">·</span>
               <span>{STRATEGY_LABELS[variant.config.strategy]}</span>
               <span className="text-primary/40">·</span>
-              <span>innov {variant.config.innovation}</span>
+              <span>创新度 {variant.config.innovation}</span>
               <span className="text-primary/40">·</span>
               <span>{VIEWPOINT_LABELS[variant.config.viewpoint]}</span>
               <span className="text-primary/40">·</span>
@@ -51,7 +51,7 @@ export function VariantCard({ variant }: VariantCardProps) {
           </div>
 
           <div className="font-mono text-[10.5px] uppercase tracking-[0.10em] text-muted-foreground">
-            generated · {formatDate(variant.created_at)}
+            生成于 · {formatDate(variant.created_at)}
           </div>
         </div>
 
@@ -63,7 +63,7 @@ export function VariantCard({ variant }: VariantCardProps) {
           <div className="flex flex-wrap gap-x-3 gap-y-1 font-mono text-[10.5px] uppercase tracking-[0.08em] text-muted-foreground">
             <span>{variant.word_count?.toLocaleString("zh-CN") ?? "0"} 字</span>
             <span className="text-primary/40">·</span>
-            <span>{variant.config.extra_instructions.trim() ? "with extra" : "default"}</span>
+            <span>{variant.config.extra_instructions.trim() ? "含额外要求" : "默认要求"}</span>
           </div>
 
           <Dialog>
@@ -77,7 +77,7 @@ export function VariantCard({ variant }: VariantCardProps) {
                 <DialogTitle>{variant.title}</DialogTitle>
                 <DialogDescription className="flex flex-wrap gap-x-3 gap-y-1 pt-2 font-mono text-[10.5px] uppercase tracking-[0.08em]">
                   <span>{STRATEGY_LABELS[variant.config.strategy]}</span>
-                  <span>innov {variant.config.innovation}</span>
+                  <span>创新度 {variant.config.innovation}</span>
                   <span>{VIEWPOINT_LABELS[variant.config.viewpoint]}</span>
                   <span>{STYLE_LABELS[variant.config.style]}</span>
                   <span>{OUTPUT_SCOPE_LABELS[variant.config.output_scope]}</span>

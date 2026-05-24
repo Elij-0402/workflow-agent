@@ -8,7 +8,7 @@ export function TaskModePage() {
   return (
     <div className="app-page">
       <PageHeader
-        label="create"
+        label="创建项目"
         title="从双书融合开始"
         description="NovelFusion 现在默认围绕双书融合工作流组织。先选择任务模式，再进入对应的上传与创作入口。"
       />
@@ -18,13 +18,13 @@ export function TaskModePage() {
           <div className="flex flex-col gap-4">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="eyebrow-label">recommended</p>
+                <p className="eyebrow-label">推荐模式</p>
                 <h2 className="mt-2 text-[24px] font-semibold leading-tight text-foreground">
                   双书融合任务
                 </h2>
               </div>
               <span className="inline-flex items-center rounded-[3px] border border-primary/35 bg-primary/10 px-2.5 py-1 font-mono text-[10.5px] uppercase tracking-[0.10em] text-primary">
-                dual
+                双书
               </span>
             </div>
 
@@ -66,7 +66,7 @@ export function TaskModePage() {
 
         <aside className="flex flex-col gap-4">
           <section className="surface-panel p-5">
-            <p className="eyebrow-label">compatibility</p>
+            <p className="eyebrow-label">兼容模式</p>
             <h2 className="mt-2 text-[18px] font-semibold leading-tight text-foreground">
               单书兼容任务
             </h2>
@@ -77,7 +77,7 @@ export function TaskModePage() {
             <div className="mt-4 space-y-2 text-[12px] text-muted-foreground">
               <div>1. 上传单本 `.txt` 小说</div>
               <div>2. 完成分析后直接生成结果</div>
-              <div>3. 不进入 dual 概览页和工作台</div>
+              <div>3. 不进入双书概览页和工作台</div>
             </div>
 
             <Button asChild variant="outline" className="mt-5 w-full justify-center">
@@ -86,9 +86,9 @@ export function TaskModePage() {
           </section>
 
           <section className="surface-subtle p-5">
-            <p className="eyebrow-label">workflow</p>
+            <p className="eyebrow-label">流程说明</p>
             <div className="mt-4 space-y-3 text-[13px] leading-6 text-muted-foreground">
-              <p>Dual 任务会先进入概览页，再根据进度进入工作台或结果区。</p>
+              <p>双书任务会先进入概览页，再根据进度进入工作台或结果区。</p>
               <p>旧链接 `/upload` 仍然可用，但现在会先把你带回这个模式选择入口。</p>
             </div>
           </section>

@@ -23,15 +23,15 @@ export function WorldviewPanel({ result }: { result: unknown }) {
   return (
     <div className="space-y-6 text-[13px] leading-7 text-muted-foreground">
       <div className="grid gap-3 md:grid-cols-2">
-        <DetailBlock label="world type" value={data.type} />
-        <DetailBlock label="power system" value={data.power_system ?? "未明确提及"} />
-        <DetailBlock className="md:col-span-2" label="setting" value={data.setting} />
+        <DetailBlock label="世界类型" value={data.type} />
+        <DetailBlock label="力量体系" value={data.power_system ?? "未明确提及"} />
+        <DetailBlock className="md:col-span-2" label="背景设定" value={data.setting} />
       </div>
 
       <Separator />
 
       <div className="space-y-3">
-        <SectionTitle title="关键场景" token="locations" />
+        <SectionTitle title="关键场景" token="地点分布" />
         {data.locations.length > 0 ? (
           <OverflowTable
             headers={["地点", "描述", "重要度"]}
@@ -49,7 +49,7 @@ export function WorldviewPanel({ result }: { result: unknown }) {
       <Separator />
 
       <div className="space-y-3">
-        <SectionTitle title="核心规则" token="rules" />
+        <SectionTitle title="核心规则" token="规则摘要" />
         {data.rules.length > 0 ? (
           <ul className="space-y-2">
             {data.rules.map((rule, idx) => (

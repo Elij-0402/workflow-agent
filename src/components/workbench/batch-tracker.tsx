@@ -22,6 +22,7 @@ type Props = {
 export function BatchTracker(props: Props) {
   const { finished, onDismiss } = props;
   const [now, setNow] = useState(() => Date.now());
+  const bookLabel = props.bookLabel === "A" ? "参考书一" : "参考书二";
 
   useEffect(() => {
     if (finished) return;
@@ -45,7 +46,7 @@ export function BatchTracker(props: Props) {
   const concurrency = 3;
   const etaMs = (avgMsPerChapter * remaining) / Math.max(1, concurrency);
   const etaText = props.finished
-    ? "done"
+    ? "已完成"
     : avgMsPerChapter > 0 && remaining > 0
       ? formatDuration(etaMs)
       : "--:--";
@@ -63,32 +64,31 @@ export function BatchTracker(props: Props) {
       aria-live="polite"
     >
       <div className="flex items-center justify-between gap-3">
-        <div className="eyebrow-label">
-          batch · book {props.bookLabel} · {props.bookTitle}
+        <div className="text-[12px] font-medium text-primary/85">
+          批量分析 · {bookLabel} · {props.bookTitle}
         </div>
         {!props.finished ? (
           <button
             type="button"
             onClick={props.onAbort}
-            className="font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground transition-colors hover:text-destructive"
+            className="text-[12px] text-muted-foreground transition-colors hover:text-destructive"
             style={{ transitionDuration: "var(--duration-fast)" }}
             aria-label="中止批量分析"
           >
-            × abort
+            中止分析
           </button>
         ) : null}
       </div>
 
-      <div className="mt-2 font-mono text-[11.5px] tracking-[0.06em] text-muted-foreground">
-        chapter analysis · <span className="text-flash">{props.doneCount}</span>
+      <div className="mt-2 text-[12px] text-muted-foreground">
+        已完成 <span className="text-flash">{props.doneCount}</span>
         {" / "}
-        <span className="text-foreground">{props.total}</span> done ·{" "}
-        <span className="text-primary">{props.runningCount}</span> running · <span>{queued}</span>{" "}
-        queued
+        <span className="text-foreground">{props.total}</span> 章 · 正在分析{" "}
+        <span className="text-primary">{props.runningCount}</span> 章 · 等待中 <span>{queued}</span> 章
         {props.errorCount > 0 ? (
           <>
             {" · "}
-            <span className="text-destructive">{props.errorCount}</span> failed
+            <span className="text-destructive">{props.errorCount}</span> 章失败
           </>
         ) : null}
       </div>
@@ -119,18 +119,18 @@ export function BatchTracker(props: Props) {
             />
           ) : null}
         </div>
-        <div className="shrink-0 font-mono text-[11px] tracking-[0.08em] text-muted-foreground">
-          {pct}% · ETA ~ {etaText}
+        <div className="shrink-0 text-[12px] text-muted-foreground">
+          {pct}% · 预计剩余 {etaText}
         </div>
       </div>
 
       {props.failures.length > 0 ? (
         <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-dashed border-border/50 pt-2">
-          <div className="font-mono text-[11px] tracking-[0.06em] text-destructive/85">
-            failures:{" "}
+          <div className="text-[12px] text-destructive/85">
+            失败章节：{" "}
             {props.failures
               .slice(0, 6)
-              .map((f) => `ch${String(f.index).padStart(2, "0")}`)
+              .map((f) => `第 ${String(f.index).padStart(2, "0")} 章`)
               .join(", ")}
             {props.failures.length > 6 ? `, +${props.failures.length - 6}` : ""}
           </div>
@@ -139,9 +139,9 @@ export function BatchTracker(props: Props) {
               variant="ghost"
               size="sm"
               onClick={props.onRetryFailed}
-              className="font-mono text-[11px] uppercase tracking-[0.10em] text-primary hover:text-primary"
+              className="text-[12px] text-primary hover:text-primary"
             >
-              $ retry failed
+              重试失败章节
             </Button>
           ) : null}
         </div>

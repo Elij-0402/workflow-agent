@@ -11,6 +11,7 @@ export type AnalysisDimension =
   | "characters"
   | "narrative"
   | "chapter_brief"
+  | "block_brief"
   | "book_synthesis"
   | "prose_craft"
   | "emotion_arc"
@@ -43,6 +44,7 @@ export const DIMENSION_LABELS: Record<AnalysisDimension, string> = {
   characters: "人物",
   narrative: "叙事",
   chapter_brief: "章节抽取",
+  block_brief: "片段抽取",
   book_synthesis: "整书汇总",
   prose_craft: "写作技法",
   emotion_arc: "情感曲线",

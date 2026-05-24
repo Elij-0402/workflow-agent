@@ -5,6 +5,8 @@ import { Settings2 } from "lucide-react";
 import { AnalysisPanel } from "./analysis-panel";
 import { ExtendedAnalysisPanel } from "./extended-analysis-panel";
 import { loadDualSessionPageData, loadSingleSessionPageData } from "./page-data";
+import { getBookIngestStatus, isBookIngestReady } from "@/lib/books/content";
+import { ImportHealthPanel } from "@/components/projects/import-health-panel";
 import { ProjectOverviewPage } from "@/components/projects/project-overview-page";
 import { GeneratePanel } from "@/components/sessions/generate-panel";
 import { VariantList } from "@/components/sessions/variant-list";
@@ -98,9 +100,13 @@ export default async function SessionDetailPage({
     safeVariants,
   } = singleData;
   const metadata = book.metadata ?? {};
+  const ingestStatus = getBookIngestStatus(metadata);
+  const ingestReady = isBookIngestReady(metadata);
   const hasCompleteAnalysis = safeAnalyses.length === 3;
   const hasVariants = safeVariants.length > 0;
-  const currentStepDescription = !hasCompleteAnalysis
+  const currentStepDescription = !ingestReady
+    ? "原始文件已导入，正在整理正文、章节与导入体检"
+    : !hasCompleteAnalysis
     ? llmConfigured
       ? "完成三项分析后可生成"
       : "需先配置模型"
@@ -108,6 +114,7 @@ export default async function SessionDetailPage({
       ? "结果已生成，可继续查看或再生成一个版本"
       : "分析已准备好，可直接生成结果";
   const stageItems = getStageItems({
+    ingestReady,
     hasCompleteAnalysis,
     variantCount: safeVariants.length,
   });
@@ -146,7 +153,7 @@ export default async function SessionDetailPage({
         <div className="surface-panel p-6">
           <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_300px]">
             <div>
-              <p className="eyebrow-label">overview</p>
+              <p className="eyebrow-label">概览</p>
               <h2 className="mt-2 font-display text-[24px] italic leading-tight text-foreground">
                 项目总览
               </h2>
@@ -155,17 +162,29 @@ export default async function SessionDetailPage({
               </p>
             </div>
             <div className="surface-subtle p-4">
-              <p className="data-label">{"// current state"}</p>
+              <p className="data-label">当前状态</p>
               <p className="mt-2 font-display text-[18px] italic text-foreground">
                 {getStageSummary(hasCompleteAnalysis, hasVariants)}
               </p>
-              <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
-                analysis {safeAnalyses.length}/3 · variants{" "}
-                {safeVariants.length}
+              <p className="mt-2 text-[12px] text-muted-foreground">
+                分析进度 {safeAnalyses.length}/3 · 版本数 {safeVariants.length}
+              </p>
+              <p className="mt-2 text-[12px] text-muted-foreground">
+                导入状态 · {ingestStatus}
               </p>
             </div>
           </div>
         </div>
+
+        <ImportHealthPanel
+          books={[
+            {
+              id: book.id,
+              title: book.title,
+              metadata: book.metadata,
+            },
+          ]}
+        />
 
         {hasCompleteAnalysis ? (
           <>
@@ -224,9 +243,11 @@ function getDualWorkbenchRedirect(query: {
 }
 
 function getStageItems({
+  ingestReady,
   hasCompleteAnalysis,
   variantCount,
 }: {
+  ingestReady: boolean;
   hasCompleteAnalysis: boolean;
   variantCount: number;
 }): WorkflowStageItem[] {
@@ -235,17 +256,19 @@ function getStageItems({
   return [
     {
       key: "upload",
-      label: "文本已导入",
-      description: "文件已经进入当前任务。",
-      state: "done",
+      label: ingestReady ? "文本已导入" : "正在整理文本",
+      description: ingestReady ? "文件已经进入当前任务。" : "原文已接收，正在完成清洗与切章。",
+      state: ingestReady ? "done" : "current",
     },
     {
       key: "analysis",
       label: "完成分析",
       description: hasCompleteAnalysis
         ? "三项分析已经准备好。"
-        : "先完成世界观、人物和叙事分析。",
-      state: hasCompleteAnalysis ? "done" : "current",
+        : ingestReady
+          ? "先完成世界观、人物和叙事分析。"
+          : "等待文本整理完成后再开始分析。",
+      state: hasCompleteAnalysis ? "done" : ingestReady ? "current" : "upcoming",
     },
     {
       key: "generate",

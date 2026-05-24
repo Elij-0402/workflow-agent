@@ -73,7 +73,7 @@ export function LoginForm({ redirectPath }: { redirectPath: string }) {
 
       <div className="surface-panel relative bg-card p-6 sm:p-7">
         <div>
-          <p className="eyebrow-label">account</p>
+          <p className="eyebrow-label">账号</p>
           <h2 className="mt-2 text-[24px] font-semibold leading-tight text-foreground">
             {mode === "login" ? "登录" : "注册"}
           </h2>

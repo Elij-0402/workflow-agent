@@ -115,7 +115,11 @@ export function DualUploadForm() {
       return;
     }
 
-    toast.success("两本参考书已导入，正在进入蓝图工作台。");
+    if (firstResult.warnings?.length || secondResult.warnings?.length) {
+      toast.warning("两本参考书原文已导入，但其中至少一本存在导入告警。");
+    } else {
+      toast.success("两本参考书已导入，正在进入蓝图工作台。");
+    }
     router.push(secondResult.redirectTo);
   }
 
@@ -239,7 +243,7 @@ export function DualUploadForm() {
           <div className="mt-4 flex flex-col gap-3 text-[13px] leading-7 text-muted-foreground">
             <p>支持 `.txt` 文件，每本上限 {formatBytes(MAX_UPLOAD_BYTES, 0)}。</p>
             <p>每个任务固定 2 本参考小说；如果需要第 3 本，请新建任务。</p>
-            <p>创建页只负责导入素材，创作方向与融合细节会在蓝图工作台继续处理。</p>
+            <p>创建页会优先保留原文，再继续完成清洗、切章与导入体检。</p>
           </div>
         </section>
 
@@ -247,8 +251,8 @@ export function DualUploadForm() {
           <p className="eyebrow-label">next</p>
           <div className="mt-4 flex flex-col gap-3 text-[13px] leading-7 text-muted-foreground">
             <p>1. 系统切章并整理两本参考小说。</p>
-            <p>2. 进入工作台分析章节、整合人物与情节节点。</p>
-            <p>3. 确认融合蓝图后，再生成新的衍生小说版本。</p>
+            <p>2. 若检测到乱码或广告，会在项目页给出导入体检与告警。</p>
+            <p>3. 确认项目已就绪后，再进入工作台分析、融合与生成。</p>
           </div>
         </section>
       </aside>

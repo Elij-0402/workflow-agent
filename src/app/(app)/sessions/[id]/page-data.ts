@@ -18,6 +18,7 @@ import type {
 type BookMetadata = {
   encoding?: string;
   chapters?: unknown[];
+  ingest_status?: string;
 };
 
 export type DualSessionPageData = {
@@ -28,6 +29,7 @@ export type DualSessionPageData = {
     position: number;
     word_count: number | null;
     chapter_count: number | null;
+    metadata: Record<string, unknown>;
     created_at: string;
   }>;
   chapters: Array<{
@@ -42,6 +44,7 @@ export type DualSessionPageData = {
   briefs: Array<{
     book_id: string;
     chapter_id: string;
+    dimension: "chapter_brief" | "block_brief";
     result: ChapterBriefResult;
   }>;
   bookSynthesisByBook: string[];
@@ -93,7 +96,7 @@ export async function loadDualSessionPageData(params: {
 
   const { data: books } = await supabase
     .from("books")
-    .select("id, title, position, word_count, chapter_count, created_at")
+    .select("id, title, position, word_count, chapter_count, metadata, created_at")
     .eq("session_id", sessionId)
     .eq("user_id", userId)
     .order("position", { ascending: true });
@@ -139,13 +142,19 @@ export async function loadDualSessionPageData(params: {
   }>;
 
   const briefs = analyses
-    .filter((analysis) => analysis.scope === "chapter" && analysis.dimension === "chapter_brief" && analysis.chapter_id)
+    .filter(
+      (analysis) =>
+        analysis.scope === "chapter" &&
+        (analysis.dimension === "chapter_brief" || analysis.dimension === "block_brief") &&
+        analysis.chapter_id,
+    )
     .map((analysis) => {
       const parsed = ChapterBriefResultSchema.safeParse(analysis.result);
       return parsed.success
         ? {
             book_id: analysis.book_id,
             chapter_id: analysis.chapter_id as string,
+            dimension: analysis.dimension as "chapter_brief" | "block_brief",
             result: parsed.data,
           }
         : null;

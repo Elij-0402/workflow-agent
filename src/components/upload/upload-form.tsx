@@ -51,7 +51,11 @@ export function UploadForm({
       return;
     }
 
-    toast.success(result.message ?? "上传成功。");
+    if (result.warnings?.length) {
+      toast.warning(result.message ?? "原始文件已导入，但有告警需要留意。");
+    } else {
+      toast.success(result.message ?? "上传成功。");
+    }
     router.push(result.redirectTo);
   };
 
@@ -63,7 +67,7 @@ export function UploadForm({
       <section className="surface-panel p-7">
         <div className="flex flex-col gap-6">
           <div>
-            <p className="eyebrow-label">source text</p>
+            <p className="eyebrow-label">文本导入</p>
             <h2 className="mt-2 font-display text-[24px] italic leading-[1.1] text-foreground">
               {isDualSupplement ? `补充${referenceLabel}` : "选择小说文本"}
             </h2>
@@ -94,8 +98,8 @@ export function UploadForm({
             <div className="flex flex-col gap-6">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <div className="font-mono text-[11px] uppercase tracking-[0.12em] text-primary/85">
-                    {filename ? "// file ready" : "// awaiting file"}
+                  <div className="text-[12px] text-primary/85">
+                    {filename ? "文件已就绪" : "等待选择文件"}
                   </div>
                   <p className="mt-2 text-[13px] leading-7 text-muted-foreground">
                     {filename
@@ -130,18 +134,18 @@ export function UploadForm({
                         {filename}
                       </div>
                       <div className="mt-1 font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
-                        {filesize == null ? "waiting…" : formatBytes(filesize)} · txt
+                        {filesize == null ? "等待读取…" : formatBytes(filesize)} · txt
                       </div>
                     </div>
                   </div>
 
                   <div className="mt-4 grid gap-3 border-t border-dashed border-border/70 pt-4 sm:grid-cols-3">
-                    <InfoStat label="format" value=".txt" />
+                    <InfoStat label="文件格式" value=".txt" />
                     <InfoStat
-                      label="size"
-                      value={filesize == null ? "unknown" : formatBytes(filesize, 0)}
+                      label="文件大小"
+                      value={filesize == null ? "待读取" : formatBytes(filesize, 0)}
                     />
-                    <InfoStat label="status" value={pending ? "running" : "ready"} />
+                    <InfoStat label="当前状态" value={pending ? "处理中" : "已就绪"} />
                   </div>
                 </div>
               ) : (
@@ -169,12 +173,12 @@ export function UploadForm({
           ) : null}
 
           <div className="flex flex-col gap-3 border-t border-dashed border-border/70 pt-5 sm:flex-row sm:items-center sm:justify-between">
-            <p className="font-mono text-[10.5px] uppercase tracking-[0.10em] text-muted-foreground">
+            <p className="text-[12px] text-muted-foreground">
               {filename
                 ? isDualSupplement
-                  ? "// reference ready — return to workbench"
-                  : "// file ready — start when ready"
-                : "// select file first"}
+                  ? "参考书已就绪，提交后返回工作台。"
+                  : "文件已就绪，确认后即可开始。"
+                : "请先选择文件。"}
             </p>
             <Button type="submit" disabled={pending}>
               {pending ? (
@@ -213,8 +217,8 @@ export function UploadForm({
             <p>支持 .txt 文件，上限 {formatBytes(MAX_UPLOAD_BYTES, 0)}。</p>
             <p>
               {isDualSupplement
-                ? "导入后会自动识别文本，并把它补入当前双书任务。"
-                : "导入后会自动识别文本并创建分析任务。"}
+                ? "导入后会先保存原文，再在服务端完成识别、清洗与章节整理。"
+                : "导入后会先保存原文，再在服务端完成识别、清洗与分析准备。"}
             </p>
             {helpOpen ? (
               <p className="border-l-[2px] border-primary/40 pl-3 italic">
@@ -225,16 +229,16 @@ export function UploadForm({
         </section>
 
         <section className="surface-subtle p-5">
-          <p className="eyebrow-label">pipeline</p>
+          <p className="eyebrow-label">流程</p>
           <ol className="mt-4 flex flex-col gap-2.5 font-mono text-[12px] text-muted-foreground">
             <li>
               <span className="text-primary/80">01 →</span> 直传原始文本到私有存储
             </li>
             <li>
-              <span className="text-primary/80">02 →</span> 服务端确认入库并清洗文本
+              <span className="text-primary/80">02 →</span> 服务端整理正文并生成导入体检
             </li>
             <li>
-              <span className="text-primary/80">03 →</span> 创建新分析任务并跳转
+              <span className="text-primary/80">03 →</span> 创建项目并跳转到详情页继续处理
             </li>
           </ol>
         </section>
@@ -246,7 +250,7 @@ export function UploadForm({
 function InfoStat({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-primary/85">{label}</p>
+      <p className="text-[11px] text-primary/85">{label}</p>
       <p className="mt-1 font-mono text-[12.5px] text-foreground">{value}</p>
     </div>
   );

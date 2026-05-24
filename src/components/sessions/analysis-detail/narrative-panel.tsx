@@ -18,18 +18,18 @@ export function NarrativePanel({ result }: { result: unknown }) {
   return (
     <div className="space-y-6 text-[13px] leading-7 text-muted-foreground">
       <div className="grid gap-3 md:grid-cols-3">
-        <DetailBlock label="structure" value={data.structure} />
-        <DetailBlock label="viewpoint" value={data.viewpoint} />
-        <DetailBlock label="pacing" value={data.pacing} />
+        <DetailBlock label="结构类型" value={data.structure} />
+        <DetailBlock label="叙事视角" value={data.viewpoint} />
+        <DetailBlock label="节奏特征" value={data.pacing} />
       </div>
 
       <Separator />
 
       <div className="space-y-3">
-        <SectionTitle title="主题与冲突" token="themes · conflicts" />
+        <SectionTitle title="主题与冲突" token="主题线与主要矛盾" />
         <div className="space-y-4">
           <div>
-            <p className="data-label mb-2">themes</p>
+            <p className="data-label mb-2">主题</p>
             <div className="flex flex-wrap gap-2">
               {data.themes.length > 0 ? (
                 data.themes.map((theme) => (
@@ -43,7 +43,7 @@ export function NarrativePanel({ result }: { result: unknown }) {
             </div>
           </div>
           <div>
-            <p className="data-label mb-2">conflicts</p>
+            <p className="data-label mb-2">冲突</p>
             {data.conflicts.length > 0 ? (
               <ul className="space-y-2">
                 {data.conflicts.map((conflict, idx) => (
@@ -68,7 +68,7 @@ export function NarrativePanel({ result }: { result: unknown }) {
       <Separator />
 
       <div className="space-y-3">
-        <SectionTitle title="关键转折点" token="turning points" />
+        <SectionTitle title="关键转折点" token="转折节点" />
         {data.turning_points.length > 0 ? (
           <OverflowTable
             headers={["标题", "描述", "影响值"]}

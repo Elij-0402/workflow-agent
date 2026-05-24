@@ -6,6 +6,10 @@ import { ChevronDown, ChevronUp, Loader2, Lock, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { BlueprintSection } from "@/lib/blueprint/schema";
 import type { ChapterBriefResult } from "@/lib/types";
+import {
+  getCandidateSectionLabel,
+  getChapterSourceLabel,
+} from "@/lib/workbench/analysis-display";
 
 export type CandidateAddRequest = {
   section: BlueprintSection;
@@ -26,21 +30,6 @@ type Props = {
   blueprintLocked?: boolean;
   onAnalyze: () => void;
   onAddCandidate: (c: CandidateAddRequest) => void;
-};
-
-const SECTION_LABEL: Record<string, string> = {
-  characters: "character",
-  relationships: "relationship",
-  world_rules: "world",
-  conflicts: "conflict",
-  plot_beats: "beat",
-  themes: "theme",
-};
-
-const SOURCE_LABEL: Record<string, string> = {
-  regex: "regex",
-  "length-chunk": "length chunk",
-  manual: "manual",
 };
 
 export function ChapterCard({
@@ -128,18 +117,19 @@ export function ChapterCard({
       </div>
 
       {hasBrief && !open && candidateCounts.length > 0 ? (
-        <div className="ml-7 mt-1.5 flex flex-wrap gap-x-3 gap-y-0.5 font-mono text-[10.5px] uppercase tracking-[0.08em] text-muted-foreground">
+        <div className="ml-7 mt-1.5 flex flex-wrap gap-x-3 gap-y-0.5 text-[12px] text-muted-foreground">
           {candidateCounts.map(({ section, count }) => (
             <span key={section}>
-              {SECTION_LABEL[section] ?? section} · <span className="text-primary/80">{count}</span>
+              候选类型：{getCandidateSectionLabel(section)} ·{" "}
+              <span className="text-primary/80">{count}</span>
             </span>
           ))}
         </div>
       ) : null}
 
       {status === "error" ? (
-        <p className="ml-7 mt-1.5 font-mono text-[10.5px] uppercase tracking-[0.08em] text-destructive">
-          {"// failed"}
+        <p className="ml-7 mt-1.5 text-[12px] text-destructive">
+          状态：分析失败，请稍后重试
         </p>
       ) : null}
 
@@ -147,8 +137,8 @@ export function ChapterCard({
         <div className="ml-7 mt-3 space-y-3 text-[12.5px] text-muted-foreground">
           <p className="leading-7">{brief.summary}</p>
           {brief.blueprint_candidates.length === 0 ? (
-            <p className="font-mono text-[10.5px] uppercase tracking-[0.08em] text-muted-foreground/70">
-              {"// no auto candidates"}
+            <p className="text-[12px] text-muted-foreground/70">
+              暂无可自动加入蓝图的候选内容
             </p>
           ) : null}
           {brief.blueprint_candidates.map((cand, i) => {
@@ -159,8 +149,8 @@ export function ChapterCard({
                 className="flex items-start justify-between gap-2 rounded-[2px] border border-border bg-background/40 px-2.5 py-2"
               >
                 <div className="min-w-0">
-                  <div className="font-mono text-[10px] uppercase tracking-[0.10em] text-primary/80">
-                    {`// ${cand.section}`}
+                  <div className="text-[12px] font-medium text-primary/80">
+                    {getCandidateSectionLabel(cand.section)}
                   </div>
                   <div className="mt-0.5 truncate text-foreground">{cand.title}</div>
                 </div>
@@ -196,8 +186,8 @@ export function ChapterCard({
         </div>
       ) : null}
 
-      <p className="ml-7 mt-1.5 font-mono text-[10.5px] uppercase tracking-[0.08em] text-primary/55">
-        {`// source · ${SOURCE_LABEL[chapter.source] ?? chapter.source}`}
+      <p className="ml-7 mt-1.5 text-[12px] text-primary/70">
+        来源：{getChapterSourceLabel(chapter.source)}
       </p>
     </div>
   );

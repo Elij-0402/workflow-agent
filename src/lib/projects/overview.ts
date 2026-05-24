@@ -1,8 +1,9 @@
+import { getBookIngestStatus } from "@/lib/books/content";
 import type { BookRow, VariantRow } from "@/lib/types";
 
 export type ProjectOverviewInput = {
   sessionId: string;
-  books: Array<Pick<BookRow, "chapter_count">>;
+  books: Array<Pick<BookRow, "chapter_count" | "metadata">>;
   bookSynthesisByBook: string[];
   blueprintStatus: "draft" | "confirmed";
   variants: Array<Pick<VariantRow, "id" | "title" | "scope">>;
@@ -33,6 +34,10 @@ function createOverview(config: ProjectOverview): ProjectOverview {
 export function deriveProjectOverview(input: ProjectOverviewInput): ProjectOverview {
   const importedCount = input.books.length;
   const hasTwoBooks = input.books.length === 2;
+  const readyBookCount = input.books.filter((book) => {
+    const status = getBookIngestStatus(book.metadata);
+    return status === "ready" || status === "ready_with_warnings";
+  }).length;
   const analyzedBooks = new Set(input.bookSynthesisByBook).size;
   const hasConfirmedBlueprint = input.blueprintStatus === "confirmed";
   const fullVariantCount = input.variants.filter((variant) => variant.scope === "full").length;
@@ -55,6 +60,27 @@ export function deriveProjectOverview(input: ProjectOverviewInput): ProjectOverv
         { label: "参考小说", value: `${importedCount} / 2` },
         { label: "已切章节", value: String(input.books[0]?.chapter_count ?? 0) },
         { label: "蓝图状态", value: "未开始" },
+      ],
+    });
+  }
+
+  if (readyBookCount < 2) {
+    return createOverview({
+      statusLabel: "等待文本整理",
+      progressLabel: `已准备好 ${readyBookCount} / 2 本参考小说`,
+      editorialBullets: [
+        "原始文件已经接收，但至少有一本还在做清洗、切章或质量检查。",
+        "先查看导入体检，确认编码、广告和章节结构是否可靠。",
+        "在两本书都完成文本准备前，不建议直接进入融合分析。",
+      ],
+      nextAction: {
+        label: "查看项目体检",
+        href: `/sessions/${input.sessionId}`,
+      },
+      keyResults: [
+        { label: "参考小说", value: "2 / 2" },
+        { label: "文本已就绪", value: `${readyBookCount} / 2` },
+        { label: "蓝图状态", value: "待开始" },
       ],
     });
   }

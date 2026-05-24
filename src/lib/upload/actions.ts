@@ -1,9 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { expandToChapters } from "@/lib/text/chapters";
-import { cleanNovelText } from "@/lib/text/clean";
-import { decodeNovelBuffer } from "@/lib/text/decode";
+import { getBookIngestMetadata } from "@/lib/books/content";
 
 import {
   buildStorageObjectPath,
@@ -11,6 +9,7 @@ import {
   sanitizeFilename,
   validateUploadFile,
 } from "./shared";
+import { processUploadedNovel } from "./process";
 
 type InitNovelUploadInput = {
   filename: string;
@@ -32,6 +31,14 @@ type FinalizeNovelUploadInput = {
 
 function isValidDualPosition(position: unknown): position is 0 | 1 {
   return position === 0 || position === 1;
+}
+
+function logIngestFailure(context: {
+  sessionId: string;
+  storageObjectPath: string;
+  report: unknown;
+}) {
+  console.error("[upload.ingest.failure]", context);
 }
 
 export async function initNovelUpload(input: InitNovelUploadInput) {
@@ -182,7 +189,7 @@ export async function finalizeNovelUpload(input: FinalizeNovelUploadInput) {
   // In dual mode the books table can hold both slots; find the row at this position.
   const { data: existingBook, error: existingBookError } = await supabase
     .from("books")
-    .select("id")
+    .select("id, metadata")
     .eq("session_id", session.id)
     .eq("user_id", user.id)
     .eq("position", position)
@@ -195,7 +202,8 @@ export async function finalizeNovelUpload(input: FinalizeNovelUploadInput) {
   if (
     session.status === "uploaded" &&
     existingBook &&
-    session.mode === "single"
+    session.mode === "single" &&
+    getBookIngestMetadata(existingBook.metadata).ingest_status !== "failed_needs_attention"
   ) {
     return {
       ok: true as const,
@@ -204,48 +212,38 @@ export async function finalizeNovelUpload(input: FinalizeNovelUploadInput) {
     };
   }
 
-  const { data: fileBlob, error: downloadError } = await supabase.storage
-    .from("novels")
-    .download(input.storageObjectPath);
-
-  if (downloadError || !fileBlob) {
-    return { error: "原始文件已上传，但读取失败。请稍后重试。" };
-  }
-
-  const bytes = new Uint8Array(await fileBlob.arrayBuffer());
-  const decoded = decodeNovelBuffer(bytes);
-  const cleaned = cleanNovelText(decoded.text);
-
-  if (!cleaned.cleaned) {
-    return { error: "原始文件已上传，但解析后为空。请检查文本内容后重试。" };
-  }
-
-  const chapters = expandToChapters(cleaned.cleaned, {
-    fallbackChunkChars: 5000,
-  });
-
   const bookInsertPayload = {
     session_id: session.id,
     user_id: user.id,
     title: sessionName,
     storage_path: `novels/${input.storageObjectPath}`,
     position,
-    word_count: cleaned.wordCount,
-    chapter_count: chapters.length,
+    word_count: null,
+    chapter_count: null,
     metadata: {
-      encoding: decoded.encoding,
+      ingest_status: "processing",
+      ingest_report: {
+        status: "processing",
+        stage: "raw_uploaded",
+        updated_at: new Date().toISOString(),
+      },
     },
-    cleaned_content: cleaned.cleaned,
+    cleaned_content: null,
   };
 
   const bookUpdatePayload = {
     title: sessionName,
-    word_count: cleaned.wordCount,
-    chapter_count: chapters.length,
+    word_count: null,
+    chapter_count: null,
     metadata: {
-      encoding: decoded.encoding,
+      ingest_status: "processing",
+      ingest_report: {
+        status: "processing",
+        stage: "raw_uploaded",
+        updated_at: new Date().toISOString(),
+      },
     },
-    cleaned_content: cleaned.cleaned,
+    cleaned_content: null,
   };
 
   let bookId: string;
@@ -273,27 +271,125 @@ export async function finalizeNovelUpload(input: FinalizeNovelUploadInput) {
     bookId = inserted.id;
   }
 
-  // Replace any existing chapter rows (covers re-upload + dual re-parse).
-  await supabase
-    .from("chapters")
-    .delete()
-    .eq("book_id", bookId)
+  const processResult = await processUploadedNovel({
+    supabase,
+    userId: user.id,
+    sessionId: session.id,
+    storageObjectPath: input.storageObjectPath,
+    safeFilename,
+  });
+
+  if (!processResult.ok) {
+    const { error: failedBookUpdateError } = await supabase
+      .from("books")
+      .update({
+        metadata: processResult.metadata,
+        cleaned_content: null,
+        word_count: null,
+        chapter_count: null,
+      })
+      .eq("id", bookId)
+      .eq("user_id", user.id);
+
+    if (failedBookUpdateError) {
+      return { error: "原始文件已导入，但写入导入体检失败。请稍后重试。" };
+    }
+
+    logIngestFailure({
+      sessionId: session.id,
+      storageObjectPath: input.storageObjectPath,
+      report: processResult.report,
+    });
+
+    return {
+      ok: true as const,
+      message: processResult.userMessage,
+      warnings: [processResult.userMessage],
+      redirectTo: `/sessions/${session.id}`,
+    };
+  }
+
+  const { error: processedBookUpdateError } = await supabase
+    .from("books")
+    .update({
+      title: sessionName,
+      word_count: processResult.wordCount,
+      chapter_count: processResult.chapterCount,
+      metadata: processResult.metadata,
+      cleaned_content:
+        processResult.cleanedContentMode === "inline" ? processResult.cleanedContent : null,
+    })
+    .eq("id", bookId)
     .eq("user_id", user.id);
 
+  if (processedBookUpdateError) {
+    return { error: "原始文件已导入，但写入书籍内容失败。请稍后重试。" };
+  }
+
+  await supabase.from("chapters").delete().eq("book_id", bookId).eq("user_id", user.id);
+
   const { error: chaptersInsertError } = await supabase.from("chapters").insert(
-    chapters.map((c) => ({
+    processResult.chapters.map((chapter) => ({
       book_id: bookId,
       user_id: user.id,
-      index: c.index,
-      title: c.title,
-      start_char: c.startChar,
-      end_char: c.endChar,
-      source: c.source,
+      index: chapter.index,
+      title: chapter.title,
+      start_char: chapter.startChar,
+      end_char: chapter.endChar,
+      source: chapter.source,
     })),
   );
 
   if (chaptersInsertError) {
-    return { error: "原始文件已上传，但章节切分写入失败。请稍后重试。" };
+    const chapterWarningReport = {
+      ...processResult.report,
+      status: "ready_with_warnings" as const,
+      stage: "write_chapters" as const,
+      errors: [
+        {
+          stage: "write_chapters" as const,
+          code: chaptersInsertError.code ?? "chapter-insert-failed",
+          message: "章节切分写入失败。",
+          retryable: true,
+          details: chaptersInsertError.message,
+        },
+      ],
+      issues: [
+        ...(processResult.report.issues ?? []),
+        {
+          code: "chapter-write-warning",
+          message: "章节写入失败，当前会回退为运行时从原文读取。",
+          severity: "warning" as const,
+        },
+      ],
+      updated_at: new Date().toISOString(),
+    };
+
+    await supabase
+      .from("books")
+      .update({
+        metadata: {
+          ...processResult.metadata,
+          ingest_status: "ready_with_warnings",
+          ingest_report: chapterWarningReport,
+          issues: chapterWarningReport.issues,
+        },
+      })
+      .eq("id", bookId)
+      .eq("user_id", user.id);
+
+    logIngestFailure({
+      sessionId: session.id,
+      storageObjectPath: input.storageObjectPath,
+      report: chapterWarningReport,
+    });
+
+    return {
+      ok: true as const,
+      message: "原始文件已导入，但章节写入未完成。你可以先查看项目体检，再决定是否重试。",
+      warnings: ["章节写入未完成，项目已保留原文。"],
+      redirectTo: `/sessions/${session.id}`,
+    };
   }
 
   const sessionUpdatePayload: { status: "uploaded"; name?: string } = {
@@ -314,10 +410,17 @@ export async function finalizeNovelUpload(input: FinalizeNovelUploadInput) {
   }
 
   const redirectTo = `/sessions/${session.id}`;
+  const warnings = (processResult.report.issues ?? [])
+    .filter((issue) => issue.severity !== "info")
+    .map((issue) => issue.message);
 
   return {
     ok: true as const,
-    message: "小说已上传。",
+    message:
+      warnings.length > 0
+        ? "原始文件已导入，文本处理已完成，但有少量告警可在项目页查看。"
+        : "小说已上传。",
+    warnings,
     redirectTo,
   };
 }

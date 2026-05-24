@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { detectChapters, expandToChapters } from "./chapters";
+import { buildChapterPlan, detectChapters, expandToChapters } from "./chapters";
 
 test("detectChapters: 序章/楔子/番外 are recognized", () => {
   const text = [
@@ -85,4 +85,45 @@ test("expandToChapters: empty input still yields one block", () => {
   assert.equal(chunks.length, 1);
   assert.equal(chunks[0].source, "length-chunk");
   assert.equal(chunks[0].endChar, 0);
+});
+
+test("buildChapterPlan reports low quality when falling back to length chunks", () => {
+  const plan = buildChapterPlan("甲".repeat(9000), { fallbackChunkChars: 5000 });
+
+  assert.equal(plan.report.strategy, "length-chunk");
+  assert.equal(plan.report.quality, "low");
+  assert.ok(plan.report.warnings.length > 0);
+});
+
+test("detectChapters collapses adjacent duplicate chapter titles", () => {
+  const text = [
+    "第一千四百六十一章 二星斗圣！【第三更！】",
+    "第一千四百六十一章 二星斗圣！",
+    "正文甲".repeat(60),
+    "第一千四百六十二章 新敌",
+    "正文乙".repeat(60),
+  ].join("\n");
+
+  const chapters = detectChapters(text);
+  assert.equal(chapters.length, 2);
+  assert.match(chapters[0].title, /第一千四百六十一章/);
+});
+
+test("buildChapterPlan marks repeated tiny fragments as low quality", () => {
+  const text = [
+    "第一章 起",
+    "第一章 起",
+    "第二章 承",
+    "第二章 承",
+    "第三章 转",
+    "第三章 转",
+    "第四章 合",
+    "第四章 合",
+    "第五章 尾",
+  ].join("\n");
+
+  const plan = buildChapterPlan(text, { fallbackChunkChars: 5000 });
+  assert.equal(plan.report.strategy, "regex");
+  assert.equal(plan.report.quality, "low");
+  assert.ok(plan.report.repeatedFragmentCount >= 1);
 });

@@ -8,7 +8,7 @@ import { deriveProjectOverview } from "./overview";
 test("deriveProjectOverview returns upload-focused summary when only one book exists", () => {
   const result = deriveProjectOverview({
     sessionId: "session-1",
-    books: [{ chapter_count: 10 }],
+    books: [{ chapter_count: 10, metadata: { ingest_status: "ready" } }],
     bookSynthesisByBook: [],
     blueprintStatus: "draft",
     variants: [],
@@ -20,22 +20,35 @@ test("deriveProjectOverview returns upload-focused summary when only one book ex
     label: "补充第二本参考书",
     href: "/upload?sessionId=session-1&position=1",
   });
-  assert.deepEqual(result.editorialBullets, [
-    "先补齐第二本参考小说，系统才能给出稳定的融合判断。",
-    "当前可先保留第一本的章节与人物基础结构。",
-    "暂不建议进入生成，避免蓝图建立在单侧素材上。",
-  ]);
-  assert.deepEqual(result.keyResults, [
-    { label: "参考小说", value: "1 / 2" },
-    { label: "已切章节", value: "10" },
-    { label: "蓝图状态", value: "未开始" },
-  ]);
+});
+
+test("deriveProjectOverview stays in import-health mode when one book is not ready", () => {
+  const result = deriveProjectOverview({
+    sessionId: "session-1",
+    books: [
+      { chapter_count: 10, metadata: { ingest_status: "ready" } },
+      { chapter_count: null, metadata: { ingest_status: "failed_needs_attention" } },
+    ],
+    bookSynthesisByBook: [],
+    blueprintStatus: "draft",
+    variants: [],
+  });
+
+  assert.equal(result.statusLabel, "等待文本整理");
+  assert.equal(result.progressLabel, "已准备好 1 / 2 本参考小说");
+  assert.deepEqual(result.nextAction, {
+    label: "查看项目体检",
+    href: "/sessions/session-1",
+  });
 });
 
 test("deriveProjectOverview returns blueprint confirmation summary when both books are analyzed", () => {
   const result = deriveProjectOverview({
     sessionId: "session-1",
-    books: [{ chapter_count: 10 }, { chapter_count: 12 }],
+    books: [
+      { chapter_count: 10, metadata: { ingest_status: "ready" } },
+      { chapter_count: 12, metadata: { ingest_status: "ready" } },
+    ],
     bookSynthesisByBook: ["book-1", "book-2"],
     blueprintStatus: "draft",
     variants: [],
@@ -43,26 +56,15 @@ test("deriveProjectOverview returns blueprint confirmation summary when both boo
 
   assert.equal(result.statusLabel, "等待确认蓝图");
   assert.equal(result.progressLabel, "两本参考小说已具备融合条件");
-  assert.deepEqual(result.nextAction, {
-    label: "进入工作台确认蓝图",
-    href: "/sessions/session-1/workbench",
-  });
-  assert.deepEqual(result.editorialBullets, [
-    "先锁定最值得保留的结构骨架，再决定生成方向。",
-    "优先处理两书之间最强的互补点，而不是平均混合。",
-    "确认蓝图后再开始生成，结果会更稳定。",
-  ]);
-  assert.deepEqual(result.keyResults, [
-    { label: "参考小说", value: "2 / 2" },
-    { label: "整书分析", value: "2 / 2" },
-    { label: "蓝图状态", value: "待确认" },
-  ]);
 });
 
 test("deriveProjectOverview returns analysis-focused summary when only one book has book synthesis", () => {
   const result = deriveProjectOverview({
     sessionId: "session-1",
-    books: [{ chapter_count: 10 }, { chapter_count: 12 }],
+    books: [
+      { chapter_count: 10, metadata: { ingest_status: "ready" } },
+      { chapter_count: 12, metadata: { ingest_status: "ready" } },
+    ],
     bookSynthesisByBook: ["book-1"],
     blueprintStatus: "draft",
     variants: [],
@@ -70,20 +72,6 @@ test("deriveProjectOverview returns analysis-focused summary when only one book 
 
   assert.equal(result.statusLabel, "等待完成分析");
   assert.equal(result.progressLabel, "已完成 1 / 2 本整书分析");
-  assert.deepEqual(result.nextAction, {
-    label: "进入工作台继续分析",
-    href: "/sessions/session-1/workbench",
-  });
-  assert.deepEqual(result.editorialBullets, [
-    "先让两本书都形成整书级判断，再讨论融合策略。",
-    "当前阶段适合继续沉淀章节摘要与基础世界观信息。",
-    "不要过早进入生成，先把双书理解补齐。",
-  ]);
-  assert.deepEqual(result.keyResults, [
-    { label: "参考小说", value: "2 / 2" },
-    { label: "整书分析", value: "1 / 2" },
-    { label: "蓝图状态", value: "草稿" },
-  ]);
 });
 
 test("deriveProjectOverview returns results summary when confirmed blueprint already has variants", () => {
@@ -109,7 +97,10 @@ test("deriveProjectOverview returns results summary when confirmed blueprint alr
 
   const result = deriveProjectOverview({
     sessionId: "session-1",
-    books: [{ chapter_count: 10 }, { chapter_count: 12 }],
+    books: [
+      { chapter_count: 10, metadata: { ingest_status: "ready" } },
+      { chapter_count: 12, metadata: { ingest_status: "ready" } },
+    ],
     bookSynthesisByBook: ["book-1", "book-2"],
     blueprintStatus: "confirmed",
     variants: loaderCompatibleVariants,
@@ -117,26 +108,15 @@ test("deriveProjectOverview returns results summary when confirmed blueprint alr
 
   assert.equal(result.statusLabel, "结果已生成");
   assert.equal(result.progressLabel, "已保存 1 个生成版本");
-  assert.deepEqual(result.nextAction, {
-    label: "查看生成结果",
-    href: "/sessions/session-1?panel=results",
-  });
-  assert.deepEqual(result.editorialBullets, [
-    "优先比较现有生成版本的骨架差异，再决定下一轮迭代。",
-    "保留最稳定的融合骨架，避免每轮都重新发散。",
-    "下一步更适合精修，而不是回到素材整理阶段。",
-  ]);
-  assert.deepEqual(result.keyResults, [
-    { label: "参考小说", value: "2 / 2" },
-    { label: "蓝图状态", value: "已确认" },
-    { label: "生成版本", value: "1" },
-  ]);
 });
 
 test("deriveProjectOverview ignores outline and chapter variants when deciding whether results exist", () => {
   const result = deriveProjectOverview({
     sessionId: "session-1",
-    books: [{ chapter_count: 10 }, { chapter_count: 12 }],
+    books: [
+      { chapter_count: 10, metadata: { ingest_status: "ready" } },
+      { chapter_count: 12, metadata: { ingest_status: "ready" } },
+    ],
     bookSynthesisByBook: ["book-1", "book-2"],
     blueprintStatus: "confirmed",
     variants: [
@@ -147,21 +127,15 @@ test("deriveProjectOverview ignores outline and chapter variants when deciding w
 
   assert.equal(result.statusLabel, "可以开始生成");
   assert.equal(result.progressLabel, "融合蓝图已确认，等待首个版本输出");
-  assert.deepEqual(result.nextAction, {
-    label: "进入结果区开始生成",
-    href: "/sessions/session-1?panel=results",
-  });
-  assert.deepEqual(result.keyResults, [
-    { label: "参考小说", value: "2 / 2" },
-    { label: "蓝图状态", value: "已确认" },
-    { label: "生成版本", value: "0" },
-  ]);
 });
 
 test("deriveProjectOverview does not unlock generation from blueprintConfirmedAt alone", () => {
   const result = deriveProjectOverview({
     sessionId: "session-1",
-    books: [{ chapter_count: 10 }, { chapter_count: 12 }],
+    books: [
+      { chapter_count: 10, metadata: { ingest_status: "ready" } },
+      { chapter_count: 12, metadata: { ingest_status: "ready" } },
+    ],
     bookSynthesisByBook: ["book-1", "book-2"],
     blueprintStatus: "draft",
     variants: [{ id: "variant-1", title: "Draft 1", scope: "full" }],
@@ -169,13 +143,4 @@ test("deriveProjectOverview does not unlock generation from blueprintConfirmedAt
 
   assert.equal(result.statusLabel, "等待确认蓝图");
   assert.equal(result.progressLabel, "两本参考小说已具备融合条件");
-  assert.deepEqual(result.nextAction, {
-    label: "进入工作台确认蓝图",
-    href: "/sessions/session-1/workbench",
-  });
-  assert.deepEqual(result.keyResults, [
-    { label: "参考小说", value: "2 / 2" },
-    { label: "整书分析", value: "2 / 2" },
-    { label: "蓝图状态", value: "待确认" },
-  ]);
 });

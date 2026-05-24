@@ -2,10 +2,15 @@ import { generateObject } from "ai";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
+import {
+  getBookAnalysisBlockingReason,
+  getBookProviderCompatibility,
+  resolveBookAnalysisView,
+} from "@/lib/books/content";
+import { saveAnalysis } from "@/lib/analysis-store";
 import { getUserLLMClient } from "@/lib/llm/dispatch";
 import { resolveStructuredObjectMode } from "@/lib/llm/structured-output";
 import { isUserFixableLLMConfigMessage } from "@/lib/llm-config";
-import { saveAnalysis } from "@/lib/analysis-store";
 import { ANALYSIS_TEXT_CHAR_LIMIT, EXTENDED_ANALYSIS_DIMENSION_CONFIG } from "@/lib/prompts";
 import { wrapUntrustedNovel } from "@/lib/prompts/safety";
 import { createClient } from "@/lib/supabase/server";
@@ -46,19 +51,29 @@ export async function POST(req: Request) {
 
   const { data: book } = await supabase
     .from("books")
-    .select("id, cleaned_content")
+    .select("id, cleaned_content, metadata, storage_path")
     .eq("id", body.bookId)
     .eq("user_id", user.id)
     .maybeSingle();
 
   if (!book) return jsonError("未找到书籍。", 404);
-  if (!book.cleaned_content) return jsonError("当前书籍内容不可用。", 400);
+  const blockingReason = getBookAnalysisBlockingReason(book.metadata);
+  if (blockingReason) return jsonError(blockingReason, 409);
+  const analysisView = await resolveBookAnalysisView(supabase, book);
+  if (!analysisView) return jsonError("当前书籍内容不可用。", 400);
 
   const promptConfig = EXTENDED_ANALYSIS_DIMENSION_CONFIG[body.dimension];
-  const excerpt = book.cleaned_content.slice(0, ANALYSIS_TEXT_CHAR_LIMIT);
+  const excerpt = analysisView.slice(0, ANALYSIS_TEXT_CHAR_LIMIT);
 
   try {
     const llm = await getUserLLMClient(supabase);
+    const compatibility = getBookProviderCompatibility(book.metadata, llm.provider);
+    if (compatibility.status === "incompatible") {
+      return jsonError(
+        compatibility.reason ?? "当前模型不兼容该内容类型，请切换模型后再试。",
+        409,
+      );
+    }
     const result = await generateObject({
       model: llm.openai(llm.model),
       mode: resolveStructuredObjectMode(llm.provider),
