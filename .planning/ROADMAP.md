@@ -81,8 +81,13 @@ Plans:
 
 Plans:
 
-- [ ] 03-01: 重构 sidebar/header 信息架构与文案
-- [ ] 03-02: 实现次要入口分层（折叠、二级菜单或情境入口）
+**Wave 1**
+
+- [ ] 03-01-PLAN.md — 壳层 CTA、ContextualShellTitle、dual redirect、sessions/工作台链
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 03-02-PLAN.md — AppNav「更多工具」Collapsible、mobile parity、/create 与 /upload 文案
 
 ### Phase 4: 核心界面密度重构
 
