@@ -28,7 +28,7 @@ export function PipelineBar(p: Props) {
   const currentIdx = steps.findIndex((s) => !s.done);
 
   return (
-    <div className="surface-panel flex items-center gap-2 px-4 py-2.5 text-[12px]">
+    <div className="surface-panel flex items-center gap-2 px-4 py-2.5 type-caption">
       {steps.map((s, i) => {
         const isCurrent = i === currentIdx;
         const glyph = s.done ? "●" : isCurrent ? "◐" : "○";
@@ -41,7 +41,9 @@ export function PipelineBar(p: Props) {
           s.done || isCurrent ? "text-foreground" : "text-muted-foreground";
         return (
           <span key={s.no} className="inline-flex items-center gap-2">
-            {i > 0 ? <span className="px-1 text-primary/30">─</span> : null}
+            {i > 0 ? (
+              <span className="px-1 text-muted-foreground/30">─</span>
+            ) : null}
             <span
               className={`${glyphColor}${isCurrent ? " motion-safe:animate-pulse" : ""}`}
               aria-hidden
