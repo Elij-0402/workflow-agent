@@ -22,15 +22,16 @@
 - ✓ 创作简报四栏、Studio SSE 大纲与逐章迭代 — v0.3
 - ✓ 扩展四维度分析（文笔 / 情绪弧 / 节奏 / 悬念网格）— v0.3
 - ✓ 多会话对比（≤6）、资料库、会话软归档 — v0.3
-- ✓ 单元测试基线（188 tests passing）— 工程健康
+- ✓ 单元测试基线（197 tests passing）— 工程健康
+- ✓ UX 收敛里程碑 Phase 1–5：审计、UI-SPEC、壳层 IA、工作台密度、QLT 验收 — 2026-05-26
 
 ### Active
 
-- [ ] **UX-01**：完成全产品功能矩阵 + `/gsd-ui-review` 审计，标注每条路径的优先级（主路径 / 次要 / 待收敛）
-- [ ] **UX-02**：确立「极度克制、大留白、低信息密度」的视觉语言（版式、间距、层级、色彩、字体），并形成可执行的 UI 规范（对接 `/gsd-ui-phase` 或设计系统收敛）
-- [ ] **UX-03**：以双书蓝图工作台为**默认英雄旅程**，主导航与页面结构让用户 30 秒内知道「下一步在哪」
-- [ ] **UX-04**：在**不预先砍功能**的前提下，通过分层展示（默认简单 / 高级折叠）降低认知负担；审计后再决定是否下线模块
-- [ ] **UX-05**：达到「自己每天愿意打开用」+「外观像成熟 SaaS」——功能清单不变，体验达标
+（UX 里程碑规划项已在 Phase 1–5 交付；QLT 复选框待 `/gsd-complete-milestone` 统一勾选。）
+
+### Deferred (v2)
+
+- CNV-01–03：legacy API 收敛、维度统一、大组件拆分（见 `05-VERIFICATION.md` known debt）
 
 ### Out of Scope
 
@@ -65,12 +66,12 @@
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| 主路径 = 双书蓝图工作台 | 用户明确选择 1=2 | — Pending |
-| 先审计后做减法 | 用户选择 3=4，避免误砍仍有价值的模块 | — Pending |
-| 美学目标 = 极度克制留白简洁 | 用户拒绝预设痛点列表，要整体气质而非局部修补 | — Pending |
-| 明/暗色不预先锁定 | 用户选 3＝先审计再定 | — Pending |
-| 成功 = 日用性 + 成熟 SaaS 观感，功能清单暂不变 | 用户 4=1,3 | — Pending |
-| GSD 规划层此前缺失 | 仅有 codebase map，无 ROADMAP/REQUIREMENTS | — Pending |
+| 主路径 = 双书蓝图工作台 | 用户明确选择 1=2 | Validated Phase 3–5 |
+| 先审计后做减法 | 用户选择 3=4，避免误砍仍有价值的模块 | Validated Phase 1 |
+| 美学目标 = 极度克制留白简洁 | dark-only UI-SPEC | Validated Phase 2 |
+| 明/暗色 | 审计后锁定 dark-only | Validated Phase 2 |
+| 成功 = 日用性 + 成熟 SaaS 观感 | 05-UAT owner signoff | Validated Phase 5 |
+| GSD 规划层 | ROADMAP + 5 phases complete | Complete 2026-05-26 |
 
 ## Evolution
 
@@ -92,4 +93,4 @@
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-26 after gsd-new-project questioning*
+*Last updated: 2026-05-26 after Phase 5 completion*
