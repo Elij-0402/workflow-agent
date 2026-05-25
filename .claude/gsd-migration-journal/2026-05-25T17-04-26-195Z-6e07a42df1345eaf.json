@@ -1,0 +1,273 @@
+{
+  "schemaVersion": 1,
+  "appliedAt": "2026-05-25T17:04:26.195Z",
+  "appliedMigrationIds": [
+    "2026-05-11-first-time-baseline-scan"
+  ],
+  "actions": [
+    {
+      "migrationId": "2026-05-11-first-time-baseline-scan",
+      "migrationChecksum": "sha256:34608ea4e2f4e1c53b069604892860e603600d8573cc6a5584e4194044b48e67",
+      "type": "baseline-preserve-user",
+      "relPath": "agents/academic-narratologist.md",
+      "reason": "known user-owned artifact preserved by first-time migration baseline",
+      "classification": "user-owned",
+      "originalHash": null,
+      "currentHash": null,
+      "status": "preserved"
+    },
+    {
+      "migrationId": "2026-05-11-first-time-baseline-scan",
+      "migrationChecksum": "sha256:34608ea4e2f4e1c53b069604892860e603600d8573cc6a5584e4194044b48e67",
+      "type": "baseline-preserve-user",
+      "relPath": "agents/design-ui-designer.md",
+      "reason": "known user-owned artifact preserved by first-time migration baseline",
+      "classification": "user-owned",
+      "originalHash": null,
+      "currentHash": null,
+      "status": "preserved"
+    },
+    {
+      "migrationId": "2026-05-11-first-time-baseline-scan",
+      "migrationChecksum": "sha256:34608ea4e2f4e1c53b069604892860e603600d8573cc6a5584e4194044b48e67",
+      "type": "baseline-preserve-user",
+      "relPath": "agents/design-ux-architect.md",
+      "reason": "known user-owned artifact preserved by first-time migration baseline",
+      "classification": "user-owned",
+      "originalHash": null,
+      "currentHash": null,
+      "status": "preserved"
+    },
+    {
+      "migrationId": "2026-05-11-first-time-baseline-scan",
+      "migrationChecksum": "sha256:34608ea4e2f4e1c53b069604892860e603600d8573cc6a5584e4194044b48e67",
+      "type": "baseline-preserve-user",
+      "relPath": "agents/engineering-ai-engineer.md",
+      "reason": "known user-owned artifact preserved by first-time migration baseline",
+      "classification": "user-owned",
+      "originalHash": null,
+      "currentHash": null,
+      "status": "preserved"
+    },
+    {
+      "migrationId": "2026-05-11-first-time-baseline-scan",
+      "migrationChecksum": "sha256:34608ea4e2f4e1c53b069604892860e603600d8573cc6a5584e4194044b48e67",
+      "type": "baseline-preserve-user",
+      "relPath": "agents/engineering-backend-architect.md",
+      "reason": "known user-owned artifact preserved by first-time migration baseline",
+      "classification": "user-owned",
+      "originalHash": null,
+      "currentHash": null,
+      "status": "preserved"
+    },
+    {
+      "migrationId": "2026-05-11-first-time-baseline-scan",
+      "migrationChecksum": "sha256:34608ea4e2f4e1c53b069604892860e603600d8573cc6a5584e4194044b48e67",
+      "type": "baseline-preserve-user",
+      "relPath": "agents/engineering-code-reviewer.md",
+      "reason": "known user-owned artifact preserved by first-time migration baseline",
+      "classification": "user-owned",
+      "originalHash": null,
+      "currentHash": null,
+      "status": "preserved"
+    },
+    {
+      "migrationId": "2026-05-11-first-time-baseline-scan",
+      "migrationChecksum": "sha256:34608ea4e2f4e1c53b069604892860e603600d8573cc6a5584e4194044b48e67",
+      "type": "baseline-preserve-user",
+      "relPath": "agents/engineering-codebase-onboarding-engineer.md",
+      "reason": "known user-owned artifact preserved by first-time migration baseline",
+      "classification": "user-owned",
+      "originalHash": null,
+      "currentHash": null,
+      "status": "preserved"
+    },
+    {
+      "migrationId": "2026-05-11-first-time-baseline-scan",
+      "migrationChecksum": "sha256:34608ea4e2f4e1c53b069604892860e603600d8573cc6a5584e4194044b48e67",
+      "type": "baseline-preserve-user",
+      "relPath": "agents/engineering-database-optimizer.md",
+      "reason": "known user-owned artifact preserved by first-time migration baseline",
+      "classification": "user-owned",
+      "originalHash": null,
+      "currentHash": null,
+      "status": "preserved"
+    },
+    {
+      "migrationId": "2026-05-11-first-time-baseline-scan",
+      "migrationChecksum": "sha256:34608ea4e2f4e1c53b069604892860e603600d8573cc6a5584e4194044b48e67",
+      "type": "baseline-preserve-user",
+      "relPath": "agents/engineering-devops-automator.md",
+      "reason": "known user-owned artifact preserved by first-time migration baseline",
+      "classification": "user-owned",
+      "originalHash": null,
+      "currentHash": null,
+      "status": "preserved"
+    },
+    {
+      "migrationId": "2026-05-11-first-time-baseline-scan",
+      "migrationChecksum": "sha256:34608ea4e2f4e1c53b069604892860e603600d8573cc6a5584e4194044b48e67",
+      "type": "baseline-preserve-user",
+      "relPath": "agents/engineering-frontend-developer.md",
+      "reason": "known user-owned artifact preserved by first-time migration baseline",
+      "classification": "user-owned",
+      "originalHash": null,
+      "currentHash": null,
+      "status": "preserved"
+    },
+    {
+      "migrationId": "2026-05-11-first-time-baseline-scan",
+      "migrationChecksum": "sha256:34608ea4e2f4e1c53b069604892860e603600d8573cc6a5584e4194044b48e67",
+      "type": "baseline-preserve-user",
+      "relPath": "agents/engineering-git-workflow-master.md",
+      "reason": "known user-owned artifact preserved by first-time migration baseline",
+      "classification": "user-owned",
+      "originalHash": null,
+      "currentHash": null,
+      "status": "preserved"
+    },
+    {
+      "migrationId": "2026-05-11-first-time-baseline-scan",
+      "migrationChecksum": "sha256:34608ea4e2f4e1c53b069604892860e603600d8573cc6a5584e4194044b48e67",
+      "type": "baseline-preserve-user",
+      "relPath": "agents/engineering-minimal-change-engineer.md",
+      "reason": "known user-owned artifact preserved by first-time migration baseline",
+      "classification": "user-owned",
+      "originalHash": null,
+      "currentHash": null,
+      "status": "preserved"
+    },
+    {
+      "migrationId": "2026-05-11-first-time-baseline-scan",
+      "migrationChecksum": "sha256:34608ea4e2f4e1c53b069604892860e603600d8573cc6a5584e4194044b48e67",
+      "type": "baseline-preserve-user",
+      "relPath": "agents/engineering-security-engineer.md",
+      "reason": "known user-owned artifact preserved by first-time migration baseline",
+      "classification": "user-owned",
+      "originalHash": null,
+      "currentHash": null,
+      "status": "preserved"
+    },
+    {
+      "migrationId": "2026-05-11-first-time-baseline-scan",
+      "migrationChecksum": "sha256:34608ea4e2f4e1c53b069604892860e603600d8573cc6a5584e4194044b48e67",
+      "type": "baseline-preserve-user",
+      "relPath": "agents/engineering-software-architect.md",
+      "reason": "known user-owned artifact preserved by first-time migration baseline",
+      "classification": "user-owned",
+      "originalHash": null,
+      "currentHash": null,
+      "status": "preserved"
+    },
+    {
+      "migrationId": "2026-05-11-first-time-baseline-scan",
+      "migrationChecksum": "sha256:34608ea4e2f4e1c53b069604892860e603600d8573cc6a5584e4194044b48e67",
+      "type": "baseline-preserve-user",
+      "relPath": "agents/marketing-bilibili-content-strategist.md",
+      "reason": "known user-owned artifact preserved by first-time migration baseline",
+      "classification": "user-owned",
+      "originalHash": null,
+      "currentHash": null,
+      "status": "preserved"
+    },
+    {
+      "migrationId": "2026-05-11-first-time-baseline-scan",
+      "migrationChecksum": "sha256:34608ea4e2f4e1c53b069604892860e603600d8573cc6a5584e4194044b48e67",
+      "type": "baseline-preserve-user",
+      "relPath": "agents/marketing-douyin-strategist.md",
+      "reason": "known user-owned artifact preserved by first-time migration baseline",
+      "classification": "user-owned",
+      "originalHash": null,
+      "currentHash": null,
+      "status": "preserved"
+    },
+    {
+      "migrationId": "2026-05-11-first-time-baseline-scan",
+      "migrationChecksum": "sha256:34608ea4e2f4e1c53b069604892860e603600d8573cc6a5584e4194044b48e67",
+      "type": "baseline-preserve-user",
+      "relPath": "agents/marketing-growth-hacker.md",
+      "reason": "known user-owned artifact preserved by first-time migration baseline",
+      "classification": "user-owned",
+      "originalHash": null,
+      "currentHash": null,
+      "status": "preserved"
+    },
+    {
+      "migrationId": "2026-05-11-first-time-baseline-scan",
+      "migrationChecksum": "sha256:34608ea4e2f4e1c53b069604892860e603600d8573cc6a5584e4194044b48e67",
+      "type": "baseline-preserve-user",
+      "relPath": "agents/marketing-wechat-official-account.md",
+      "reason": "known user-owned artifact preserved by first-time migration baseline",
+      "classification": "user-owned",
+      "originalHash": null,
+      "currentHash": null,
+      "status": "preserved"
+    },
+    {
+      "migrationId": "2026-05-11-first-time-baseline-scan",
+      "migrationChecksum": "sha256:34608ea4e2f4e1c53b069604892860e603600d8573cc6a5584e4194044b48e67",
+      "type": "baseline-preserve-user",
+      "relPath": "agents/marketing-xiaohongshu-specialist.md",
+      "reason": "known user-owned artifact preserved by first-time migration baseline",
+      "classification": "user-owned",
+      "originalHash": null,
+      "currentHash": null,
+      "status": "preserved"
+    },
+    {
+      "migrationId": "2026-05-11-first-time-baseline-scan",
+      "migrationChecksum": "sha256:34608ea4e2f4e1c53b069604892860e603600d8573cc6a5584e4194044b48e67",
+      "type": "baseline-preserve-user",
+      "relPath": "agents/marketing-zhihu-strategist.md",
+      "reason": "known user-owned artifact preserved by first-time migration baseline",
+      "classification": "user-owned",
+      "originalHash": null,
+      "currentHash": null,
+      "status": "preserved"
+    },
+    {
+      "migrationId": "2026-05-11-first-time-baseline-scan",
+      "migrationChecksum": "sha256:34608ea4e2f4e1c53b069604892860e603600d8573cc6a5584e4194044b48e67",
+      "type": "baseline-preserve-user",
+      "relPath": "agents/product-manager.md",
+      "reason": "known user-owned artifact preserved by first-time migration baseline",
+      "classification": "user-owned",
+      "originalHash": null,
+      "currentHash": null,
+      "status": "preserved"
+    },
+    {
+      "migrationId": "2026-05-11-first-time-baseline-scan",
+      "migrationChecksum": "sha256:34608ea4e2f4e1c53b069604892860e603600d8573cc6a5584e4194044b48e67",
+      "type": "baseline-preserve-user",
+      "relPath": "agents/product-sprint-prioritizer.md",
+      "reason": "known user-owned artifact preserved by first-time migration baseline",
+      "classification": "user-owned",
+      "originalHash": null,
+      "currentHash": null,
+      "status": "preserved"
+    },
+    {
+      "migrationId": "2026-05-11-first-time-baseline-scan",
+      "migrationChecksum": "sha256:34608ea4e2f4e1c53b069604892860e603600d8573cc6a5584e4194044b48e67",
+      "type": "baseline-preserve-user",
+      "relPath": "agents/testing-api-tester.md",
+      "reason": "known user-owned artifact preserved by first-time migration baseline",
+      "classification": "user-owned",
+      "originalHash": null,
+      "currentHash": null,
+      "status": "preserved"
+    },
+    {
+      "migrationId": "2026-05-11-first-time-baseline-scan",
+      "migrationChecksum": "sha256:34608ea4e2f4e1c53b069604892860e603600d8573cc6a5584e4194044b48e67",
+      "type": "baseline-preserve-user",
+      "relPath": "agents/testing-reality-checker.md",
+      "reason": "known user-owned artifact preserved by first-time migration baseline",
+      "classification": "user-owned",
+      "originalHash": null,
+      "currentHash": null,
+      "status": "preserved"
+    }
+  ]
+}
