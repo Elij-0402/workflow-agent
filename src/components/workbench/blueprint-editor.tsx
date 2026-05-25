@@ -12,6 +12,7 @@ import {
   type BlueprintSection,
   type BlueprintStatus,
 } from "@/lib/blueprint/schema";
+import { CTA_COPY } from "@/lib/ui/cta-copy";
 
 import {
   BlueprintCardList,
@@ -73,6 +74,7 @@ export function BlueprintEditor({
   const [bpUpdatedAt, setBpUpdatedAt] = useState<string | null>(updatedAt);
   const [showGenerate, setShowGenerate] = useState(false);
   const disabled = status === "confirmed";
+  const confirmReady = blueprintReadyToConfirm(bp);
 
   useEffect(() => {
     if (!pendingCandidate) return;
@@ -183,7 +185,7 @@ export function BlueprintEditor({
         <div className="flex shrink-0 items-center gap-2">
           <span
             className={`font-mono text-[10.5px] uppercase tracking-[0.12em] ${
-              status === "confirmed" ? "text-flash" : "text-primary/85"
+              status === "confirmed" ? "text-flash" : "text-muted-foreground"
             }`}
           >
             {status === "confirmed" ? "已确认" : "草稿"}
@@ -193,15 +195,27 @@ export function BlueprintEditor({
               <Button size="sm" variant="ghost" onClick={() => void unlock()}>
                 解锁
               </Button>
-              <Button size="sm" onClick={() => setShowGenerate(true)}>
+              <Button size="sm" variant="default" onClick={() => setShowGenerate(true)}>
                 <Sparkles />
-                生成新版本
+                {CTA_COPY.generateNewVersion}
               </Button>
             </>
           ) : (
-            <Button size="sm" onClick={() => void confirm()}>
-              确认蓝图
-            </Button>
+            <div className="flex flex-col items-end gap-1">
+              <Button
+                size="sm"
+                variant="default"
+                disabled={!confirmReady.ok}
+                onClick={() => void confirm()}
+              >
+                {CTA_COPY.confirmBlueprint}
+              </Button>
+              {!confirmReady.ok ? (
+                <p className="type-caption max-w-[220px] text-right text-muted-foreground">
+                  缺少：{confirmReady.missing.join("、")}
+                </p>
+              ) : null}
+            </div>
           )}
         </div>
       </div>
