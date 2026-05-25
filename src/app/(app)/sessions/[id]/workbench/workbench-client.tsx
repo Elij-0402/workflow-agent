@@ -1,15 +1,26 @@
 "use client";
 
-import { useEffect, useMemo, useState, useTransition } from "react";
+import {
+  useEffect,
+  useMemo,
+  useState,
+  useTransition,
+  type ReactNode,
+} from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { BookPlus, Sparkles } from "lucide-react";
+import { BookPlus, ChevronRight, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
 import { PageHeader } from "@/components/page-header";
 import { VariantCard } from "@/components/sessions/variant-card";
 import { VariantComparison } from "@/components/sessions/variant-comparison";
 import { Button } from "@/components/ui/button";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import {
   WorkflowStageBar,
   type WorkflowStageItem,
@@ -139,7 +150,6 @@ export function WorkbenchClient(props: Props) {
   );
   const [blueprint, setBlueprint] = useState<Blueprint>(props.blueprint);
   const [generateOpen, setGenerateOpen] = useState(false);
-  const [analysisGuideExpanded, setAnalysisGuideExpanded] = useState(false);
 
   const [costModal, setCostModal] = useState<{
     open: boolean;
@@ -704,14 +714,20 @@ export function WorkbenchClient(props: Props) {
       ) : null}
 
       {activeStep === "analysis" ? (
-        <section className="space-y-5">
+        <section className="space-y-10">
           <StepIntro
-            title="第 2 步 · 拆解两本参考小说的结构、人物与叙事素材"
+            title="拆解章节"
             description="系统会先分别拆解每本参考书，优先按章节分析；若导入体检判断章节结构不稳，则自动改为分段分析。完成两本书的结构化摘要后，再进入整书汇总与后续对比整理。"
           />
-          <AnalysisCapabilityPanel
-            expanded={analysisGuideExpanded}
-            onToggle={() => setAnalysisGuideExpanded((value) => !value)}
+          <PipelineBar
+            importedCount={props.books.length}
+            chapterTotals={chapterTotals}
+            bookSynthesisDone={{
+              a: a ? synthesisSet.has(a.id) : false,
+              b: b ? synthesisSet.has(b.id) : false,
+            }}
+            blueprintStatus={blueprintStatus}
+            variantCount={props.variants.length}
           />
           <HintBanner hint={hint} />
           {batchState ? (
@@ -731,26 +747,28 @@ export function WorkbenchClient(props: Props) {
             />
           ) : null}
           {analysisGrid}
-          <div className="surface-panel flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-[13px] leading-6 text-muted-foreground">
-              {analysisDone
+          <AnalysisCapabilityPanel />
+          <StepActionBar
+            hint={
+              analysisDone
                 ? "章节分析和整书汇总都完成了。下一步进入双书对比与蓝图整理。"
-                : "完成两本参考书的章节分析和整书汇总后，才能进入对比。"}
-            </p>
+                : "完成两本参考书的章节分析和整书汇总后，才能进入对比。"
+            }
+          >
             <Button
               onClick={() => navigateToStep("compare")}
               disabled={!analysisDone}
             >
               前往对比
             </Button>
-          </div>
+          </StepActionBar>
         </section>
       ) : null}
 
       {activeStep === "compare" ? (
-        <section className="space-y-5">
+        <section className="flex min-h-0 flex-1 flex-col space-y-10">
           <StepIntro
-            title="第 3 步 · 对比并整理骨架"
+            title="整理融合蓝图"
             description="这里把两本参考小说的章节素材、人物关系、世界规则和情节节点合并成一份融合蓝图。确认蓝图后才开放最终生成。"
           />
           <PipelineBar
@@ -769,7 +787,7 @@ export function WorkbenchClient(props: Props) {
             chapterTotals={chapterTotals}
             onExpand={() => navigateToStep("analysis")}
           />
-          <div className="min-h-[680px]">
+          <div className="flex min-h-0 flex-1 flex-col">
             <BlueprintEditor
               sessionId={props.session.id}
               blueprintId={blueprintId}
@@ -797,28 +815,27 @@ export function WorkbenchClient(props: Props) {
               }}
             />
           </div>
-          <div className="surface-panel flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-[13px] leading-6 text-muted-foreground">
-              {compareDone
+          <StepActionBar
+            hint={
+              compareDone
                 ? "蓝图已经确认，可以开始生成新的融合小说。"
-                : blueprintReady
-                  ? "蓝图内容已经够用了。确认蓝图后，就能进入生成。"
-                  : "先补齐蓝图里的关键卡片，再确认它。"}
-            </p>
+                : "在上方编辑器中确认蓝图后，再进入生成步骤。"
+            }
+          >
             <Button
               onClick={() => navigateToStep("generate")}
               disabled={!compareDone}
             >
               前往生成
             </Button>
-          </div>
+          </StepActionBar>
         </section>
       ) : null}
 
       {activeStep === "generate" ? (
-        <section className="space-y-5">
+        <section className="space-y-10">
           <StepIntro
-            title="第 4 步 · 生成新小说"
+            title="生成变体"
             description="蓝图确认后，从这里生成新的融合版本。生成完成后，可以继续累积多个版本并直接对比它们。"
           />
           <PipelineBar
@@ -835,10 +852,8 @@ export function WorkbenchClient(props: Props) {
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="eyebrow-label">生成阶段</p>
-                <h2 className="text-[20px] font-semibold leading-tight text-foreground">
-                  生成结果
-                </h2>
-                <p className="mt-2 max-w-2xl text-[13px] leading-6 text-muted-foreground">
+                <h2 className="type-title">生成结果</h2>
+                <p className="type-body mt-2 max-w-2xl text-muted-foreground">
                   {hasVariants
                     ? `当前已有 ${props.variants.length} 个版本。可以继续生成，或者先比较已有结果。`
                     : "先生成第一个版本，再决定是否继续迭代多个结果。"}
@@ -849,13 +864,21 @@ export function WorkbenchClient(props: Props) {
                 disabled={!compareDone || !blueprintId}
               >
                 <Sparkles className="h-4 w-4" aria-hidden />
-                {hasVariants ? "再生成一版" : "生成新小说"}
+                生成新版本
               </Button>
             </div>
             {!compareDone ? (
-              <p className="text-[12px] text-primary">
+              <p className="type-caption text-warning">
                 需要先在上一步确认蓝图，才能开始生成。
               </p>
+            ) : null}
+            {props.variants.length === 0 ? (
+              <div className="flex flex-col items-center gap-3 border-t border-dashed border-border/60 py-8 text-center">
+                <p className="type-mono-label text-muted-foreground">04</p>
+                <p className="type-body text-muted-foreground">
+                  还没有生成结果。确认蓝图后，点击「生成新版本」开始创作第一版。
+                </p>
+              </div>
             ) : null}
           </div>
 
@@ -865,11 +888,7 @@ export function WorkbenchClient(props: Props) {
                 <VariantCard key={variant.id} variant={variant} />
               ))}
             </div>
-          ) : (
-            <div className="surface-panel p-6 text-[13px] leading-7 text-muted-foreground">
-              还没有生成结果。确认蓝图后，点击上方按钮开始创作第一版。
-            </div>
-          )}
+          ) : null}
 
           {props.variants.length >= 2 ? (
             <VariantComparison
@@ -1012,115 +1031,113 @@ function StepIntro({
 }) {
   return (
     <div className="space-y-2">
-      <h2 className="text-[22px] font-semibold leading-tight text-foreground">
-        {title}
-      </h2>
-      <p className="max-w-3xl text-[13px] leading-7 text-muted-foreground">
-        {description}
-      </p>
+      <h2 className="type-title">{title}</h2>
+      <p className="type-body max-w-3xl text-muted-foreground">{description}</p>
     </div>
   );
 }
 
-function AnalysisCapabilityPanel({
-  expanded,
-  onToggle,
+function StepActionBar({
+  hint,
+  children,
 }: {
-  expanded: boolean;
-  onToggle: () => void;
+  hint: string;
+  children: ReactNode;
 }) {
+  return (
+    <div className="sticky bottom-0 z-10 -mx-1 border-t border-border/60 bg-background/95 px-1 py-4 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <p className="type-caption leading-6 text-muted-foreground">{hint}</p>
+        <div className="flex shrink-0 flex-wrap items-center gap-2">{children}</div>
+      </div>
+    </div>
+  );
+}
+
+function AnalysisCapabilityPanel() {
   const guide = ANALYSIS_CAPABILITY_GUIDE;
+  const [open, setOpen] = useState(false);
 
   return (
-    <div className="surface-panel p-5">
-      <div className="flex flex-col gap-3 border-b border-dashed border-border/60 pb-4 sm:flex-row sm:items-start sm:justify-between">
-        <div className="space-y-2">
-          <p className="eyebrow-label">分析能力说明</p>
-          <h3 className="text-[18px] font-semibold leading-tight text-foreground">
-            当前更适合做创作拆解，不是全维度精读
-          </h3>
-          <p className="max-w-3xl text-[13px] leading-7 text-muted-foreground">
-            {guide.shortSummary}
-          </p>
-          <p className="max-w-3xl text-[12px] leading-6 text-muted-foreground">
-            {guide.positioning}
-          </p>
-        </div>
-        <Button variant="outline" size="sm" onClick={onToggle}>
-          {expanded ? "收起完整说明" : "查看完整说明"}
-        </Button>
-      </div>
-
-      <div className="mt-4 grid gap-4 lg:grid-cols-3">
-        <InfoListCard
-          title="适合分析"
-          tone="normal"
-          items={guide.suitable}
-          footer="结构型信息相对稳定，适合先建立整书结构画像。"
-        />
-        <InfoListCard
-          title="部分支持"
-          tone="warning"
-          items={guide.partial}
-          footer="风格型信息可作参考，但不建议直接当作最终判断。"
-        />
-        <InfoListCard
-          title="建议人工复核"
-          tone="blocked"
-          items={guide.reviewNeeded}
-          footer="深层文学判断与长程伏线整理，仍建议结合人工精读。"
-        />
-      </div>
-
-      <div className="mt-4 grid gap-4 lg:grid-cols-2">
-        <div className="rounded-[4px] border border-border/70 bg-background/40 p-4">
-          <p className="text-[13px] font-medium text-foreground">
-            双书互动流程
-          </p>
-          <div className="mt-3 space-y-3">
-            <StageLine index="01" text={guide.processStages[0]} />
-            <StageLine index="02" text={guide.processStages[1]} />
+    <Collapsible open={open} onOpenChange={setOpen}>
+      <div className="surface-subtle rounded-[var(--radius-md)]">
+        <CollapsibleTrigger
+          className="group flex w-full items-start gap-3 px-4 py-3 text-left focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary/40"
+          style={{ transitionDuration: "var(--duration-fast)" }}
+        >
+          <ChevronRight
+            aria-hidden="true"
+            className={cn(
+              "mt-0.5 h-4 w-4 shrink-0 text-muted-foreground/70 transition-transform",
+              open && "rotate-90",
+            )}
+            strokeWidth={1.5}
+          />
+          <div className="min-w-0 flex-1 space-y-1">
+            <p className="type-mono-label">分析能力说明</p>
+            <p className="type-caption text-muted-foreground">
+              {guide.shortSummary}
+            </p>
           </div>
-          <p className="mt-3 text-[12px] leading-6 text-muted-foreground">
-            两本书之间的互动、互补和冲突，不会在本步直接生成，而是在下一步“对比”中整理。
-          </p>
-        </div>
-        <div className="rounded-[4px] border border-border/70 bg-background/40 p-4">
-          <p className="text-[13px] font-medium text-foreground">
-            结果可信度说明
-          </p>
-          <ul className="mt-3 space-y-2 text-[12px] leading-6 text-muted-foreground">
-            {guide.trustNotes.map((item) => (
-              <li key={item}>• {item}</li>
-            ))}
-          </ul>
-          <div className="mt-3 rounded-[4px] border border-border/60 bg-background/50 p-3 text-[12px] text-muted-foreground">
-            结果预期：结构型信息相对稳定，风格型信息参考使用，深层文学判断需要人工复核。
+        </CollapsibleTrigger>
+        <CollapsibleContent className="space-y-4 border-t border-dashed border-border/60 px-4 pb-4 pt-3">
+          <p className="type-body text-muted-foreground">{guide.positioning}</p>
+          <InfoListCard
+            title="适合分析"
+            tone="normal"
+            items={guide.suitable}
+            footer="结构型信息相对稳定，适合先建立整书结构画像。"
+          />
+          <InfoListCard
+            title="部分支持"
+            tone="warning"
+            items={guide.partial}
+            footer="风格型信息可作参考，但不建议直接当作最终判断。"
+          />
+          <InfoListCard
+            title="建议人工复核"
+            tone="blocked"
+            items={guide.reviewNeeded}
+            footer="深层文学判断与长程伏线整理，仍建议结合人工精读。"
+          />
+          <div className="rounded-[4px] border border-border/70 bg-background/40 p-4">
+            <p className="type-body font-medium text-foreground">双书互动流程</p>
+            <div className="mt-3 space-y-3">
+              <StageLine index="01" text={guide.processStages[0]} />
+              <StageLine index="02" text={guide.processStages[1]} />
+            </div>
+            <p className="type-caption mt-3 text-muted-foreground">
+              两本书之间的互动、互补和冲突，不会在本步直接生成，而是在下一步「对比」中整理。
+            </p>
           </div>
-        </div>
+          <div className="rounded-[4px] border border-border/70 bg-background/40 p-4">
+            <p className="type-body font-medium text-foreground">
+              结果可信度说明
+            </p>
+            <ul className="type-caption mt-3 space-y-2 text-muted-foreground">
+              {guide.trustNotes.map((item) => (
+                <li key={item}>• {item}</li>
+              ))}
+            </ul>
+          </div>
+          <div className="rounded-[4px] border border-border/70 bg-background/40 p-4">
+            <p className="type-body font-medium text-foreground">
+              推荐人工复核场景
+            </p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {guide.reviewScenarios.map((item) => (
+                <span
+                  key={item}
+                  className="type-caption rounded-full border border-border/70 px-2.5 py-1 text-muted-foreground"
+                >
+                  {item}
+                </span>
+              ))}
+            </div>
+          </div>
+        </CollapsibleContent>
       </div>
-
-      {expanded ? (
-        <div className="mt-4 rounded-[4px] border border-border/70 bg-background/40 p-4">
-          <p className="text-[13px] font-medium text-foreground">
-            推荐人工复核场景
-          </p>
-          <div className="mt-3 flex flex-wrap gap-2">
-            {guide.reviewScenarios.map((item) => (
-              <span
-                key={item}
-                className="rounded-full border border-border/70 px-2.5 py-1 text-[12px] text-muted-foreground"
-              >
-                {item}
-              </span>
-            ))}
-          </div>
-          <p className="mt-3 text-[12px] leading-6 text-muted-foreground">
-            批量分析只负责基础分析，不代表自动完成全部扩展维度。扩展分析适合在完成基础拆解后按需启用。
-          </p>
-        </div>
-      ) : null}
-    </div>
+    </Collapsible>
   );
 }
 
@@ -1142,19 +1159,17 @@ function InfoListCard({
         tone === "blocked"
           ? "border-destructive/30 bg-destructive/5"
           : tone === "warning"
-            ? "border-amber-400/30 bg-amber-500/5"
+            ? "border-warning/30 bg-warning/5"
             : "border-border/70 bg-background/40",
       )}
     >
-      <p className="text-[13px] font-medium text-foreground">{title}</p>
-      <ul className="mt-3 space-y-2 text-[12px] leading-6 text-muted-foreground">
+      <p className="type-body font-medium text-foreground">{title}</p>
+      <ul className="type-caption mt-3 space-y-2 text-muted-foreground">
         {items.map((item) => (
           <li key={item}>• {item}</li>
         ))}
       </ul>
-      <p className="mt-3 text-[12px] leading-6 text-muted-foreground">
-        {footer}
-      </p>
+      <p className="type-caption mt-3 text-muted-foreground">{footer}</p>
     </div>
   );
 }
@@ -1162,8 +1177,8 @@ function InfoListCard({
 function StageLine({ index, text }: { index: string; text: string }) {
   return (
     <div className="flex items-start gap-3">
-      <span className="font-mono text-[11px] text-primary/80">{index}</span>
-      <p className="text-[12px] leading-6 text-muted-foreground">{text}</p>
+      <span className="type-mono-label text-muted-foreground">{index}</span>
+      <p className="type-caption text-muted-foreground">{text}</p>
     </div>
   );
 }
@@ -1231,22 +1246,20 @@ function UploadBookCard({
           display.tone === "blocked"
             ? "border-destructive/35 bg-destructive/8"
             : display.tone === "warning"
-              ? "border-amber-400/35 bg-amber-500/8"
+              ? "border-warning/35 bg-warning/8"
               : display.tone === "fallback"
-                ? "border-sky-400/30 bg-sky-500/8"
+                ? "border-info/30 bg-info/8"
                 : "border-border/70 bg-background/50",
         )}
       >
-        <p className="font-mono text-[10.5px] tracking-[0.10em] text-primary/80">
-          文本体检
-        </p>
-        <p className="mt-2 text-[14px] font-medium leading-6 text-foreground">
+        <p className="type-mono-label">文本体检</p>
+        <p className="type-body mt-2 font-medium text-foreground">
           {display.healthHeadline}
         </p>
-        <p className="mt-1 text-[13px] leading-6 text-muted-foreground">
+        <p className="type-body mt-1 text-muted-foreground">
           {display.healthDetail}
         </p>
-        <p className="mt-3 text-[12px] leading-6 text-muted-foreground">
+        <p className="type-caption mt-3 text-muted-foreground">
           {`内容类型：${display.contentTypeLabel} · 模型适配：${display.modelFitLabel}`}
         </p>
       </div>
@@ -1267,25 +1280,23 @@ function Stat({
 }) {
   return (
     <div className="rounded-[3px] border border-border/70 bg-background/50 px-4 py-3">
-      <p className="font-mono text-[10.5px] tracking-[0.10em] text-primary/80">
-        {label}
-      </p>
+      <p className="type-mono-label">{label}</p>
       <p
         className={cn(
-          "mt-1 text-[13px] font-medium",
+          "type-body mt-1 font-medium",
           tone === "blocked"
             ? "text-destructive"
             : tone === "warning"
-              ? "text-amber-300"
+              ? "text-warning"
               : tone === "fallback"
-                ? "text-sky-300"
+                ? "text-info"
                 : "text-foreground",
         )}
       >
         {value}
       </p>
       {note ? (
-        <p className="mt-1 text-[12px] leading-5 text-muted-foreground">
+        <p className="type-caption mt-1 text-muted-foreground">
           {note}
         </p>
       ) : null}
@@ -1305,7 +1316,7 @@ function EmptySlot({
   return (
     <div className="surface-panel flex min-h-[260px] flex-col items-center justify-center gap-4 p-8 text-center">
       <BookPlus
-        className="h-12 w-12 text-primary/60"
+        className="h-12 w-12 text-muted-foreground/60"
         strokeWidth={1.5}
         aria-hidden
       />
@@ -1346,7 +1357,7 @@ function CollapsedChaptersBar({
     <button
       type="button"
       onClick={onExpand}
-      className="surface-panel flex items-center justify-between gap-3 px-4 py-3 text-left transition-colors hover:bg-accent/30"
+      className="group surface-panel flex items-center justify-between gap-3 px-4 py-3 text-left transition-colors hover:bg-accent/30"
       style={{ transitionDuration: "var(--duration-fast)" }}
       aria-label="返回分析步骤查看章节"
     >
@@ -1357,12 +1368,14 @@ function CollapsedChaptersBar({
         <span className="truncate text-[12px] text-foreground">
           {summary(a, "A")}
         </span>
-        <span className="text-primary/30">·</span>
+        <span className="text-muted-foreground/30">·</span>
         <span className="truncate text-[12px] text-foreground">
           {summary(b, "B")}
         </span>
       </span>
-      <span className="text-[12px] text-primary">回看分析 →</span>
+      <span className="type-caption text-muted-foreground group-hover:text-foreground">
+        回看分析 →
+      </span>
     </button>
   );
 }
