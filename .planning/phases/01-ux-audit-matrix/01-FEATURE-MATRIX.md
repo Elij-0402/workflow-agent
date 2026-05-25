@@ -84,3 +84,48 @@
 | `/login` | 登录账户 | 边缘 | 中 | `src/app/(auth)/actions.ts` | 认证前入口 | Auth 路由组 |
 
 **导航客观信号摘要（D-08）：** `APP_NAV_ITEMS` 四级顶栏 — 项目 `/sessions`、创作台 `/studio`、对比 `/compare`、资料库 `/library`；footer 设置 `/settings`（见 `src/components/app-nav.tsx`）。Sidebar 品牌区 CTA「新建项目」→ `/create`，与四顶栏并列构成 IA 竞争面。
+
+---
+
+## 用户旅程
+
+嵌入本文件（D-22）。痛点仅使用占位，待 `01-UI-REVIEW` 填实据。
+
+### 主图：双书蓝图端到端（D-20）
+
+```mermaid
+flowchart LR
+  A["/upload?mode=dual"] --> B["/sessions/[id]"]
+  B --> C["/sessions/[id]/workbench"]
+  C --> D["分析: POST analyze/chapter + analyze/book"]
+  D --> E["对比面板 / 蓝图编辑"]
+  E --> F["POST /api/blueprint/confirm"]
+  F --> G["POST /api/generate-v2"]
+  G --> H["结果阅读 / 变体"]
+  C -.-> P1["痛点占位: 待 01-UI-REVIEW"]
+  E -.-> P2["痛点占位: 待 01-UI-REVIEW"]
+  G -.-> P3["痛点占位: 待 01-UI-REVIEW"]
+```
+
+### 附图 A：单书会话流（D-21）
+
+```mermaid
+flowchart LR
+  S1["/sessions"] --> S2["/sessions/[id] 单书"]
+  S2 --> S3["分析面板 analyze/extended"]
+  S3 --> S4["蓝图 / 生成"]
+  S4 --> S5["结果阅读"]
+  S5 --> N1["竞争注意力: 创作台/对比/资料库 同级导航"]
+```
+
+### 附图 B：Studio 简报流（D-21）
+
+```mermaid
+flowchart LR
+  T1["/studio"] --> T2["/studio/new"]
+  T2 --> T3["/studio/[briefId]"]
+  T3 --> T4["简报编辑 / 导出"]
+  T4 --> N2["竞争注意力: 创作台/对比/资料库 同级导航"]
+```
+
+**附图说明：** 单书流可能经 legacy `POST /api/generate`（边缘）；Studio 流依赖 `briefs` API，与双书 `generate-v2` 路径并行，不展开六柱评分。
