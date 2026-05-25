@@ -51,11 +51,18 @@ Plans:
   3. 设计系统页或 token 与 SPEC 对齐，可作为实现单一事实来源
 
 **Plans**: 2 plans
-
 Plans:
+**Wave 1**
 
-- [ ] 02-01: 从审计提炼设计原则与 token 草案
-- [ ] 02-02: 撰写并评审 UI-SPEC.md
+- [ ] 02-01-PLAN.md — spacing/status token 草案、globals 收敛、02-UI-SPEC 骨架
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 02-02-PLAN.md — 定稿 UI-SPEC、design-system 对齐、Phase 2 验收清单
+
+**Cross-cutting constraints:**
+
+- npm test 全绿
 
 ### Phase 3: 应用壳与导航 IA
 
@@ -125,7 +132,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. 体验审计与功能矩阵 | 2/2 | Complete    | 2026-05-25 |
-| 2. 极简设计契约 | 0/2 | Not started | - |
+| 2. 极简设计契约 | 0/2 | Planned | - |
 | 3. 应用壳与导航 IA | 0/2 | Not started | - |
 | 4. 核心界面密度重构 | 0/3 | Not started | - |
 | 5. 验收与 SaaS 级打磨 | 0/2 | Not started | - |
