@@ -3,7 +3,8 @@
 **Audited:** 2026-05-26
 **Scoring scope:** P0 only (dual-book main path). P1/P2 findings are backlog feed only.
 **Baseline:** Abstract 6-pillar standards (no UI-SPEC)
-**Screenshots:** not captured (Task 2 will add browser smoke)
+**Screenshots:** not captured
+**Browser smoke:** skipped (dev server not running on localhost:3000)
 
 ---
 
@@ -105,4 +106,75 @@
 
 ---
 
-*Phase 1 UI audit — static code review; browser smoke pending Task 2.*
+## P1/P2 Findings (backlog feed)
+
+*以下不计入 Overall /24（D-13）；P0 baseline 仍为 **14/24**。*
+
+### P1 — `/studio`（`studio/page.tsx`, `brief-create-sheet`, `studio/new`)
+
+| Route | Pillar | 现象 | 建议方向 |
+|-------|--------|------|----------|
+| `/studio` | Spacing | 简报列表 + `surface-panel` 卡片堆叠，与 `/sessions` 同类密度模式 | 收敛首屏面板数，突出「新建简报」单一 CTA |
+| `/studio` | Typography | 11+ 处任意 `text-[Npx]`（`page.tsx` 等） | 与 P0 合并为全站字号阶梯治理（**合并候选**） |
+| `/studio/new` | Visuals | 创建流多步表单与主列表视觉权重未分层 | 步骤条或侧栏进度，减少与列表页竞争 |
+
+### P1 — `/compare`（`compare/page.tsx`, `CompareClient.tsx`）
+
+| Route | Pillar | 现象 | 建议方向 |
+|-------|--------|------|----------|
+| `/compare` | Visuals | 空态 + 会话选择 + 维度对比同屏，侧栏与主区权重接近 | 选定 dual 会话后折叠选择器 |
+| `/compare` | Copywriting | 与 workbench「对比」步术语需一致（骨架/蓝图） | 统一「对比蓝图」文案，避免两套说法 |
+| `/compare` | Spacing | `surface-panel` + 任意字号与 P0 workbench 重复 | **合并候选**：与 workbench compare 步一并治理 |
+
+### P1 — `/library`（`library/page.tsx`）
+
+| Route | Pillar | 现象 | 建议方向 |
+|-------|--------|------|----------|
+| `/library` | Visuals | 复用 `SessionsClient` archived 视图，三栏密度继承 P0 列表问题 | 归档视图简化侧栏 |
+| `/library` | Typography | `text-[20px]`/`text-[13px]` 标题体系与 `/sessions` 不一致 | 对齐 PageHeader + 正文 token |
+| `/library` | Experience | 「返回项目」为 outline 次 CTA，恢复流程步数多 | 恢复后 deep-link 回 workbench |
+
+### P1 — `/settings`（`settings/page.tsx`, `settings-form.tsx`）
+
+| Route | Pillar | 现象 | 建议方向 |
+|-------|--------|------|----------|
+| `/settings` | Spacing | `settings-form.tsx` ~541 行、17+ 任意字号，长表单无分段锚点 | 分组 Tab/Accordion，降低首屏滚动 |
+| `/settings` | Experience | 连接探测失败态依赖 `last_connection_error` 文案 | 补充重试 CTA 与文档链接 |
+| `/settings` | Color | 状态徽章与主色混用，非主路径但影响信任感 | 语义色仅用于 ok/error 徽章 |
+
+### P2 — Spot-check（每路由 ≤5 条）
+
+**`/create`**（`create/page.tsx` → `TaskModePage`）
+- 单书/任务模式入口与 `/upload?mode=dual` 主路径并列，导航无「双书优先」提示
+- 依赖共享 `task-mode-page` 组件，密度未单独审计六柱长文
+
+**`/upload`**
+- 双书 `mode=dual` 为英雄旅程起点，应与 `/sessions` CTA 文案对齐（见 P0 Copywriting）
+- 上传进度与 workbench upload 步状态条（amber/sky）视觉语言不一致
+
+**`/studio/new`、`/studio/[briefId]`**
+- 简报编辑流与 Studio 列表共享 `surface-panel` 模式
+- `[briefId]` 详情页未列入 P1 全量，仅记「与 new 流同密度」
+
+**`/sessions/archived`**
+- `redirect("/library")`（边缘）；用户书签旧 URL 仍可用但 IA 隐藏
+
+---
+
+## Appendix: /design-system
+
+**角色：** Token 与组件参考源（`design-system-client.tsx` ~810 行），**非**产品 UX 达标页。
+
+**Excluded from Overall /24：** 本附录不参与 Pillar Scores 计算（D-12）。
+
+| 项 | 证据 | Backlog 指向 |
+|----|------|----------------|
+| 生产环境可访问 | `CONCERNS.md` — 无 `NODE_ENV` guard，`page.tsx` 任意登录用户可开 `/design-system` | **P3 Deferred** |
+| 与主产品 IA | 侧栏未露出，但 URL 可猜 | Phase 2 决策是否 dev-only 路由守卫 |
+| 参考价值 | `globals.css` token 与 Atelier 色系锚点 | Phase 4 token 对齐输入，非本阶段改色 |
+
+**风险：** 普通用户若收藏该 URL，会离开双书主路径语境 — 记入 backlog P3，不在此重算 P0 分数。
+
+---
+
+*Phase 1 UI audit — static code review + P1/P2 walkthrough; browser smoke skipped (no dev server).*
