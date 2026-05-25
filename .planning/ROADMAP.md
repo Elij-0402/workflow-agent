@@ -8,7 +8,7 @@
 
 - [x] **Phase 1: 体验审计与功能矩阵** — 摸清现状与优先级
 - [x] **Phase 2: 极简设计契约** — UI-SPEC 与视觉决策
-- [ ] **Phase 3: 应用壳与导航 IA** — 双书英雄旅程
+- [x] **Phase 3: 应用壳与导航 IA** — 双书英雄旅程
 - [ ] **Phase 4: 核心界面密度重构** — 工作台与会话
 - [ ] **Phase 5: 验收与 SaaS 级打磨** — 测试、日用性、一致性
 
@@ -87,7 +87,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 03-02-PLAN.md — AppNav「更多工具」Collapsible、mobile parity、/create 与 /upload 文案
+- [x] 03-02-PLAN.md — AppNav「更多工具」Collapsible、mobile parity、/create 与 /upload 文案
 
 ### Phase 4: 核心界面密度重构
 
@@ -138,6 +138,6 @@ Plans:
 |-------|----------------|--------|-----------|
 | 1. 体验审计与功能矩阵 | 2/2 | Complete    | 2026-05-25 |
 | 2. 极简设计契约 | 2/2 | Complete | 2026-05-26 |
-| 3. 应用壳与导航 IA | 1/2 | In Progress|  |
+| 3. 应用壳与导航 IA | 2/2 | Complete | 2026-05-26 |
 | 4. 核心界面密度重构 | 0/3 | Not started | - |
 | 5. 验收与 SaaS 级打磨 | 0/2 | Not started | - |

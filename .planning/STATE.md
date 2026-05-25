@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v0.3
 milestone_name: milestone
-status: executing
-last_updated: "2026-05-26T12:00:00.000Z"
+status: phase_complete
+last_updated: "2026-05-26T19:15:00.000Z"
 last_activity: 2026-05-26
 progress:
   total_phases: 5
   completed_phases: 2
   total_plans: 11
-  completed_plans: 6
-  percent: 55
+  completed_plans: 7
+  percent: 64
 ---
 
 # Project State
@@ -24,18 +24,18 @@ See: .planning/PROJECT.md (updated 2026-05-26)
 
 ## Current Position
 
-Phase: 03 (app-shell-navigation-ia) — EXECUTING
-Plan: 1 of 2 complete (03-02 next)
-Status: Ready to execute 03-02
+Phase: 03 (app-shell-navigation-ia) — COMPLETE
+Plan: 2 of 2 complete
+Status: Phase 03 complete; ready for Phase 04
 Last activity: 2026-05-26
 
-Progress: [███████████░] 55%
+Progress: [████████████░░] 64%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 6 (phase 03 plan 01)
+- Total plans completed: 7 (phase 03 plan 02)
 - Average duration: 23min
 - Total execution time: 71min
 
@@ -45,9 +45,9 @@ Progress: [███████████░] 55%
 |-------|-------|-------|----------|
 | 01-ux-audit-matrix | 2/2 | 46min | 23min |
 | 02-minimal-design-contract | 2/2 | 35min | 18min |
-| 03-app-shell-navigation-ia | 1/2 | 25min | 25min |
+| 03-app-shell-navigation-ia | 2/2 | 43min | 22min |
 
-**Recent:** 03-01 — 25min, 3 tasks, 10 files
+**Recent:** 03-02 — 18min, 3 tasks, 6 files
 
 ## Accumulated Context
 
@@ -59,6 +59,8 @@ Progress: [███████████░] 55%
 - P0 UI Overall 14/24；Top 15 backlog 已 approved（AUD-02）；直接 gsd-ui-auditor，非 stock ui-review 编排器
 - [Phase 03-01]: Dual overview reachable via ?view=overview to avoid redirect loop with workbench default
 - [Phase 03-01]: Shell CTAs primary → /upload?mode=dual; ContextualShellTitle + sessions list hint (IA-02)
+- [Phase 03-02]: Collapsible 更多工具 default closed; primary 项目 active only /sessions and /
+- [Phase 03-02]: NavLink variant controls icon color; secondary never text-primary
 
 ### Pending Todos
 

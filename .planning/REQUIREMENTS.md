@@ -17,7 +17,7 @@
 
 - [x] **IA-01**: 确立「极度克制、大留白、低信息密度」的 UI 规范（间距、字号阶梯、色彩、边框/阴影策略）
 - [x] **IA-02**: 主导航与全局壳层以双书蓝图为默认英雄旅程（新用户 30 秒内知下一步）
-- [ ] **IA-03**: 次要能力（Studio、对比、单书、资料库）默认折叠或二级入口，高级用户仍可直达
+- [x] **IA-03**: 次要能力（Studio、对比、单书、资料库）默认折叠或二级入口，高级用户仍可直达
 
 ### 核心界面
 
@@ -56,7 +56,7 @@
 | AUD-03 | Phase 2 | Complete |
 | IA-01 | Phase 2 | Complete |
 | IA-02 | Phase 3 | Complete |
-| IA-03 | Phase 3 | Pending |
+| IA-03 | Phase 3 | Complete |
 | WB-01 | Phase 4 | Pending |
 | WB-02 | Phase 4 | Pending |
 | WB-03 | Phase 4 | Pending |
