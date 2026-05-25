@@ -2,8 +2,8 @@
 gsd_state_version: 1.0
 milestone: v0.3
 milestone_name: milestone
-status: Ready for Phase 2 (极简设计契约)
-last_updated: "2026-05-25T18:14:34.229Z"
+status: Phase 2 context gathered — ready to plan
+last_updated: "2026-05-26T12:00:00.000Z"
 last_activity: 2026-05-25
 progress:
   total_phases: 5
@@ -20,13 +20,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-26)
 
 **Core value:** 双书蓝图主路径顺畅且令人愿意每天用  
-**Current focus:** Phase 01 — 体验审计与功能矩阵
+**Current focus:** Phase 02 — 极简设计契约
 
 ## Current Position
 
 Phase: 2
 Plan: Not started
-Status: Ready for Phase 2 (极简设计契约)
+Status: Phase 2 context gathered — ready to plan
 Last activity: 2026-05-25
 
 Progress: [██████████] 100%
@@ -52,7 +52,7 @@ Progress: [██████████] 100%
 
 ### Decisions
 
-- 主路径 = 双书蓝图；先审计后减法；明/暗审计后再定（见 PROJECT.md）
+- 主路径 = 双书蓝图；先审计后减法；**Phase 2 锁定深色唯一**（见 `02-CONTEXT.md` D-01–D-04）
 - 功能矩阵与旅程嵌入 `01-FEATURE-MATRIX.md`（AUD-01 完成）
 - P0 UI Overall 14/24；Top 15 backlog 已 approved（AUD-02）；直接 gsd-ui-auditor，非 stock ui-review 编排器
 
