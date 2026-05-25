@@ -641,9 +641,16 @@ export function WorkbenchClient(props: Props) {
               : "先导入两本参考小说，再开始后续流程"
         }
         action={
-          <Button asChild variant="outline" size="sm">
-            <Link href="/sessions">返回任务列表</Link>
-          </Button>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button asChild variant="ghost" size="sm">
+              <Link href={`/sessions/${props.session.id}?view=overview`}>
+                项目概览
+              </Link>
+            </Button>
+            <Button asChild variant="outline" size="sm">
+              <Link href="/sessions">返回任务列表</Link>
+            </Button>
+          </div>
         }
       />
 

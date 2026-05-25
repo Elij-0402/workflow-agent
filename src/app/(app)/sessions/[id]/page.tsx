@@ -31,6 +31,7 @@ type SessionPageProps = {
   searchParams: Promise<{
     step?: string;
     panel?: string;
+    view?: string;
   }>;
 };
 
@@ -59,6 +60,10 @@ export default async function SessionDetailPage({
     const legacyTarget = getDualWorkbenchRedirect(query);
     if (legacyTarget) {
       redirect(`/sessions/${id}/workbench${legacyTarget}`);
+    }
+
+    if (query.view !== "overview") {
+      redirect(`/sessions/${id}/workbench`);
     }
 
     const dualData = await loadDualSessionPageData({

@@ -30,7 +30,7 @@ export default async function SessionsPage() {
         description="从这里判断每个项目现在到哪一步、卡在哪里、下一步该做什么。双书项目是主路线，单书模式保留为兼容流程。"
         action={
           <Button asChild>
-            <Link href="/create">新建项目</Link>
+            <Link href="/upload?mode=dual">新建双书项目</Link>
           </Button>
         }
       />
@@ -114,7 +114,7 @@ export default async function SessionsPage() {
           action={
             <div className="flex flex-col gap-3 sm:flex-row">
               <Button asChild>
-                <Link href="/create">开始新项目</Link>
+                <Link href="/upload?mode=dual">新建双书项目</Link>
               </Button>
               <Button asChild variant="outline">
                 <Link href="/upload?mode=single">进入单书兼容流程</Link>
