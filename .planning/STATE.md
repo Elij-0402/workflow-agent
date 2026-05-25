@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v0.3
 milestone_name: milestone
-status: milestone-ready
-last_updated: "2026-05-25T20:23:33.408Z"
-last_activity: 2026-05-25
+status: Awaiting next milestone
+last_updated: "2026-05-25T20:30:13.600Z"
+last_activity: 2026-05-25 — Milestone v0.3 completed and archived
 progress:
   total_phases: 5
   completed_phases: 5
@@ -20,16 +20,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-26)
 
 **Core value:** 双书蓝图主路径顺畅且令人愿意每天用  
-**Current focus:** Milestone v0.3 UX 收敛 — all 5 phases complete
+**Current focus:** Planning next milestone (`/gsd-new-milestone`)
 
 ## Current Position
 
-Phase: 05 (saas) — Complete
-Plan: 2/2 complete
-Status: Phase 5 verified (QLT-01/02/03)
-Last activity: 2026-05-26 — Phase 05 execution + owner UAT approved
-
-Progress: [████████████████████] 11/11 plans (100%)
+Phase: Milestone v0.3 complete
+Plan: —
+Status: Awaiting next milestone
+Last activity: 2026-05-25 — Milestone v0.3 completed and archived
 
 ## Performance Metrics
 
@@ -75,8 +73,18 @@ None yet.
 
 ### Blockers/Concerns
 
-- Phase 3 `03-HUMAN-UAT.md` — 待 Phase 5 UAT 通过后回填 complete（见 `05-CONTEXT.md` D-16–D-17）
+None.
 
 ## Deferred Items
 
-- v2 可选收敛（legacy API、维度统一、大组件拆分）— 审计后决定
+Items acknowledged and deferred at milestone close on 2026-05-26:
+
+| Category | Item | Status |
+|----------|------|--------|
+| verification | Phase 03: 03-VERIFICATION.md human_needed | Covered by Phase 5 owner UAT (11/11); formal status not re-run |
+
+- v2 可选收敛（CNV-01–03：legacy API、维度统一、大组件拆分）— 见 `05-VERIFICATION.md`
+
+## Operator Next Steps
+
+- Start the next milestone with /gsd-new-milestone

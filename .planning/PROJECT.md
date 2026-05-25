@@ -2,9 +2,7 @@
 
 ## What This Is
 
-面向创作者与编辑的多源小说分析与变体生成平台（brownfield，当前代码约 v0.3）。用户上传原著（含双书模式），经章节级分析与结构化蓝图，再生成可控变体；并附带创作简报 Studio、扩展分析维度与会话对比等能力。
-
-本里程碑不追求「再加功能」，而是在**保留既有能力**的前提下，通过审计与重设计，把产品做成**极度克制、留白充足、简洁可用**的日常工具。
+面向创作者与编辑的多源小说分析与变体生成平台（brownfield，**v0.3 UX 收敛已交付**）。用户上传原著（含双书模式），经章节级分析与结构化蓝图，再生成可控变体；Studio、对比、扩展分析等能力保留，但通过审计分层与壳层 IA 让**双书蓝图**成为默认、克制、留白充足的日常主路径。
 
 ## Core Value
 
@@ -22,12 +20,15 @@
 - ✓ 创作简报四栏、Studio SSE 大纲与逐章迭代 — v0.3
 - ✓ 扩展四维度分析（文笔 / 情绪弧 / 节奏 / 悬念网格）— v0.3
 - ✓ 多会话对比（≤6）、资料库、会话软归档 — v0.3
-- ✓ 单元测试基线（197 tests passing）— 工程健康
-- ✓ UX 收敛里程碑 Phase 1–5：审计、UI-SPEC、壳层 IA、工作台密度、QLT 验收 — 2026-05-26
+- ✓ 全站功能矩阵与六柱 UI 审计（AUD-01/02/03）— v0.3 UX
+- ✓ dark-only UI-SPEC 与 design-system 对齐（IA-01）— v0.3 UX
+- ✓ 双书优先壳层与折叠「更多工具」IA（IA-02/03）— v0.3 UX
+- ✓ 工作台分段、会话列表密度、全站 CTA SSOT（WB-01/02/03）— v0.3 UX
+- ✓ QLT 验收：197 tests、所有者 UAT、SaaS 观感抽查（QLT-01/02/03）— v0.3 UX
 
 ### Active
 
-（UX 里程碑规划项已在 Phase 1–5 交付；QLT 复选框待 `/gsd-complete-milestone` 统一勾选。）
+（无 — 下一里程碑由 `/gsd-new-milestone` 定义新需求集）
 
 ### Deferred (v2)
 
@@ -41,49 +42,37 @@
 
 ## Context
 
-**用户反馈（2026-05-26）：**
+**v0.3 UX 收敛（shipped 2026-05-25）：**
 
-- 对前端视觉效果与功能交互布局**整体不满意**，不是单点问题
-- 期望美学：**极度克制、留白、简洁**（拒绝当前偏密、偏「仪表盘堆叠」的感受）
-- 主路径选择：**双书蓝图**（非单书、非 Studio 优先）
-- 复杂度策略：**先审计**（功能矩阵 + UI review），再决定是否隐藏/分层/下线
-- 成功标准：**每天愿意用** + **功能不砍但看起来像成熟 SaaS**
+- 5 phases、11 plans、31 tasks；197 单元测试全绿
+- 归档：`.planning/milestones/v0.3-ROADMAP.md`、`v0.3-REQUIREMENTS.md`
+- 所有者 UAT 11/11 通过；Top 15 backlog 已 disposition
 
-**代码库现状（`.planning/codebase/`）：**
+**代码库现状：**
 
-- 三条并行产品形态（单书 / 双书 / Studio）+ 对比与扩展分析，导航 4+1
-- 多套 API（generate vs generate-v2）、多套分析维度，组件体量偏大（500–800 行级）
-- v0.3 已做 Atelier Terminal 深色主题统一，但统一主题 ≠ 信息架构清晰
+- 三条产品形态（单书 / 双书 / Studio）保留；主导航与壳层引导双书主路径
+- 技术债：legacy generate、维度状态模型、500+ 行组件（CNV-01–03，v2）
 
 ## Constraints
 
 - **Tech stack**：Next.js 15 App Router、TypeScript strict、Supabase、Shadcn + Tailwind — 不重写框架
 - **Compatibility**：保持现有 API 与 DB 迁移兼容；UI 改动以组件与布局为主
-- **Scope process**：功能删减须以 UX-01 审计输出为依据，不得在未审计前大规模删路由
+- **Scope process**：功能删减须以审计输出为依据
 - **Core path**：任何全局 IA 调整不得破坏双书蓝图 confirm → generate-v2 闭环
 
 ## Key Decisions
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| 主路径 = 双书蓝图工作台 | 用户明确选择 1=2 | Validated Phase 3–5 |
-| 先审计后做减法 | 用户选择 3=4，避免误砍仍有价值的模块 | Validated Phase 1 |
-| 美学目标 = 极度克制留白简洁 | dark-only UI-SPEC | Validated Phase 2 |
-| 明/暗色 | 审计后锁定 dark-only | Validated Phase 2 |
-| 成功 = 日用性 + 成熟 SaaS 观感 | 05-UAT owner signoff | Validated Phase 5 |
-| GSD 规划层 | ROADMAP + 5 phases complete | Complete 2026-05-26 |
+| 主路径 = 双书蓝图工作台 | 用户明确选择 | ✓ Validated v0.3 UX |
+| 先审计后做减法 | 避免误砍模块 | ✓ Validated Phase 1 |
+| 美学 = 极度克制留白 + dark-only | 用户反馈 | ✓ Validated Phase 2 |
+| 成功 = 日用性 + 成熟 SaaS 观感 | QLT-02 UAT | ✓ Validated Phase 5 |
+| GSD 5-phase 里程碑 | ROADMAP 执行 | ✓ Shipped 2026-05-25 |
 
 ## Evolution
 
 本文件在阶段转换与里程碑边界更新。
-
-**After each phase transition**（`/gsd-transition`）：
-
-1. Requirements invalidated? → Move to Out of Scope with reason
-2. Requirements validated? → Move to Validated with phase reference
-3. New requirements emerged? → Add to Active
-4. Decisions to log? → Add to Key Decisions
-5. "What This Is" still accurate? → Update if drifted
 
 **After each milestone**（`/gsd-complete-milestone`）：
 
@@ -93,4 +82,4 @@
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-26 after Phase 5 completion*
+*Last updated: 2026-05-26 after v0.3 UX 收敛 milestone*
