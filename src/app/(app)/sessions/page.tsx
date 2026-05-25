@@ -9,6 +9,7 @@ import { safeGetUser } from "@/lib/supabase/auth";
 import { loadSessionDashboard } from "@/lib/sessions/dashboard-server";
 
 import { SessionsClient } from "./SessionsClient";
+import { SessionsMetricsCollapsible } from "./sessions-metrics-collapsible";
 
 export default async function SessionsPage() {
   const supabase = await createClient();
@@ -23,7 +24,7 @@ export default async function SessionsPage() {
     : { sessions: [], summary: null, recentEvents: [] };
 
   return (
-    <div className="app-page">
+    <div className="app-page space-y-10">
       <PageHeader
         label="项目总览"
         title="把创作流水线放到台面上"
@@ -35,32 +36,26 @@ export default async function SessionsPage() {
         }
       />
 
-      <section className="grid gap-4 xl:grid-cols-[1.5fr_.9fr]">
-        <div className="surface-panel p-6">
+      <section className="surface-panel space-y-6 p-6">
+        <div>
           <p className="eyebrow-label">主状态</p>
-          <div className="mt-3 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-            <div>
-              <h2 className="text-[28px] font-semibold leading-tight text-foreground">
-                {summary?.activeProjectCount ?? 0} 个项目正在推进
-              </h2>
-              <p className="mt-3 max-w-2xl text-[13px] leading-7 text-muted-foreground">
-                先处理待确认蓝图的项目，再推进可生成项目。生成结果和创意简报都回到项目主线上管理。
-              </p>
-            </div>
-          </div>
+          <h2 className="type-display mt-3 leading-tight">
+            {summary?.activeProjectCount ?? 0} 个项目正在推进
+          </h2>
+          <p className="type-body mt-3 max-w-2xl text-muted-foreground">
+            先处理待确认蓝图的项目，再推进可生成项目。生成结果和创意简报都回到项目主线上管理。
+          </p>
         </div>
 
-        <div className="surface-panel p-6">
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <p className="eyebrow-label">快速入口</p>
-              <h2 className="mt-2 text-[18px] font-semibold text-foreground">
-                从项目主线开始
-              </h2>
-            </div>
-            <FolderKanban className="h-5 w-5 text-primary" aria-hidden />
+        <div>
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <p className="eyebrow-label">快速入口</p>
+            <FolderKanban
+              className="h-5 w-5 text-muted-foreground"
+              aria-hidden
+            />
           </div>
-          <div className="mt-5 grid gap-3">
+          <div className="grid gap-3 sm:grid-cols-3">
             <LinkCard
               href="/upload?mode=dual"
               title="双书项目"
@@ -80,24 +75,7 @@ export default async function SessionsPage() {
         </div>
       </section>
 
-      <section className="grid gap-4 lg:grid-cols-4">
-        <MetricCard
-          label="活跃项目"
-          value={String(summary?.activeProjectCount ?? 0)}
-        />
-        <MetricCard
-          label="待确认蓝图"
-          value={String(summary?.waitingBlueprintCount ?? 0)}
-        />
-        <MetricCard
-          label="活跃简报"
-          value={String(summary?.activeBriefCount ?? 0)}
-        />
-        <MetricCard
-          label="已生成版本"
-          value={String(summary?.generatedVariantCount ?? 0)}
-        />
-      </section>
+      <SessionsMetricsCollapsible summary={summary} />
 
       {sessions.length > 0 ? (
         <SessionsClient
@@ -127,17 +105,6 @@ export default async function SessionsPage() {
   );
 }
 
-function MetricCard({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="surface-panel p-5">
-      <p className="eyebrow-label">{label}</p>
-      <p className="mt-3 text-[26px] font-semibold leading-none text-foreground">
-        {value}
-      </p>
-    </div>
-  );
-}
-
 function LinkCard({
   href,
   title,
@@ -152,10 +119,8 @@ function LinkCard({
       href={href}
       className="surface-subtle block px-4 py-4 transition-colors hover:border-primary/40 hover:bg-accent/40"
     >
-      <p className="text-[14px] font-medium text-foreground">{title}</p>
-      <p className="mt-1 text-[12px] leading-6 text-muted-foreground">
-        {description}
-      </p>
+      <p className="type-body font-medium">{title}</p>
+      <p className="type-caption mt-1 leading-6">{description}</p>
     </Link>
   );
 }
