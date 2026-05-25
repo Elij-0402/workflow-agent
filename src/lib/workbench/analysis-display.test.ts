@@ -11,7 +11,10 @@ import {
 test("analysis capability guide keeps Chinese-facing product copy", () => {
   assert.match(ANALYSIS_CAPABILITY_GUIDE.shortSummary, /创作拆解/);
   assert.equal(ANALYSIS_CAPABILITY_GUIDE.suitable.length, 5);
-  assert.equal(ANALYSIS_CAPABILITY_GUIDE.processStages[0], "先分别拆解每本参考书");
+  assert.equal(
+    ANALYSIS_CAPABILITY_GUIDE.processStages[0],
+    "先分别拆解每本参考书",
+  );
 });
 
 test("chapter source and candidate labels are translated for UI", () => {

@@ -1,4 +1,8 @@
-import type { AnalysisMode, ChapterGateStatus, ProviderCompatibilityStatus } from "@/lib/books/content";
+import type {
+  AnalysisMode,
+  ChapterGateStatus,
+  ProviderCompatibilityStatus,
+} from "@/lib/books/content";
 
 export type AnalysisCapabilityGuide = {
   title: string;
@@ -18,9 +22,20 @@ export const ANALYSIS_CAPABILITY_GUIDE: AnalysisCapabilityGuide = {
     "本功能更适合做创作拆解、结构整理和融合准备，不等同于文学研究式全维度精读。",
   positioning:
     "批量分析会先逐章或逐片段抽取结构化素材，再汇总成整书画像，用于后续对比与融合蓝图整理。",
-  suitable: ["人物关系", "世界规则", "章节事件与冲突", "主题线索", "情节结构与关键节点"],
+  suitable: [
+    "人物关系",
+    "世界规则",
+    "章节事件与冲突",
+    "主题线索",
+    "情节结构与关键节点",
+  ],
   partial: ["文风特征", "情绪推进", "节奏变化", "伏笔与回收"],
-  reviewNeeded: ["深层隐喻", "复杂反讽", "多层叙述诡计", "极长篇跨卷伏线的精确归纳"],
+  reviewNeeded: [
+    "深层隐喻",
+    "复杂反讽",
+    "多层叙述诡计",
+    "极长篇跨卷伏线的精确归纳",
+  ],
   trustNotes: [
     "本功能适合大规模整理结构信息，不承诺每章结论都完全准确。",
     "章节标题异常、切章质量不稳、长篇跨卷回收、隐性人物关系，都会影响准确度。",
@@ -36,7 +51,9 @@ export const ANALYSIS_CAPABILITY_GUIDE: AnalysisCapabilityGuide = {
   processStages: ["先分别拆解每本参考书", "再进入双书对比与融合整理"],
 };
 
-export function getChapterSourceLabel(source: "regex" | "length-chunk" | "manual") {
+export function getChapterSourceLabel(
+  source: "regex" | "length-chunk" | "manual",
+) {
   switch (source) {
     case "length-chunk":
       return "分段切分";
@@ -110,7 +127,10 @@ export function buildBookAnalysisSummary(input: {
       ? `本书将按 ${input.chapterCount} 个片段逐段拆解，适合提取人物、事件、冲突和主题线索。`
       : `本书将按 ${input.chapterCount} 章逐章拆解，适合提取人物、事件、冲突和主题线索。`;
 
-  if (input.gateStatus === "blocked" || input.compatibilityStatus === "incompatible") {
+  if (
+    input.gateStatus === "blocked" ||
+    input.compatibilityStatus === "incompatible"
+  ) {
     return `当前不建议直接分析《${input.title}》，请先处理体检或模型适配问题。`;
   }
 
@@ -118,7 +138,10 @@ export function buildBookAnalysisSummary(input: {
     return `${basis} 系统会自动降级为分段分析，以降低切章误差的影响。`;
   }
 
-  if (input.gateStatus === "retryable" || input.compatibilityStatus === "risky") {
+  if (
+    input.gateStatus === "retryable" ||
+    input.compatibilityStatus === "risky"
+  ) {
     return `${basis} 建议先抽查关键章节，再决定是否批量分析。`;
   }
 

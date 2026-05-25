@@ -49,8 +49,7 @@ export function deriveSessionDashboard(
         nextActionLabel: "补齐参考书",
         nextHref: `/upload?sessionId=${seed.id}&position=${seed.bookCount}`,
         progressLabel: `已导入 ${seed.bookCount} / 2 本参考书`,
-        lastActivityLabel:
-          seed.lastActivityLabel ?? "等待导入第二本参考书",
+        lastActivityLabel: seed.lastActivityLabel ?? "等待导入第二本参考书",
       };
     }
 
@@ -106,7 +105,8 @@ export function deriveSessionDashboard(
   }
 
   const singleNextHref = `/sessions/${seed.id}`;
-  const chapterLabel = seed.chapterCount > 0 ? `${seed.chapterCount} 章` : "待切章";
+  const chapterLabel =
+    seed.chapterCount > 0 ? `${seed.chapterCount} 章` : "待切章";
   const hasResults = seed.variantCount > 0;
 
   return {

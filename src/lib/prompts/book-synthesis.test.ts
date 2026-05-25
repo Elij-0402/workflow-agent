@@ -27,11 +27,17 @@ test("pickBriefsForSynthesis: keeps head/tail and forces turning-point chapters"
   const briefs: BriefEntry[] = Array.from({ length: 500 }, (_, i) => ({
     index: i + 1,
     brief: {
-      events: i === 250 ? [{ title: "x", description: "y", is_turning_point: true }] : [],
+      events:
+        i === 250
+          ? [{ title: "x", description: "y", is_turning_point: true }]
+          : [],
     },
   }));
   const picked = pickBriefsForSynthesis(briefs);
-  assert.ok(picked.length <= 201, `picked.length=${picked.length} should be ≤ 201`);
+  assert.ok(
+    picked.length <= 201,
+    `picked.length=${picked.length} should be ≤ 201`,
+  );
   assert.ok(
     picked.some((p) => p.index === 1),
     "missing head",
@@ -51,8 +57,13 @@ test("pickBriefsForSynthesis: keeps head/tail and forces turning-point chapters"
 });
 
 test("buildBookSynthesisUserPrompt embeds briefs as JSON, no novel delimiters", () => {
-  const briefs: BriefEntry[] = [{ index: 1, brief: { summary: "x", events: [] } }];
-  const prompt = buildBookSynthesisUserPrompt({ bookTitle: "TestBook", briefs });
+  const briefs: BriefEntry[] = [
+    { index: 1, brief: { summary: "x", events: [] } },
+  ];
+  const prompt = buildBookSynthesisUserPrompt({
+    bookTitle: "TestBook",
+    briefs,
+  });
   assert.ok(prompt.includes("TestBook"));
   assert.ok(prompt.includes('"summary": "x"'));
   // book-synthesis consumes only structured briefs, not raw novel text — no untrusted wrapper.

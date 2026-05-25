@@ -14,7 +14,8 @@ export function PipelineBar(p: Props) {
     p.chapterTotals.length > 0 &&
     p.chapterTotals.every((t) => t.total > 0 && t.analyzed === t.total);
   const allSynthesized = p.bookSynthesisDone.a && p.bookSynthesisDone.b;
-  const analysisDone = allBooksImported && allChaptersAnalyzed && allSynthesized;
+  const analysisDone =
+    allBooksImported && allChaptersAnalyzed && allSynthesized;
   const blueprintConfirmed = p.blueprintStatus === "confirmed";
   const hasVariants = p.variantCount > 0;
 
@@ -36,7 +37,8 @@ export function PipelineBar(p: Props) {
           : isCurrent
             ? "text-primary"
             : "text-muted-foreground/55";
-        const labelColor = s.done || isCurrent ? "text-foreground" : "text-muted-foreground";
+        const labelColor =
+          s.done || isCurrent ? "text-foreground" : "text-muted-foreground";
         return (
           <span key={s.no} className="inline-flex items-center gap-2">
             {i > 0 ? <span className="px-1 text-primary/30">─</span> : null}

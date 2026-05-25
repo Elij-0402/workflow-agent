@@ -5,7 +5,10 @@ import { z } from "zod";
 // ----------------------------------------------------------------------------
 export const PersonaDirectiveSchema = z.object({
   id: z.string().min(1),
-  character_name: z.string().min(1).describe("目标角色名（蓝图人物 name，或自定义新角色）"),
+  character_name: z
+    .string()
+    .min(1)
+    .describe("目标角色名（蓝图人物 name，或自定义新角色）"),
   change_type: z.enum(["replace", "modify", "add", "remove"]),
   fields: z
     .object({
@@ -25,8 +28,18 @@ export type PersonaDirective = z.infer<typeof PersonaDirectiveSchema>;
 // ----------------------------------------------------------------------------
 export const PlotDirectiveSchema = z.object({
   id: z.string().min(1),
-  target_beat_id: z.string().optional().describe("蓝图 plot_beat id；新插入留空"),
-  action: z.enum(["keep", "replace", "delete", "insert_before", "insert_after", "reorder"]),
+  target_beat_id: z
+    .string()
+    .optional()
+    .describe("蓝图 plot_beat id；新插入留空"),
+  action: z.enum([
+    "keep",
+    "replace",
+    "delete",
+    "insert_before",
+    "insert_after",
+    "reorder",
+  ]),
   new_beat: z
     .object({
       title: z.string().optional(),
@@ -43,10 +56,20 @@ export type PlotDirective = z.infer<typeof PlotDirectiveSchema>;
 // ----------------------------------------------------------------------------
 export const StyleDirectiveSchema = z.object({
   tone: z
-    .enum(["keep", "lyrical", "plain", "humorous", "ironic", "noir", "classical"])
+    .enum([
+      "keep",
+      "lyrical",
+      "plain",
+      "humorous",
+      "ironic",
+      "noir",
+      "classical",
+    ])
     .default("keep"),
   rhythm: z.enum(["keep", "slow", "moderate", "fast"]).default("keep"),
-  dialogue_ratio: z.enum(["keep", "more_dialogue", "less_dialogue"]).default("keep"),
+  dialogue_ratio: z
+    .enum(["keep", "more_dialogue", "less_dialogue"])
+    .default("keep"),
   sensory_density: z.enum(["keep", "sparse", "rich"]).default("keep"),
   prose_register: z
     .enum(["keep", "modern", "web_novel", "literary", "classical_chinese"])
@@ -68,7 +91,10 @@ export const RetentionRuleSchema = z.object({
     "plot_beats",
     "themes",
   ]),
-  target_ids: z.array(z.string()).default([]).describe("蓝图节点 id 列表；空数组=整段"),
+  target_ids: z
+    .array(z.string())
+    .default([])
+    .describe("蓝图节点 id 列表；空数组=整段"),
   strictness: z.enum(["must_keep", "prefer_keep", "flexible"]),
   note: z.string().optional(),
 });
@@ -93,7 +119,11 @@ export const CreativeBriefSchema = z.object({
 });
 export type CreativeBrief = z.infer<typeof CreativeBriefSchema>;
 
-export const CreativeBriefStatusSchema = z.enum(["draft", "active", "archived"]);
+export const CreativeBriefStatusSchema = z.enum([
+  "draft",
+  "active",
+  "archived",
+]);
 export type CreativeBriefStatus = z.infer<typeof CreativeBriefStatusSchema>;
 
 export type CreativeBriefRow = {

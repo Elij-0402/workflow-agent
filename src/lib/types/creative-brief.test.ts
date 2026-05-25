@@ -49,7 +49,9 @@ test("StyleDirectiveSchema applies defaults", () => {
 });
 
 test("StyleDirectiveSchema caps extra_instructions at 800", () => {
-  const bad = StyleDirectiveSchema.safeParse({ extra_instructions: "x".repeat(801) });
+  const bad = StyleDirectiveSchema.safeParse({
+    extra_instructions: "x".repeat(801),
+  });
   assert.equal(bad.success, false);
 });
 

@@ -113,9 +113,11 @@ export function ChapterTree({
   }, [chapters, briefByChapter, filter]);
 
   const chunkLabel = analysisMode === "block-fallback" ? "个片段" : "章";
-  const batchLabel = analysisMode === "block-fallback" ? "批量分析片段" : "批量分析";
+  const batchLabel =
+    analysisMode === "block-fallback" ? "批量分析片段" : "批量分析";
   const synthLabel = synthesisDone ? "重新生成整书汇总" : "整书汇总";
-  const positionLabel = position === "A" ? "参考书一" : position === "B" ? "参考书二" : null;
+  const positionLabel =
+    position === "A" ? "参考书一" : position === "B" ? "参考书二" : null;
   const summary = buildBookAnalysisSummary({
     title: book.title,
     chapterCount: chapters.length,
@@ -140,7 +142,8 @@ export function ChapterTree({
             </h3>
           </div>
           <div className="mt-1 text-[12px] text-muted-foreground">
-            共 {chapters.length} {chunkLabel}，已分析 {analyzedCount} {chunkLabel}
+            共 {chapters.length} {chunkLabel}，已分析 {analyzedCount}{" "}
+            {chunkLabel}
           </div>
           <p className="mt-2 max-w-2xl text-[12px] leading-6 text-muted-foreground">
             {summary}
@@ -167,7 +170,11 @@ export function ChapterTree({
             <Button
               size="sm"
               variant={synthesisDone ? "ghost" : "default"}
-              className={synthesisDone ? "font-mono uppercase tracking-[0.08em]" : undefined}
+              className={
+                synthesisDone
+                  ? "font-mono uppercase tracking-[0.08em]"
+                  : undefined
+              }
               onClick={onSynthesize}
             >
               {synthLabel}

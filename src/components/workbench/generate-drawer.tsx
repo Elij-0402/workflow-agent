@@ -30,7 +30,12 @@ type GenerateResponse =
   | { ok: true; variantId: string; title: string; wordCount: number }
   | { error: string | LLMClientError };
 
-export function GenerateDrawer({ open, onOpenChange, blueprintId, onGenerated }: Props) {
+export function GenerateDrawer({
+  open,
+  onOpenChange,
+  blueprintId,
+  onGenerated,
+}: Props) {
   const [pending, setPending] = useState(false);
   const form = useForm<GenerateConfig>({
     resolver: zodResolver(GenerateConfigSchema),
@@ -59,7 +64,9 @@ export function GenerateDrawer({ open, onOpenChange, blueprintId, onGenerated }:
       });
       const payload = (await res.json()) as GenerateResponse;
       if (!res.ok || !("ok" in payload)) {
-        toastError("error" in payload ? payload.error : "生成失败，请稍后重试。");
+        toastError(
+          "error" in payload ? payload.error : "生成失败，请稍后重试。",
+        );
         return;
       }
       toast.success(`已生成《${payload.title}》`);
@@ -74,13 +81,18 @@ export function GenerateDrawer({ open, onOpenChange, blueprintId, onGenerated }:
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="flex w-full flex-col gap-0 p-0 sm:max-w-[520px]">
+      <SheetContent
+        side="right"
+        className="flex w-full flex-col gap-0 p-0 sm:max-w-[520px]"
+      >
         <SheetHeader className="border-b border-dashed border-border/60 px-6 py-5">
           <p className="eyebrow-label">generate</p>
           <SheetTitle className="font-display text-[24px] italic leading-tight">
             生成变体参数
           </SheetTitle>
-          <SheetDescription>常用参数留在首屏；视角、文风、额外要求收进高级选项。</SheetDescription>
+          <SheetDescription>
+            常用参数留在首屏；视角、文风、额外要求收进高级选项。
+          </SheetDescription>
         </SheetHeader>
         <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-6 py-6">
           <GenerateForm

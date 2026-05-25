@@ -73,16 +73,33 @@ export async function POST(req: Request) {
       : Promise.resolve({ data: null }),
   ]);
 
-  if (!brief) return NextResponse.json({ error: "未找到简报。" }, { status: 404 });
+  if (!brief)
+    return NextResponse.json({ error: "未找到简报。" }, { status: 404 });
 
-  const { guard } = await loadActiveSession(supabase, brief.session_id, user.id);
+  const { session, guard } = await loadActiveSession(
+    supabase,
+    brief.session_id,
+    user.id,
+  );
   if (!guard.ok) {
-    return NextResponse.json({ error: guard.message }, { status: guard.status });
+    return NextResponse.json(
+      { error: guard.message },
+      { status: guard.status },
+    );
+  }
+  if (session?.status === "done") {
+    return NextResponse.json(
+      { error: "项目已完成，无法继续迭代。" },
+      { status: 409 },
+    );
   }
 
   const rateLimit = await assertWithinRateLimit(supabase, user.id);
   if (!rateLimit.ok) {
-    return NextResponse.json({ error: rateLimit.message }, { status: rateLimit.status });
+    return NextResponse.json(
+      { error: rateLimit.message },
+      { status: rateLimit.status },
+    );
   }
 
   const outlineCheck = validateOutlineVariantForBrief({
@@ -90,7 +107,10 @@ export async function POST(req: Request) {
     outlineVariant,
   });
   if (!outlineCheck.ok) {
-    return NextResponse.json({ error: outlineCheck.message }, { status: outlineCheck.status });
+    return NextResponse.json(
+      { error: outlineCheck.message },
+      { status: outlineCheck.status },
+    );
   }
   if (body.previousVariantId) {
     const previousCheck = validatePreviousChapterVariantForBrief({

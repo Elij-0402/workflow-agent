@@ -28,10 +28,13 @@ async function getKey(): Promise<CryptoKey> {
       `ENCRYPTION_KEY must be 32 bytes (base64-encoded), got ${keyBytes.length} bytes`,
     );
   }
-  cachedKey = await subtle.importKey("raw", keyBytes, { name: "AES-GCM" }, false, [
-    "encrypt",
-    "decrypt",
-  ]);
+  cachedKey = await subtle.importKey(
+    "raw",
+    keyBytes,
+    { name: "AES-GCM" },
+    false,
+    ["encrypt", "decrypt"],
+  );
   return cachedKey;
 }
 
@@ -52,7 +55,11 @@ export async function decrypt(payload: string): Promise<string> {
   if (data.length < 13) throw new Error("Invalid ciphertext payload");
   const iv = data.subarray(0, 12);
   const ciphertext = data.subarray(12);
-  const plaintext = await subtle.decrypt({ name: "AES-GCM", iv }, key, ciphertext);
+  const plaintext = await subtle.decrypt(
+    { name: "AES-GCM", iv },
+    key,
+    ciphertext,
+  );
   return new TextDecoder().decode(plaintext);
 }
 

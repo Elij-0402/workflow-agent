@@ -34,7 +34,10 @@ type PromptConfig = {
   schemaVersion: string;
 };
 
-export const ANALYSIS_DIMENSION_CONFIG: Record<LegacyAnalysisDimension, PromptConfig> = {
+export const ANALYSIS_DIMENSION_CONFIG: Record<
+  LegacyAnalysisDimension,
+  PromptConfig
+> = {
   worldview: {
     systemPrompt: WORLDVIEW_PROMPT,
     schema: WorldviewResultSchema,
@@ -55,7 +58,10 @@ export const ANALYSIS_DIMENSION_CONFIG: Record<LegacyAnalysisDimension, PromptCo
   },
 };
 
-export const EXTENDED_ANALYSIS_DIMENSION_CONFIG: Record<ExtendedAnalysisDimension, PromptConfig> = {
+export const EXTENDED_ANALYSIS_DIMENSION_CONFIG: Record<
+  ExtendedAnalysisDimension,
+  PromptConfig
+> = {
   prose_craft: {
     systemPrompt: PROSE_CRAFT_PROMPT,
     schema: ProseCraftResultSchema,

@@ -21,7 +21,10 @@ import {
 } from "@/lib/prompts/book-synthesis";
 import { loadActiveSessionByBookId } from "@/lib/sessions/guard";
 import { createClient } from "@/lib/supabase/server";
-import { BookSynthesisResultSchema, ChapterBriefResultSchema } from "@/lib/types";
+import {
+  BookSynthesisResultSchema,
+  ChapterBriefResultSchema,
+} from "@/lib/types";
 
 export const runtime = "nodejs";
 export const maxDuration = 180;
@@ -32,7 +35,9 @@ function filterBriefEntries(entries: BriefEntry[]) {
   const seen = new Set<string>();
   return entries.filter((entry) => {
     const summary = (entry.brief.summary ?? "").trim();
-    const eventCount = Array.isArray(entry.brief.events) ? entry.brief.events.length : 0;
+    const eventCount = Array.isArray(entry.brief.events)
+      ? entry.brief.events.length
+      : 0;
     if (summary.length < 20 && eventCount === 0) {
       return false;
     }
@@ -62,14 +67,24 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "请求参数不正确。" }, { status: 400 });
   }
 
-  const { guard } = await loadActiveSessionByBookId(supabase, body.bookId, user.id);
+  const { guard } = await loadActiveSessionByBookId(
+    supabase,
+    body.bookId,
+    user.id,
+  );
   if (!guard.ok) {
-    return NextResponse.json({ error: guard.message }, { status: guard.status });
+    return NextResponse.json(
+      { error: guard.message },
+      { status: guard.status },
+    );
   }
 
   const rateLimit = await assertWithinRateLimit(supabase, user.id);
   if (!rateLimit.ok) {
-    return NextResponse.json({ error: rateLimit.message }, { status: rateLimit.status });
+    return NextResponse.json(
+      { error: rateLimit.message },
+      { status: rateLimit.status },
+    );
   }
 
   const [{ data: book }, { data: chapters }] = await Promise.all([
@@ -87,8 +102,11 @@ export async function POST(req: Request) {
       .order("index", { ascending: true }),
   ]);
 
-  if (!book) return NextResponse.json({ error: "未找到书籍。" }, { status: 404 });
-  const blockingReason = getBookAnalysisBlockingReason(book.metadata as Record<string, unknown> | null);
+  if (!book)
+    return NextResponse.json({ error: "未找到书籍。" }, { status: 404 });
+  const blockingReason = getBookAnalysisBlockingReason(
+    book.metadata as Record<string, unknown> | null,
+  );
   if (blockingReason) {
     return NextResponse.json({ error: blockingReason }, { status: 409 });
   }
@@ -96,8 +114,11 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "当前书籍没有章节。" }, { status: 400 });
   }
 
-  const analysisMode = getBookAnalysisMode(book.metadata as Record<string, unknown> | null);
-  const briefDimension = analysisMode === "block-fallback" ? "block_brief" : "chapter_brief";
+  const analysisMode = getBookAnalysisMode(
+    book.metadata as Record<string, unknown> | null,
+  );
+  const briefDimension =
+    analysisMode === "block-fallback" ? "block_brief" : "chapter_brief";
 
   const { data: briefs } = await supabase
     .from("analyses")
@@ -107,7 +128,9 @@ export async function POST(req: Request) {
     .eq("scope", "chapter")
     .eq("dimension", briefDimension);
 
-  const briefByChapter = new Map((briefs ?? []).map((b) => [b.chapter_id as string, b.result]));
+  const briefByChapter = new Map(
+    (briefs ?? []).map((b) => [b.chapter_id as string, b.result]),
+  );
   const missing = chapters.filter((c) => !briefByChapter.has(c.id));
   if (missing.length > 0) {
     return NextResponse.json(
@@ -139,7 +162,11 @@ export async function POST(req: Request) {
     );
     if (compatibility.status === "incompatible") {
       return NextResponse.json(
-        { error: compatibility.reason ?? "当前模型不兼容该内容类型，请切换模型后再试。" },
+        {
+          error:
+            compatibility.reason ??
+            "当前模型不兼容该内容类型，请切换模型后再试。",
+        },
         { status: 409 },
       );
     }
@@ -179,7 +206,10 @@ export async function POST(req: Request) {
       cacheKey: result.cacheKey,
     });
     if (upErr) {
-      return NextResponse.json({ error: "保存整书汇总失败。" }, { status: 500 });
+      return NextResponse.json(
+        { error: "保存整书汇总失败。" },
+        { status: 500 },
+      );
     }
     return NextResponse.json({ ok: true, result: result.object });
   } catch (e) {

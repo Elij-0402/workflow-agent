@@ -77,7 +77,9 @@ test("mergeSections only overwrites listed keys", () => {
   const bp = emptyBlueprint();
   bp.themes.push({ id: "1", theme: "love", notes: "", sources: [] });
   const merged = mergeSections(bp, {
-    conflicts: [{ id: "x", title: "war", description: "y", notes: "", sources: [] }],
+    conflicts: [
+      { id: "x", title: "war", description: "y", notes: "", sources: [] },
+    ],
   });
   assert.equal(merged.themes.length, 1);
   assert.equal(merged.conflicts.length, 1);

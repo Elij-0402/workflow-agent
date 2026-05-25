@@ -45,7 +45,11 @@ export function GenerateForm({
         className="flex flex-col gap-7"
         onSubmit={form.handleSubmit((values) => void onSubmit(values))}
       >
-        <QuickGenerateForm form={form} disabled={pending || disabled} innovation={innovation} />
+        <QuickGenerateForm
+          form={form}
+          disabled={pending || disabled}
+          innovation={innovation}
+        />
 
         <div className="border-t border-dashed border-border/60 pt-5">
           <button

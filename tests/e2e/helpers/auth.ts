@@ -19,7 +19,9 @@ export async function login(page: Page) {
   await page.goto("/login");
   const form = page.locator("form");
   await page.getByLabel("邮箱", { exact: true }).fill(loginCredentials.email);
-  await page.getByLabel("密码", { exact: true }).fill(loginCredentials.password);
+  await page
+    .getByLabel("密码", { exact: true })
+    .fill(loginCredentials.password);
   await form.getByRole("button", { name: "登录", exact: true }).click();
   await expect(page).toHaveURL(/\/(dashboard|sessions)$/, { timeout: 15_000 });
 }
@@ -32,14 +34,19 @@ export async function configureLlm(page: Page) {
   };
 
   await page.goto("/settings");
-  await page.getByLabel("Base URL", { exact: true }).fill(llmCredentials.baseUrl);
+  await page
+    .getByLabel("Base URL", { exact: true })
+    .fill(llmCredentials.baseUrl);
   await page.getByLabel("API Key", { exact: true }).fill(llmCredentials.apiKey);
   await page.getByRole("button", { name: "获取可用模型", exact: true }).click();
 
   const modelToast = page.getByText("已获取", { exact: false });
-  const modelFetchFailed = page.getByText("无法连接到该接口，请检查 Base URL。", {
-    exact: true,
-  });
+  const modelFetchFailed = page.getByText(
+    "无法连接到该接口，请检查 Base URL。",
+    {
+      exact: true,
+    },
+  );
   await Promise.race([
     modelToast.waitFor({ state: "visible", timeout: 20_000 }),
     modelFetchFailed.waitFor({ state: "visible", timeout: 20_000 }),
@@ -62,5 +69,7 @@ export async function configureLlm(page: Page) {
   }
 
   await page.getByRole("button", { name: "保存配置", exact: true }).click();
-  await expect(page.getByText("LLM 配置已保存。", { exact: true })).toBeVisible();
+  await expect(
+    page.getByText("LLM 配置已保存。", { exact: true }),
+  ).toBeVisible();
 }

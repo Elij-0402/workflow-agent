@@ -1,7 +1,11 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { BlueprintSchema, blueprintReadyToConfirm, emptyBlueprint } from "./schema";
+import {
+  BlueprintSchema,
+  blueprintReadyToConfirm,
+  emptyBlueprint,
+} from "./schema";
 
 test("emptyBlueprint passes BlueprintSchema", () => {
   const parsed = BlueprintSchema.safeParse(emptyBlueprint());
@@ -42,8 +46,20 @@ test("blueprintReadyToConfirm returns true when minimal valid", () => {
     notes: "",
     sources: [],
   });
-  bp.world_rules.push({ id: "1", rule: "r", description: "x", notes: "", sources: [] });
-  bp.conflicts.push({ id: "1", title: "c", description: "x", notes: "", sources: [] });
+  bp.world_rules.push({
+    id: "1",
+    rule: "r",
+    description: "x",
+    notes: "",
+    sources: [],
+  });
+  bp.conflicts.push({
+    id: "1",
+    title: "c",
+    description: "x",
+    notes: "",
+    sources: [],
+  });
   bp.plot_beats.push({
     id: "1",
     title: "p",

@@ -1,7 +1,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { PasswordAuthFormSchema, mapPasswordAuthErrorMessage } from "./password-auth.ts";
+import {
+  PasswordAuthFormSchema,
+  mapPasswordAuthErrorMessage,
+} from "./password-auth.ts";
 
 test("accepts login credentials with mode, email, and password", () => {
   const result = PasswordAuthFormSchema.parse({
@@ -28,7 +31,10 @@ test("rejects passwords shorter than 8 characters", () => {
 });
 
 test("maps common Supabase password auth errors to clear Chinese messages", () => {
-  assert.equal(mapPasswordAuthErrorMessage("Invalid login credentials"), "邮箱或密码错误。");
+  assert.equal(
+    mapPasswordAuthErrorMessage("Invalid login credentials"),
+    "邮箱或密码错误。",
+  );
   assert.equal(
     mapPasswordAuthErrorMessage("User already registered"),
     "该邮箱已注册，请直接登录。",

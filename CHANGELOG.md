@@ -1,6 +1,6 @@
 # 变更记录
 
-本仓库自 **2026-05-24** 起对 `main` 分支历史做了线性化与里程碑合并；完整旧 SHA 对照见 [docs/GIT_HISTORY.md](docs/GIT_HISTORY.md)，机器导出见 [docs/_git-export-pre-rewrite.txt](docs/_git-export-pre-rewrite.txt)。旧历史完整快照：`git log archive/history-pre-rewrite-2026-05-24`。
+本仓库自 **2026-05-24** 起对 `main` 分支历史做了线性化与里程碑合并；完整旧 SHA 对照见 [docs/GIT_HISTORY.md](docs/GIT_HISTORY.md)，机器导出见 [docs/\_git-export-pre-rewrite.txt](docs/_git-export-pre-rewrite.txt)。旧历史完整快照：`git log archive/history-pre-rewrite-2026-05-24`。
 
 ## Unreleased
 

@@ -4,7 +4,10 @@ import { Settings2 } from "lucide-react";
 
 import { AnalysisPanel } from "./analysis-panel";
 import { ExtendedAnalysisPanel } from "./extended-analysis-panel";
-import { loadDualSessionPageData, loadSingleSessionPageData } from "./page-data";
+import {
+  loadDualSessionPageData,
+  loadSingleSessionPageData,
+} from "./page-data";
 import { getBookIngestStatus, isBookIngestReady } from "@/lib/books/content";
 import { ImportHealthPanel } from "@/components/projects/import-health-panel";
 import { ProjectOverviewPage } from "@/components/projects/project-overview-page";
@@ -79,6 +82,7 @@ export default async function SessionDetailPage({
         sessionName={dualData.session.name}
         overview={overview}
         llmConfigured={dualData.llmConfigured}
+        extendedAnalysisDisabled={dualData.session.status === "generating"}
         books={dualData.books.map((book) => ({
           ...book,
           extendedAnalyses: dualData.extendedAnalysesByBook[book.id] ?? [],
@@ -111,12 +115,12 @@ export default async function SessionDetailPage({
   const currentStepDescription = !ingestReady
     ? "原始文件已导入，正在整理正文、章节与导入体检"
     : !hasCompleteAnalysis
-    ? llmConfigured
-      ? "完成三项分析后可生成"
-      : "需先配置模型"
-    : hasVariants
-      ? "结果已生成，可继续查看或再生成一个版本"
-      : "分析已准备好，可直接生成结果";
+      ? llmConfigured
+        ? "完成三项分析后可生成"
+        : "需先配置模型"
+      : hasVariants
+        ? "结果已生成，可继续查看或再生成一个版本"
+        : "分析已准备好，可直接生成结果";
   const stageItems = getStageItems({
     ingestReady,
     hasCompleteAnalysis,
@@ -226,10 +230,7 @@ export default async function SessionDetailPage({
   );
 }
 
-function getDualWorkbenchRedirect(query: {
-  step?: string;
-  panel?: string;
-}) {
+function getDualWorkbenchRedirect(query: { step?: string; panel?: string }) {
   if (query.panel === "results") {
     return "?step=generate";
   }
@@ -261,7 +262,9 @@ function getStageItems({
     {
       key: "upload",
       label: ingestReady ? "文本已导入" : "正在整理文本",
-      description: ingestReady ? "文件已经进入当前任务。" : "原文已接收，正在完成清洗与切章。",
+      description: ingestReady
+        ? "文件已经进入当前任务。"
+        : "原文已接收，正在完成清洗与切章。",
       state: ingestReady ? "done" : "current",
     },
     {
@@ -272,7 +275,11 @@ function getStageItems({
         : ingestReady
           ? "先完成世界观、人物和叙事分析。"
           : "等待文本整理完成后再开始分析。",
-      state: hasCompleteAnalysis ? "done" : ingestReady ? "current" : "upcoming",
+      state: hasCompleteAnalysis
+        ? "done"
+        : ingestReady
+          ? "current"
+          : "upcoming",
     },
     {
       key: "generate",

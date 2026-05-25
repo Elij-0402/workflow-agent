@@ -24,9 +24,16 @@ type Props = {
   height?: number;
 };
 
-export function DimensionRadar({ dimensions, books, seriesMeta, height = 220 }: Props) {
+export function DimensionRadar({
+  dimensions,
+  books,
+  seriesMeta,
+  height = 220,
+}: Props) {
   const data = dimensions.map((dim) => {
-    const row: Record<string, string | number> = { axis: DIMENSION_LABELS[dim] };
+    const row: Record<string, string | number> = {
+      axis: DIMENSION_LABELS[dim],
+    };
     books.forEach((b, i) => {
       row[`b${i}`] = b.analyses[dim] !== undefined ? 1 : 0;
     });

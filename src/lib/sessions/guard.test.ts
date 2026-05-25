@@ -13,7 +13,9 @@ test("rejectArchivedSession returns 404 when session is null", () => {
 });
 
 test("rejectArchivedSession blocks archived sessions", () => {
-  const result = rejectArchivedSession({ archived_at: "2026-01-01T00:00:00.000Z" });
+  const result = rejectArchivedSession({
+    archived_at: "2026-01-01T00:00:00.000Z",
+  });
   assert.equal(result.ok, false);
   if (!result.ok) {
     assert.equal(result.status, 409);

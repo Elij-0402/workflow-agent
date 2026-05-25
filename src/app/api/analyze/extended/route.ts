@@ -11,11 +11,17 @@ import { asLLMClientError } from "@/lib/llm/errors";
 import { getUserLLMClient } from "@/lib/llm/dispatch";
 import { runLLMObject } from "@/lib/llm/runtime";
 import { assertWithinRateLimit } from "@/lib/rate-limit";
-import { ANALYSIS_TEXT_CHAR_LIMIT, EXTENDED_ANALYSIS_DIMENSION_CONFIG } from "@/lib/prompts";
+import {
+  ANALYSIS_TEXT_CHAR_LIMIT,
+  EXTENDED_ANALYSIS_DIMENSION_CONFIG,
+} from "@/lib/prompts";
 import { wrapUntrustedNovel } from "@/lib/prompts/safety";
 import { loadActiveSessionByBookId } from "@/lib/sessions/guard";
 import { createClient } from "@/lib/supabase/server";
-import { EXTENDED_ANALYSIS_DIMENSIONS, type ExtendedAnalysisDimension } from "@/lib/types";
+import {
+  EXTENDED_ANALYSIS_DIMENSIONS,
+  type ExtendedAnalysisDimension,
+} from "@/lib/types";
 
 export const runtime = "nodejs";
 export const maxDuration = 300;
@@ -50,7 +56,11 @@ export async function POST(req: Request) {
     return jsonError("请求参数不正确。", 400);
   }
 
-  const { guard } = await loadActiveSessionByBookId(supabase, body.bookId, user.id);
+  const { guard } = await loadActiveSessionByBookId(
+    supabase,
+    body.bookId,
+    user.id,
+  );
   if (!guard.ok) {
     return jsonError(guard.message, guard.status);
   }
@@ -78,7 +88,10 @@ export async function POST(req: Request) {
 
   try {
     const llm = await getUserLLMClient(supabase);
-    const compatibility = getBookProviderCompatibility(book.metadata, llm.provider);
+    const compatibility = getBookProviderCompatibility(
+      book.metadata,
+      llm.provider,
+    );
     if (compatibility.status === "incompatible") {
       return jsonError(
         compatibility.reason ?? "当前模型不兼容该内容类型，请切换模型后再试。",

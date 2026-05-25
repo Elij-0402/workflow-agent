@@ -43,10 +43,10 @@ export function CostEstimateModal({
         </DialogHeader>
 
         <pre className="overflow-x-auto whitespace-pre rounded-xs border border-border/70 bg-background/40 p-4 font-mono text-[12px] leading-7 text-muted-foreground">
-{`调用次数      ──────  ${String(est.calls).padStart(6)}
+          {`调用次数      ──────  ${String(est.calls).padStart(6)}
 平均字数      ──────  ${String(avgChars)
-  .padStart(6)
-  .replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+            .padStart(6)
+            .replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
 输入令牌      ──────  ~${est.estimatedInputTokens.toLocaleString().padStart(6)}
 输出令牌      ──────  ~${est.estimatedOutputTokens.toLocaleString().padStart(6)}
 预计费用      ──────  ¥${est.estimatedCNY}`}

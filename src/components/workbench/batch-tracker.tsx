@@ -36,9 +36,15 @@ export function BatchTracker(props: Props) {
     return () => clearTimeout(t);
   }, [finished, onDismiss]);
 
-  const queued = Math.max(0, props.total - props.doneCount - props.runningCount - props.errorCount);
+  const queued = Math.max(
+    0,
+    props.total - props.doneCount - props.runningCount - props.errorCount,
+  );
   const completedCount = props.doneCount + props.errorCount;
-  const pct = props.total > 0 ? Math.min(100, Math.round((completedCount / props.total) * 100)) : 0;
+  const pct =
+    props.total > 0
+      ? Math.min(100, Math.round((completedCount / props.total) * 100))
+      : 0;
 
   const elapsedMs = now - props.startedAt;
   const remaining = props.total - completedCount;
@@ -51,7 +57,8 @@ export function BatchTracker(props: Props) {
       ? formatDuration(etaMs)
       : "--:--";
 
-  const runningWidth = props.total > 0 ? (props.runningCount / props.total) * 100 : 0;
+  const runningWidth =
+    props.total > 0 ? (props.runningCount / props.total) * 100 : 0;
 
   return (
     <div
@@ -84,7 +91,8 @@ export function BatchTracker(props: Props) {
         已完成 <span className="text-flash">{props.doneCount}</span>
         {" / "}
         <span className="text-foreground">{props.total}</span> 章 · 正在分析{" "}
-        <span className="text-primary">{props.runningCount}</span> 章 · 等待中 <span>{queued}</span> 章
+        <span className="text-primary">{props.runningCount}</span> 章 · 等待中{" "}
+        <span>{queued}</span> 章
         {props.errorCount > 0 ? (
           <>
             {" · "}

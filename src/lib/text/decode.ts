@@ -4,7 +4,13 @@ const UTF8_REPLACEMENT_CHAR = "\uFFFD";
 
 export type DecodedText = {
   text: string;
-  encoding: "utf-8-bom" | "utf-8" | "gb18030" | "big5" | "utf-16le" | "utf-16be";
+  encoding:
+    | "utf-8-bom"
+    | "utf-8"
+    | "gb18030"
+    | "big5"
+    | "utf-16le"
+    | "utf-16be";
   confidence: number;
   warnings: string[];
   decoderSignals: {
@@ -59,11 +65,21 @@ function decodeUtf16Be(buffer: Buffer) {
   return iconv.decode(swapped, "utf16le");
 }
 
-function scoreDecodedText(encoding: CandidateEncoding, text: string): CandidateScore {
-  const replacementRatio = countRatio(text, (char) => char === UTF8_REPLACEMENT_CHAR);
-  const controlRatio = countRatio(text, (char) => /[\u0000-\u0008\u000B\u000C\u000E-\u001F]/u.test(char));
+function scoreDecodedText(
+  encoding: CandidateEncoding,
+  text: string,
+): CandidateScore {
+  const replacementRatio = countRatio(
+    text,
+    (char) => char === UTF8_REPLACEMENT_CHAR,
+  );
+  const controlRatio = countRatio(text, (char) =>
+    /[\u0000-\u0008\u000B\u000C\u000E-\u001F]/u.test(char),
+  );
   const hanRatio = countRatio(text, (char) => /\p{Script=Han}/u.test(char));
-  const punctuationRatio = countRatio(text, (char) => /[，。！？：；、“”‘’（）《》【】,.!?;:'"()[\]\-]/u.test(char));
+  const punctuationRatio = countRatio(text, (char) =>
+    /[，。！？：；、“”‘’（）《》【】,.!?;:'"()[\]\-]/u.test(char),
+  );
   const newlineDensity = countRatio(text, (char) => char === "\n");
   const suspiciousMojibakeCount = countMatches(text, SUSPICIOUS_MOJIBAKE_RE);
   const chapterHeadingHits = countMatches(text, CHAPTER_HEADING_RE);
@@ -117,7 +133,10 @@ function scoreDecodedText(encoding: CandidateEncoding, text: string): CandidateS
 export function decodeNovelBuffer(input: Uint8Array): DecodedText {
   const buffer = Buffer.from(input);
   const hasUtf8Bom =
-    buffer.length >= 3 && buffer[0] === 0xef && buffer[1] === 0xbb && buffer[2] === 0xbf;
+    buffer.length >= 3 &&
+    buffer[0] === 0xef &&
+    buffer[1] === 0xbb &&
+    buffer[2] === 0xbf;
 
   if (hasUtf8Bom) {
     return scoreDecodedText("utf-8-bom", iconv.decode(buffer, "utf8"));
@@ -139,7 +158,9 @@ export function decodeNovelBuffer(input: Uint8Array): DecodedText {
     warnings.push("编码识别置信度偏低，建议人工检查导入结果。");
   }
   if (rival && best.confidence - rival.confidence < 0.08) {
-    warnings.push(`文本编码可能与 ${rival.encoding} 接近，已选择当前更优候选。`);
+    warnings.push(
+      `文本编码可能与 ${rival.encoding} 接近，已选择当前更优候选。`,
+    );
   }
 
   return {

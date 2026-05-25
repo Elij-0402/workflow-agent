@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Loader2, PlayCircle, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 
@@ -34,15 +34,34 @@ export function ChapterIterateStreamer({
   outline,
   initialChapterVariants = [],
 }: Props) {
-  const [chapterIndex, setChapterIndex] = useState(outline?.chapters[0]?.index ?? 1);
+  const [chapterIndex, setChapterIndex] = useState(
+    outline?.chapters[0]?.index ?? 1,
+  );
   const [feedback, setFeedback] = useState("");
   const [state, setState] = useState<StreamState>("idle");
   const [partialContent, setPartialContent] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [chapterVariants, setChapterVariants] =
-    useState<ChapterVariantSummary[]>(initialChapterVariants);
+  const [chapterVariants, setChapterVariants] = useState<
+    ChapterVariantSummary[]
+  >(initialChapterVariants);
+  const abortRef = useRef<AbortController | null>(null);
+  const runIdRef = useRef(0);
 
   const chapters = outline?.chapters ?? [];
+
+  useEffect(() => {
+    if (!outline) return;
+    setChapterIndex((current) => {
+      const exists = outline.chapters.some((c) => c.index === current);
+      return exists ? current : (outline.chapters[0]?.index ?? 1);
+    });
+  }, [outline]);
+
+  useEffect(() => {
+    return () => {
+      abortRef.current?.abort();
+    };
+  }, []);
 
   const latestByChapter = useMemo(() => {
     const map = new Map<number, ChapterVariantSummary>();
@@ -64,6 +83,11 @@ export function ChapterIterateStreamer({
       return;
     }
 
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+    const runId = ++runIdRef.current;
+
     setState("running");
     setPartialContent(null);
     setErrorMsg(null);
@@ -81,9 +105,11 @@ export function ChapterIterateStreamer({
           previousVariantId: previousVariantId ?? undefined,
           feedback: feedback.trim() || undefined,
         }),
+        signal: controller.signal,
       });
 
       if (!res.ok || !res.body) {
+        if (runId !== runIdRef.current) return;
         const json = await res.json().catch(() => ({}));
         const msg = (json as { error?: string }).error ?? `HTTP ${res.status}`;
         setErrorMsg(msg);
@@ -92,50 +118,61 @@ export function ChapterIterateStreamer({
         return;
       }
 
-      const completion = await consumeSseStream(res.body, (event) => {
-        if (event.type === "partial") {
-          const partial = VariantResultSchema.partial().safeParse(event.data);
-          if (partial.success && partial.data.content) {
-            finalizedContent = partial.data.content;
-            setPartialContent(partial.data.content);
+      const completion = await consumeSseStream(
+        res.body,
+        (event) => {
+          if (runId !== runIdRef.current) return;
+          if (event.type === "partial") {
+            const partial = VariantResultSchema.partial().safeParse(event.data);
+            if (partial.success && partial.data.content) {
+              finalizedContent = partial.data.content;
+              setPartialContent(partial.data.content);
+            }
+          } else if (event.type === "done") {
+            const payload = event.data as {
+              variantId?: string;
+              chapterIndex?: number;
+              wordCount?: number;
+              title?: string;
+            };
+            if (payload.variantId && typeof payload.chapterIndex === "number") {
+              const variantId = payload.variantId;
+              const chapterIdx = payload.chapterIndex;
+              setChapterVariants((current) => [
+                ...current,
+                {
+                  id: variantId,
+                  chapterIndex: chapterIdx,
+                  title: payload.title ?? `第 ${chapterIdx} 章`,
+                  content: finalizedContent,
+                  wordCount: payload.wordCount ?? null,
+                  createdAt: new Date().toISOString(),
+                },
+              ]);
+              setState("done");
+              toast.success(`第 ${chapterIdx} 章已生成并保存。`);
+            } else {
+              setState("done");
+            }
+          } else if (event.type === "error") {
+            const message =
+              (event.data as { message?: string }).message ?? "stream error";
+            setErrorMsg(message);
+            setState("error");
+            toast.error(message);
           }
-        } else if (event.type === "done") {
-          const payload = event.data as {
-            variantId?: string;
-            chapterIndex?: number;
-            wordCount?: number;
-            title?: string;
-          };
-          if (payload.variantId && payload.chapterIndex) {
-            const variantId = payload.variantId;
-            const chapterIdx = payload.chapterIndex;
-            setChapterVariants((current) => [
-              ...current,
-              {
-                id: variantId,
-                chapterIndex: chapterIdx,
-                title: payload.title ?? `第 ${chapterIdx} 章`,
-                content: finalizedContent,
-                wordCount: payload.wordCount ?? null,
-                createdAt: new Date().toISOString(),
-              },
-            ]);
-          }
-          setState("done");
-          toast.success(`第 ${chapterIndex} 章已生成并保存。`);
-        } else if (event.type === "error") {
-          const message = (event.data as { message?: string }).message ?? "stream error";
-          setErrorMsg(message);
-          setState("error");
-          toast.error(message);
-        }
-      });
+        },
+        controller.signal,
+      );
 
+      if (runId !== runIdRef.current) return;
       if (completion === "interrupted") {
         setErrorMsg("连接中断，请重试。");
         setState("error");
       }
     } catch (e) {
+      if (runId !== runIdRef.current) return;
+      if ((e as { name?: string })?.name === "AbortError") return;
       const msg = e instanceof Error ? e.message : "网络异常";
       setErrorMsg(msg);
       setState("error");
@@ -146,7 +183,7 @@ export function ChapterIterateStreamer({
   const liveContent =
     state === "running" && partialContent
       ? partialContent
-      : activeVariant?.content ?? null;
+      : (activeVariant?.content ?? null);
 
   if (!outlineVariantId || !outline) {
     return (
@@ -241,7 +278,8 @@ export function ChapterIterateStreamer({
         <div aria-live="polite" aria-atomic="true" className="space-y-3">
           <div className="flex items-baseline justify-between gap-3">
             <h3 className="font-display text-[20px] italic leading-tight text-foreground">
-              {chapters.find((c) => c.index === chapterIndex)?.title ?? `第 ${chapterIndex} 章`}
+              {chapters.find((c) => c.index === chapterIndex)?.title ??
+                `第 ${chapterIndex} 章`}
             </h3>
             {activeVariant?.wordCount ? (
               <span className="font-mono text-[10.5px] uppercase tracking-[0.08em] text-muted-foreground">

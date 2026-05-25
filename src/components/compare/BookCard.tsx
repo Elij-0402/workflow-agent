@@ -38,7 +38,10 @@ export function BookCard({
 
   return (
     <div className="surface-panel relative flex h-full flex-col overflow-hidden">
-      <div className="h-[3px] w-full" style={{ background: getBookColorHsl(index) }} />
+      <div
+        className="h-[3px] w-full"
+        style={{ background: getBookColorHsl(index) }}
+      />
       <div className="flex flex-col gap-3 px-4 py-4">
         <div className="flex items-center justify-between">
           <p
@@ -71,8 +74,12 @@ export function BookCard({
                 title={DIMENSION_LABELS[d]}
                 className="inline-flex h-[14px] w-[14px] items-center justify-center rounded-full border"
                 style={{
-                  borderColor: has ? getBookColorHsl(index, 0.6) : "hsl(var(--border))",
-                  background: has ? getBookColorHsl(index, 0.55) : "transparent",
+                  borderColor: has
+                    ? getBookColorHsl(index, 0.6)
+                    : "hsl(var(--border))",
+                  background: has
+                    ? getBookColorHsl(index, 0.55)
+                    : "transparent",
                 }}
               />
             );

@@ -80,7 +80,11 @@ export function TaskModePage() {
               <div>3. 不进入双书概览页和工作台</div>
             </div>
 
-            <Button asChild variant="outline" className="mt-5 w-full justify-center">
+            <Button
+              asChild
+              variant="outline"
+              className="mt-5 w-full justify-center"
+            >
               <Link href="/upload?mode=single">进入兼容旧流程</Link>
             </Button>
           </section>
@@ -89,7 +93,9 @@ export function TaskModePage() {
             <p className="eyebrow-label">流程说明</p>
             <div className="mt-4 space-y-3 text-[13px] leading-6 text-muted-foreground">
               <p>双书任务会先进入概览页，再根据进度进入工作台或结果区。</p>
-              <p>旧链接 `/upload` 仍然可用，但现在会先把你带回这个模式选择入口。</p>
+              <p>
+                旧链接 `/upload` 仍然可用，但现在会先把你带回这个模式选择入口。
+              </p>
             </div>
           </section>
         </aside>

@@ -41,6 +41,8 @@ export async function runBatch(opts: {
     }
   }
 
-  await Promise.all(Array.from({ length: Math.min(max, opts.chapterIds.length) }, worker));
+  await Promise.all(
+    Array.from({ length: Math.min(max, opts.chapterIds.length) }, worker),
+  );
   return { failures };
 }

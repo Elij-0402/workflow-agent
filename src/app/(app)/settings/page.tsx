@@ -34,7 +34,10 @@ export default async function SettingsPage() {
     calls: usageRows?.length ?? 0,
     failures: (usageRows ?? []).filter((row) => row.success === false).length,
     estimatedCostCNY: Math.round(
-      ((usageRows ?? []).reduce((sum, row) => sum + Number(row.estimated_cost_cny ?? 0), 0) *
+      ((usageRows ?? []).reduce(
+        (sum, row) => sum + Number(row.estimated_cost_cny ?? 0),
+        0,
+      ) *
         100) /
         100,
     ),

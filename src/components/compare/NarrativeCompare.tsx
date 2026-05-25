@@ -65,9 +65,15 @@ function ChipRow({
         const isShared = entry.tag === "common" || entry.tag === "majority";
         if (isShared) {
           return (
-            <Badge key={entry.key} variant="default" className="font-mono text-[11px]">
+            <Badge
+              key={entry.key}
+              variant="default"
+              className="font-mono text-[11px]"
+            >
               {text}
-              <span className="ml-1 text-primary/70">×{entry.bookIndices.length}</span>
+              <span className="ml-1 text-primary/70">
+                ×{entry.bookIndices.length}
+              </span>
             </Badge>
           );
         }
@@ -84,7 +90,9 @@ function ChipRow({
             }}
           >
             {text}
-            <span className="ml-1 opacity-60">{book?.label.replace("BOOK ", "")}</span>
+            <span className="ml-1 opacity-60">
+              {book?.label.replace("BOOK ", "")}
+            </span>
           </Badge>
         );
       })}
@@ -113,11 +121,19 @@ export function NarrativeCompare({ books }: { books: Book[] }) {
   const { open } = useDrawer();
 
   const themeEntries = useMemo(
-    () => multiwayTag(series.map((s) => s.data.themes ?? []), (s) => s),
+    () =>
+      multiwayTag(
+        series.map((s) => s.data.themes ?? []),
+        (s) => s,
+      ),
     [series],
   );
   const conflictEntries = useMemo(
-    () => multiwayTag(series.map((s) => s.data.conflicts ?? []), (s) => s),
+    () =>
+      multiwayTag(
+        series.map((s) => s.data.conflicts ?? []),
+        (s) => s,
+      ),
     [series],
   );
   const scatter = useMemo(() => buildScatterSeries(series), [series]);
@@ -162,16 +178,24 @@ export function NarrativeCompare({ books }: { books: Book[] }) {
             >
               {book.label}
             </span>
-            <span className="text-[13px] text-foreground">{data.structure || "—"}</span>
-            <span className="text-[13px] text-muted-foreground">{data.viewpoint || "—"}</span>
-            <span className="text-[13px] text-muted-foreground">{data.pacing || "—"}</span>
+            <span className="text-[13px] text-foreground">
+              {data.structure || "—"}
+            </span>
+            <span className="text-[13px] text-muted-foreground">
+              {data.viewpoint || "—"}
+            </span>
+            <span className="text-[13px] text-muted-foreground">
+              {data.pacing || "—"}
+            </span>
           </div>
         ))}
       </section>
 
       <section>
         <div className="flex items-baseline gap-3 pb-2">
-          <h4 className="font-display text-[16px] italic text-foreground">主题</h4>
+          <h4 className="font-display text-[16px] italic text-foreground">
+            主题
+          </h4>
           <span className="font-mono text-[10.5px] uppercase tracking-[0.10em] text-primary/70">
             {`// shared ${themeEntries.filter((e) => e.tag !== "exclusive").length} · exclusive ${themeEntries.filter((e) => e.tag === "exclusive").length}`}
           </span>
@@ -181,7 +205,9 @@ export function NarrativeCompare({ books }: { books: Book[] }) {
 
       <section className="surface-panel px-3 py-3">
         <div className="flex items-baseline gap-3 pb-1">
-          <h4 className="font-display text-[16px] italic text-foreground">转折点散布</h4>
+          <h4 className="font-display text-[16px] italic text-foreground">
+            转折点散布
+          </h4>
           <span className="font-mono text-[10.5px] uppercase tracking-[0.10em] text-primary/70">
             {`// x = 位序% · y = impact · click for detail`}
           </span>
@@ -189,7 +215,10 @@ export function NarrativeCompare({ books }: { books: Book[] }) {
         <div style={{ width: "100%", height: 280 }}>
           <ResponsiveContainer>
             <ScatterChart margin={{ top: 12, right: 16, bottom: 18, left: 0 }}>
-              <CartesianGrid strokeDasharray="2 4" stroke="hsl(var(--border))" />
+              <CartesianGrid
+                strokeDasharray="2 4"
+                stroke="hsl(var(--border))"
+              />
               <XAxis
                 type="number"
                 dataKey="position"
@@ -216,7 +245,10 @@ export function NarrativeCompare({ books }: { books: Book[] }) {
               />
               <ZAxis range={[60, 60]} />
               <Tooltip
-                cursor={{ stroke: "hsl(var(--border))", strokeDasharray: "3 3" }}
+                cursor={{
+                  stroke: "hsl(var(--border))",
+                  strokeDasharray: "3 3",
+                }}
                 contentStyle={{
                   background: "hsl(var(--popover))",
                   border: "1px solid hsl(var(--border))",
@@ -238,7 +270,9 @@ export function NarrativeCompare({ books }: { books: Book[] }) {
                       >
                         {d.bookLabel}
                       </p>
-                      <p className="mt-1 max-w-[280px] text-foreground">{d.title}</p>
+                      <p className="mt-1 max-w-[280px] text-foreground">
+                        {d.title}
+                      </p>
                       <p className="mt-0.5 font-mono text-[11px] text-muted-foreground">
                         impact {d.impact} · {Math.round(d.position * 100)}%
                       </p>
@@ -252,7 +286,11 @@ export function NarrativeCompare({ books }: { books: Book[] }) {
                     key={book.bookId}
                     data={points}
                     fill={getBookColorHsl(book.index)}
-                    onClick={(d: unknown) => handleScatterClick((d as { payload: ScatterDatum }).payload)}
+                    onClick={(d: unknown) =>
+                      handleScatterClick(
+                        (d as { payload: ScatterDatum }).payload,
+                      )
+                    }
                     isAnimationActive={false}
                   />
                 ),
@@ -264,7 +302,9 @@ export function NarrativeCompare({ books }: { books: Book[] }) {
 
       <section>
         <div className="flex items-baseline gap-3 pb-2">
-          <h4 className="font-display text-[16px] italic text-foreground">核心冲突</h4>
+          <h4 className="font-display text-[16px] italic text-foreground">
+            核心冲突
+          </h4>
           <span className="font-mono text-[10.5px] uppercase tracking-[0.10em] text-primary/70">
             {`// shared ${conflictEntries.filter((e) => e.tag !== "exclusive").length} · exclusive ${conflictEntries.filter((e) => e.tag === "exclusive").length}`}
           </span>

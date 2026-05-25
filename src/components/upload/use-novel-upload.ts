@@ -18,10 +18,14 @@ export function useNovelUpload() {
   const [pending, setPending] = useState(false);
   const [statusText, setStatusText] = useState<string | null>(null);
 
-  async function uploadNovel(
-    input: UploadNovelInput,
-  ): Promise<
-    | { ok: true; sessionId: string; redirectTo: string; message?: string; warnings?: string[] }
+  async function uploadNovel(input: UploadNovelInput): Promise<
+    | {
+        ok: true;
+        sessionId: string;
+        redirectTo: string;
+        message?: string;
+        warnings?: string[];
+      }
     | { ok: false; error: string }
   > {
     const fileError = validateUploadFile({

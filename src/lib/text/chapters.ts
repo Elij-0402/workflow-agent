@@ -83,7 +83,9 @@ function toTitleDedupKey(title: string) {
     .toLowerCase();
 }
 
-function collapseAdjacentDuplicateTitles(matches: Array<{ startChar: number; title: string }>) {
+function collapseAdjacentDuplicateTitles(
+  matches: Array<{ startChar: number; title: string }>,
+) {
   if (matches.length < 2) return matches;
 
   const collapsed: Array<{ startChar: number; title: string }> = [];
@@ -99,7 +101,8 @@ function collapseAdjacentDuplicateTitles(matches: Array<{ startChar: number; tit
     const distance = current.startChar - prev.startChar;
     if (prevKey === currentKey && distance >= 0 && distance <= 120) {
       const cleanerTitle =
-        current.title.length <= prev.title.length && !/[【\[(（]/u.test(current.title)
+        current.title.length <= prev.title.length &&
+        !/[【\[(（]/u.test(current.title)
           ? current.title
           : prev.title;
       collapsed[collapsed.length - 1] = {
@@ -135,7 +138,15 @@ type ExpandOptions = { fallbackChunkChars?: number };
 
 function buildFallbackChapters(text: string, chunkSize: number): ChapterMeta[] {
   if (text.length === 0) {
-    return [{ index: 1, title: "块 #1", startChar: 0, endChar: 0, source: "length-chunk" }];
+    return [
+      {
+        index: 1,
+        title: "块 #1",
+        startChar: 0,
+        endChar: 0,
+        source: "length-chunk",
+      },
+    ];
   }
 
   const chunks: ChapterMeta[] = [];
@@ -155,13 +166,22 @@ function buildFallbackChapters(text: string, chunkSize: number): ChapterMeta[] {
   return chunks;
 }
 
-function assessChapterPlan(text: string, chapters: ChapterMeta[]): ChapterPlan["report"] {
+function assessChapterPlan(
+  text: string,
+  chapters: ChapterMeta[],
+): ChapterPlan["report"] {
   const totalLength = Math.max(text.length, 1);
-  const spans = chapters.map((chapter) => Math.max(0, chapter.endChar - chapter.startChar));
+  const spans = chapters.map((chapter) =>
+    Math.max(0, chapter.endChar - chapter.startChar),
+  );
   const covered = spans.reduce((sum, span) => sum + span, 0);
   const averageSpan =
-    spans.length === 0 ? 0 : Math.round(spans.reduce((sum, span) => sum + span, 0) / spans.length);
-  const shortChapterCount = spans.filter((span) => span > 0 && span < 200).length;
+    spans.length === 0
+      ? 0
+      : Math.round(spans.reduce((sum, span) => sum + span, 0) / spans.length);
+  const shortChapterCount = spans.filter(
+    (span) => span > 0 && span < 200,
+  ).length;
   const emptyChapterCount = spans.filter((span) => span === 0).length;
   const coverageRatio = Math.min(1, covered / totalLength);
   const strategy = chapters[0]?.source === "regex" ? "regex" : "length-chunk";
@@ -173,7 +193,9 @@ function assessChapterPlan(text: string, chapters: ChapterMeta[]): ChapterPlan["
     if (index === 0) return count;
     return count + (titleKeys[index - 1] === key ? 1 : 0);
   }, 0);
-  const repeatedFragmentCount = spans.filter((span) => span > 0 && span <= 40).length;
+  const repeatedFragmentCount = spans.filter(
+    (span) => span > 0 && span <= 40,
+  ).length;
   const titleSequenceBreakCount = titleKeys.reduce((count, key, index) => {
     if (index === 0) return count;
     return count + (titleKeys[index - 1] === key ? 1 : 0);
@@ -190,7 +212,10 @@ function assessChapterPlan(text: string, chapters: ChapterMeta[]): ChapterPlan["
     quality = "low";
   }
 
-  if (strategy === "regex" && shortChapterCount >= Math.max(2, Math.ceil(chapters.length * 0.3))) {
+  if (
+    strategy === "regex" &&
+    shortChapterCount >= Math.max(2, Math.ceil(chapters.length * 0.3))
+  ) {
     warnings.push("识别到较多过短章节，建议人工检查。");
     quality = quality === "high" ? "medium" : quality;
   }
@@ -200,7 +225,10 @@ function assessChapterPlan(text: string, chapters: ChapterMeta[]): ChapterPlan["
     quality = "medium";
   }
 
-  if (strategy === "regex" && repeatedFragmentCount >= Math.max(2, Math.ceil(chapters.length * 0.08))) {
+  if (
+    strategy === "regex" &&
+    repeatedFragmentCount >= Math.max(2, Math.ceil(chapters.length * 0.08))
+  ) {
     warnings.push("检测到较多极短片段，建议回退到更稳妥的分块分析。");
     quality = "low";
   }
@@ -230,10 +258,14 @@ function assessChapterPlan(text: string, chapters: ChapterMeta[]): ChapterPlan["
   };
 }
 
-export function buildChapterPlan(text: string, options: ExpandOptions = {}): ChapterPlan {
+export function buildChapterPlan(
+  text: string,
+  options: ExpandOptions = {},
+): ChapterPlan {
   const chunkSize = options.fallbackChunkChars ?? 5000;
   const detected = detectChapters(text);
-  const chapters = detected.length > 0 ? detected : buildFallbackChapters(text, chunkSize);
+  const chapters =
+    detected.length > 0 ? detected : buildFallbackChapters(text, chunkSize);
 
   return {
     chapters,
@@ -241,6 +273,9 @@ export function buildChapterPlan(text: string, options: ExpandOptions = {}): Cha
   };
 }
 
-export function expandToChapters(text: string, options: ExpandOptions = {}): ChapterMeta[] {
+export function expandToChapters(
+  text: string,
+  options: ExpandOptions = {},
+): ChapterMeta[] {
   return buildChapterPlan(text, options).chapters;
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Loader2, PlayCircle, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 
@@ -20,8 +20,19 @@ export function OutlineStreamer({ briefId, onOutlineReady }: Props) {
   const [partial, setPartial] = useState<Partial<Outline> | null>(null);
   const [outline, setOutline] = useState<Outline | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    return () => {
+      abortRef.current?.abort();
+    };
+  }, []);
 
   const run = async () => {
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+
     setState("running");
     setPartial(null);
     setOutline(null);
@@ -32,6 +43,7 @@ export function OutlineStreamer({ briefId, onOutlineReady }: Props) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ briefId }),
+        signal: controller.signal,
       });
       if (!res.ok || !res.body) {
         const json = await res.json().catch(() => ({}));
@@ -42,34 +54,51 @@ export function OutlineStreamer({ briefId, onOutlineReady }: Props) {
         return;
       }
 
-      const completion = await consumeSseStream(res.body, (event) => {
-        if (event.type === "partial") {
-          setPartial(event.data as Partial<Outline>);
-        } else if (event.type === "done") {
-          const payload = event.data as { outline?: unknown; variantId?: string };
-          const validated = OutlineSchema.safeParse(payload.outline);
-          if (validated.success && payload.variantId) {
+      const completion = await consumeSseStream(
+        res.body,
+        (event) => {
+          if (event.type === "partial") {
+            setPartial(event.data as Partial<Outline>);
+          } else if (event.type === "done") {
+            const payload = event.data as {
+              outline?: unknown;
+              variantId?: string;
+            };
+            const validated = OutlineSchema.safeParse(payload.outline);
+            if (!validated.success) {
+              setErrorMsg("大纲格式校验失败。");
+              setState("error");
+              return;
+            }
+            if (!payload.variantId) {
+              setErrorMsg("大纲保存失败，请重试。");
+              setState("error");
+              return;
+            }
             setOutline(validated.data);
             setState("done");
-            onOutlineReady?.({ variantId: payload.variantId, outline: validated.data });
+            onOutlineReady?.({
+              variantId: payload.variantId,
+              outline: validated.data,
+            });
             toast.success("大纲已生成并保存。");
-          } else {
-            setErrorMsg("大纲格式校验失败。");
+          } else if (event.type === "error") {
+            const message =
+              (event.data as { message?: string }).message ?? "stream error";
+            setErrorMsg(message);
             setState("error");
+            toast.error(message);
           }
-        } else if (event.type === "error") {
-          const message = (event.data as { message?: string }).message ?? "stream error";
-          setErrorMsg(message);
-          setState("error");
-          toast.error(message);
-        }
-      });
+        },
+        controller.signal,
+      );
 
       if (completion === "interrupted") {
         setErrorMsg("连接中断，请重试。");
         setState("error");
       }
     } catch (e) {
+      if ((e as { name?: string })?.name === "AbortError") return;
       const msg = e instanceof Error ? e.message : "网络异常";
       setErrorMsg(msg);
       setState("error");
@@ -88,10 +117,16 @@ export function OutlineStreamer({ briefId, onOutlineReady }: Props) {
             预览大纲
           </p>
           <p className="mt-1 text-[13px] text-muted-foreground">
-            根据当前简报 + 已确认蓝图，流式合成一份新版本的大纲（不消耗整书 token）。
+            根据当前简报 + 已确认蓝图，流式合成一份新版本的大纲（不消耗整书
+            token）。
           </p>
         </div>
-        <Button onClick={run} disabled={state === "running"} variant="terminal" size="sm">
+        <Button
+          onClick={run}
+          disabled={state === "running"}
+          variant="terminal"
+          size="sm"
+        >
           {state === "running" ? (
             <>
               <Loader2 className="animate-spin" />
@@ -125,7 +160,9 @@ export function OutlineStreamer({ briefId, onOutlineReady }: Props) {
                 {view.title ?? "（生成中…）"}
               </h3>
               {view.premise ? (
-                <p className="text-[13.5px] leading-7 text-muted-foreground">{view.premise}</p>
+                <p className="text-[13.5px] leading-7 text-muted-foreground">
+                  {view.premise}
+                </p>
               ) : null}
             </div>
             <div className="space-y-2">
@@ -145,12 +182,14 @@ export function OutlineStreamer({ briefId, onOutlineReady }: Props) {
                       </span>
                     </div>
                     {ch?.summary ? (
-                      <p className="mt-2 text-[13px] leading-6 text-muted-foreground">{ch.summary}</p>
+                      <p className="mt-2 text-[13px] leading-6 text-muted-foreground">
+                        {ch.summary}
+                      </p>
                     ) : null}
                     {(ch?.key_events ?? []).length > 0 ? (
                       <ul className="mt-2 list-disc pl-5 text-[12.5px] leading-6 text-muted-foreground">
                         {(ch?.key_events ?? []).map((ev, idx) => (
-                          <li key={idx}>{ev}</li>
+                          <li key={`${idx}-${ev}`}>{ev}</li>
                         ))}
                       </ul>
                     ) : null}

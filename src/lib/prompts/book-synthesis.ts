@@ -16,7 +16,11 @@ export type BriefEntry = {
   index: number;
   brief: {
     summary?: string;
-    events?: Array<{ title?: string; description?: string; is_turning_point?: boolean }>;
+    events?: Array<{
+      title?: string;
+      description?: string;
+      is_turning_point?: boolean;
+    }>;
     [key: string]: unknown;
   };
 };

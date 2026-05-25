@@ -20,7 +20,11 @@ export const CompareInsightsResultSchema = z.object({
     .array(
       z.object({
         title: z.string().min(2).max(60).describe("一句话观察标题，10-30 字"),
-        body: z.string().min(10).max(400).describe("解释为什么 / 给出对比依据，60-200 字"),
+        body: z
+          .string()
+          .min(10)
+          .max(400)
+          .describe("解释为什么 / 给出对比依据，60-200 字"),
         dimension: z.enum(
           COMPARE_INSIGHT_DIMENSIONS as readonly [Dim, ...Dim[]],
         ),

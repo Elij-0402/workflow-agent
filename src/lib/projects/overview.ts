@@ -24,14 +24,20 @@ export type ProjectOverview = {
   progressLabel: string;
   editorialBullets: [string, string, string];
   nextAction: ProjectOverviewNextAction;
-  keyResults: [ProjectOverviewKeyResult, ProjectOverviewKeyResult, ProjectOverviewKeyResult];
+  keyResults: [
+    ProjectOverviewKeyResult,
+    ProjectOverviewKeyResult,
+    ProjectOverviewKeyResult,
+  ];
 };
 
 function createOverview(config: ProjectOverview): ProjectOverview {
   return config;
 }
 
-export function deriveProjectOverview(input: ProjectOverviewInput): ProjectOverview {
+export function deriveProjectOverview(
+  input: ProjectOverviewInput,
+): ProjectOverview {
   const importedCount = input.books.length;
   const hasTwoBooks = input.books.length === 2;
   const readyBookCount = input.books.filter((book) => {
@@ -40,7 +46,9 @@ export function deriveProjectOverview(input: ProjectOverviewInput): ProjectOverv
   }).length;
   const analyzedBooks = new Set(input.bookSynthesisByBook).size;
   const hasConfirmedBlueprint = input.blueprintStatus === "confirmed";
-  const fullVariantCount = input.variants.filter((variant) => variant.scope === "full").length;
+  const fullVariantCount = input.variants.filter(
+    (variant) => variant.scope === "full",
+  ).length;
   const hasFullVariants = fullVariantCount > 0;
 
   if (!hasTwoBooks) {
@@ -58,7 +66,10 @@ export function deriveProjectOverview(input: ProjectOverviewInput): ProjectOverv
       },
       keyResults: [
         { label: "参考小说", value: `${importedCount} / 2` },
-        { label: "已切章节", value: String(input.books[0]?.chapter_count ?? 0) },
+        {
+          label: "已切章节",
+          value: String(input.books[0]?.chapter_count ?? 0),
+        },
         { label: "蓝图状态", value: "未开始" },
       ],
     });

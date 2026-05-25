@@ -24,7 +24,10 @@ type Book = {
 
 type ParsedBook = { book: Book; data: ProseCraftResult };
 
-const RHETORIC_AXES: Array<{ key: keyof ProseCraftResult["rhetoric_density"]; label: string }> = [
+const RHETORIC_AXES: Array<{
+  key: keyof ProseCraftResult["rhetoric_density"];
+  label: string;
+}> = [
   { key: "metaphor", label: "比喻" },
   { key: "parallelism", label: "排比" },
   { key: "personification", label: "拟人" },
@@ -32,7 +35,10 @@ const RHETORIC_AXES: Array<{ key: keyof ProseCraftResult["rhetoric_density"]; la
   { key: "hyperbole", label: "夸张" },
 ];
 
-const SENSORY_AXES: Array<{ key: keyof ProseCraftResult["sensory_mix"]; label: string }> = [
+const SENSORY_AXES: Array<{
+  key: keyof ProseCraftResult["sensory_mix"];
+  label: string;
+}> = [
   { key: "visual", label: "视" },
   { key: "auditory", label: "听" },
   { key: "tactile", label: "触" },
@@ -151,7 +157,9 @@ export function ProseCraftRadarOverlay({
         axes={SENSORY_AXES}
         max={1}
         series={series}
-        getValue={(d, k) => (d.sensory_mix as unknown as Record<string, number>)[k] ?? 0}
+        getValue={(d, k) =>
+          (d.sensory_mix as unknown as Record<string, number>)[k] ?? 0
+        }
         height={height}
       />
     </div>

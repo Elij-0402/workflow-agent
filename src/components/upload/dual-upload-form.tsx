@@ -162,7 +162,8 @@ export function DualUploadForm() {
                         : "// select up to 2 references"}
                   </div>
                   <p className="mt-2 text-[13px] leading-7 text-muted-foreground">
-                    一次选择两本 `.txt` 参考小说。当前版本不支持在同一任务内导入第 3 本。
+                    一次选择两本 `.txt`
+                    参考小说。当前版本不支持在同一任务内导入第 3 本。
                   </p>
                 </div>
 
@@ -241,7 +242,9 @@ export function DualUploadForm() {
         <section className="surface-panel p-5">
           <p className="eyebrow-label">rules</p>
           <div className="mt-4 flex flex-col gap-3 text-[13px] leading-7 text-muted-foreground">
-            <p>支持 `.txt` 文件，每本上限 {formatBytes(MAX_UPLOAD_BYTES, 0)}。</p>
+            <p>
+              支持 `.txt` 文件，每本上限 {formatBytes(MAX_UPLOAD_BYTES, 0)}。
+            </p>
             <p>每个任务固定 2 本参考小说；如果需要第 3 本，请新建任务。</p>
             <p>创建页会优先保留原文，再继续完成清洗、切章与导入体检。</p>
           </div>
@@ -276,7 +279,9 @@ function ReferenceCard({
         <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-primary/70">
           {`// ${label} · awaiting`}
         </span>
-        <span className="font-mono text-[24px] text-primary/35">{slotLabel}</span>
+        <span className="font-mono text-[24px] text-primary/35">
+          {slotLabel}
+        </span>
         <p className="font-display text-[18px] italic leading-tight text-foreground">
           {label}
         </p>

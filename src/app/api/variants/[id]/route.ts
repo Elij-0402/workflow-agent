@@ -7,7 +7,10 @@ export const runtime = "nodejs";
 
 const paramsSchema = z.object({ id: z.string().uuid() });
 
-export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(
+  _req: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
   const supabase = await createClient();
   const {
     data: { user },

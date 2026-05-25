@@ -4,10 +4,18 @@ import dynamic from "next/dynamic";
 
 import { EmotionArcResultSchema } from "@/lib/types";
 
-import { InvalidResultNotice, OverflowTable, SectionTitle, Separator } from "./shared";
+import {
+  InvalidResultNotice,
+  OverflowTable,
+  SectionTitle,
+  Separator,
+} from "./shared";
 
 const EmotionArcChart = dynamic(
-  () => import("@/components/charts/emotion-arc-chart").then((m) => m.EmotionArcChart),
+  () =>
+    import("@/components/charts/emotion-arc-chart").then(
+      (m) => m.EmotionArcChart,
+    ),
   { ssr: false, loading: () => <ChartSkeleton /> },
 );
 

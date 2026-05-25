@@ -39,7 +39,8 @@ export function SuspenseGridChart({
 
   const xOf = (idx: number) =>
     padding.left + (idx / xMax) * (innerWidth - padding.left - padding.right);
-  const yOf = (i: number) => padding.top + ((i + 0.5) / Math.max(threads.length, 1)) * innerHeight;
+  const yOf = (i: number) =>
+    padding.top + ((i + 0.5) / Math.max(threads.length, 1)) * innerHeight;
 
   return (
     <div className="overflow-x-auto rounded-[3px] border border-border bg-background/30">
@@ -81,7 +82,13 @@ export function SuspenseGridChart({
               )}
               <circle cx={x1} cy={y} r={3 + t.strength / 3} fill={color} />
               {x2 !== null ? (
-                <circle cx={x2} cy={y} r={3 + t.strength / 3} fill={color} fillOpacity={0.6} />
+                <circle
+                  cx={x2}
+                  cy={y}
+                  r={3 + t.strength / 3}
+                  fill={color}
+                  fillOpacity={0.6}
+                />
               ) : null}
               <text
                 x={padding.left + 6}

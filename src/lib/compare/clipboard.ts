@@ -28,7 +28,10 @@ function readAll(): ClipboardItem[] {
     if (!Array.isArray(parsed)) return [];
     return parsed.filter(
       (x): x is ClipboardItem =>
-        x && typeof x === "object" && typeof x.id === "string" && typeof x.title === "string",
+        x &&
+        typeof x === "object" &&
+        typeof x.id === "string" &&
+        typeof x.title === "string",
     );
   } catch {
     return [];
@@ -38,7 +41,10 @@ function readAll(): ClipboardItem[] {
 function writeAll(items: ClipboardItem[]) {
   if (typeof window === "undefined") return;
   try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(items.slice(0, MAX_ITEMS)));
+    window.localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify(items.slice(0, MAX_ITEMS)),
+    );
     window.dispatchEvent(new CustomEvent(CHANGE_EVENT));
   } catch {
     // ignore quota errors

@@ -21,7 +21,14 @@ test("detectChapters: 序章/楔子/番外 are recognized", () => {
 });
 
 test("detectChapters: 第X节/折/部/篇 variants", () => {
-  const text = ["第一节 开端", "...", "第二折 中段", "...", "第三部 终章", "..."].join("\n");
+  const text = [
+    "第一节 开端",
+    "...",
+    "第二折 中段",
+    "...",
+    "第三部 终章",
+    "...",
+  ].join("\n");
 
   const chapters = detectChapters(text);
   assert.equal(chapters.length, 3);
@@ -34,7 +41,16 @@ test("detectChapters: 正文 N variant", () => {
 });
 
 test("detectChapters: numeric-only weak signal accepted when ≥3 in a row with blank surroundings", () => {
-  const text = ["001 启程", "...", "", "002 风雪", "...", "", "003 抵达", "..."].join("\n");
+  const text = [
+    "001 启程",
+    "...",
+    "",
+    "002 风雪",
+    "...",
+    "",
+    "003 抵达",
+    "...",
+  ].join("\n");
   const chapters = detectChapters(text);
   assert.equal(chapters.length, 3);
   assert.equal(chapters[0].title, "001 启程");
@@ -66,7 +82,12 @@ test("expandToChapters: falls back to length chunks when no chapters detected", 
 });
 
 test("expandToChapters: uses regex result when chapters detected", () => {
-  const text = ["第一章 起", "甲".repeat(100), "第二章 承", "甲".repeat(100)].join("\n");
+  const text = [
+    "第一章 起",
+    "甲".repeat(100),
+    "第二章 承",
+    "甲".repeat(100),
+  ].join("\n");
   const chunks = expandToChapters(text, { fallbackChunkChars: 5000 });
   assert.equal(chunks.length, 2);
   assert.equal(chunks[0].source, "regex");
@@ -88,7 +109,9 @@ test("expandToChapters: empty input still yields one block", () => {
 });
 
 test("buildChapterPlan reports low quality when falling back to length chunks", () => {
-  const plan = buildChapterPlan("甲".repeat(9000), { fallbackChunkChars: 5000 });
+  const plan = buildChapterPlan("甲".repeat(9000), {
+    fallbackChunkChars: 5000,
+  });
 
   assert.equal(plan.report.strategy, "length-chunk");
   assert.equal(plan.report.quality, "low");

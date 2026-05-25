@@ -13,7 +13,10 @@ function createMockSupabase(query: MockQuery) {
     eq: () => chain,
     gte: () => chain,
     then(
-      resolve: (value: { count: number | null; error: { message: string } | null }) => void,
+      resolve: (value: {
+        count: number | null;
+        error: { message: string } | null;
+      }) => void,
     ) {
       resolve({ count: query.count, error: query.error });
     },
@@ -26,16 +29,24 @@ function createMockSupabase(query: MockQuery) {
 }
 
 test("assertWithinRateLimit allows requests under the cap", async () => {
-  const result = await assertWithinRateLimit(createMockSupabase({ count: 5, error: null }), "user-1", {
-    maxRequests: 10,
-  });
+  const result = await assertWithinRateLimit(
+    createMockSupabase({ count: 5, error: null }),
+    "user-1",
+    {
+      maxRequests: 10,
+    },
+  );
   assert.deepEqual(result, { ok: true });
 });
 
 test("assertWithinRateLimit rejects at the cap", async () => {
-  const result = await assertWithinRateLimit(createMockSupabase({ count: 30, error: null }), "user-1", {
-    maxRequests: 30,
-  });
+  const result = await assertWithinRateLimit(
+    createMockSupabase({ count: 30, error: null }),
+    "user-1",
+    {
+      maxRequests: 30,
+    },
+  );
   assert.equal(result.ok, false);
   if (!result.ok) {
     assert.equal(result.status, 429);

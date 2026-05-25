@@ -68,17 +68,21 @@ QQ群 123456
 
   assert.doesNotMatch(result.cleaned, /本书来自/);
   assert.match(result.cleaned, /江湖夜雨十年灯/);
-  assert.ok(result.issues.some((issue) => issue.code === "high-confidence-noise-removed"));
-  assert.ok(result.issues.some((issue) => issue.code === "suspicious-noise-line"));
+  assert.ok(
+    result.issues.some(
+      (issue) => issue.code === "high-confidence-noise-removed",
+    ),
+  );
+  assert.ok(
+    result.issues.some((issue) => issue.code === "suspicious-noise-line"),
+  );
 });
 
 test("aggressive cleanup removes adjacent duplicate headings and keeps content risk tags", () => {
   const result = cleanNovelText(
-    [
-      "第一章 风起【第三更】",
-      "第一章 风起",
-      "他强行压住她，开始做爱。",
-    ].join("\n"),
+    ["第一章 风起【第三更】", "第一章 风起", "他强行压住她，开始做爱。"].join(
+      "\n",
+    ),
     { aggressiveChapterCleanup: true },
   );
 

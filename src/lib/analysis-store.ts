@@ -38,7 +38,8 @@ export async function saveAnalysis(input: SaveAnalysisInput) {
       ? matchQuery.eq("chapter_id", input.chapterId)
       : matchQuery.is("chapter_id", null);
 
-  const { data: existing, error: existingError } = await scopedQuery.maybeSingle();
+  const { data: existing, error: existingError } =
+    await scopedQuery.maybeSingle();
   if (existingError) {
     return { error: existingError };
   }
@@ -65,7 +66,7 @@ export async function saveAnalysis(input: SaveAnalysisInput) {
     book_id: input.bookId,
     user_id: input.userId,
     scope: input.scope,
-    chapter_id: input.scope === "chapter" ? input.chapterId ?? null : null,
+    chapter_id: input.scope === "chapter" ? (input.chapterId ?? null) : null,
     dimension: input.dimension,
     result: input.result,
     llm_config_id: input.llmConfigId,

@@ -40,7 +40,10 @@ export function Toolbar({
     >
       {showSearch ? (
         <label className="surface-subtle flex h-9 min-w-[180px] flex-1 items-center gap-2 px-3">
-          <Search className="h-3.5 w-3.5 text-muted-foreground/80" aria-hidden />
+          <Search
+            className="h-3.5 w-3.5 text-muted-foreground/80"
+            aria-hidden
+          />
           <input
             value={searchValue}
             onChange={(e) => onSearchChange?.(e.target.value)}
@@ -49,11 +52,15 @@ export function Toolbar({
           />
         </label>
       ) : null}
-      {filters ? <div className="flex items-center gap-2">{filters}</div> : null}
+      {filters ? (
+        <div className="flex items-center gap-2">{filters}</div>
+      ) : null}
       {sort ? <div className="flex items-center gap-2">{sort}</div> : null}
       <div className="ml-auto flex items-center gap-2">
         {count ? (
-          <span className="mono-label-xs text-muted-foreground/80">{count}</span>
+          <span className="mono-label-xs text-muted-foreground/80">
+            {count}
+          </span>
         ) : null}
         {actions}
       </div>

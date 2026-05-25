@@ -4,7 +4,10 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { loadActiveSession } from "@/lib/sessions/guard";
 import type { Database } from "@/lib/types";
-import { CreativeBriefSchema, CreativeBriefStatusSchema } from "@/lib/types/creative-brief";
+import {
+  CreativeBriefSchema,
+  CreativeBriefStatusSchema,
+} from "@/lib/types/creative-brief";
 
 export const runtime = "nodejs";
 
@@ -15,7 +18,10 @@ const patchBodySchema = z.object({
   status: CreativeBriefStatusSchema.optional(),
 });
 
-export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(
+  _req: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
   const supabase = await createClient();
   const {
     data: { user },
@@ -42,7 +48,10 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
   return NextResponse.json({ ok: true, brief: data });
 }
 
-export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function PATCH(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
   const supabase = await createClient();
   const {
     data: { user },
@@ -74,9 +83,16 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   if (!briefRow) {
     return NextResponse.json({ error: "未找到简报。" }, { status: 404 });
   }
-  const { guard } = await loadActiveSession(supabase, briefRow.session_id, user.id);
+  const { guard } = await loadActiveSession(
+    supabase,
+    briefRow.session_id,
+    user.id,
+  );
   if (!guard.ok) {
-    return NextResponse.json({ error: guard.message }, { status: guard.status });
+    return NextResponse.json(
+      { error: guard.message },
+      { status: guard.status },
+    );
   }
 
   const update: Database["public"]["Tables"]["creative_briefs"]["Update"] = {};
@@ -106,7 +122,10 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   return NextResponse.json({ ok: true });
 }
 
-export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(
+  _req: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
   const supabase = await createClient();
   const {
     data: { user },
@@ -127,9 +146,16 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
   if (!briefRow) {
     return NextResponse.json({ error: "未找到简报。" }, { status: 404 });
   }
-  const { guard } = await loadActiveSession(supabase, briefRow.session_id, user.id);
+  const { guard } = await loadActiveSession(
+    supabase,
+    briefRow.session_id,
+    user.id,
+  );
   if (!guard.ok) {
-    return NextResponse.json({ error: guard.message }, { status: guard.status });
+    return NextResponse.json(
+      { error: guard.message },
+      { status: guard.status },
+    );
   }
 
   const { error } = await supabase

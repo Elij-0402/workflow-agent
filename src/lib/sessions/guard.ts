@@ -2,7 +2,9 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import type { Database } from "@/lib/types";
 
-type GuardResult = { ok: true } | { ok: false; status: number; message: string };
+type GuardResult =
+  | { ok: true }
+  | { ok: false; status: number; message: string };
 
 export function rejectArchivedSession(
   session: { archived_at?: string | null } | null,
@@ -11,7 +13,11 @@ export function rejectArchivedSession(
     return { ok: false, status: 404, message: "未找到对应项目。" };
   }
   if (session.archived_at) {
-    return { ok: false, status: 409, message: "项目已归档，请先恢复后再操作。" };
+    return {
+      ok: false,
+      status: 409,
+      message: "项目已归档，请先恢复后再操作。",
+    };
   }
   return { ok: true };
 }
@@ -29,7 +35,10 @@ export async function loadActiveSession(
     .maybeSingle();
 
   if (error) {
-    return { session: null, guard: { ok: false as const, status: 500, message: "读取项目失败。" } };
+    return {
+      session: null,
+      guard: { ok: false as const, status: 500, message: "读取项目失败。" },
+    };
   }
 
   const guard = rejectArchivedSession(session);
@@ -60,6 +69,10 @@ export async function loadActiveSessionByBookId(
     };
   }
 
-  const { session, guard } = await loadActiveSession(supabase, book.session_id, userId);
+  const { session, guard } = await loadActiveSession(
+    supabase,
+    book.session_id,
+    userId,
+  );
   return { session, book, guard };
 }

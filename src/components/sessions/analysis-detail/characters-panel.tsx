@@ -1,7 +1,13 @@
 import { Badge } from "@/components/ui/badge";
 import { CharactersResultSchema } from "@/lib/types";
 
-import { EmptyText, InvalidResultNotice, OverflowTable, SectionTitle, Separator } from "./shared";
+import {
+  EmptyText,
+  InvalidResultNotice,
+  OverflowTable,
+  SectionTitle,
+  Separator,
+} from "./shared";
 
 function roleLabel(value: "protagonist" | "antagonist" | "supporting") {
   if (value === "protagonist") return "主角";

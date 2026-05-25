@@ -17,9 +17,13 @@ type ProjectOverviewPageProps = {
     title: string;
     chapter_count: number | null;
     metadata: Record<string, unknown>;
-    extendedAnalyses?: Array<{ dimension: ExtendedAnalysisDimension; result: unknown }>;
+    extendedAnalyses?: Array<{
+      dimension: ExtendedAnalysisDimension;
+      result: unknown;
+    }>;
   }>;
   llmConfigured?: boolean;
+  extendedAnalysisDisabled?: boolean;
 };
 
 export function ProjectOverviewPage({
@@ -28,6 +32,7 @@ export function ProjectOverviewPage({
   overview,
   books,
   llmConfigured = false,
+  extendedAnalysisDisabled = false,
 }: ProjectOverviewPageProps) {
   return (
     <div className="app-page">
@@ -72,7 +77,8 @@ export function ProjectOverviewPage({
               写作技法与节奏洞察
             </h2>
             <p className="mt-2 max-w-3xl text-[13px] leading-6 text-muted-foreground">
-              针对每本参考书运行 prose_craft、emotion_arc、pacing_map、suspense_grid 四维扩展分析。
+              针对每本参考书运行
+              prose_craft、emotion_arc、pacing_map、suspense_grid 四维扩展分析。
             </p>
           </div>
           <div className="grid gap-6 xl:grid-cols-2">
@@ -82,6 +88,7 @@ export function ProjectOverviewPage({
                 bookId={book.id}
                 analyses={book.extendedAnalyses ?? []}
                 llmConfigured={llmConfigured}
+                disabled={extendedAnalysisDisabled}
               />
             ))}
           </div>

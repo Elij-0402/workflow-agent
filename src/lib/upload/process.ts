@@ -46,7 +46,9 @@ type ProcessUploadedNovelFailure = {
   userMessage: string;
 };
 
-type ProcessUploadedNovelResult = ProcessUploadedNovelSuccess | ProcessUploadedNovelFailure;
+type ProcessUploadedNovelResult =
+  | ProcessUploadedNovelSuccess
+  | ProcessUploadedNovelFailure;
 
 function nowIso() {
   return new Date().toISOString();
@@ -72,7 +74,8 @@ function buildFailureReport(
       ingest_report: report,
     },
     report,
-    userMessage: "原始文件已导入，但文本处理未完成，请在项目页查看导入体检并重试。",
+    userMessage:
+      "原始文件已导入，但文本处理未完成，请在项目页查看导入体检并重试。",
   };
 }
 
@@ -92,11 +95,14 @@ function toErrorReport(input: {
   };
 }
 
-function buildProviderCompatibility(tags: ContentRiskTag[]): IngestReport["provider_compatibility"] {
+function buildProviderCompatibility(
+  tags: ContentRiskTag[],
+): IngestReport["provider_compatibility"] {
   const hasAdult = tags.includes("adult_explicit");
   const hasGraphicViolence = tags.includes("graphic_violence");
   const hasSevereSexualRisk =
-    tags.includes("sexual_coercion_risk") || tags.includes("abuse_or_incest_risk");
+    tags.includes("sexual_coercion_risk") ||
+    tags.includes("abuse_or_incest_risk");
 
   const defaultStatus: ProviderCompatibilityStatus = hasSevereSexualRisk
     ? "risky"
@@ -144,9 +150,14 @@ function deriveContentProfile(input: {
   tags: ContentRiskTag[];
 }): ContentProfile {
   const noisy = input.issues.some((issue) =>
-    ["high-confidence-noise-removed", "suspicious-noise-line", "decoder-warning"].includes(issue.code),
+    [
+      "high-confidence-noise-removed",
+      "suspicious-noise-line",
+      "decoder-warning",
+    ].includes(issue.code),
   );
-  const duplicated = input.repeatedShortLineCount > 0 || input.duplicateTitleCount > 0;
+  const duplicated =
+    input.repeatedShortLineCount > 0 || input.duplicateTitleCount > 0;
   const adult = input.tags.length > 0;
   const active = [noisy, duplicated, adult].filter(Boolean).length;
   if (active >= 2) return "mixed";
@@ -166,19 +177,23 @@ function buildChapterGate(input: {
   const shortRatio =
     input.chapterPlan.chapters.length === 0
       ? 0
-      : input.chapterPlan.report.shortChapterCount / input.chapterPlan.chapters.length;
+      : input.chapterPlan.report.shortChapterCount /
+        input.chapterPlan.chapters.length;
   const duplicateTitleRatio =
     input.chapterPlan.chapters.length === 0
       ? 0
-      : input.chapterPlan.report.duplicateTitleCount / input.chapterPlan.chapters.length;
+      : input.chapterPlan.report.duplicateTitleCount /
+        input.chapterPlan.chapters.length;
   const adjacentDuplicateRatio =
     input.chapterPlan.chapters.length === 0
       ? 0
-      : input.chapterPlan.report.adjacentDuplicateCount / input.chapterPlan.chapters.length;
+      : input.chapterPlan.report.adjacentDuplicateCount /
+        input.chapterPlan.chapters.length;
   const repeatedFragmentRatio =
     input.chapterPlan.chapters.length === 0
       ? 0
-      : input.chapterPlan.report.repeatedFragmentCount / input.chapterPlan.chapters.length;
+      : input.chapterPlan.report.repeatedFragmentCount /
+        input.chapterPlan.chapters.length;
 
   let status: ChapterGateStatus = "pass";
   let analysisMode: AnalysisMode = "chaptered";
@@ -188,7 +203,10 @@ function buildChapterGate(input: {
     reasons.push("编码置信度过低，当前文本可能仍含严重乱码。");
   }
 
-  if (input.chapterPlan.report.strategy === "length-chunk" || input.chapterPlan.report.quality === "low") {
+  if (
+    input.chapterPlan.report.strategy === "length-chunk" ||
+    input.chapterPlan.report.quality === "low"
+  ) {
     status = status === "blocked" ? status : "fallback_only";
     analysisMode = "block-fallback";
     reasons.push("章节结构不稳定，已切换为大块分段分析。");
@@ -229,7 +247,8 @@ function buildChapterGate(input: {
 export async function processUploadedNovel(
   params: ProcessUploadedNovelParams,
 ): Promise<ProcessUploadedNovelResult> {
-  const { supabase, userId, sessionId, storageObjectPath, safeFilename } = params;
+  const { supabase, userId, sessionId, storageObjectPath, safeFilename } =
+    params;
   const { data: fileBlob, error: downloadError } = await supabase.storage
     .from("novels")
     .download(storageObjectPath);
@@ -304,7 +323,10 @@ export async function processUploadedNovel(
       chapterPlan = retriedPlan;
       chapterGate = {
         ...retriedGate,
-        reasons: [...retriedGate.reasons, "已应用更严格的去重与标题清洗策略。"] as string[],
+        reasons: [
+          ...retriedGate.reasons,
+          "已应用更严格的去重与标题清洗策略。",
+        ] as string[],
       };
     }
   }
@@ -314,7 +336,10 @@ export async function processUploadedNovel(
       ...chapterGate,
       status: "fallback_only",
       analysisMode: "block-fallback",
-      reasons: [...chapterGate.reasons, "自动重切后仍存在结构污染，已改用大块分段分析。"],
+      reasons: [
+        ...chapterGate.reasons,
+        "自动重切后仍存在结构污染，已改用大块分段分析。",
+      ],
     };
     chapterPlan = buildChapterPlan(analysisView, {
       fallbackChunkChars: 12000,
@@ -332,7 +357,8 @@ export async function processUploadedNovel(
       code: "chapter-detection-warning",
       message: warning,
       severity:
-        chapterGate.status === "blocked" || chapterGate.status === "fallback_only"
+        chapterGate.status === "blocked" ||
+        chapterGate.status === "fallback_only"
           ? ("error" as const)
           : ("warning" as const),
     })),
@@ -352,9 +378,8 @@ export async function processUploadedNovel(
   }
 
   const inlineCleanedContent = shouldInlineCleanedContent(analysisView);
-  let cleanedContentMode: "inline" | "storage" | "raw-fallback" = inlineCleanedContent
-    ? "inline"
-    : "storage";
+  let cleanedContentMode: "inline" | "storage" | "raw-fallback" =
+    inlineCleanedContent ? "inline" : "storage";
   let cleanedStoragePath = inlineCleanedContent
     ? null
     : buildCleanedStorageObjectPath(userId, sessionId, safeFilename);
@@ -381,11 +406,16 @@ export async function processUploadedNovel(
 
   const warningsPresent =
     decoded.confidence < 0.72 ||
-    reportIssues.some((issue) => issue.severity === "warning" || issue.severity === "error");
-  const providerCompatibility = buildProviderCompatibility(activeCleanResult.contentRiskTags);
+    reportIssues.some(
+      (issue) => issue.severity === "warning" || issue.severity === "error",
+    );
+  const providerCompatibility = buildProviderCompatibility(
+    activeCleanResult.contentRiskTags,
+  );
   const contentProfile = deriveContentProfile({
     issues: reportIssues,
-    repeatedShortLineCount: activeCleanResult.dedupeSummary.repeatedShortLineCount,
+    repeatedShortLineCount:
+      activeCleanResult.dedupeSummary.repeatedShortLineCount,
     duplicateTitleCount: chapterPlan.report.duplicateTitleCount,
     tags: activeCleanResult.contentRiskTags,
   });
@@ -430,7 +460,8 @@ export async function processUploadedNovel(
     content_risk_tags: activeCleanResult.contentRiskTags,
     provider_compatibility: providerCompatibility,
     dedupe_summary: {
-      repeated_short_line_count: activeCleanResult.dedupeSummary.repeatedShortLineCount,
+      repeated_short_line_count:
+        activeCleanResult.dedupeSummary.repeatedShortLineCount,
       duplicate_title_count: chapterPlan.report.duplicateTitleCount,
       adjacent_duplicate_count: chapterPlan.report.adjacentDuplicateCount,
       repeated_fragment_count: chapterPlan.report.repeatedFragmentCount,

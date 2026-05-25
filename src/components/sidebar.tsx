@@ -26,10 +26,7 @@ export function Sidebar() {
       </Link>
 
       <div className="px-5 pt-5">
-        <Button
-          asChild
-          className="h-10 w-full justify-center gap-2"
-        >
+        <Button asChild className="h-10 w-full justify-center gap-2">
           <Link href="/create">
             <Plus className="h-4 w-4" aria-hidden />
             新建项目

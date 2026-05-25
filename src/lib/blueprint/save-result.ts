@@ -1,4 +1,7 @@
-export function toBlueprintSaveResult(row: { id: string | null; updated_at: string | null }) {
+export function toBlueprintSaveResult(row: {
+  id: string | null;
+  updated_at: string | null;
+}) {
   if (!row.id || !row.updated_at) {
     throw new Error("蓝图保存结果不完整。");
   }

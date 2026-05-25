@@ -14,7 +14,9 @@ import { createClient } from "@/lib/supabase/server";
 
 type ActionFailure = { error: LLMClientError };
 type SaveConfigResult = ActionFailure | { ok: true; message: string };
-type ProbeResult = ActionFailure | { ok: true; reachable: boolean; supportsModels: boolean; message: string };
+type ProbeResult =
+  | ActionFailure
+  | { ok: true; reachable: boolean; supportsModels: boolean; message: string };
 type FetchModelsResult =
   | ActionFailure
   | {
@@ -52,7 +54,10 @@ async function updateConnectionStatus(
   await supabase.from("llm_config").update(next).eq("id", configId);
 }
 
-async function resolveApiKey(supabase: Awaited<ReturnType<typeof createClient>>, typedKey: string) {
+async function resolveApiKey(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  typedKey: string,
+) {
   if (typedKey) return typedKey;
 
   const { data: existing } = await supabase
@@ -60,15 +65,22 @@ async function resolveApiKey(supabase: Awaited<ReturnType<typeof createClient>>,
     .select("api_key_encrypted")
     .maybeSingle();
   if (!existing?.api_key_encrypted) {
-    throw new LLMError(clientError("llm_api_key_invalid", "请先填写 API Key。"), 400);
+    throw new LLMError(
+      clientError("llm_api_key_invalid", "请先填写 API Key。"),
+      400,
+    );
   }
   try {
     return await decrypt(existing.api_key_encrypted);
   } catch {
     throw new LLMError(
-      clientError("llm_api_key_unreadable", LLM_SAVED_API_KEY_DECRYPT_FAILED_MESSAGE, {
-        action: "open_settings",
-      }),
+      clientError(
+        "llm_api_key_unreadable",
+        LLM_SAVED_API_KEY_DECRYPT_FAILED_MESSAGE,
+        {
+          action: "open_settings",
+        },
+      ),
       409,
     );
   }
@@ -83,7 +95,11 @@ function buildChatProbePayload(model: string) {
   };
 }
 
-async function fetchJsonWithTimeout(url: string, init: RequestInit, timeoutMs = 8000) {
+async function fetchJsonWithTimeout(
+  url: string,
+  init: RequestInit,
+  timeoutMs = 8000,
+) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
@@ -97,7 +113,11 @@ async function fetchJsonWithTimeout(url: string, init: RequestInit, timeoutMs = 
   }
 }
 
-async function probeEndpoint(opts: { baseUrl: string; apiKey: string; model?: string }) {
+async function probeEndpoint(opts: {
+  baseUrl: string;
+  apiKey: string;
+  model?: string;
+}) {
   const authHeaders = {
     Authorization: `Bearer ${opts.apiKey}`,
     Accept: "application/json",
@@ -126,14 +146,17 @@ async function probeEndpoint(opts: { baseUrl: string; apiKey: string; model?: st
         };
       }
 
-      const probeRes = await fetchJsonWithTimeout(`${normalizedBaseUrl}/chat/completions`, {
-        method: "POST",
-        headers: {
-          ...authHeaders,
-          "Content-Type": "application/json",
+      const probeRes = await fetchJsonWithTimeout(
+        `${normalizedBaseUrl}/chat/completions`,
+        {
+          method: "POST",
+          headers: {
+            ...authHeaders,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(buildChatProbePayload(opts.model)),
         },
-        body: JSON.stringify(buildChatProbePayload(opts.model)),
-      });
+      );
 
       if (probeRes.status === 401 || probeRes.status === 403) {
         throw new LLMError(
@@ -168,10 +191,14 @@ async function probeEndpoint(opts: { baseUrl: string; apiKey: string; model?: st
 
     if (!res.ok) {
       throw new LLMError(
-        clientError("llm_connection_failed", `服务端返回 ${res.status}，请稍后再试。`, {
-          retryable: res.status >= 500,
-          providerStatus: res.status,
-        }),
+        clientError(
+          "llm_connection_failed",
+          `服务端返回 ${res.status}，请稍后再试。`,
+          {
+            retryable: res.status >= 500,
+            providerStatus: res.status,
+          },
+        ),
         502,
       );
     }
@@ -181,9 +208,13 @@ async function probeEndpoint(opts: { baseUrl: string; apiKey: string; model?: st
       json = await res.json();
     } catch {
       throw new LLMError(
-        clientError("llm_provider_response_invalid", "返回内容不是合法 JSON。", {
-          retryable: false,
-        }),
+        clientError(
+          "llm_provider_response_invalid",
+          "返回内容不是合法 JSON。",
+          {
+            retryable: false,
+          },
+        ),
         502,
       );
     }
@@ -207,15 +238,21 @@ async function probeEndpoint(opts: { baseUrl: string; apiKey: string; model?: st
   } catch (error) {
     if (error instanceof LLMError) throw error;
     throw new LLMError(
-      clientError("llm_connection_failed", "无法连接到该接口，请检查 Base URL。", {
-        retryable: true,
-      }),
+      clientError(
+        "llm_connection_failed",
+        "无法连接到该接口，请检查 Base URL。",
+        {
+          retryable: true,
+        },
+      ),
       502,
     );
   }
 }
 
-export async function saveLLMConfig(formData: FormData): Promise<SaveConfigResult> {
+export async function saveLLMConfig(
+  formData: FormData,
+): Promise<SaveConfigResult> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -231,7 +268,11 @@ export async function saveLLMConfig(formData: FormData): Promise<SaveConfigResul
     .maybeSingle();
 
   if (existingError) {
-    return { error: clientError("internal_error", "读取现有配置失败，请稍后再试。", { retryable: true }) };
+    return {
+      error: clientError("internal_error", "读取现有配置失败，请稍后再试。", {
+        retryable: true,
+      }),
+    };
   }
 
   let parsed;
@@ -242,7 +283,10 @@ export async function saveLLMConfig(formData: FormData): Promise<SaveConfigResul
   } catch (error) {
     if (error instanceof ZodError) {
       return {
-        error: clientError("bad_request", error.issues[0]?.message ?? "配置填写不完整。"),
+        error: clientError(
+          "bad_request",
+          error.issues[0]?.message ?? "配置填写不完整。",
+        ),
       };
     }
     return { error: clientError("bad_request", "配置填写不完整。") };
@@ -250,7 +294,11 @@ export async function saveLLMConfig(formData: FormData): Promise<SaveConfigResul
 
   const compatibility = validateCompatibleBaseUrl(parsed.base_url);
   if (!compatibility.ok) {
-    return { error: clientError("llm_config_invalid", compatibility.message, { action: "open_settings" }) };
+    return {
+      error: clientError("llm_config_invalid", compatibility.message, {
+        action: "open_settings",
+      }),
+    };
   }
 
   const encryptedApiKey = parsed.api_key
@@ -302,13 +350,17 @@ export async function saveLLMConfig(formData: FormData): Promise<SaveConfigResul
 
   const { error } = await query;
   if (error) {
-    return { error: clientError("persistence_failed", "保存失败，请检查配置后重试。") };
+    return {
+      error: clientError("persistence_failed", "保存失败，请检查配置后重试。"),
+    };
   }
 
   return { ok: true, message: "LLM 配置已保存。" };
 }
 
-export async function testLLMConnection(formData: FormData): Promise<ProbeResult> {
+export async function testLLMConnection(
+  formData: FormData,
+): Promise<ProbeResult> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -324,19 +376,32 @@ export async function testLLMConnection(formData: FormData): Promise<ProbeResult
 
   const compatibility = validateCompatibleBaseUrl(baseUrl);
   if (!compatibility.ok) {
-    return { error: clientError("llm_config_invalid", compatibility.message, { action: "open_settings" }) };
+    return {
+      error: clientError("llm_config_invalid", compatibility.message, {
+        action: "open_settings",
+      }),
+    };
   }
 
   try {
     const apiKey = await resolveApiKey(supabase, typedKey);
-    const result = await probeEndpoint({ baseUrl, apiKey, model: model || undefined });
-    const { data: existing } = await supabase.from("llm_config").select("id").maybeSingle();
+    const result = await probeEndpoint({
+      baseUrl,
+      apiKey,
+      model: model || undefined,
+    });
+    const { data: existing } = await supabase
+      .from("llm_config")
+      .select("id")
+      .maybeSingle();
     if (existing?.id) {
       await updateConnectionStatus(existing.id, {
         last_connection_status: result.reachable ? "ok" : "error",
         last_connection_error: result.reachable ? null : result.message,
         last_validated_at: new Date().toISOString(),
-        last_connection_ok_at: result.reachable ? new Date().toISOString() : undefined,
+        last_connection_ok_at: result.reachable
+          ? new Date().toISOString()
+          : undefined,
       });
     }
     return {
@@ -346,8 +411,18 @@ export async function testLLMConnection(formData: FormData): Promise<ProbeResult
       message: result.message,
     };
   } catch (error) {
-    const client = error instanceof LLMError ? error.toClientError() : clientError("llm_connection_failed", "无法连接到该接口，请检查 Base URL。", { retryable: true });
-    const { data: existing } = await supabase.from("llm_config").select("id").maybeSingle();
+    const client =
+      error instanceof LLMError
+        ? error.toClientError()
+        : clientError(
+            "llm_connection_failed",
+            "无法连接到该接口，请检查 Base URL。",
+            { retryable: true },
+          );
+    const { data: existing } = await supabase
+      .from("llm_config")
+      .select("id")
+      .maybeSingle();
     if (existing?.id) {
       await updateConnectionStatus(existing.id, {
         last_connection_status: "error",
@@ -359,7 +434,9 @@ export async function testLLMConnection(formData: FormData): Promise<ProbeResult
   }
 }
 
-export async function fetchAvailableModels(formData: FormData): Promise<FetchModelsResult> {
+export async function fetchAvailableModels(
+  formData: FormData,
+): Promise<FetchModelsResult> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -379,19 +456,32 @@ export async function fetchAvailableModels(formData: FormData): Promise<FetchMod
 
   const compatibility = validateCompatibleBaseUrl(baseUrl);
   if (!compatibility.ok) {
-    return { error: clientError("llm_config_invalid", compatibility.message, { action: "open_settings" }) };
+    return {
+      error: clientError("llm_config_invalid", compatibility.message, {
+        action: "open_settings",
+      }),
+    };
   }
 
   try {
     const apiKey = await resolveApiKey(supabase, typedKey);
-    const result = await probeEndpoint({ baseUrl, apiKey, model: model || undefined });
-    const { data: existing } = await supabase.from("llm_config").select("id").maybeSingle();
+    const result = await probeEndpoint({
+      baseUrl,
+      apiKey,
+      model: model || undefined,
+    });
+    const { data: existing } = await supabase
+      .from("llm_config")
+      .select("id")
+      .maybeSingle();
     if (existing?.id) {
       await updateConnectionStatus(existing.id, {
         last_connection_status: result.reachable ? "ok" : "error",
         last_connection_error: result.reachable ? null : result.message,
         last_validated_at: new Date().toISOString(),
-        last_connection_ok_at: result.reachable ? new Date().toISOString() : undefined,
+        last_connection_ok_at: result.reachable
+          ? new Date().toISOString()
+          : undefined,
       });
     }
     if (!result.supportsModels || result.models.length === 0) {
@@ -414,9 +504,13 @@ export async function fetchAvailableModels(formData: FormData): Promise<FetchMod
     const client =
       error instanceof LLMError
         ? error.toClientError()
-        : clientError("llm_connection_failed", "无法连接到该接口，请检查 Base URL。", {
-            retryable: true,
-          });
+        : clientError(
+            "llm_connection_failed",
+            "无法连接到该接口，请检查 Base URL。",
+            {
+              retryable: true,
+            },
+          );
     return { error: client };
   }
 }

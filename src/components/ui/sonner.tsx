@@ -51,7 +51,8 @@ const Toaster = ({
         classNames: {
           toast:
             "group toast group-[.toaster]:bg-card group-[.toaster]:text-foreground group-[.toaster]:border-border group-[.toaster]:rounded-[3px] group-[.toaster]:shadow-panel group-[.toaster]:font-sans group-[.toaster]:text-[13px] group-[.toaster]:items-start group-[.toaster]:gap-3",
-          title: "group-[.toast]:font-sans group-[.toast]:text-[13px] group-[.toast]:leading-6",
+          title:
+            "group-[.toast]:font-sans group-[.toast]:text-[13px] group-[.toast]:leading-6",
           icon: "group-[.toast]:mt-0.5",
           description:
             "group-[.toast]:text-muted-foreground group-[.toast]:text-[12px] group-[.toast]:leading-6",

@@ -4,8 +4,16 @@ import { useMemo, useState } from "react";
 
 import { diffParagraphs, splitParagraphs } from "@/lib/diff/variant-diff";
 
-export function VariantDiffParagraphs({ left, right }: { left: string; right: string }) {
-  const [open, setOpen] = useState<{ side: "a" | "b"; index: number } | null>(null);
+export function VariantDiffParagraphs({
+  left,
+  right,
+}: {
+  left: string;
+  right: string;
+}) {
+  const [open, setOpen] = useState<{ side: "a" | "b"; index: number } | null>(
+    null,
+  );
   const data = useMemo(() => {
     const a = splitParagraphs(left);
     const b = splitParagraphs(right);
@@ -31,7 +39,9 @@ export function VariantDiffParagraphs({ left, right }: { left: string; right: st
       />
       {open ? (
         <Drawer
-          paragraph={open.side === "a" ? data.a[open.index] : data.b[open.index]}
+          paragraph={
+            open.side === "a" ? data.a[open.index] : data.b[open.index]
+          }
           onClose={() => setOpen(null)}
         />
       ) : null}
@@ -73,7 +83,9 @@ function Column({
             }`}
             onClick={() => onOpen(it.index)}
           >
-            <span className="mr-2 text-primary/70">#{String(it.index + 1).padStart(3, "0")}</span>
+            <span className="mr-2 text-primary/70">
+              #{String(it.index + 1).padStart(3, "0")}
+            </span>
             {it.paragraph.slice(0, 80)}
             {it.paragraph.length > 80 ? "…" : ""}
           </li>
@@ -83,7 +95,13 @@ function Column({
   );
 }
 
-function Drawer({ paragraph, onClose }: { paragraph: string; onClose: () => void }) {
+function Drawer({
+  paragraph,
+  onClose,
+}: {
+  paragraph: string;
+  onClose: () => void;
+}) {
   return (
     <div className="surface-panel fixed inset-y-0 right-0 z-30 w-[460px] overflow-auto bg-background p-5">
       <div className="flex items-center justify-between border-b border-dashed border-border/70 pb-3">

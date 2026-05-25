@@ -76,7 +76,10 @@ export default async function ComparePage({
       : { data: [] };
 
   const analyses = analysesResult.data ?? [];
-  const analysisMap = new Map<string, Partial<Record<AnalysisDimension, unknown>>>();
+  const analysisMap = new Map<
+    string,
+    Partial<Record<AnalysisDimension, unknown>>
+  >();
   for (const analysis of analyses) {
     const current = analysisMap.get(analysis.book_id) ?? {};
     current[analysis.dimension as AnalysisDimension] = analysis.result;

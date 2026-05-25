@@ -2,7 +2,14 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowDownAZ, ArrowUpDown, Clock, FileText, Sparkles, Trash2 } from "lucide-react";
+import {
+  ArrowDownAZ,
+  ArrowUpDown,
+  Clock,
+  FileText,
+  Sparkles,
+  Trash2,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import type { VariantRow } from "@/lib/types";
@@ -56,13 +63,18 @@ export function VariantList({ variants: initialVariants }: VariantListProps) {
       if (sortKey === "word_count") {
         return (b.word_count ?? 0) - (a.word_count ?? 0);
       }
-      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      return (
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
     });
     return sorted;
   }, [variants, query, sortKey]);
 
   const activeVariant = useMemo(
-    () => filtered.find((variant) => variant.id === activeId) ?? filtered[0] ?? variants[0],
+    () =>
+      filtered.find((variant) => variant.id === activeId) ??
+      filtered[0] ??
+      variants[0],
     [activeId, filtered, variants],
   );
 
@@ -88,7 +100,9 @@ export function VariantList({ variants: initialVariants }: VariantListProps) {
   const showToolbar = variants.length > TOOLBAR_THRESHOLD;
 
   return (
-    <section className={`space-y-5 ${pending ? "pointer-events-none opacity-60" : ""}`}>
+    <section
+      className={`space-y-5 ${pending ? "pointer-events-none opacity-60" : ""}`}
+    >
       <div>
         <p className="eyebrow-label">结果</p>
         <h2 className="mt-2 font-display text-[28px] italic leading-[1.05] text-foreground">
@@ -235,15 +249,23 @@ export function VariantList({ variants: initialVariants }: VariantListProps) {
                   ) : null}
                   <ReadingBadge
                     icon={FileText}
-                    label={OUTPUT_SCOPE_LABELS[activeVariant.config.output_scope]}
+                    label={
+                      OUTPUT_SCOPE_LABELS[activeVariant.config.output_scope]
+                    }
                   />
                   <ReadingBadge
                     icon={Sparkles}
                     label={STRATEGY_LABELS[activeVariant.config.strategy]}
                   />
-                  <ReadingBadge label={`innov ${activeVariant.config.innovation}`} />
-                  <ReadingBadge label={VIEWPOINT_LABELS[activeVariant.config.viewpoint]} />
-                  <ReadingBadge label={STYLE_LABELS[activeVariant.config.style]} />
+                  <ReadingBadge
+                    label={`innov ${activeVariant.config.innovation}`}
+                  />
+                  <ReadingBadge
+                    label={VIEWPOINT_LABELS[activeVariant.config.viewpoint]}
+                  />
+                  <ReadingBadge
+                    label={STYLE_LABELS[activeVariant.config.style]}
+                  />
                 </div>
               </div>
 
@@ -284,7 +306,8 @@ export function VariantList({ variants: initialVariants }: VariantListProps) {
                 <div>
                   <p className="data-label">额外要求</p>
                   <p className="mt-2 text-[13px] leading-7 text-muted-foreground">
-                    {activeVariant.config.extra_instructions.trim() || "默认要求"}
+                    {activeVariant.config.extra_instructions.trim() ||
+                      "默认要求"}
                   </p>
                 </div>
                 <div>

@@ -52,14 +52,24 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "未找到简报。" }, { status: 404 });
   }
 
-  const { guard } = await loadActiveSession(supabase, briefRow.session_id, user.id);
+  const { guard } = await loadActiveSession(
+    supabase,
+    briefRow.session_id,
+    user.id,
+  );
   if (!guard.ok) {
-    return NextResponse.json({ error: guard.message }, { status: guard.status });
+    return NextResponse.json(
+      { error: guard.message },
+      { status: guard.status },
+    );
   }
 
   const rateLimit = await assertWithinRateLimit(supabase, user.id);
   if (!rateLimit.ok) {
-    return NextResponse.json({ error: rateLimit.message }, { status: rateLimit.status });
+    return NextResponse.json(
+      { error: rateLimit.message },
+      { status: rateLimit.status },
+    );
   }
 
   const briefParsed = CreativeBriefSchema.safeParse({
@@ -70,7 +80,10 @@ export async function POST(req: Request) {
     retention_rules: briefRow.retention_rules,
   });
   if (!briefParsed.success) {
-    return NextResponse.json({ error: "简报格式异常，请编辑后重试。" }, { status: 409 });
+    return NextResponse.json(
+      { error: "简报格式异常，请编辑后重试。" },
+      { status: 409 },
+    );
   }
 
   const { data: bp } = await supabase
@@ -84,7 +97,10 @@ export async function POST(req: Request) {
     blueprint: bp,
   });
   if (!blueprintCheck.ok) {
-    return NextResponse.json({ error: blueprintCheck.message }, { status: blueprintCheck.status });
+    return NextResponse.json(
+      { error: blueprintCheck.message },
+      { status: blueprintCheck.status },
+    );
   }
   const confirmedBlueprint = bp!;
 
@@ -96,7 +112,9 @@ export async function POST(req: Request) {
   });
 
   return sseResponse(async (emit) => {
-    let result: Awaited<ReturnType<typeof streamLLMObject<typeof OutlineSchema>>>;
+    let result: Awaited<
+      ReturnType<typeof streamLLMObject<typeof OutlineSchema>>
+    >;
     try {
       result = await streamLLMObject({
         supabase,

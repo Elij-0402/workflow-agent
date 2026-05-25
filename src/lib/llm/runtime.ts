@@ -5,7 +5,11 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { z } from "zod";
 
 import { getUserLLMClient } from "@/lib/llm/dispatch";
-import { LLMError, type LLMClientError, asLLMClientError } from "@/lib/llm/errors";
+import {
+  LLMError,
+  type LLMClientError,
+  asLLMClientError,
+} from "@/lib/llm/errors";
 import { estimateUsageCostCNY, normalizeUsage } from "@/lib/llm/pricing";
 import { resolveStructuredObjectMode } from "@/lib/llm/structured-output";
 import type { Database } from "@/lib/types";
@@ -14,9 +18,10 @@ const DEFAULT_TIMEOUT_MS = 60_000;
 
 function stableStringify(value: unknown): string {
   if (value === null || typeof value !== "object") return JSON.stringify(value);
-  if (Array.isArray(value)) return `[${value.map((item) => stableStringify(item)).join(",")}]`;
-  const entries = Object.entries(value as Record<string, unknown>).sort(([a], [b]) =>
-    a.localeCompare(b),
+  if (Array.isArray(value))
+    return `[${value.map((item) => stableStringify(item)).join(",")}]`;
+  const entries = Object.entries(value as Record<string, unknown>).sort(
+    ([a], [b]) => a.localeCompare(b),
   );
   return `{${entries
     .map(([key, nested]) => `${JSON.stringify(key)}:${stableStringify(nested)}`)
@@ -75,7 +80,8 @@ async function updateConfigHealth(
       : {
           last_validated_at: new Date().toISOString(),
           last_connection_status: "error" as const,
-          last_connection_error: health.errorMessage?.slice(0, 240) ?? "未知错误",
+          last_connection_error:
+            health.errorMessage?.slice(0, 240) ?? "未知错误",
         };
 
   await supabase.from("llm_config").update(payload).eq("id", configId);
@@ -202,7 +208,10 @@ export async function runLLMObject<TSchema extends z.ZodTypeAny>({
       error_code: clientError.code,
     });
 
-    throw new LLMError(clientError, clientError.code === "llm_timeout" ? 504 : 502);
+    throw new LLMError(
+      clientError,
+      clientError.code === "llm_timeout" ? 504 : 502,
+    );
   }
 }
 
@@ -323,7 +332,10 @@ export async function streamLLMObject<TSchema extends z.ZodTypeAny>({
           error_code: clientError.code,
         });
 
-        throw new LLMError(clientError, clientError.code === "llm_timeout" ? 504 : 502);
+        throw new LLMError(
+          clientError,
+          clientError.code === "llm_timeout" ? 504 : 502,
+        );
       }
     },
   };

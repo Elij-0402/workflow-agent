@@ -19,9 +19,7 @@ export function PageHeader({
     <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
       <div className="min-w-0 max-w-3xl">
         <div className="flex flex-col gap-2">
-          {label ? (
-            <p className="eyebrow-label">{label}</p>
-          ) : null}
+          {label ? <p className="eyebrow-label">{label}</p> : null}
           <h1 className="text-balance text-[24px] font-semibold leading-tight text-foreground sm:text-[28px]">
             {title}
           </h1>

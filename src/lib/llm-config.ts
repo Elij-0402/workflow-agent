@@ -7,8 +7,10 @@ export const LLM_CONFIG_REQUIRED_MESSAGE = "请先在设置页完成兼容模型
 export const LLM_BASE_URL_FORMAT_MESSAGE = "Base URL 格式错误。";
 export const LLM_INCOMPATIBLE_BASE_URL_MESSAGE =
   "该 Base URL 不属于 OpenAI-compatible 接口，请改用兼容端点。";
-export const LLM_BASE_URL_NOT_ALLOWED_MESSAGE = "该 Base URL 不被允许，请使用 https 公网端点。";
-export const LLM_SAVED_API_KEY_DECRYPT_FAILED_MESSAGE = "已保存的 API Key 无法解密，请重新填写。";
+export const LLM_BASE_URL_NOT_ALLOWED_MESSAGE =
+  "该 Base URL 不被允许，请使用 https 公网端点。";
+export const LLM_SAVED_API_KEY_DECRYPT_FAILED_MESSAGE =
+  "已保存的 API Key 无法解密，请重新填写。";
 
 export const LLMConfigFormSchema = z.object({
   base_url: z.string().trim().url("Base URL 格式错误"),
@@ -49,7 +51,9 @@ export type LegacyPresetMigrationCandidate = {
   created_at: string;
 };
 
-export function selectLegacyPresetForMigration(presets: LegacyPresetMigrationCandidate[]) {
+export function selectLegacyPresetForMigration(
+  presets: LegacyPresetMigrationCandidate[],
+) {
   if (presets.length === 0) return null;
 
   return [...presets].sort((a, b) => {
@@ -64,7 +68,9 @@ export function parseLLMConfigFormData(
   formData: FormData,
   options?: { allowEmptyApiKey?: boolean },
 ) {
-  const schema = options?.allowEmptyApiKey ? LLMConfigUpdateFormSchema : LLMConfigFormSchema;
+  const schema = options?.allowEmptyApiKey
+    ? LLMConfigUpdateFormSchema
+    : LLMConfigFormSchema;
 
   return schema.parse({
     base_url: String(formData.get("base_url") ?? "").trim(),

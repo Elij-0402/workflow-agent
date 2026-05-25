@@ -27,7 +27,10 @@ test("deriveProjectOverview stays in import-health mode when one book is not rea
     sessionId: "session-1",
     books: [
       { chapter_count: 10, metadata: { ingest_status: "ready" } },
-      { chapter_count: null, metadata: { ingest_status: "failed_needs_attention" } },
+      {
+        chapter_count: null,
+        metadata: { ingest_status: "failed_needs_attention" },
+      },
     ],
     bookSynthesisByBook: [],
     blueprintStatus: "draft",

@@ -5,7 +5,11 @@ import { useRouter } from "next/navigation";
 import { Eye, EyeOff, Loader2, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 
-import { fetchAvailableModels, saveLLMConfig, testLLMConnection } from "./actions";
+import {
+  fetchAvailableModels,
+  saveLLMConfig,
+  testLLMConnection,
+} from "./actions";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,20 +31,37 @@ import { cn } from "@/lib/utils";
 type Status =
   | { kind: "unconfigured" }
   | { kind: "unverified"; updatedAt: string }
-  | { kind: "ok"; updatedAt: string; lastValidatedAt: string | null; lastConnectionOkAt: string | null }
-  | { kind: "error"; updatedAt: string; lastValidatedAt: string | null; detail: string };
+  | {
+      kind: "ok";
+      updatedAt: string;
+      lastValidatedAt: string | null;
+      lastConnectionOkAt: string | null;
+    }
+  | {
+      kind: "error";
+      updatedAt: string;
+      lastValidatedAt: string | null;
+      detail: string;
+    };
 
 type ProviderKey = "openai" | "deepseek" | "custom";
 
-const PROVIDER_OPTIONS: { key: ProviderKey; label: string; baseUrl: string }[] = [
-  { key: "openai", label: "OpenAI", baseUrl: "https://api.openai.com/v1" },
-  { key: "deepseek", label: "DeepSeek", baseUrl: "https://api.deepseek.com/v1" },
-  { key: "custom", label: "自定义", baseUrl: "" },
-];
+const PROVIDER_OPTIONS: { key: ProviderKey; label: string; baseUrl: string }[] =
+  [
+    { key: "openai", label: "OpenAI", baseUrl: "https://api.openai.com/v1" },
+    {
+      key: "deepseek",
+      label: "DeepSeek",
+      baseUrl: "https://api.deepseek.com/v1",
+    },
+    { key: "custom", label: "自定义", baseUrl: "" },
+  ];
 
 function detectProvider(baseUrl: string): ProviderKey {
   if (!baseUrl) return "openai";
-  const known = PROVIDER_OPTIONS.find((p) => p.baseUrl && p.baseUrl === baseUrl);
+  const known = PROVIDER_OPTIONS.find(
+    (p) => p.baseUrl && p.baseUrl === baseUrl,
+  );
   return known?.key ?? "custom";
 }
 
@@ -68,7 +89,8 @@ function showClientError(error: LLMClientError) {
         label: actionLabel,
         onClick: () => {
           if (error.action === "retry") window.location.reload();
-          if (error.action === "open_settings") window.location.href = "/settings";
+          if (error.action === "open_settings")
+            window.location.href = "/settings";
         },
       },
     });
@@ -94,7 +116,9 @@ export function SettingsForm({
   const [provider, setProvider] = useState<ProviderKey>(
     detectProvider(initialConfig?.base_url ?? ""),
   );
-  const [baseUrl, setBaseUrl] = useState(initialConfig?.base_url ?? "https://api.openai.com/v1");
+  const [baseUrl, setBaseUrl] = useState(
+    initialConfig?.base_url ?? "https://api.openai.com/v1",
+  );
   const [apiKey, setApiKey] = useState("");
   const [showKey, setShowKey] = useState(false);
   const [model, setModel] = useState(initialConfig?.model ?? "");
@@ -103,14 +127,19 @@ export function SettingsForm({
   );
   const [savedModelStale, setSavedModelStale] = useState(false);
   const [manualModel, setManualModel] = useState(true);
-  const [temperature, setTemperature] = useState(String(initialConfig?.temperature ?? 0.7));
-  const [maxTokens, setMaxTokens] = useState(String(initialConfig?.max_tokens ?? 4096));
+  const [temperature, setTemperature] = useState(
+    String(initialConfig?.temperature ?? 0.7),
+  );
+  const [maxTokens, setMaxTokens] = useState(
+    String(initialConfig?.max_tokens ?? 4096),
+  );
   const [connectionHint, setConnectionHint] = useState<string | null>(
     status.kind === "error" ? status.detail : null,
   );
 
   const hasSavedKey = Boolean(maskedApiKey);
-  const canFetch = baseUrl.trim().length > 0 && (apiKey.length > 0 || hasSavedKey);
+  const canFetch =
+    baseUrl.trim().length > 0 && (apiKey.length > 0 || hasSavedKey);
 
   const onProviderChange = (next: ProviderKey) => {
     setProvider(next);
@@ -196,7 +225,11 @@ export function SettingsForm({
         />
         <UsageSummary usageSummary={usageSummary} />
 
-        <form ref={formRef} onSubmit={onSubmit} className="mt-7 flex flex-col gap-6">
+        <form
+          ref={formRef}
+          onSubmit={onSubmit}
+          className="mt-7 flex flex-col gap-6"
+        >
           <div className="flex flex-col gap-2.5">
             <Label>提供商</Label>
             <div className="grid grid-cols-3 gap-2">
@@ -246,7 +279,9 @@ export function SettingsForm({
                 id="api_key"
                 name="api_key"
                 type={showKey ? "text" : "password"}
-                placeholder={maskedApiKey ? "留空表示沿用已保存的 Key" : "sk-..."}
+                placeholder={
+                  maskedApiKey ? "留空表示沿用已保存的 Key" : "sk-..."
+                }
                 className="h-10 pr-10"
                 value={apiKey}
                 onChange={(event) => setApiKey(event.target.value)}
@@ -260,7 +295,11 @@ export function SettingsForm({
                 aria-label={showKey ? "隐藏 API Key" : "显示 API Key"}
                 tabIndex={-1}
               >
-                {showKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                {showKey ? (
+                  <EyeOff className="h-4 w-4" />
+                ) : (
+                  <Eye className="h-4 w-4" />
+                )}
               </button>
             </div>
           </div>
@@ -295,7 +334,11 @@ export function SettingsForm({
                     name="model"
                     value={model}
                     onValueChange={setModel}
-                    disabled={savingConfig || fetchingModels || modelOptions.length === 0}
+                    disabled={
+                      savingConfig ||
+                      fetchingModels ||
+                      modelOptions.length === 0
+                    }
                   >
                     <SelectTrigger id="model" className="h-10">
                       <SelectValue
@@ -311,7 +354,9 @@ export function SettingsForm({
                     <SelectContent>
                       {modelOptions.map((id, index) => {
                         const isStaleSaved =
-                          savedModelStale && index === modelOptions.length - 1 && id === model;
+                          savedModelStale &&
+                          index === modelOptions.length - 1 &&
+                          id === model;
                         return (
                           <SelectItem key={id} value={id}>
                             {id}
@@ -346,7 +391,9 @@ export function SettingsForm({
             </div>
 
             {savedModelStale ? (
-              <p className="text-[12px] text-destructive">已保存的模型不在新列表中，请重新选择。</p>
+              <p className="text-[12px] text-destructive">
+                已保存的模型不在新列表中，请重新选择。
+              </p>
             ) : null}
             <p className="text-[12px] text-muted-foreground">
               默认建议直接手动输入模型名。模型列表探测只是辅助能力，不是保存前置条件。
@@ -418,13 +465,16 @@ export function SettingsForm({
                 )}
               </Button>
               <span className="text-[12px] text-muted-foreground">
-                {connectionHint ?? "保存只验证格式；测试连接才会验证接口是否真的可用。"}
+                {connectionHint ??
+                  "保存只验证格式；测试连接才会验证接口是否真的可用。"}
               </span>
             </div>
           </div>
 
           <div className="flex items-center justify-between gap-3 border-t border-border/60 pt-5">
-            <p className="text-[12px] text-muted-foreground">API Key 仅在服务端加密存储。</p>
+            <p className="text-[12px] text-muted-foreground">
+              API Key 仅在服务端加密存储。
+            </p>
             <Button type="submit" disabled={savingConfig || testingConnection}>
               {savingConfig ? (
                 <>
@@ -501,11 +551,15 @@ function UsageSummary({
       </div>
       <div>
         <p className="text-muted-foreground">近 7 天失败</p>
-        <p className="mt-1 text-[16px] text-foreground">{usageSummary.failures}</p>
+        <p className="mt-1 text-[16px] text-foreground">
+          {usageSummary.failures}
+        </p>
       </div>
       <div>
         <p className="text-muted-foreground">近 7 天成本</p>
-        <p className="mt-1 text-[16px] text-foreground">¥{usageSummary.estimatedCostCNY}</p>
+        <p className="mt-1 text-[16px] text-foreground">
+          ¥{usageSummary.estimatedCostCNY}
+        </p>
       </div>
     </div>
   );

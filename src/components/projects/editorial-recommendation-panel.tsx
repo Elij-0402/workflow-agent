@@ -15,11 +15,16 @@ export function EditorialRecommendationPanel({
 
         <ol className="space-y-4">
           {bullets.map((bullet, index) => (
-            <li key={bullet} className="flex gap-4 border-t border-border/60 pt-4 first:border-t-0 first:pt-0">
+            <li
+              key={bullet}
+              className="flex gap-4 border-t border-border/60 pt-4 first:border-t-0 first:pt-0"
+            >
               <span className="mt-0.5 font-mono text-[11px] tracking-[0.08em] text-primary">
                 {String(index + 1).padStart(2, "0")}
               </span>
-              <p className="text-[14px] leading-7 text-muted-foreground">{bullet}</p>
+              <p className="text-[14px] leading-7 text-muted-foreground">
+                {bullet}
+              </p>
             </li>
           ))}
         </ol>

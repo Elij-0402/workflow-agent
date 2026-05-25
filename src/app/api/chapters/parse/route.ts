@@ -42,12 +42,22 @@ export async function POST(req: Request) {
     .eq("user_id", user.id)
     .maybeSingle();
   if (!book?.cleaned_content) {
-    return NextResponse.json({ error: "当前书籍内容不可用。" }, { status: 404 });
+    return NextResponse.json(
+      { error: "当前书籍内容不可用。" },
+      { status: 404 },
+    );
   }
 
-  const { guard } = await loadActiveSessionByBookId(supabase, body.bookId, user.id);
+  const { guard } = await loadActiveSessionByBookId(
+    supabase,
+    body.bookId,
+    user.id,
+  );
   if (!guard.ok) {
-    return NextResponse.json({ error: guard.message }, { status: guard.status });
+    return NextResponse.json(
+      { error: guard.message },
+      { status: guard.status },
+    );
   }
 
   type ChapterRow = {
@@ -89,7 +99,10 @@ export async function POST(req: Request) {
     }
   } else {
     if (!body.chapters?.length) {
-      return NextResponse.json({ error: "手工模式需要 chapters 数组。" }, { status: 400 });
+      return NextResponse.json(
+        { error: "手工模式需要 chapters 数组。" },
+        { status: 400 },
+      );
     }
     chapters = body.chapters.map((c, i) => ({
       index: i + 1,
@@ -100,12 +113,14 @@ export async function POST(req: Request) {
     }));
   }
 
-  const { data: existingChapters } = await supabase
+  const { error: deleteErr } = await supabase
     .from("chapters")
-    .select("id")
+    .delete()
     .eq("book_id", body.bookId)
     .eq("user_id", user.id);
-  const existingIds = (existingChapters ?? []).map((row) => row.id);
+  if (deleteErr) {
+    return NextResponse.json({ error: "章节替换失败。" }, { status: 500 });
+  }
 
   const { error: insertErr } = await supabase.from("chapters").insert(
     chapters.map((c) => ({
@@ -120,17 +135,6 @@ export async function POST(req: Request) {
   );
   if (insertErr) {
     return NextResponse.json({ error: "章节写入失败。" }, { status: 500 });
-  }
-
-  if (existingIds.length > 0) {
-    const { error: deleteErr } = await supabase
-      .from("chapters")
-      .delete()
-      .in("id", existingIds)
-      .eq("user_id", user.id);
-    if (deleteErr) {
-      return NextResponse.json({ error: "章节替换失败。" }, { status: 500 });
-    }
   }
 
   await supabase

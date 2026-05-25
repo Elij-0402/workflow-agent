@@ -66,7 +66,12 @@ export function ProjectCard({
 
       <div className="relative z-10 flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <p className={cn("mono-label-sm", session.modeTone === "primary" && "text-primary")}>
+          <p
+            className={cn(
+              "mono-label-sm",
+              session.modeTone === "primary" && "text-primary",
+            )}
+          >
             {session.modeLabel}
           </p>
         </div>
@@ -76,7 +81,9 @@ export function ProjectCard({
               type="checkbox"
               checked={selected}
               onClick={(event) => event.stopPropagation()}
-              onChange={(event) => onSelectChange?.(session.id, event.target.checked)}
+              onChange={(event) =>
+                onSelectChange?.(session.id, event.target.checked)
+              }
               className="relative z-20 h-4 w-4 rounded border-border"
               aria-label={`选择 ${session.name}`}
             />

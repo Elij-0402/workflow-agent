@@ -16,14 +16,20 @@ type Book = {
 
 type ParsedBook = { book: Book; data: SuspenseGridResult };
 
-const KIND_LABEL: Record<SuspenseGridResult["threads"][number]["kind"], string> = {
+const KIND_LABEL: Record<
+  SuspenseGridResult["threads"][number]["kind"],
+  string
+> = {
   foreshadow: "伏笔",
   mystery: "谜团",
   deferred_promise: "延迟承诺",
   red_herring: "红鲱鱼",
 };
 
-const STROKE_DASH: Record<SuspenseGridResult["threads"][number]["kind"], string | undefined> = {
+const STROKE_DASH: Record<
+  SuspenseGridResult["threads"][number]["kind"],
+  string | undefined
+> = {
   foreshadow: "3 3",
   mystery: undefined,
   deferred_promise: "1 3",
@@ -44,7 +50,8 @@ function maxChapterOf(series: ParsedBook[]): number {
   for (const { data } of series) {
     for (const t of data.threads) {
       if (t.setup_chapter > m) m = t.setup_chapter;
-      if (t.payoff_chapter !== null && t.payoff_chapter > m) m = t.payoff_chapter;
+      if (t.payoff_chapter !== null && t.payoff_chapter > m)
+        m = t.payoff_chapter;
     }
   }
   return m;
@@ -52,7 +59,8 @@ function maxChapterOf(series: ParsedBook[]): number {
 
 export function SuspenseGridOverlay({ books }: { books: Book[] }) {
   const series = useMemo(() => parseSeries(books), [books]);
-  const { hoverChapter, anchorChapter, setHover, setAnchor, toggleAnchor } = useSyncContext();
+  const { hoverChapter, anchorChapter, setHover, setAnchor, toggleAnchor } =
+    useSyncContext();
   const ruler = hoverChapter ?? anchorChapter;
   const xMax = maxChapterOf(series);
 
@@ -69,12 +77,15 @@ export function SuspenseGridOverlay({ books }: { books: Book[] }) {
     data,
     laneCount: Math.max(data.threads.length, 1),
   }));
-  const bandHeights = bands.map((b) => bandTitleHeight + b.laneCount * threadRowHeight + 8);
+  const bandHeights = bands.map(
+    (b) => bandTitleHeight + b.laneCount * threadRowHeight + 8,
+  );
   const totalInner = bandHeights.reduce((a, b) => a + b, 0);
   const height = pad.top + totalInner + pad.bottom;
   const innerLeft = pad.left;
   const innerRight = width - pad.right;
-  const xOf = (idx: number) => innerLeft + (idx / xMax) * (innerRight - innerLeft);
+  const xOf = (idx: number) =>
+    innerLeft + (idx / xMax) * (innerRight - innerLeft);
 
   const handleMouseMove: React.MouseEventHandler<SVGSVGElement> = (e) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -131,7 +142,9 @@ export function SuspenseGridOverlay({ books }: { books: Book[] }) {
                   x={innerLeft}
                   y={bandTop + 4}
                   width={3}
-                  height={bandTitleHeight + threads.length * threadRowHeight - 2}
+                  height={
+                    bandTitleHeight + threads.length * threadRowHeight - 2
+                  }
                   fill={bookColor}
                 />
                 <text
@@ -155,10 +168,18 @@ export function SuspenseGridOverlay({ books }: { books: Book[] }) {
                   {threads.length} 线索 · {unresolvedSet.size} 未回收
                 </text>
                 {threads.map((t, ti) => {
-                  const y = bandTop + bandTitleHeight + ti * threadRowHeight + threadRowHeight / 2;
+                  const y =
+                    bandTop +
+                    bandTitleHeight +
+                    ti * threadRowHeight +
+                    threadRowHeight / 2;
                   const x1 = xOf(t.setup_chapter);
-                  const isUnresolved = t.payoff_chapter === null || unresolvedSet.has(t.id);
-                  const x2 = t.payoff_chapter !== null ? xOf(t.payoff_chapter) : innerRight;
+                  const isUnresolved =
+                    t.payoff_chapter === null || unresolvedSet.has(t.id);
+                  const x2 =
+                    t.payoff_chapter !== null
+                      ? xOf(t.payoff_chapter)
+                      : innerRight;
                   const radius = 3 + t.strength / 3;
                   return (
                     <g key={t.id}>
@@ -209,7 +230,8 @@ export function SuspenseGridOverlay({ books }: { books: Book[] }) {
               </g>
             );
 
-            cursorY = bandTop + bandTitleHeight + threads.length * threadRowHeight + 8;
+            cursorY =
+              bandTop + bandTitleHeight + threads.length * threadRowHeight + 8;
             return elements;
           })}
 
@@ -224,9 +246,13 @@ export function SuspenseGridOverlay({ books }: { books: Book[] }) {
                   ? "hsl(var(--primary))"
                   : "hsl(var(--muted-foreground))"
               }
-              strokeWidth={anchorChapter !== null && ruler === anchorChapter ? 1.2 : 1}
+              strokeWidth={
+                anchorChapter !== null && ruler === anchorChapter ? 1.2 : 1
+              }
               strokeDasharray={
-                anchorChapter !== null && ruler === anchorChapter ? undefined : "3 3"
+                anchorChapter !== null && ruler === anchorChapter
+                  ? undefined
+                  : "3 3"
               }
             />
           ) : null}

@@ -26,6 +26,8 @@ export function getSessionStatusAfterGenerateSuccess(): SessionStatus {
   return "done";
 }
 
-export function getSessionStatusAfterGenerateFailure(finalVariantCount: number): SessionStatus {
+export function getSessionStatusAfterGenerateFailure(
+  finalVariantCount: number,
+): SessionStatus {
   return finalVariantCount > 0 ? "done" : "analyzed";
 }

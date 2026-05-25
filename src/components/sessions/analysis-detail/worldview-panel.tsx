@@ -24,8 +24,15 @@ export function WorldviewPanel({ result }: { result: unknown }) {
     <div className="space-y-6 text-[13px] leading-7 text-muted-foreground">
       <div className="grid gap-3 md:grid-cols-2">
         <DetailBlock label="世界类型" value={data.type} />
-        <DetailBlock label="力量体系" value={data.power_system ?? "未明确提及"} />
-        <DetailBlock className="md:col-span-2" label="背景设定" value={data.setting} />
+        <DetailBlock
+          label="力量体系"
+          value={data.power_system ?? "未明确提及"}
+        />
+        <DetailBlock
+          className="md:col-span-2"
+          label="背景设定"
+          value={data.setting}
+        />
       </div>
 
       <Separator />

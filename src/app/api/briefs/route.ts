@@ -76,7 +76,10 @@ export async function POST(req: Request) {
 
   const { guard } = await loadActiveSession(supabase, body.sessionId, user.id);
   if (!guard.ok) {
-    return NextResponse.json({ error: guard.message }, { status: guard.status });
+    return NextResponse.json(
+      { error: guard.message },
+      { status: guard.status },
+    );
   }
 
   const { data, error } = await supabase

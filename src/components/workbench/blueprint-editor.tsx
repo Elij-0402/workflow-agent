@@ -97,7 +97,12 @@ export function BlueprintEditor({
         expectedUpdatedAt: bpUpdatedAt,
       }),
     });
-    const j = (await res.json()) as { ok?: true; id?: string; updated_at?: string; error?: string };
+    const j = (await res.json()) as {
+      ok?: true;
+      id?: string;
+      updated_at?: string;
+      error?: string;
+    };
     if (!res.ok || !j.ok || !j.id || !j.updated_at) {
       toast.error(j.error ?? "保存蓝图失败。");
       return;
@@ -158,7 +163,9 @@ export function BlueprintEditor({
     <div
       className={`${disabled ? "surface-locked" : "surface-panel"} flex min-h-0 flex-1 flex-col`}
     >
-      {disabled ? <LockBanner updatedAt={bpUpdatedAt} onUnlock={() => void unlock()} /> : null}
+      {disabled ? (
+        <LockBanner updatedAt={bpUpdatedAt} onUnlock={() => void unlock()} />
+      ) : null}
       <div className="flex items-center justify-between gap-3 border-b border-dashed border-border/60 px-4 py-2.5">
         <nav className="flex flex-wrap gap-0.5">
           {TABS.map((t) => (
@@ -203,7 +210,9 @@ export function BlueprintEditor({
           <ViewpointEditor
             bp={bp}
             disabled={disabled}
-            onSave={(patch) => void save({ ...bp, viewpoint: { ...bp.viewpoint, ...patch } })}
+            onSave={(patch) =>
+              void save({ ...bp, viewpoint: { ...bp.viewpoint, ...patch } })
+            }
           />
         ) : active === "characters" ? (
           <BlueprintCardList
@@ -291,7 +300,9 @@ export function BlueprintEditor({
                 onDelete={() =>
                   void save({
                     ...bp,
-                    relationships: bp.relationships.filter((r) => r.id !== row.id),
+                    relationships: bp.relationships.filter(
+                      (r) => r.id !== row.id,
+                    ),
                   })
                 }
               />
@@ -371,7 +382,9 @@ export function BlueprintEditor({
                 onChange={(patch) =>
                   void save({
                     ...bp,
-                    conflicts: bp.conflicts.map((r) => (r.id === row.id ? { ...r, ...patch } : r)),
+                    conflicts: bp.conflicts.map((r) =>
+                      r.id === row.id ? { ...r, ...patch } : r,
+                    ),
                   })
                 }
                 onDelete={() =>
@@ -428,7 +441,9 @@ export function BlueprintEditor({
                 onDelete={() =>
                   void save({
                     ...bp,
-                    plot_beats: renumberBeats(bp.plot_beats.filter((r) => r.id !== row.id)),
+                    plot_beats: renumberBeats(
+                      bp.plot_beats.filter((r) => r.id !== row.id),
+                    ),
                   })
                 }
               />
@@ -463,7 +478,9 @@ export function BlueprintEditor({
                 onChange={(patch) =>
                   void save({
                     ...bp,
-                    themes: bp.themes.map((r) => (r.id === row.id ? { ...r, ...patch } : r)),
+                    themes: bp.themes.map((r) =>
+                      r.id === row.id ? { ...r, ...patch } : r,
+                    ),
                   })
                 }
                 onDelete={() =>
@@ -535,7 +552,9 @@ function Field({
 }) {
   return (
     <label className="flex items-start gap-3">
-      <span className="w-24 shrink-0 pt-2 text-[12.5px] text-muted-foreground">{label}</span>
+      <span className="w-24 shrink-0 pt-2 text-[12.5px] text-muted-foreground">
+        {label}
+      </span>
       <input
         className="flex-1 rounded-[2px] border border-border bg-background/40 px-2 py-1.5 text-[13px] text-foreground focus:border-primary focus:outline-none"
         value={value}
@@ -550,7 +569,13 @@ function renumberBeats<T extends { order: number }>(beats: T[]): T[] {
   return beats.map((b, idx) => ({ ...b, order: idx + 1 }));
 }
 
-function LockBanner({ updatedAt, onUnlock }: { updatedAt: string | null; onUnlock: () => void }) {
+function LockBanner({
+  updatedAt,
+  onUnlock,
+}: {
+  updatedAt: string | null;
+  onUnlock: () => void;
+}) {
   const stamp = useMemo(() => {
     if (!updatedAt) return null;
     try {
@@ -569,11 +594,18 @@ function LockBanner({ updatedAt, onUnlock }: { updatedAt: string | null; onUnloc
         <Lock className="h-3.5 w-3.5 text-locked" aria-hidden />
         <span className="text-[12px] text-foreground/85">
           蓝图已锁定
-          {stamp ? <span className="ml-2 text-muted-foreground">· {stamp}</span> : null}
+          {stamp ? (
+            <span className="ml-2 text-muted-foreground">· {stamp}</span>
+          ) : null}
           <span className="ml-2 text-muted-foreground">· 编辑前请解锁</span>
         </span>
       </div>
-      <Button size="sm" variant="ghost" onClick={onUnlock} aria-label="解锁蓝图以继续编辑">
+      <Button
+        size="sm"
+        variant="ghost"
+        onClick={onUnlock}
+        aria-label="解锁蓝图以继续编辑"
+      >
         解锁
       </Button>
     </div>

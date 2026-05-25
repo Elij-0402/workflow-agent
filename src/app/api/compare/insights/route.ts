@@ -26,7 +26,10 @@ function jsonError(message: string, status: number) {
   return NextResponse.json({ error: message }, { status });
 }
 
-function summariseAnalysisForPrompt(dim: AnalysisDimension, result: unknown): unknown {
+function summariseAnalysisForPrompt(
+  dim: AnalysisDimension,
+  result: unknown,
+): unknown {
   if (!result || typeof result !== "object") return null;
   const r = result as Record<string, unknown>;
   switch (dim) {
@@ -48,12 +51,16 @@ function summariseAnalysisForPrompt(dim: AnalysisDimension, result: unknown): un
       return {
         character_count: Array.isArray(r.characters) ? r.characters.length : 0,
         roles: Array.isArray(r.characters)
-          ? (r.characters as Array<{ role?: string; name?: string }>).map((c) => ({
-              name: c.name,
-              role: c.role,
-            }))
+          ? (r.characters as Array<{ role?: string; name?: string }>).map(
+              (c) => ({
+                name: c.name,
+                role: c.role,
+              }),
+            )
           : [],
-        relationship_count: Array.isArray(r.relationships) ? r.relationships.length : 0,
+        relationship_count: Array.isArray(r.relationships)
+          ? r.relationships.length
+          : 0,
         summary: r.summary,
       };
     case "narrative":
@@ -64,7 +71,9 @@ function summariseAnalysisForPrompt(dim: AnalysisDimension, result: unknown): un
         themes: r.themes,
         conflicts: r.conflicts,
         turning_points: Array.isArray(r.turning_points)
-          ? (r.turning_points as Array<{ title?: string; impact?: number }>).map((t, i) => ({
+          ? (
+              r.turning_points as Array<{ title?: string; impact?: number }>
+            ).map((t, i) => ({
               index: i,
               title: t.title,
               impact: t.impact,
@@ -94,7 +103,9 @@ function summariseAnalysisForPrompt(dim: AnalysisDimension, result: unknown): un
       return {
         chapter_count: chapters.length,
         valence_mean:
-          valences.length === 0 ? 0 : valences.reduce((s, v) => s + v, 0) / valences.length,
+          valences.length === 0
+            ? 0
+            : valences.reduce((s, v) => s + v, 0) / valences.length,
         valence_min: valences.length === 0 ? 0 : Math.min(...valences),
         valence_max: valences.length === 0 ? 0 : Math.max(...valences),
         intensity_mean:
@@ -109,7 +120,12 @@ function summariseAnalysisForPrompt(dim: AnalysisDimension, result: unknown): un
       const chapters = Array.isArray(r.chapters)
         ? (r.chapters as Array<Record<string, unknown>>)
         : [];
-      const tally: Record<string, number> = { slow: 0, moderate: 0, fast: 0, burst: 0 };
+      const tally: Record<string, number> = {
+        slow: 0,
+        moderate: 0,
+        fast: 0,
+        burst: 0,
+      };
       for (const c of chapters) {
         const t = String(c.tempo);
         if (t in tally) tally[t] += 1;
@@ -161,7 +177,10 @@ export async function POST(req: Request) {
     return jsonError("请求参数不正确。", 400);
   }
 
-  const sessionIds = Array.from(new Set(body.sessionIds)).slice(0, MAX_SESSIONS);
+  const sessionIds = Array.from(new Set(body.sessionIds)).slice(
+    0,
+    MAX_SESSIONS,
+  );
 
   const [{ data: sessions }, { data: books }] = await Promise.all([
     supabase
@@ -172,7 +191,8 @@ export async function POST(req: Request) {
     supabase
       .from("books")
       .select("id, session_id, title, position")
-      .in("session_id", sessionIds),
+      .in("session_id", sessionIds)
+      .eq("user_id", user.id),
   ]);
 
   const safeSessions = sessions ?? [];
@@ -191,7 +211,8 @@ export async function POST(req: Request) {
   const { data: analyses } = await supabase
     .from("analyses")
     .select("book_id, dimension, result")
-    .in("book_id", bookIds);
+    .in("book_id", bookIds)
+    .eq("user_id", user.id);
 
   const sessionById = new Map(safeSessions.map((s) => [s.id, s]));
   const analysesByBook = new Map<string, Map<AnalysisDimension, unknown>>();

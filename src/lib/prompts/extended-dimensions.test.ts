@@ -10,7 +10,12 @@ import {
 
 test("ProseCraftResultSchema accepts valid shape", () => {
   const ok = ProseCraftResultSchema.safeParse({
-    sentence_length: { short_pct: 0.3, medium_pct: 0.5, long_pct: 0.2, average: 18 },
+    sentence_length: {
+      short_pct: 0.3,
+      medium_pct: 0.5,
+      long_pct: 0.2,
+      average: 18,
+    },
     rhetoric_density: {
       metaphor: 5,
       parallelism: 3,
@@ -39,7 +44,12 @@ test("ProseCraftResultSchema accepts valid shape", () => {
 
 test("ProseCraftResultSchema rejects out-of-range pct", () => {
   const bad = ProseCraftResultSchema.safeParse({
-    sentence_length: { short_pct: 1.5, medium_pct: 0.5, long_pct: 0.2, average: 18 },
+    sentence_length: {
+      short_pct: 1.5,
+      medium_pct: 0.5,
+      long_pct: 0.2,
+      average: 18,
+    },
     rhetoric_density: {
       metaphor: 5,
       parallelism: 3,

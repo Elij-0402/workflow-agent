@@ -19,12 +19,19 @@ test("getSessionName strips file extension", () => {
 });
 
 test("sanitizeStorageFilename converts unicode-heavy names into ascii-safe object names", () => {
-  assert.equal(sanitizeStorageFilename("《斗破苍穹》小说全集txt版.txt"), "txt.txt");
+  assert.equal(
+    sanitizeStorageFilename("《斗破苍穹》小说全集txt版.txt"),
+    "txt.txt",
+  );
 });
 
 test("validateUploadFile rejects invalid files", () => {
   assert.equal(
-    validateUploadFile({ name: "novel.pdf", size: 100, type: "application/pdf" }),
+    validateUploadFile({
+      name: "novel.pdf",
+      size: 100,
+      type: "application/pdf",
+    }),
     "当前仅支持上传 .txt 文本文件。",
   );
   assert.equal(

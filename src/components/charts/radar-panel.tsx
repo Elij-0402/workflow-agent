@@ -16,7 +16,11 @@ type RadarPanelProps = {
   height?: number;
 };
 
-export function RadarPanelChart({ data, max = 10, height = 240 }: RadarPanelProps) {
+export function RadarPanelChart({
+  data,
+  max = 10,
+  height = 240,
+}: RadarPanelProps) {
   return (
     <div style={{ width: "100%", height }}>
       <ResponsiveContainer>

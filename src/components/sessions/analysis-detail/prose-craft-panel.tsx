@@ -4,10 +4,16 @@ import dynamic from "next/dynamic";
 
 import { ProseCraftResultSchema } from "@/lib/types";
 
-import { DetailBlock, InvalidResultNotice, SectionTitle, Separator } from "./shared";
+import {
+  DetailBlock,
+  InvalidResultNotice,
+  SectionTitle,
+  Separator,
+} from "./shared";
 
 const RadarPanelChart = dynamic(
-  () => import("@/components/charts/radar-panel").then((m) => m.RadarPanelChart),
+  () =>
+    import("@/components/charts/radar-panel").then((m) => m.RadarPanelChart),
   { ssr: false, loading: () => <ChartSkeleton /> },
 );
 
@@ -45,7 +51,10 @@ export function ProseCraftPanel({ result }: { result: unknown }) {
   return (
     <div className="space-y-6 text-[13px] leading-7 text-muted-foreground">
       <div className="grid gap-3 md:grid-cols-3">
-        <DetailBlock label="avg sentence" value={`${data.sentence_length.average.toFixed(1)} 字`} />
+        <DetailBlock
+          label="avg sentence"
+          value={`${data.sentence_length.average.toFixed(1)} 字`}
+        />
         <DetailBlock
           label="short / med / long"
           value={`${pct(data.sentence_length.short_pct)} · ${pct(

@@ -14,7 +14,9 @@ export function normalizeUsage(usage: {
   completionTokens?: number;
   totalTokens?: number;
 }): LLMUsage {
-  const promptTokens = Number.isFinite(usage.promptTokens) ? Number(usage.promptTokens) : null;
+  const promptTokens = Number.isFinite(usage.promptTokens)
+    ? Number(usage.promptTokens)
+    : null;
   const completionTokens = Number.isFinite(usage.completionTokens)
     ? Number(usage.completionTokens)
     : null;
@@ -28,8 +30,11 @@ export function normalizeUsage(usage: {
 }
 
 export function estimateUsageCostCNY(usage: LLMUsage) {
-  if (usage.promptTokens === null && usage.completionTokens === null) return null;
-  const input = ((usage.promptTokens ?? 0) / 1000) * DEFAULT_PRICES_CNY_PER_1K.input;
-  const output = ((usage.completionTokens ?? 0) / 1000) * DEFAULT_PRICES_CNY_PER_1K.output;
+  if (usage.promptTokens === null && usage.completionTokens === null)
+    return null;
+  const input =
+    ((usage.promptTokens ?? 0) / 1000) * DEFAULT_PRICES_CNY_PER_1K.input;
+  const output =
+    ((usage.completionTokens ?? 0) / 1000) * DEFAULT_PRICES_CNY_PER_1K.output;
   return Math.round((input + output) * 10000) / 10000;
 }

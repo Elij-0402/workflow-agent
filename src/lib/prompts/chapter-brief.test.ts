@@ -24,7 +24,10 @@ test("buildChapterBriefUserPrompt wraps untrusted text and includes chapter titl
 
 test("buildChapterBriefUserPrompt truncates beyond CHAPTER_TEXT_CHAR_LIMIT", () => {
   const long = "字".repeat(15_000);
-  const prompt = buildChapterBriefUserPrompt({ chapterTitle: "X", chapterText: long });
+  const prompt = buildChapterBriefUserPrompt({
+    chapterTitle: "X",
+    chapterText: long,
+  });
   // truncated body + ~200 chars of wrapper/header
   assert.ok(prompt.length < CHAPTER_TEXT_CHAR_LIMIT + 500);
   assert.ok(!prompt.includes("字".repeat(CHAPTER_TEXT_CHAR_LIMIT + 1)));

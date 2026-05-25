@@ -36,13 +36,15 @@ export default async function StudioBriefPage({ params }: Props) {
     .maybeSingle();
   if (!row) notFound();
 
-  const initial: CreativeBrief = CreativeBriefSchema.parse({
+  const briefParsed = CreativeBriefSchema.safeParse({
     title: row.title,
     persona_directives: row.persona_directives,
     plot_directives: row.plot_directives,
     style_directives: row.style_directives,
     retention_rules: row.retention_rules,
   });
+  if (!briefParsed.success) notFound();
+  const initial: CreativeBrief = briefParsed.data;
 
   const [{ data: session }, { data: variants }] = await Promise.all([
     supabase
@@ -53,18 +55,28 @@ export default async function StudioBriefPage({ params }: Props) {
       .maybeSingle(),
     supabase
       .from("variants")
-      .select("id, title, scope, content, word_count, chapter_index, created_at")
+      .select(
+        "id, title, scope, content, word_count, chapter_index, created_at",
+      )
       .eq("brief_id", briefId)
       .eq("user_id", user.id)
       .order("created_at", { ascending: true }),
   ]);
 
-  const outlineRows = (variants ?? []).filter((variant) => variant.scope === "outline");
+  const outlineRows = (variants ?? []).filter(
+    (variant) => variant.scope === "outline",
+  );
   const outlineVariant = outlineRows[outlineRows.length - 1] ?? null;
   let initialOutline = null;
   if (outlineVariant?.content) {
-    const parsed = OutlineSchema.safeParse(JSON.parse(outlineVariant.content));
-    if (parsed.success) initialOutline = parsed.data;
+    try {
+      const parsed = OutlineSchema.safeParse(
+        JSON.parse(outlineVariant.content),
+      );
+      if (parsed.success) initialOutline = parsed.data;
+    } catch {
+      // corrupt outline content; fall back to no outline
+    }
   }
 
   const initialChapterVariants: ChapterVariantSummary[] = (variants ?? [])

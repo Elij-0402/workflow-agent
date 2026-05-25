@@ -13,7 +13,9 @@ export default function SessionsError({
     <div className="app-page">
       <div className="surface-panel max-w-xl p-6">
         <p className="eyebrow-label">加载失败</p>
-        <h1 className="mt-2 text-[20px] font-semibold text-foreground">项目列表暂时无法打开</h1>
+        <h1 className="mt-2 text-[20px] font-semibold text-foreground">
+          项目列表暂时无法打开
+        </h1>
         <p className="mt-3 text-[13px] leading-6 text-muted-foreground">
           {error.message || "请稍后重试。"}
         </p>

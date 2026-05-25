@@ -19,11 +19,20 @@ type ChapterRow = {
   introspection_pct: number;
 };
 
-export function PacingStackChart({ data, height = 240 }: { data: ChapterRow[]; height?: number }) {
+export function PacingStackChart({
+  data,
+  height = 240,
+}: {
+  data: ChapterRow[];
+  height?: number;
+}) {
   return (
     <div style={{ width: "100%", height }}>
       <ResponsiveContainer>
-        <BarChart data={data} margin={{ top: 8, right: 12, bottom: 8, left: 0 }}>
+        <BarChart
+          data={data}
+          margin={{ top: 8, right: 12, bottom: 8, left: 0 }}
+        >
           <CartesianGrid strokeDasharray="2 4" stroke="hsl(var(--border))" />
           <XAxis
             dataKey="index"
@@ -45,9 +54,24 @@ export function PacingStackChart({ data, height = 240 }: { data: ChapterRow[]; h
             }}
             formatter={(v) => `${Math.round(Number(v ?? 0) * 100)}%`}
           />
-          <Legend wrapperStyle={{ fontSize: 10, color: "hsl(var(--muted-foreground))" }} />
-          <Bar dataKey="action_pct" name="动作" stackId="a" fill="hsl(var(--primary))" />
-          <Bar dataKey="dialogue_pct" name="对话" stackId="a" fill="hsl(var(--flash))" />
+          <Legend
+            wrapperStyle={{
+              fontSize: 10,
+              color: "hsl(var(--muted-foreground))",
+            }}
+          />
+          <Bar
+            dataKey="action_pct"
+            name="动作"
+            stackId="a"
+            fill="hsl(var(--primary))"
+          />
+          <Bar
+            dataKey="dialogue_pct"
+            name="对话"
+            stackId="a"
+            fill="hsl(var(--flash))"
+          />
           <Bar
             dataKey="description_pct"
             name="描写"

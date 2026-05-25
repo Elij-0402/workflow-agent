@@ -1,6 +1,9 @@
 import type { CreativeBrief } from "@/lib/types/creative-brief";
 
-const STYLE_TONE_LABEL: Record<NonNullable<CreativeBrief["style_directives"]["tone"]>, string> = {
+const STYLE_TONE_LABEL: Record<
+  NonNullable<CreativeBrief["style_directives"]["tone"]>,
+  string
+> = {
   keep: "保留原作语调",
   lyrical: "抒情、富有诗意",
   plain: "平实、克制",
@@ -10,7 +13,10 @@ const STYLE_TONE_LABEL: Record<NonNullable<CreativeBrief["style_directives"]["to
   classical: "古典端庄",
 };
 
-const RHYTHM_LABEL: Record<NonNullable<CreativeBrief["style_directives"]["rhythm"]>, string> = {
+const RHYTHM_LABEL: Record<
+  NonNullable<CreativeBrief["style_directives"]["rhythm"]>,
+  string
+> = {
   keep: "保留原作节奏",
   slow: "放慢节奏，多铺陈",
   moderate: "正常推进",
@@ -46,13 +52,19 @@ const REGISTER_LABEL: Record<
   classical_chinese: "偏文言",
 };
 
-const STRICTNESS_LABEL: Record<CreativeBrief["retention_rules"][number]["strictness"], string> = {
+const STRICTNESS_LABEL: Record<
+  CreativeBrief["retention_rules"][number]["strictness"],
+  string
+> = {
   must_keep: "必须保留",
   prefer_keep: "尽量保留",
   flexible: "可调整",
 };
 
-const SECTION_LABEL: Record<CreativeBrief["retention_rules"][number]["section"], string> = {
+const SECTION_LABEL: Record<
+  CreativeBrief["retention_rules"][number]["section"],
+  string
+> = {
   characters: "人物",
   relationships: "关系",
   world_rules: "世界规则",
@@ -82,7 +94,9 @@ export function composeBriefIntoPrompt(brief: CreativeBrief): string {
 
   if (brief.plot_directives.length > 0) {
     const lines = brief.plot_directives.map((d, idx) => {
-      const target = d.target_beat_id ? `目标节点 ${d.target_beat_id}` : "（新节点）";
+      const target = d.target_beat_id
+        ? `目标节点 ${d.target_beat_id}`
+        : "（新节点）";
       const beat = d.new_beat
         ? `「${d.new_beat.title ?? "（无标题）"}」${d.new_beat.description ?? ""}`
         : "";

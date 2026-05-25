@@ -18,7 +18,8 @@ import { toastError } from "@/lib/error-toast";
 import { appBackgroundColor } from "@/lib/theme";
 
 function downloadFile(filename: string, content: string | Blob, mime: string) {
-  const blob = content instanceof Blob ? content : new Blob([content], { type: mime });
+  const blob =
+    content instanceof Blob ? content : new Blob([content], { type: mime });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
@@ -40,7 +41,11 @@ function dataUrlToBlob(dataUrl: string): Blob {
   return new Blob([arr], { type: mime });
 }
 
-export function ExportMenu({ snapshotRef }: { snapshotRef: RefObject<HTMLElement | null> }) {
+export function ExportMenu({
+  snapshotRef,
+}: {
+  snapshotRef: RefObject<HTMLElement | null>;
+}) {
   const [busy, setBusy] = useState(false);
   const { items, clear } = useClipboard();
 
@@ -99,7 +104,9 @@ export function ExportMenu({ snapshotRef }: { snapshotRef: RefObject<HTMLElement
         <DropdownMenuItem onClick={exportPng}>
           <div className="flex w-full items-center justify-between">
             <span>PNG 海报</span>
-            <span className="font-mono text-[10px] text-muted-foreground/60">当前视图</span>
+            <span className="font-mono text-[10px] text-muted-foreground/60">
+              当前视图
+            </span>
           </div>
         </DropdownMenuItem>
         <DropdownMenuItem onClick={exportMarkdown}>

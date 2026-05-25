@@ -11,12 +11,21 @@ import { asLLMClientError } from "@/lib/llm/errors";
 import { runLLMObject } from "@/lib/llm/runtime";
 import { assertWithinRateLimit } from "@/lib/rate-limit";
 import { getUserLLMClient } from "@/lib/llm/dispatch";
-import { ANALYSIS_TEXT_CHAR_LIMIT, ANALYSIS_DIMENSION_CONFIG } from "@/lib/prompts";
+import {
+  ANALYSIS_TEXT_CHAR_LIMIT,
+  ANALYSIS_DIMENSION_CONFIG,
+} from "@/lib/prompts";
 import { wrapUntrustedNovel } from "@/lib/prompts/safety";
 import { loadActiveSession } from "@/lib/sessions/guard";
 import { createClient } from "@/lib/supabase/server";
-import { getSessionStatusAfterAnalysis, shouldEnterAnalyzingStatus } from "@/lib/session-status";
-import { LEGACY_ANALYSIS_DIMENSIONS, type LegacyAnalysisDimension } from "@/lib/types";
+import {
+  getSessionStatusAfterAnalysis,
+  shouldEnterAnalyzingStatus,
+} from "@/lib/session-status";
+import {
+  LEGACY_ANALYSIS_DIMENSIONS,
+  type LegacyAnalysisDimension,
+} from "@/lib/types";
 
 export const runtime = "nodejs";
 export const maxDuration = 300;
@@ -24,7 +33,10 @@ export const maxDuration = 300;
 const requestSchema = z.object({
   sessionId: z.string().uuid(),
   dimension: z.enum(
-    LEGACY_ANALYSIS_DIMENSIONS as readonly [LegacyAnalysisDimension, ...LegacyAnalysisDimension[]],
+    LEGACY_ANALYSIS_DIMENSIONS as readonly [
+      LegacyAnalysisDimension,
+      ...LegacyAnalysisDimension[],
+    ],
   ),
 });
 
@@ -62,7 +74,11 @@ export async function POST(request: Request) {
     return jsonError("请求参数不正确。", 400);
   }
 
-  const { session, guard } = await loadActiveSession(supabase, parsedBody.sessionId, user.id);
+  const { session, guard } = await loadActiveSession(
+    supabase,
+    parsedBody.sessionId,
+    user.id,
+  );
   if (!guard.ok) {
     return jsonError(guard.message, guard.status);
   }
@@ -99,10 +115,14 @@ export async function POST(request: Request) {
   }
 
   const llm = await getUserLLMClient(supabase);
-  const providerCompatibility = getBookProviderCompatibility(book.metadata, llm.provider);
+  const providerCompatibility = getBookProviderCompatibility(
+    book.metadata,
+    llm.provider,
+  );
   if (providerCompatibility.status === "incompatible") {
     return jsonError(
-      providerCompatibility.reason ?? "当前模型不兼容该内容类型，请切换模型后再试。",
+      providerCompatibility.reason ??
+        "当前模型不兼容该内容类型，请切换模型后再试。",
       409,
     );
   }
@@ -242,7 +262,10 @@ export async function POST(request: Request) {
     });
     return NextResponse.json(
       { error: clientError },
-      { status: clientError.userMessage === ANALYSIS_GENERIC_FAILURE ? 500 : 409 },
+      {
+        status:
+          clientError.userMessage === ANALYSIS_GENERIC_FAILURE ? 500 : 409,
+      },
     );
   }
 }

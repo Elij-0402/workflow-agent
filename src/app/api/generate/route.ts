@@ -59,9 +59,15 @@ function parseAnalyses(
 ): GenerateAnalyses | null {
   const byDimension = new Map(rows.map((row) => [row.dimension, row.result]));
 
-  const worldview = WorldviewResultSchema.safeParse(byDimension.get("worldview"));
-  const characters = CharactersResultSchema.safeParse(byDimension.get("characters"));
-  const narrative = NarrativeResultSchema.safeParse(byDimension.get("narrative"));
+  const worldview = WorldviewResultSchema.safeParse(
+    byDimension.get("worldview"),
+  );
+  const characters = CharactersResultSchema.safeParse(
+    byDimension.get("characters"),
+  );
+  const narrative = NarrativeResultSchema.safeParse(
+    byDimension.get("narrative"),
+  );
 
   if (!worldview.success || !characters.success || !narrative.success) {
     return null;
@@ -91,7 +97,11 @@ export async function POST(request: Request) {
     return jsonError("请求参数不正确。", 400);
   }
 
-  const { session, guard } = await loadActiveSession(supabase, parsedBody.sessionId, user.id);
+  const { session, guard } = await loadActiveSession(
+    supabase,
+    parsedBody.sessionId,
+    user.id,
+  );
   if (!guard.ok) {
     return jsonError(guard.message, guard.status);
   }
@@ -151,7 +161,10 @@ export async function POST(request: Request) {
   }
 
   const parsedAnalyses = parseAnalyses(
-    (analyses ?? []) as Array<{ dimension: AnalysisDimension; result: unknown }>,
+    (analyses ?? []) as Array<{
+      dimension: AnalysisDimension;
+      result: unknown;
+    }>,
   );
 
   if (!parsedAnalyses) {

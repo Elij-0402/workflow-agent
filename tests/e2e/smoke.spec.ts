@@ -37,7 +37,9 @@ async function finishAnalyses(page: Page) {
     .eq("session_id", sessionId)
     .order("position", { ascending: true });
   if (!books || books.length !== 2) {
-    throw new Error(`Expected 2 books for ${sessionId}, got ${books?.length ?? 0}`);
+    throw new Error(
+      `Expected 2 books for ${sessionId}, got ${books?.length ?? 0}`,
+    );
   }
 
   for (const book of books) {
@@ -59,7 +61,10 @@ async function finishAnalyses(page: Page) {
         timeout: 180_000,
       });
       const payload = (await response.json()) as { ok?: true; error?: string };
-      expect(response.ok(), payload.error ?? "chapter analysis failed").toBeTruthy();
+      expect(
+        response.ok(),
+        payload.error ?? "chapter analysis failed",
+      ).toBeTruthy();
     }
 
     const synthResponse = await page.request.post("/api/analyze/book", {
@@ -186,10 +191,18 @@ test("smoke flow: login, configure, upload, analyze, and generate", async ({
   await configureLlm(page);
 
   await page.goto(dualUploadPath);
-  await page.locator('input[type="file"]').setInputFiles([uploadFileA, uploadFileB]);
-  await expect(page.getByText(path.basename(uploadFileA), { exact: false })).toBeVisible();
-  await expect(page.getByText(path.basename(uploadFileB), { exact: false })).toBeVisible();
-  await page.getByRole("button", { name: "创建并进入工作台", exact: true }).click();
+  await page
+    .locator('input[type="file"]')
+    .setInputFiles([uploadFileA, uploadFileB]);
+  await expect(
+    page.getByText(path.basename(uploadFileA), { exact: false }),
+  ).toBeVisible();
+  await expect(
+    page.getByText(path.basename(uploadFileB), { exact: false }),
+  ).toBeVisible();
+  await page
+    .getByRole("button", { name: "创建并进入工作台", exact: true })
+    .click();
 
   await expect(page).toHaveURL(/\/sessions\/[0-9a-f-]+$/, {
     timeout: 30_000,
@@ -232,10 +245,15 @@ test("smoke flow: login, configure, upload, analyze, and generate", async ({
   await expect(
     page.getByRole("heading", { name: "生成结果", exact: true }),
   ).toBeVisible({ timeout: 5 * 60 * 1000 });
-  await expect(page.getByRole("button", { name: "再生成一版", exact: true })).toBeVisible({
+  await expect(
+    page.getByRole("button", { name: "再生成一版", exact: true }),
+  ).toBeVisible({
     timeout: 5 * 60 * 1000,
   });
-  await page.getByRole("button", { name: "阅读全文 →", exact: true }).first().click();
+  await page
+    .getByRole("button", { name: "阅读全文 →", exact: true })
+    .first()
+    .click();
   await expect(page.locator("article.reading-prose")).toBeVisible({
     timeout: 30_000,
   });

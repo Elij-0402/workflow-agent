@@ -50,9 +50,14 @@ export function BriefCreateSheet({ sessions }: Props) {
           新建简报
         </Button>
       </SheetTrigger>
-      <SheetContent side="right" className="w-[400px] border-l border-border bg-background p-0">
+      <SheetContent
+        side="right"
+        className="w-[400px] border-l border-border bg-background p-0"
+      >
         <SheetHeader className="border-b border-border/70 px-5 py-4">
-          <SheetTitle className="font-display text-[20px] italic">选择目标项目</SheetTitle>
+          <SheetTitle className="font-display text-[20px] italic">
+            选择目标项目
+          </SheetTitle>
           <SheetDescription className="text-[12.5px] text-muted-foreground">
             简报会绑定到该项目，并在变体生成时注入。
           </SheetDescription>
@@ -95,7 +100,9 @@ export function BriefCreateSheet({ sessions }: Props) {
                       className="flex w-full items-center justify-between gap-3 px-5 py-3 text-left text-[13px] transition-colors hover:bg-accent/60"
                     >
                       <span className="truncate text-foreground">{s.name}</span>
-                      <span className="mono-label-xs">{s.mode === "dual" ? "dual" : "single"}</span>
+                      <span className="mono-label-xs">
+                        {s.mode === "dual" ? "dual" : "single"}
+                      </span>
                     </button>
                   </li>
                 ))

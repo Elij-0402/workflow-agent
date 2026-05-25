@@ -48,18 +48,25 @@ function getStatusBadge(status: ReturnType<typeof getBookIngestStatus>) {
 function pickTopMessages(metadata: BookIngestMetadata) {
   const issues = metadata.ingest_report?.issues ?? [];
   const errors = metadata.ingest_report?.errors ?? [];
-  const messages = [...errors.map((item) => item.message), ...issues.map((item) => item.message)];
+  const messages = [
+    ...errors.map((item) => item.message),
+    ...issues.map((item) => item.message),
+  ];
   return [...new Set(messages)].slice(0, 3);
 }
 
-function getGateStatusLabel(status: ReturnType<typeof getBookChapterGate>["status"]) {
+function getGateStatusLabel(
+  status: ReturnType<typeof getBookChapterGate>["status"],
+) {
   if (status === "pass") return "可直接分析";
   if (status === "retryable") return "可重试";
   if (status === "fallback_only") return "仅限分段分析";
   return "暂时阻断";
 }
 
-function getContentProfileLabel(profile?: BookIngestMetadata["content_profile"]) {
+function getContentProfileLabel(
+  profile?: BookIngestMetadata["content_profile"],
+) {
   if (profile === "noisy") return "噪声偏多";
   if (profile === "duplicated") return "重复偏多";
   if (profile === "adult") return "成人向";
@@ -67,7 +74,9 @@ function getContentProfileLabel(profile?: BookIngestMetadata["content_profile"])
   return "常规";
 }
 
-function getCompatibilityLabel(status: ReturnType<typeof getBookProviderCompatibility>["status"]) {
+function getCompatibilityLabel(
+  status: ReturnType<typeof getBookProviderCompatibility>["status"],
+) {
   if (status === "supported") return "可处理";
   if (status === "risky") return "存在风险";
   return "暂不兼容";
@@ -78,7 +87,9 @@ export function ImportHealthPanel({ books }: ImportHealthPanelProps) {
     <section className="surface-panel p-6">
       <div className="flex flex-col gap-2">
         <p className="eyebrow-label">导入体检</p>
-        <h2 className="text-[20px] font-semibold leading-tight text-foreground">文本准备状态</h2>
+        <h2 className="text-[20px] font-semibold leading-tight text-foreground">
+          文本准备状态
+        </h2>
         <p className="max-w-3xl text-[13px] leading-6 text-muted-foreground">
           每本参考小说都会保留原文，再逐步完成编码识别、正文清洗、章节整理与质量检查。
         </p>
@@ -96,11 +107,16 @@ export function ImportHealthPanel({ books }: ImportHealthPanelProps) {
           const contentTags = metadata.content_risk_tags ?? [];
 
           return (
-            <article key={book.id} className="surface-subtle grid gap-4 p-4 lg:grid-cols-[minmax(0,1fr)_360px]">
+            <article
+              key={book.id}
+              className="surface-subtle grid gap-4 p-4 lg:grid-cols-[minmax(0,1fr)_360px]"
+            >
               <div>
                 <div className="flex flex-wrap items-center gap-3">
                   <p className="font-semibold text-foreground">{book.title}</p>
-                  <span className={`rounded-full border px-2.5 py-1 text-[11px] ${badge.className}`}>
+                  <span
+                    className={`rounded-full border px-2.5 py-1 text-[11px] ${badge.className}`}
+                  >
                     {badge.label}
                   </span>
                 </div>
@@ -114,10 +130,19 @@ export function ImportHealthPanel({ books }: ImportHealthPanelProps) {
                       : "待生成"}
                   </p>
                   <p>清洗结果：{metadata.cleaned_content_mode ?? "待生成"}</p>
-                  <p>章节质量：{metadata.chapter_detection_quality ?? "待评估"}</p>
-                  <p>分析路线：{analysisMode === "block-fallback" ? "降级大块" : "标准逐章"}</p>
+                  <p>
+                    章节质量：{metadata.chapter_detection_quality ?? "待评估"}
+                  </p>
+                  <p>
+                    分析路线：
+                    {analysisMode === "block-fallback"
+                      ? "降级大块"
+                      : "标准逐章"}
+                  </p>
                   <p>章节门禁：{getGateStatusLabel(gate.status)}</p>
-                  <p>内容画像：{getContentProfileLabel(metadata.content_profile)}</p>
+                  <p>
+                    内容画像：{getContentProfileLabel(metadata.content_profile)}
+                  </p>
                   <p>模型兼容：{getCompatibilityLabel(compatibility.status)}</p>
                 </div>
                 {contentTags.length > 0 ? (

@@ -67,7 +67,12 @@ test("detectBriefConflicts flags must_keep + delete on same plot_beat", () => {
   const brief = buildBrief({
     plot: [{ id: "pl1", target_beat_id: "beat-3", action: "delete" }],
     retention: [
-      { id: "r1", section: "plot_beats", target_ids: ["beat-3"], strictness: "must_keep" },
+      {
+        id: "r1",
+        section: "plot_beats",
+        target_ids: ["beat-3"],
+        strictness: "must_keep",
+      },
     ],
   });
   const conflicts = detectBriefConflicts(brief);
@@ -77,8 +82,17 @@ test("detectBriefConflicts flags must_keep + delete on same plot_beat", () => {
 
 test("detectBriefConflicts flags must_keep character + remove", () => {
   const brief = buildBrief({
-    persona: [{ id: "p1", character_name: "李雷", change_type: "remove", fields: {} }],
-    retention: [{ id: "r1", section: "characters", target_ids: ["李雷"], strictness: "must_keep" }],
+    persona: [
+      { id: "p1", character_name: "李雷", change_type: "remove", fields: {} },
+    ],
+    retention: [
+      {
+        id: "r1",
+        section: "characters",
+        target_ids: ["李雷"],
+        strictness: "must_keep",
+      },
+    ],
   });
   const conflicts = detectBriefConflicts(brief);
   assert.equal(conflicts.length, 1);
@@ -89,7 +103,12 @@ test("detectBriefConflicts returns empty when no conflict", () => {
   const brief = buildBrief({
     plot: [{ id: "pl1", target_beat_id: "beat-3", action: "replace" }],
     retention: [
-      { id: "r1", section: "plot_beats", target_ids: ["beat-7"], strictness: "must_keep" },
+      {
+        id: "r1",
+        section: "plot_beats",
+        target_ids: ["beat-7"],
+        strictness: "must_keep",
+      },
     ],
   });
   assert.deepEqual(detectBriefConflicts(brief), []);

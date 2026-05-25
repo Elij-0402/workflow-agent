@@ -203,7 +203,8 @@ export async function finalizeNovelUpload(input: FinalizeNovelUploadInput) {
     session.status === "uploaded" &&
     existingBook &&
     session.mode === "single" &&
-    getBookIngestMetadata(existingBook.metadata).ingest_status !== "failed_needs_attention"
+    getBookIngestMetadata(existingBook.metadata).ingest_status !==
+      "failed_needs_attention"
   ) {
     return {
       ok: true as const,
@@ -317,7 +318,9 @@ export async function finalizeNovelUpload(input: FinalizeNovelUploadInput) {
       chapter_count: processResult.chapterCount,
       metadata: processResult.metadata,
       cleaned_content:
-        processResult.cleanedContentMode === "inline" ? processResult.cleanedContent : null,
+        processResult.cleanedContentMode === "inline"
+          ? processResult.cleanedContent
+          : null,
     })
     .eq("id", bookId)
     .eq("user_id", user.id);
@@ -326,7 +329,11 @@ export async function finalizeNovelUpload(input: FinalizeNovelUploadInput) {
     return { error: "原始文件已导入，但写入书籍内容失败。请稍后重试。" };
   }
 
-  await supabase.from("chapters").delete().eq("book_id", bookId).eq("user_id", user.id);
+  await supabase
+    .from("chapters")
+    .delete()
+    .eq("book_id", bookId)
+    .eq("user_id", user.id);
 
   const { error: chaptersInsertError } = await supabase.from("chapters").insert(
     processResult.chapters.map((chapter) => ({
@@ -386,7 +393,8 @@ export async function finalizeNovelUpload(input: FinalizeNovelUploadInput) {
 
     return {
       ok: true as const,
-      message: "原始文件已导入，但章节写入未完成。你可以先查看项目体检，再决定是否重试。",
+      message:
+        "原始文件已导入，但章节写入未完成。你可以先查看项目体检，再决定是否重试。",
       warnings: ["章节写入未完成，项目已保留原文。"],
       redirectTo: `/sessions/${session.id}`,
     };

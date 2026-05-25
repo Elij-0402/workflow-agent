@@ -2,7 +2,10 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { createClient } from "@/lib/supabase/server";
-import { deleteSessionStorageObjects } from "@/lib/sessions/storage-cleanup";
+import {
+  collectSessionStoragePaths,
+  removeStorageObjects,
+} from "@/lib/sessions/storage-cleanup";
 
 export const runtime = "nodejs";
 
@@ -26,7 +29,7 @@ export async function POST(req: Request) {
   }
 
   if (body.action === "delete") {
-    await deleteSessionStorageObjects(supabase, body.ids, user.id);
+    const paths = await collectSessionStoragePaths(supabase, body.ids, user.id);
     const { error } = await supabase
       .from("sessions")
       .delete()
@@ -35,10 +38,12 @@ export async function POST(req: Request) {
     if (error) {
       return NextResponse.json({ error: "批量删除失败。" }, { status: 500 });
     }
+    await removeStorageObjects(supabase, paths);
     return NextResponse.json({ ok: true, count: body.ids.length });
   }
 
-  const archived_at = body.action === "archive" ? new Date().toISOString() : null;
+  const archived_at =
+    body.action === "archive" ? new Date().toISOString() : null;
   const { error } = await supabase
     .from("sessions")
     .update({ archived_at })

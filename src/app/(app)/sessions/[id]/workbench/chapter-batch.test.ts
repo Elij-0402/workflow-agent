@@ -27,7 +27,8 @@ test("runBatch reports failures without throwing", async () => {
   const { failures } = await runBatch({
     chapterIds: ["a", "b"],
     onProgress: () => {},
-    analyze: async (id) => (id === "a" ? { ok: false, error: "boom" } : { ok: true }),
+    analyze: async (id) =>
+      id === "a" ? { ok: false, error: "boom" } : { ok: true },
   });
   assert.equal(failures.length, 1);
   assert.equal(failures[0].chapterId, "a");

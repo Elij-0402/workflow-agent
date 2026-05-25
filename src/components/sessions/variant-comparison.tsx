@@ -36,13 +36,19 @@ const TAB_STORAGE_KEY = "wb-diff-tab";
 
 export function VariantComparison({ variants, confirmedAt }: Props) {
   const [leftId, setLeftId] = useState(variants[0]?.id ?? "");
-  const [rightId, setRightId] = useState(variants[1]?.id ?? variants[0]?.id ?? "");
+  const [rightId, setRightId] = useState(
+    variants[1]?.id ?? variants[0]?.id ?? "",
+  );
   const [tab, setTab] = useState<DiffTab>("structure");
 
   useEffect(() => {
     try {
       const stored = localStorage.getItem(TAB_STORAGE_KEY);
-      if (stored === "meta" || stored === "structure" || stored === "paragraphs") {
+      if (
+        stored === "meta" ||
+        stored === "structure" ||
+        stored === "paragraphs"
+      ) {
         setTab(stored);
       }
     } catch {
@@ -80,7 +86,9 @@ export function VariantComparison({ variants, confirmedAt }: Props) {
   return (
     <section className="space-y-4">
       <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <h2 className="text-[18px] font-medium leading-tight text-foreground">结果对比</h2>
+        <h2 className="text-[18px] font-medium leading-tight text-foreground">
+          结果对比
+        </h2>
         <div className="flex flex-wrap items-center gap-2 text-[12px]">
           <Picker
             label="A"
@@ -169,7 +177,9 @@ function Picker({
 }) {
   return (
     <label className="flex items-center gap-2">
-      <span className="text-[11px] uppercase tracking-[0.10em] text-muted-foreground">{label}</span>
+      <span className="text-[11px] uppercase tracking-[0.10em] text-muted-foreground">
+        {label}
+      </span>
       <select
         className="h-8 rounded-[3px] border border-border bg-background/40 px-2 text-[12px] text-foreground transition-colors focus:border-primary focus:outline-none focus-visible:ring-1 focus-visible:ring-primary/40"
         style={{ transitionDuration: "var(--duration-fast)" }}

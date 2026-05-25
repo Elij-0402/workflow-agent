@@ -50,7 +50,8 @@ export const OUTPUT_SCOPE_CONFIG: Record<
 > = {
   outline: {
     maxTokens: 2048,
-    promptInstruction: "返回章节大纲，给出 5-10 个连续节点，每个节点 50-150 字。",
+    promptInstruction:
+      "返回章节大纲，给出 5-10 个连续节点，每个节点 50-150 字。",
     uiHint: "5-10 个节点，每节点 50-150 字",
   },
   "single-chapter": {

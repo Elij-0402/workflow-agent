@@ -18,11 +18,20 @@ type EmotionPoint = {
   dominant_emotion?: string;
 };
 
-export function EmotionArcChart({ data, height = 220 }: { data: EmotionPoint[]; height?: number }) {
+export function EmotionArcChart({
+  data,
+  height = 220,
+}: {
+  data: EmotionPoint[];
+  height?: number;
+}) {
   return (
     <div style={{ width: "100%", height }}>
       <ResponsiveContainer>
-        <ComposedChart data={data} margin={{ top: 8, right: 12, bottom: 8, left: 0 }}>
+        <ComposedChart
+          data={data}
+          margin={{ top: 8, right: 12, bottom: 8, left: 0 }}
+        >
           <CartesianGrid strokeDasharray="2 4" stroke="hsl(var(--border))" />
           <XAxis
             dataKey="index"

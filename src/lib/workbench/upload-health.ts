@@ -80,11 +80,15 @@ function buildChapterWarning(book: UploadBookLike) {
   const metadata = getBookIngestMetadata(book.metadata);
   const report = metadata.ingest_report;
   const chapterCount = book.chapter_count ?? 0;
-  const duplicateTitleRatio = report?.chapter_detection?.duplicate_title_ratio ?? 0;
-  const repeatedFragmentRatio = report?.chapter_detection?.repeated_fragment_ratio ?? 0;
+  const duplicateTitleRatio =
+    report?.chapter_detection?.duplicate_title_ratio ?? 0;
+  const repeatedFragmentRatio =
+    report?.chapter_detection?.repeated_fragment_ratio ?? 0;
   const shortChapterRatio = report?.chapter_detection?.short_chapter_ratio ?? 0;
   const avgCharsPerChapter =
-    book.word_count && chapterCount > 0 ? Math.round(book.word_count / chapterCount) : null;
+    book.word_count && chapterCount > 0
+      ? Math.round(book.word_count / chapterCount)
+      : null;
 
   if (duplicateTitleRatio >= 0.02) {
     return "检测到重复标题，后续可能自动改为分段分析";
@@ -94,7 +98,12 @@ function buildChapterWarning(book: UploadBookLike) {
     return "检测到重复片段，建议先抽查切章结果";
   }
 
-  if (chapterCount >= 1500 || (avgCharsPerChapter !== null && chapterCount >= 300 && avgCharsPerChapter <= 1800)) {
+  if (
+    chapterCount >= 1500 ||
+    (avgCharsPerChapter !== null &&
+      chapterCount >= 300 &&
+      avgCharsPerChapter <= 1800)
+  ) {
     return "章节数量偏多，建议抽查切章结果";
   }
 
@@ -110,7 +119,10 @@ function deriveTone(input: {
   compatibilityStatus: ProviderCompatibilityStatus;
   chapterWarning: string | null;
 }) {
-  if (input.gateStatus === "blocked" || input.compatibilityStatus === "incompatible") {
+  if (
+    input.gateStatus === "blocked" ||
+    input.compatibilityStatus === "incompatible"
+  ) {
     return "blocked" as const;
   }
   if (input.gateStatus === "fallback_only") {
@@ -126,7 +138,9 @@ function deriveTone(input: {
   return "normal" as const;
 }
 
-export function deriveUploadBookDisplay(book: UploadBookLike): UploadBookDisplay {
+export function deriveUploadBookDisplay(
+  book: UploadBookLike,
+): UploadBookDisplay {
   const analysisMode = getBookAnalysisMode(book.metadata);
   const gate = getBookChapterGate(book.metadata);
   const compatibility = getBookProviderCompatibility(book.metadata);
@@ -137,10 +151,12 @@ export function deriveUploadBookDisplay(book: UploadBookLike): UploadBookDisplay
     compatibilityStatus: compatibility.status,
     chapterWarning,
   });
-  const canAnalyze = gate.status !== "blocked" && compatibility.status !== "incompatible";
+  const canAnalyze =
+    gate.status !== "blocked" && compatibility.status !== "incompatible";
   const needsAttention = tone !== "normal";
 
-  const analysisMethodLabel = analysisMode === "block-fallback" ? "分段分析" : "标准逐章";
+  const analysisMethodLabel =
+    analysisMode === "block-fallback" ? "分段分析" : "标准逐章";
   const analysisMethodHint =
     analysisMode === "block-fallback"
       ? "章节结构不稳，将按较大文本片段进入分析"
@@ -154,7 +170,10 @@ export function deriveUploadBookDisplay(book: UploadBookLike): UploadBookDisplay
   } else if (gate.status === "fallback_only") {
     accessLabel = "将自动转为分段分析";
     accessHint = "系统会自动降级，降低切章错误的影响";
-  } else if (gate.status === "blocked" || compatibility.status === "incompatible") {
+  } else if (
+    gate.status === "blocked" ||
+    compatibility.status === "incompatible"
+  ) {
     accessLabel = "暂不可分析";
     accessHint = "需先处理文本问题，再继续后续流程";
   }
@@ -171,7 +190,11 @@ export function deriveUploadBookDisplay(book: UploadBookLike): UploadBookDisplay
   } else if (gate.status === "fallback_only") {
     healthHeadline = "章节结构不稳定，将自动改用分段分析";
     healthDetail = "这样能降低切章错误对后续分析的影响";
-  } else if (gate.status === "retryable" || compatibility.status === "risky" || chapterWarning) {
+  } else if (
+    gate.status === "retryable" ||
+    compatibility.status === "risky" ||
+    chapterWarning
+  ) {
     healthHeadline = chapterWarning ?? "检测到文本体检告警，建议先复查后分析";
     healthDetail =
       compatibility.status === "risky"
@@ -200,7 +223,9 @@ export function deriveUploadBookDisplay(book: UploadBookLike): UploadBookDisplay
   };
 }
 
-export function deriveUploadStepSummary(books: UploadBookLike[]): UploadStepSummary {
+export function deriveUploadStepSummary(
+  books: UploadBookLike[],
+): UploadStepSummary {
   if (books.length < 2) {
     return {
       description: "还需要补齐两本参考小说。",
@@ -214,7 +239,9 @@ export function deriveUploadStepSummary(books: UploadBookLike[]): UploadStepSumm
 
   const displays = books.map(deriveUploadBookDisplay);
   const blockedCount = displays.filter((item) => !item.canAnalyze).length;
-  const warningCount = displays.filter((item) => item.needsAttention && item.canAnalyze).length;
+  const warningCount = displays.filter(
+    (item) => item.needsAttention && item.canAnalyze,
+  ).length;
 
   if (blockedCount > 0) {
     return {

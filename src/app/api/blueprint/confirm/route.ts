@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { BlueprintSchema, blueprintReadyToConfirm } from "@/lib/blueprint/schema";
+import {
+  BlueprintSchema,
+  blueprintReadyToConfirm,
+} from "@/lib/blueprint/schema";
 import { createClient } from "@/lib/supabase/server";
 import { loadActiveSession } from "@/lib/sessions/guard";
 
@@ -25,7 +28,10 @@ export async function POST(req: Request) {
 
   const { guard } = await loadActiveSession(supabase, body.sessionId, user.id);
   if (!guard.ok) {
-    return NextResponse.json({ error: guard.message }, { status: guard.status });
+    return NextResponse.json(
+      { error: guard.message },
+      { status: guard.status },
+    );
   }
 
   const { data: bp } = await supabase
@@ -39,7 +45,10 @@ export async function POST(req: Request) {
   const parsed = BlueprintSchema.parse(bp.sections ?? {});
   const ready = blueprintReadyToConfirm(parsed);
   if (!ready.ok) {
-    return NextResponse.json({ error: `蓝图缺少：${ready.missing.join(", ")}` }, { status: 400 });
+    return NextResponse.json(
+      { error: `蓝图缺少：${ready.missing.join(", ")}` },
+      { status: 400 },
+    );
   }
 
   const { error } = await supabase

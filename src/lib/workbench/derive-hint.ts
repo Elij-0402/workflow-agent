@@ -1,6 +1,12 @@
 import type { BlueprintStatus } from "@/lib/blueprint/schema";
 
-export type WorkbenchStep = "import" | "chapter" | "synth" | "compare" | "confirm" | "generate";
+export type WorkbenchStep =
+  | "import"
+  | "chapter"
+  | "synth"
+  | "compare"
+  | "confirm"
+  | "generate";
 
 export type HintInput = {
   importedCount: number;

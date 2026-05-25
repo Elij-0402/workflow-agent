@@ -4,10 +4,18 @@ import dynamic from "next/dynamic";
 
 import { PacingMapResultSchema } from "@/lib/types";
 
-import { InvalidResultNotice, OverflowTable, SectionTitle, Separator } from "./shared";
+import {
+  InvalidResultNotice,
+  OverflowTable,
+  SectionTitle,
+  Separator,
+} from "./shared";
 
 const PacingStackChart = dynamic(
-  () => import("@/components/charts/pacing-stack-chart").then((m) => m.PacingStackChart),
+  () =>
+    import("@/components/charts/pacing-stack-chart").then(
+      (m) => m.PacingStackChart,
+    ),
   { ssr: false, loading: () => <ChartSkeleton /> },
 );
 
@@ -42,7 +50,10 @@ export function PacingMapPanel({ result }: { result: unknown }) {
         <SectionTitle title="节奏档位" token="tempo" />
         <OverflowTable
           headers={["章节", "档位"]}
-          rows={data.chapters.map((c) => [String(c.index), TEMPO_LABEL[c.tempo]])}
+          rows={data.chapters.map((c) => [
+            String(c.index),
+            TEMPO_LABEL[c.tempo],
+          ])}
         />
       </div>
 

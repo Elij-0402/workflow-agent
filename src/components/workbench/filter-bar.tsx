@@ -14,13 +14,12 @@ type Props = {
 
 export function FilterBar({ options, value, onChange }: Props) {
   const hasFilter =
-    value.characters.length + value.conflicts.length > 0 || value.themeKeyword.trim().length > 0;
+    value.characters.length + value.conflicts.length > 0 ||
+    value.themeKeyword.trim().length > 0;
 
   return (
     <div className="flex flex-wrap items-center gap-2 border-b border-dashed border-border/60 px-3 py-2 text-[12px]">
-      <span className="text-[12px] font-medium text-primary/85">
-        筛选：
-      </span>
+      <span className="text-[12px] font-medium text-primary/85">筛选：</span>
       <Multi
         label="人物"
         all={options.characters}
@@ -43,7 +42,9 @@ export function FilterBar({ options, value, onChange }: Props) {
         <button
           type="button"
           className="text-[12px] text-muted-foreground hover:text-primary"
-          onClick={() => onChange({ characters: [], conflicts: [], themeKeyword: "" })}
+          onClick={() =>
+            onChange({ characters: [], conflicts: [], themeKeyword: "" })
+          }
         >
           清空筛选
         </button>
@@ -76,13 +77,9 @@ function Multi({
         {selected.length > 0 ? `（${selected.length}）` : ""}
       </summary>
       <div className="absolute z-10 mt-1 max-h-60 w-52 overflow-auto rounded-[3px] border border-border bg-popover p-2 shadow-panel">
-        <p className="mb-2 text-[12px] font-medium text-primary/80">
-          {label}
-        </p>
+        <p className="mb-2 text-[12px] font-medium text-primary/80">{label}</p>
         {all.length === 0 ? (
-          <p className="text-[12px] text-muted-foreground">
-            暂无可选项
-          </p>
+          <p className="text-[12px] text-muted-foreground">暂无可选项</p>
         ) : null}
         {all.map((opt) => {
           const checked = selected.includes(opt);
@@ -97,7 +94,9 @@ function Multi({
                 className="accent-primary"
                 onChange={(e) =>
                   onChange(
-                    e.target.checked ? [...selected, opt] : selected.filter((s) => s !== opt),
+                    e.target.checked
+                      ? [...selected, opt]
+                      : selected.filter((s) => s !== opt),
                   )
                 }
               />

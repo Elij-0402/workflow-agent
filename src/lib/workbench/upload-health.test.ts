@@ -140,17 +140,26 @@ test("deriveUploadStepSummary returns description and action by overall state", 
         analysis_mode: "chaptered",
         content_profile: "noisy",
         ingest_report: {
-          chapter_gate: { status: "blocked", reasons: ["需要先处理文本问题。"] },
+          chapter_gate: {
+            status: "blocked",
+            reasons: ["需要先处理文本问题。"],
+          },
         },
         provider_compatibility: { default: { status: "supported" } },
       },
     },
   ]);
 
-  assert.equal(warningSummary.description, "两本参考小说已上传，1 本需留意体检告警");
+  assert.equal(
+    warningSummary.description,
+    "两本参考小说已上传，1 本需留意体检告警",
+  );
   assert.equal(warningSummary.actionLabel, "继续分析");
   assert.equal(warningSummary.canEnterAnalysis, true);
-  assert.equal(blockedSummary.description, "参考小说已上传，但需先处理文本问题");
+  assert.equal(
+    blockedSummary.description,
+    "参考小说已上传，但需先处理文本问题",
+  );
   assert.equal(blockedSummary.actionLabel, "查看体检问题");
   assert.equal(blockedSummary.canEnterAnalysis, false);
 });

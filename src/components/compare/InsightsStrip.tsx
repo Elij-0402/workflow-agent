@@ -69,7 +69,11 @@ export function InsightsStrip({ sessionIds }: { sessionIds: string[] }) {
         <div className="flex items-baseline gap-3">
           <p className="eyebrow-label">ai insights</p>
           <p className="font-mono text-[10px] uppercase tracking-[0.10em] text-muted-foreground/60">
-            {insights ? `${insights.length} insights` : canRequest ? "click ⚡ to generate" : "≥ 2 sessions required"}
+            {insights
+              ? `${insights.length} insights`
+              : canRequest
+                ? "click ⚡ to generate"
+                : "≥ 2 sessions required"}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -108,14 +112,17 @@ export function InsightsStrip({ sessionIds }: { sessionIds: string[] }) {
             <article
               key={i}
               className="surface-panel relative flex flex-col overflow-hidden px-3 py-3"
-              style={{ borderLeft: `3px solid ${SEVERITY_COLOR[ins.severity]}` }}
+              style={{
+                borderLeft: `3px solid ${SEVERITY_COLOR[ins.severity]}`,
+              }}
             >
               <div className="flex items-center justify-between pb-1">
                 <span
                   className="font-mono text-[10px] uppercase tracking-[0.10em]"
                   style={{ color: SEVERITY_COLOR[ins.severity] }}
                 >
-                  {SEVERITY_LABEL[ins.severity]} · {DIMENSION_LABELS[ins.dimension]}
+                  {SEVERITY_LABEL[ins.severity]} ·{" "}
+                  {DIMENSION_LABELS[ins.dimension]}
                 </span>
                 <button
                   type="button"
@@ -135,12 +142,16 @@ export function InsightsStrip({ sessionIds }: { sessionIds: string[] }) {
               <h4 className="font-display text-[15px] italic leading-tight text-foreground">
                 {ins.title}
               </h4>
-              <p className="mt-1.5 text-[12.5px] leading-6 text-muted-foreground">{ins.body}</p>
+              <p className="mt-1.5 text-[12.5px] leading-6 text-muted-foreground">
+                {ins.body}
+              </p>
             </article>
           ))}
         </div>
       ) : insights && insights.length === 0 ? (
-        <p className="text-[12.5px] text-muted-foreground">未产出 insight。请确认所选项目至少有 2 个维度已分析。</p>
+        <p className="text-[12.5px] text-muted-foreground">
+          未产出 insight。请确认所选项目至少有 2 个维度已分析。
+        </p>
       ) : null}
     </section>
   );

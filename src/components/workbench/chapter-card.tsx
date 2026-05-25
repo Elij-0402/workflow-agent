@@ -52,7 +52,10 @@ export function ChapterCard({
     for (const c of brief.blueprint_candidates) {
       map.set(c.section, (map.get(c.section) ?? 0) + 1);
     }
-    return Array.from(map.entries()).map(([section, count]) => ({ section, count }));
+    return Array.from(map.entries()).map(([section, count]) => ({
+      section,
+      count,
+    }));
   }, [brief]);
 
   const titleRow = (
@@ -62,14 +65,24 @@ export function ChapterCard({
       </span>
       <span
         className={`font-mono text-[11px] ${
-          done ? "text-flash" : busy ? "animate-pulse text-primary" : "text-muted-foreground/60"
+          done
+            ? "text-flash"
+            : busy
+              ? "animate-pulse text-primary"
+              : "text-muted-foreground/60"
         }`}
         aria-hidden
       >
         {busy ? "◐" : done ? "●" : "○"}
       </span>
       <span className="sr-only">
-        {busy ? "进行中" : done ? "已完成" : status === "error" ? "失败" : "未开始"}
+        {busy
+          ? "进行中"
+          : done
+            ? "已完成"
+            : status === "error"
+              ? "失败"
+              : "未开始"}
       </span>
       <span className="truncate text-foreground">{chapter.title}</span>
     </>
@@ -90,7 +103,9 @@ export function ChapterCard({
             {titleRow}
           </button>
         ) : (
-          <div className="flex min-w-0 flex-1 items-center gap-2.5">{titleRow}</div>
+          <div className="flex min-w-0 flex-1 items-center gap-2.5">
+            {titleRow}
+          </div>
         )}
         <div className="flex shrink-0 items-center gap-1">
           {hasBrief ? (
@@ -152,7 +167,9 @@ export function ChapterCard({
                   <div className="text-[12px] font-medium text-primary/80">
                     {getCandidateSectionLabel(cand.section)}
                   </div>
-                  <div className="mt-0.5 truncate text-foreground">{cand.title}</div>
+                  <div className="mt-0.5 truncate text-foreground">
+                    {cand.title}
+                  </div>
                 </div>
                 {blueprintLocked ? (
                   <span

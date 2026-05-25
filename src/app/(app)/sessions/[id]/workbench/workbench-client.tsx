@@ -154,7 +154,12 @@ export function WorkbenchClient(props: Props) {
   const b = props.books[1] ?? null;
   const bookModes = useMemo(
     () =>
-      new Map(props.books.map((book) => [book.id, getBookAnalysisMode(book.metadata)])),
+      new Map(
+        props.books.map((book) => [
+          book.id,
+          getBookAnalysisMode(book.metadata),
+        ]),
+      ),
     [props.books],
   );
   const bookGates = useMemo(
@@ -201,9 +206,13 @@ export function WorkbenchClient(props: Props) {
         const total = props.chapters.filter(
           (chapter) => chapter.book_id === book.id,
         ).length;
-        const expectedDimension = bookModes.get(book.id) === "block-fallback" ? "block_brief" : "chapter_brief";
+        const expectedDimension =
+          bookModes.get(book.id) === "block-fallback"
+            ? "block_brief"
+            : "chapter_brief";
         const analyzed = props.briefs.filter(
-          (brief) => brief.book_id === book.id && brief.dimension === expectedDimension,
+          (brief) =>
+            brief.book_id === book.id && brief.dimension === expectedDimension,
         ).length;
         return { bookId: book.id, total, analyzed };
       }),
@@ -229,13 +238,14 @@ export function WorkbenchClient(props: Props) {
   const compareDone = blueprintStatus === "confirmed";
   const hasVariants = props.variants.length > 0;
 
-  const recommendedStep: FlowStep = !hasBothBooks || !uploadSummary.canEnterAnalysis
-    ? "upload"
-    : !analysisDone
-      ? "analysis"
-      : !compareDone
-        ? "compare"
-        : "generate";
+  const recommendedStep: FlowStep =
+    !hasBothBooks || !uploadSummary.canEnterAnalysis
+      ? "upload"
+      : !analysisDone
+        ? "analysis"
+        : !compareDone
+          ? "compare"
+          : "generate";
 
   const [activeStep, setActiveStep] = useState<FlowStep>(() =>
     resolveStep(props.initialStep, recommendedStep, {
@@ -540,9 +550,7 @@ export function WorkbenchClient(props: Props) {
     )
       return;
     setActiveStep(step);
-    router.replace(
-      `/sessions/${props.session.id}/workbench?step=${step}`,
-    );
+    router.replace(`/sessions/${props.session.id}/workbench?step=${step}`);
   }
 
   const analysisGrid = (
@@ -557,7 +565,9 @@ export function WorkbenchClient(props: Props) {
           briefs={props.briefs.filter((brief) => brief.book_id === a.id)}
           analysisMode={bookModes.get(a.id) ?? "chaptered"}
           gateStatus={bookGates.get(a.id)?.gate.status ?? "pass"}
-          compatibilityStatus={bookGates.get(a.id)?.compatibility.status ?? "supported"}
+          compatibilityStatus={
+            bookGates.get(a.id)?.compatibility.status ?? "supported"
+          }
           chapterStatus={chapterStatus}
           synthesisDone={synthesisSet.has(a.id)}
           blueprintLocked={blueprintStatus === "confirmed"}
@@ -590,7 +600,9 @@ export function WorkbenchClient(props: Props) {
           briefs={props.briefs.filter((brief) => brief.book_id === b.id)}
           analysisMode={bookModes.get(b.id) ?? "chaptered"}
           gateStatus={bookGates.get(b.id)?.gate.status ?? "pass"}
-          compatibilityStatus={bookGates.get(b.id)?.compatibility.status ?? "supported"}
+          compatibilityStatus={
+            bookGates.get(b.id)?.compatibility.status ?? "supported"
+          }
           chapterStatus={chapterStatus}
           synthesisDone={synthesisSet.has(b.id)}
           blueprintLocked={blueprintStatus === "confirmed"}
@@ -668,7 +680,9 @@ export function WorkbenchClient(props: Props) {
             </p>
             {uploadSummary.hasBlocked ? (
               <Button asChild variant="outline">
-                <Link href={`/sessions/${props.session.id}`}>{uploadSummary.actionLabel}</Link>
+                <Link href={`/sessions/${props.session.id}`}>
+                  {uploadSummary.actionLabel}
+                </Link>
               </Button>
             ) : (
               <Button
@@ -947,7 +961,9 @@ function getStageItems({
     {
       key: "upload",
       label: "上传",
-      description: hasBothBooks ? uploadDescription : "还需要补齐两本参考小说。",
+      description: hasBothBooks
+        ? uploadDescription
+        : "还需要补齐两本参考小说。",
       state: hasBothBooks ? "done" : "current",
     },
     {
@@ -1051,7 +1067,9 @@ function AnalysisCapabilityPanel({
 
       <div className="mt-4 grid gap-4 lg:grid-cols-2">
         <div className="rounded-[4px] border border-border/70 bg-background/40 p-4">
-          <p className="text-[13px] font-medium text-foreground">双书互动流程</p>
+          <p className="text-[13px] font-medium text-foreground">
+            双书互动流程
+          </p>
           <div className="mt-3 space-y-3">
             <StageLine index="01" text={guide.processStages[0]} />
             <StageLine index="02" text={guide.processStages[1]} />
@@ -1061,7 +1079,9 @@ function AnalysisCapabilityPanel({
           </p>
         </div>
         <div className="rounded-[4px] border border-border/70 bg-background/40 p-4">
-          <p className="text-[13px] font-medium text-foreground">结果可信度说明</p>
+          <p className="text-[13px] font-medium text-foreground">
+            结果可信度说明
+          </p>
           <ul className="mt-3 space-y-2 text-[12px] leading-6 text-muted-foreground">
             {guide.trustNotes.map((item) => (
               <li key={item}>• {item}</li>
@@ -1075,7 +1095,9 @@ function AnalysisCapabilityPanel({
 
       {expanded ? (
         <div className="mt-4 rounded-[4px] border border-border/70 bg-background/40 p-4">
-          <p className="text-[13px] font-medium text-foreground">推荐人工复核场景</p>
+          <p className="text-[13px] font-medium text-foreground">
+            推荐人工复核场景
+          </p>
           <div className="mt-3 flex flex-wrap gap-2">
             {guide.reviewScenarios.map((item) => (
               <span
@@ -1123,7 +1145,9 @@ function InfoListCard({
           <li key={item}>• {item}</li>
         ))}
       </ul>
-      <p className="mt-3 text-[12px] leading-6 text-muted-foreground">{footer}</p>
+      <p className="mt-3 text-[12px] leading-6 text-muted-foreground">
+        {footer}
+      </p>
     </div>
   );
 }
@@ -1165,7 +1189,9 @@ function UploadBookCard({
             {`${bookLabel} · ${book.title}`}
           </h3>
         </div>
-        <span className="font-mono text-[24px] text-primary/50">{serialLabel}</span>
+        <span className="font-mono text-[24px] text-primary/50">
+          {serialLabel}
+        </span>
       </div>
       <div className="grid gap-3 sm:grid-cols-2">
         <Stat
@@ -1181,7 +1207,9 @@ function UploadBookCard({
           label="分析方式"
           value={display.analysisMethodLabel}
           note={display.analysisMethodHint}
-          tone={display.analysisMode === "block-fallback" ? "fallback" : "normal"}
+          tone={
+            display.analysisMode === "block-fallback" ? "fallback" : "normal"
+          }
         />
         <Stat
           label="分析准入"
@@ -1250,7 +1278,9 @@ function Stat({
         {value}
       </p>
       {note ? (
-        <p className="mt-1 text-[12px] leading-5 text-muted-foreground">{note}</p>
+        <p className="mt-1 text-[12px] leading-5 text-muted-foreground">
+          {note}
+        </p>
       ) : null}
     </div>
   );

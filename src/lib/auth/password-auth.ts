@@ -11,7 +11,9 @@ export const PasswordAuthFormSchema = z.object({
 
 export type PasswordAuthForm = z.infer<typeof PasswordAuthFormSchema>;
 
-export function parsePasswordAuthFormData(formData: FormData): PasswordAuthForm {
+export function parsePasswordAuthFormData(
+  formData: FormData,
+): PasswordAuthForm {
   return PasswordAuthFormSchema.parse({
     mode: String(formData.get("mode") ?? "login"),
     email: String(formData.get("email") ?? "").trim(),

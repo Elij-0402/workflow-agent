@@ -13,7 +13,10 @@ import {
   GENERATE_FROM_BLUEPRINT_SCHEMA_VERSION,
   buildGenerateFromBlueprintUserPrompt,
 } from "@/lib/prompts/generate-from-blueprint";
-import { GENERATE_TITLE_FALLBACK, scopeToMaxTokens } from "@/lib/prompts/generate";
+import {
+  GENERATE_TITLE_FALLBACK,
+  scopeToMaxTokens,
+} from "@/lib/prompts/generate";
 import { createClient } from "@/lib/supabase/server";
 import { countWords } from "@/lib/text/clean";
 import { GenerateConfigSchema, VariantResultSchema } from "@/lib/types";
@@ -55,15 +58,29 @@ export async function POST(req: Request) {
 
   const { guard } = await loadActiveSession(supabase, bp.session_id, user.id);
   if (!guard.ok) {
-    return NextResponse.json({ error: guard.message }, { status: guard.status });
+    return NextResponse.json(
+      { error: guard.message },
+      { status: guard.status },
+    );
   }
 
   const rateLimit = await assertWithinRateLimit(supabase, user.id);
   if (!rateLimit.ok) {
-    return NextResponse.json({ error: rateLimit.message }, { status: rateLimit.status });
+    return NextResponse.json(
+      { error: rateLimit.message },
+      { status: rateLimit.status },
+    );
   }
 
-  const blueprint = BlueprintSchema.parse(bp.sections ?? emptyBlueprint());
+  let blueprint: ReturnType<typeof BlueprintSchema.parse>;
+  try {
+    blueprint = BlueprintSchema.parse(bp.sections ?? emptyBlueprint());
+  } catch {
+    return NextResponse.json(
+      { error: "蓝图格式异常，请重新确认蓝图。" },
+      { status: 409 },
+    );
+  }
 
   let briefSection = "";
   if (body.briefId) {
@@ -79,7 +96,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "未找到简报。" }, { status: 404 });
     }
     if (briefRow.session_id !== bp.session_id) {
-      return NextResponse.json({ error: "简报和蓝图不属于同一项目。" }, { status: 409 });
+      return NextResponse.json(
+        { error: "简报和蓝图不属于同一项目。" },
+        { status: 409 },
+      );
     }
     const briefParsed = CreativeBriefSchema.safeParse({
       title: briefRow.title,
@@ -99,7 +119,9 @@ export async function POST(req: Request) {
       blueprint,
       config: body.config,
     });
-    const finalPrompt = briefSection ? `${userPrompt}\n\n${briefSection}` : userPrompt;
+    const finalPrompt = briefSection
+      ? `${userPrompt}\n\n${briefSection}`
+      : userPrompt;
     const result = await runLLMObject({
       supabase,
       route: "/api/generate-v2",
@@ -164,7 +186,10 @@ export async function POST(req: Request) {
     });
     return NextResponse.json(
       { error: clientError },
-      { status: clientError.userMessage === "生成失败，请稍后重试。" ? 502 : 409 },
+      {
+        status:
+          clientError.userMessage === "生成失败，请稍后重试。" ? 502 : 409,
+      },
     );
   }
 }

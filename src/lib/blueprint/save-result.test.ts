@@ -5,7 +5,10 @@ import { toBlueprintSaveResult } from "./save-result";
 
 test("toBlueprintSaveResult returns id and updated_at for blueprint responses", () => {
   assert.deepEqual(
-    toBlueprintSaveResult({ id: "bp-1", updated_at: "2026-05-23T12:00:00.000Z" }),
+    toBlueprintSaveResult({
+      id: "bp-1",
+      updated_at: "2026-05-23T12:00:00.000Z",
+    }),
     {
       ok: true,
       id: "bp-1",

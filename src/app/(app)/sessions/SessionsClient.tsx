@@ -26,7 +26,13 @@ type SessionsClientProps = {
 };
 
 type ConfirmState = null | {
-  kind: "single-delete" | "single-archive" | "single-restore" | "bulk-delete" | "bulk-archive" | "bulk-restore";
+  kind:
+    | "single-delete"
+    | "single-archive"
+    | "single-restore"
+    | "bulk-delete"
+    | "bulk-archive"
+    | "bulk-restore";
   ids: string[];
   action: "archive" | "restore" | "delete";
 };
@@ -43,9 +49,28 @@ export function SessionsClient({
   const grouped = groupSessionsByMode(sessions);
   const selectionMode = selectedIds.length > 0;
 
-  const runBulk = async (ids: string[], action: "archive" | "restore" | "delete") => {
+  const runBulk = async (
+    ids: string[],
+    action: "archive" | "restore" | "delete",
+  ) => {
     if (action === "delete" && view === "archived") {
-      await Promise.all(ids.map((id) => fetch(`/api/sessions/${id}?hard=true`, { method: "DELETE" })));
+      const responses = await Promise.all(
+        ids.map((id) =>
+          fetch(`/api/sessions/${id}?hard=true`, { method: "DELETE" }).catch(
+            () => null,
+          ),
+        ),
+      );
+      const failed = responses.filter((r) => !r || !r.ok).length;
+      if (failed > 0) {
+        return {
+          ok: false,
+          error:
+            failed === ids.length
+              ? "永久删除失败。"
+              : `${ids.length - failed}/${ids.length} 项已删除，其余失败。`,
+        };
+      }
       return { ok: true };
     }
     const res = await fetch("/api/sessions/bulk", {
@@ -98,24 +123,37 @@ export function SessionsClient({
 
   const toggleSelected = (id: string, checked: boolean) => {
     setSelectedIds((current) =>
-      checked ? Array.from(new Set([...current, id])) : current.filter((item) => item !== id),
+      checked
+        ? Array.from(new Set([...current, id]))
+        : current.filter((item) => item !== id),
     );
   };
 
   return (
     <>
-      <div className={cn("grid gap-4 xl:grid-cols-[1.55fr_.85fr]", pending && "pointer-events-none opacity-60")}>
+      <div
+        className={cn(
+          "grid gap-4 xl:grid-cols-[1.55fr_.85fr]",
+          pending && "pointer-events-none opacity-60",
+        )}
+      >
         <div className="space-y-8">
           {selectionMode ? (
             <div className="surface-panel flex flex-wrap items-center gap-3 p-4">
-              <p className="text-[13px] text-foreground">已选择 {selectedIds.length} 个项目</p>
+              <p className="text-[13px] text-foreground">
+                已选择 {selectedIds.length} 个项目
+              </p>
               {view === "active" ? (
                 <Button
                   type="button"
                   size="sm"
                   variant="outline"
                   onClick={() =>
-                    setConfirm({ kind: "bulk-archive", action: "archive", ids: selectedIds })
+                    setConfirm({
+                      kind: "bulk-archive",
+                      action: "archive",
+                      ids: selectedIds,
+                    })
                   }
                 >
                   批量归档
@@ -126,7 +164,11 @@ export function SessionsClient({
                   size="sm"
                   variant="outline"
                   onClick={() =>
-                    setConfirm({ kind: "bulk-restore", action: "restore", ids: selectedIds })
+                    setConfirm({
+                      kind: "bulk-restore",
+                      action: "restore",
+                      ids: selectedIds,
+                    })
                   }
                 >
                   批量恢复
@@ -137,12 +179,21 @@ export function SessionsClient({
                 size="sm"
                 variant="destructive"
                 onClick={() =>
-                  setConfirm({ kind: "bulk-delete", action: "delete", ids: selectedIds })
+                  setConfirm({
+                    kind: "bulk-delete",
+                    action: "delete",
+                    ids: selectedIds,
+                  })
                 }
               >
                 {view === "archived" ? "批量永久删除" : "批量删除"}
               </Button>
-              <Button type="button" size="sm" variant="ghost" onClick={() => setSelectedIds([])}>
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                onClick={() => setSelectedIds([])}
+              >
                 取消选择
               </Button>
             </div>
@@ -263,7 +314,9 @@ function SessionSection({
   return (
     <section className="space-y-4">
       <div className="flex flex-col gap-1.5">
-        <p className={cn("eyebrow-label", subdued && "text-muted-foreground/80")}>
+        <p
+          className={cn("eyebrow-label", subdued && "text-muted-foreground/80")}
+        >
           {subdued ? "兼容流程" : "主路线"}
         </p>
         <h2 className="text-[18px] font-semibold leading-tight text-foreground">
@@ -385,7 +438,12 @@ function ConfirmDialog({
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
         <DialogFooter>
-          <Button type="button" variant="outline" onClick={onCancel} disabled={pending}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onCancel}
+            disabled={pending}
+          >
             取消
           </Button>
           <Button

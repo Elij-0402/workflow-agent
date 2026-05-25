@@ -31,7 +31,10 @@ export async function PATCH(req: Request) {
 
   const { guard } = await loadActiveSession(supabase, body.sessionId, user.id);
   if (!guard.ok) {
-    return NextResponse.json({ error: guard.message }, { status: guard.status });
+    return NextResponse.json(
+      { error: guard.message },
+      { status: guard.status },
+    );
   }
 
   const { data: existing } = await supabase
@@ -41,17 +44,26 @@ export async function PATCH(req: Request) {
     .eq("user_id", user.id)
     .maybeSingle();
 
-  if (existing && body.expectedUpdatedAt && existing.updated_at !== body.expectedUpdatedAt) {
+  if (
+    existing &&
+    body.expectedUpdatedAt &&
+    existing.updated_at !== body.expectedUpdatedAt
+  ) {
     return NextResponse.json(
       { error: "蓝图已在其他窗口被更新，请刷新后再编辑。" },
       { status: 409 },
     );
   }
   if (existing?.status === "confirmed") {
-    return NextResponse.json({ error: "蓝图已锁定，请先解锁。" }, { status: 409 });
+    return NextResponse.json(
+      { error: "蓝图已锁定，请先解锁。" },
+      { status: 409 },
+    );
   }
 
-  const current = existing ? BlueprintSchema.parse(existing.sections ?? {}) : emptyBlueprint();
+  const current = existing
+    ? BlueprintSchema.parse(existing.sections ?? {})
+    : emptyBlueprint();
   let next;
   try {
     next = mergeSections(current, body.patch as never);

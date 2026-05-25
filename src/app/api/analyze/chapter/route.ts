@@ -44,14 +44,26 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "请求参数不正确。" }, { status: 400 });
   }
 
-  const { guard } = await loadActiveSessionByBookId(supabase, body.bookId, user.id);
+  const { guard } = await loadActiveSessionByBookId(
+    supabase,
+    body.bookId,
+    user.id,
+  );
   if (!guard.ok) {
-    return NextResponse.json({ error: guard.message }, { status: guard.status });
+    return NextResponse.json(
+      { error: guard.message },
+      { status: guard.status },
+    );
   }
 
-  const rateLimit = await assertWithinRateLimit(supabase, user.id);
+  const rateLimit = await assertWithinRateLimit(supabase, user.id, {
+    maxRequests: 120,
+  });
   if (!rateLimit.ok) {
-    return NextResponse.json({ error: rateLimit.message }, { status: rateLimit.status });
+    return NextResponse.json(
+      { error: rateLimit.message },
+      { status: rateLimit.status },
+    );
   }
 
   const [{ data: chapter }, { data: book }] = await Promise.all([
@@ -73,7 +85,10 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "未找到章节。" }, { status: 404 });
   }
   if (!book) {
-    return NextResponse.json({ error: "当前书籍内容不可用。" }, { status: 404 });
+    return NextResponse.json(
+      { error: "当前书籍内容不可用。" },
+      { status: 404 },
+    );
   }
 
   const blockingReason = getBookAnalysisBlockingReason(book.metadata);
@@ -82,22 +97,36 @@ export async function POST(req: Request) {
   }
 
   const llm = await getUserLLMClient(supabase);
-  const providerCompatibility = getBookProviderCompatibility(book.metadata, llm.provider);
+  const providerCompatibility = getBookProviderCompatibility(
+    book.metadata,
+    llm.provider,
+  );
   if (providerCompatibility.status === "incompatible") {
     return NextResponse.json(
-      { error: providerCompatibility.reason ?? "当前模型不兼容该内容类型，请切换模型后再试。" },
+      {
+        error:
+          providerCompatibility.reason ??
+          "当前模型不兼容该内容类型，请切换模型后再试。",
+      },
       { status: 409 },
     );
   }
 
   const cleanedContent = await resolveBookAnalysisView(supabase, book);
   if (!cleanedContent) {
-    return NextResponse.json({ error: "当前书籍内容不可用。" }, { status: 404 });
+    return NextResponse.json(
+      { error: "当前书籍内容不可用。" },
+      { status: 404 },
+    );
   }
 
-  const chapterText = cleanedContent.slice(chapter.start_char, chapter.end_char);
+  const chapterText = cleanedContent.slice(
+    chapter.start_char,
+    chapter.end_char,
+  );
   const analysisMode = getBookAnalysisMode(book.metadata);
-  const dimension = analysisMode === "block-fallback" ? "block_brief" : "chapter_brief";
+  const dimension =
+    analysisMode === "block-fallback" ? "block_brief" : "chapter_brief";
 
   try {
     const result = await runLLMObject({

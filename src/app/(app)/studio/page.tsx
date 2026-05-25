@@ -70,7 +70,8 @@ export default async function StudioPage({ searchParams }: Props) {
             {focusedBriefs.length} 份简报可继续推进
           </h2>
           <p className="mt-3 max-w-2xl text-[13px] leading-7 text-muted-foreground">
-            优先让活跃简报绑定到明确项目，再从简报进入 outline 预览或章节迭代。这样生成结果才能回到项目的结果链路里。
+            优先让活跃简报绑定到明确项目，再从简报进入 outline
+            预览或章节迭代。这样生成结果才能回到项目的结果链路里。
           </p>
         </div>
 

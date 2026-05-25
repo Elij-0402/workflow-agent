@@ -35,7 +35,11 @@ export function validateConfirmedBlueprintForBrief(params: {
   const { brief, blueprint } = params;
 
   if (!blueprint) {
-    return { ok: false, status: 409, message: "项目尚无蓝图，无法继续当前操作。" };
+    return {
+      ok: false,
+      status: 409,
+      message: "项目尚无蓝图，无法继续当前操作。",
+    };
   }
   if (blueprint.session_id !== brief.session_id) {
     return { ok: false, status: 409, message: "简报和蓝图不属于同一项目。" };
@@ -83,7 +87,11 @@ export function validatePreviousChapterVariantForBrief(params: {
     return { ok: false, status: 409, message: "上一版必须是章节稿。" };
   }
   if (previousVariant.session_id !== brief.session_id) {
-    return { ok: false, status: 409, message: "上一版和当前简报不属于同一项目。" };
+    return {
+      ok: false,
+      status: 409,
+      message: "上一版和当前简报不属于同一项目。",
+    };
   }
   if (previousVariant.brief_id !== brief.id) {
     return { ok: false, status: 409, message: "上一版不属于当前简报链。" };

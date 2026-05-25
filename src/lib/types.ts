@@ -4,7 +4,13 @@ import type { LLMConfig, LLMProvider } from "@/lib/llm-config";
 // ============================================================================
 // Domain
 // ============================================================================
-export type SessionStatus = "draft" | "uploaded" | "analyzing" | "analyzed" | "generating" | "done";
+export type SessionStatus =
+  | "draft"
+  | "uploaded"
+  | "analyzing"
+  | "analyzed"
+  | "generating"
+  | "done";
 
 export type AnalysisDimension =
   | "worldview"
@@ -24,7 +30,8 @@ export const LEGACY_ANALYSIS_DIMENSIONS = [
   "narrative",
 ] as const satisfies readonly AnalysisDimension[];
 
-export type LegacyAnalysisDimension = (typeof LEGACY_ANALYSIS_DIMENSIONS)[number];
+export type LegacyAnalysisDimension =
+  (typeof LEGACY_ANALYSIS_DIMENSIONS)[number];
 
 export const EXTENDED_ANALYSIS_DIMENSIONS = [
   "prose_craft",
@@ -33,7 +40,8 @@ export const EXTENDED_ANALYSIS_DIMENSIONS = [
   "suspense_grid",
 ] as const satisfies readonly AnalysisDimension[];
 
-export type ExtendedAnalysisDimension = (typeof EXTENDED_ANALYSIS_DIMENSIONS)[number];
+export type ExtendedAnalysisDimension =
+  (typeof EXTENDED_ANALYSIS_DIMENSIONS)[number];
 
 export type AnalysisScope = "book" | "chapter";
 
@@ -98,7 +106,9 @@ export const CharactersResultSchema = z.object({
 export type CharactersResult = z.infer<typeof CharactersResultSchema>;
 
 export const NarrativeResultSchema = z.object({
-  structure: z.string().describe("情节结构类型：英雄之旅/三幕式/起承转合/非线性"),
+  structure: z
+    .string()
+    .describe("情节结构类型：英雄之旅/三幕式/起承转合/非线性"),
   viewpoint: z.string().describe("叙事视角：第一/第三有限/全知/混合"),
   pacing: z.string().describe("节奏特点描述"),
   themes: z.array(z.string()).describe("主题与母题"),
@@ -109,7 +119,9 @@ export const NarrativeResultSchema = z.object({
       impact: z.number().min(1).max(10),
     }),
   ),
-  conflicts: z.array(z.string()).describe("核心冲突：人vs人 / 人vs自然 / 人vs社会 / 人vs自我"),
+  conflicts: z
+    .array(z.string())
+    .describe("核心冲突：人vs人 / 人vs自然 / 人vs社会 / 人vs自我"),
   summary: z.string(),
 });
 export type NarrativeResult = z.infer<typeof NarrativeResultSchema>;
@@ -239,7 +251,10 @@ export const ProseCraftResultSchema = z.object({
     action_pct: z.number().min(0).max(1),
     introspection_pct: z.number().min(0).max(1),
   }),
-  signature_techniques: z.array(z.string()).max(8).describe("作者标志性技法 0-8 条"),
+  signature_techniques: z
+    .array(z.string())
+    .max(8)
+    .describe("作者标志性技法 0-8 条"),
   summary: z.string(),
 });
 export type ProseCraftResult = z.infer<typeof ProseCraftResultSchema>;
@@ -251,7 +266,9 @@ export const EmotionArcResultSchema = z.object({
         index: z.number().int().min(0),
         valence: z.number().min(-1).max(1).describe("正/负情感 -1..1"),
         intensity: z.number().min(0).max(1).describe("情感强度 0..1"),
-        dominant_emotion: z.string().describe("主导情感：喜/怒/哀/惧/爱/恶/欲/平静 等"),
+        dominant_emotion: z
+          .string()
+          .describe("主导情感：喜/怒/哀/惧/爱/恶/欲/平静 等"),
         note: z.string().optional(),
       }),
     )
@@ -302,9 +319,19 @@ export const SuspenseGridResultSchema = z.object({
         id: z.string().describe("线索 id，可用 t1/t2/.."),
         label: z.string(),
         setup_chapter: z.number().int().min(0).describe("埋伏笔的章节 index"),
-        payoff_chapter: z.number().int().min(0).nullable().describe("回收章节，未回收则 null"),
+        payoff_chapter: z
+          .number()
+          .int()
+          .min(0)
+          .nullable()
+          .describe("回收章节，未回收则 null"),
         strength: z.number().min(1).max(10).describe("线索强度 1-10"),
-        kind: z.enum(["foreshadow", "mystery", "deferred_promise", "red_herring"]),
+        kind: z.enum([
+          "foreshadow",
+          "mystery",
+          "deferred_promise",
+          "red_herring",
+        ]),
       }),
     )
     .min(1),
@@ -317,11 +344,17 @@ export type SuspenseGridResult = z.infer<typeof SuspenseGridResultSchema>;
 // Generate variant
 // ============================================================================
 export const GenerateConfigSchema = z.object({
-  strategy: z.enum(["a-dominant", "balanced", "theme-graft"]).default("balanced"),
+  strategy: z
+    .enum(["a-dominant", "balanced", "theme-graft"])
+    .default("balanced"),
   innovation: z.number().int().min(1).max(10).default(5),
-  viewpoint: z.enum(["keep", "first-person", "third-limited", "omniscient"]).default("keep"),
+  viewpoint: z
+    .enum(["keep", "first-person", "third-limited", "omniscient"])
+    .default("keep"),
   style: z.enum(["keep", "modern", "classical", "web-novel"]).default("keep"),
-  output_scope: z.enum(["single-chapter", "outline", "three-chapters"]).default("single-chapter"),
+  output_scope: z
+    .enum(["single-chapter", "outline", "three-chapters"])
+    .default("single-chapter"),
   extra_instructions: z.string().max(800).default(""),
 });
 export type GenerateConfig = z.infer<typeof GenerateConfigSchema>;

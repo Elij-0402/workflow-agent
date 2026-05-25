@@ -27,7 +27,9 @@ export async function loadSessionDashboard(params: {
       ? await baseQuery
           .not("archived_at", "is", null)
           .order("archived_at", { ascending: false })
-      : await baseQuery.is("archived_at", null).order("updated_at", { ascending: false });
+      : await baseQuery
+          .is("archived_at", null)
+          .order("updated_at", { ascending: false });
 
   const sessionRows = sessions ?? [];
   const sessionIds = sessionRows.map((session) => session.id);
@@ -39,36 +41,41 @@ export async function loadSessionDashboard(params: {
     };
   }
 
-  const [booksResult, analysesResult, blueprintsResult, variantsResult, briefsResult] =
-    await Promise.all([
-      supabase
-        .from("books")
-        .select("id, session_id, chapter_count")
-        .eq("user_id", userId)
-        .in("session_id", sessionIds),
-      supabase
-        .from("analyses")
-        .select("book_id, dimension")
-        .eq("user_id", userId)
-        .eq("scope", "book")
-        .eq("dimension", "book_synthesis"),
-      supabase
-        .from("blueprints")
-        .select("session_id, status")
-        .eq("user_id", userId)
-        .in("session_id", sessionIds),
-      supabase
-        .from("variants")
-        .select("session_id, scope, title, created_at")
-        .eq("user_id", userId)
-        .in("session_id", sessionIds)
-        .order("created_at", { ascending: false }),
-      supabase
-        .from("creative_briefs")
-        .select("session_id, status, updated_at")
-        .eq("user_id", userId)
-        .in("session_id", sessionIds),
-    ]);
+  const [
+    booksResult,
+    analysesResult,
+    blueprintsResult,
+    variantsResult,
+    briefsResult,
+  ] = await Promise.all([
+    supabase
+      .from("books")
+      .select("id, session_id, chapter_count")
+      .eq("user_id", userId)
+      .in("session_id", sessionIds),
+    supabase
+      .from("analyses")
+      .select("book_id, dimension")
+      .eq("user_id", userId)
+      .eq("scope", "book")
+      .eq("dimension", "book_synthesis"),
+    supabase
+      .from("blueprints")
+      .select("session_id, status")
+      .eq("user_id", userId)
+      .in("session_id", sessionIds),
+    supabase
+      .from("variants")
+      .select("session_id, scope, title, created_at")
+      .eq("user_id", userId)
+      .in("session_id", sessionIds)
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("creative_briefs")
+      .select("session_id, status, updated_at")
+      .eq("user_id", userId)
+      .in("session_id", sessionIds),
+  ]);
 
   const books = booksResult.data ?? [];
   const analyses = analysesResult.data ?? [];
@@ -136,7 +143,10 @@ export async function loadSessionDashboard(params: {
       ...session,
       bookCount: entry?.books.length ?? 0,
       chapterCount:
-        entry?.books.reduce((sum, book) => sum + (book.chapter_count ?? 0), 0) ?? 0,
+        entry?.books.reduce(
+          (sum, book) => sum + (book.chapter_count ?? 0),
+          0,
+        ) ?? 0,
       analyzedBookCount: entry?.analyzedBookIds.size ?? 0,
       blueprintStatus: entry?.blueprintStatus ?? null,
       activeBriefCount: entry?.activeBriefCount ?? 0,

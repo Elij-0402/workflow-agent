@@ -23,7 +23,14 @@ import {
 type VariantCardProps = {
   variant: Pick<
     VariantRow,
-    "id" | "title" | "config" | "content" | "word_count" | "created_at" | "scope" | "chapter_index"
+    | "id"
+    | "title"
+    | "config"
+    | "content"
+    | "word_count"
+    | "created_at"
+    | "scope"
+    | "chapter_index"
   >;
   onDelete?: (id: string) => void;
 };
@@ -79,12 +86,20 @@ export function VariantCard({ variant, onDelete }: VariantCardProps) {
           <div className="flex flex-wrap gap-x-3 gap-y-1 font-mono text-[10.5px] uppercase tracking-[0.08em] text-muted-foreground">
             <span>{variant.word_count?.toLocaleString("zh-CN") ?? "0"} 字</span>
             <span className="text-primary/40">·</span>
-            <span>{variant.config.extra_instructions.trim() ? "含额外要求" : "默认要求"}</span>
+            <span>
+              {variant.config.extra_instructions.trim()
+                ? "含额外要求"
+                : "默认要求"}
+            </span>
           </div>
 
           <div className="flex flex-wrap gap-2">
             {onDelete ? (
-              <Button variant="outline" size="sm" onClick={() => onDelete(variant.id)}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onDelete(variant.id)}
+              >
                 删除
               </Button>
             ) : null}
@@ -103,7 +118,9 @@ export function VariantCard({ variant, onDelete }: VariantCardProps) {
                     <span>创新度 {variant.config.innovation}</span>
                     <span>{VIEWPOINT_LABELS[variant.config.viewpoint]}</span>
                     <span>{STYLE_LABELS[variant.config.style]}</span>
-                    <span>{OUTPUT_SCOPE_LABELS[variant.config.output_scope]}</span>
+                    <span>
+                      {OUTPUT_SCOPE_LABELS[variant.config.output_scope]}
+                    </span>
                   </DialogDescription>
                 </DialogHeader>
                 <div className="overflow-y-auto px-7 pb-7 pt-5">

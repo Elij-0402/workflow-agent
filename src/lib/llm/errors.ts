@@ -42,10 +42,7 @@ export class LLMError extends Error {
   readonly providerStatus?: number;
   readonly status: number;
 
-  constructor(
-    client: LLMClientError,
-    status = 500,
-  ) {
+  constructor(client: LLMClientError, status = 500) {
     super(client.userMessage);
     this.name = "LLMError";
     this.code = client.code;
@@ -111,7 +108,9 @@ export function asLLMClientError(
     return {
       code: "llm_config_invalid",
       userMessage:
-        error.message === LLM_CONFIG_REQUIRED_MESSAGE ? LLM_CONFIG_REQUIRED_MESSAGE : error.message,
+        error.message === LLM_CONFIG_REQUIRED_MESSAGE
+          ? LLM_CONFIG_REQUIRED_MESSAGE
+          : error.message,
       retryable: false,
       action: "open_settings",
     };

@@ -109,9 +109,11 @@ export function formatVariantScopeLabel(
   return null;
 }
 
-export const OUTPUT_SCOPE_LABELS: Record<GenerateConfig["output_scope"], string> = {
+export const OUTPUT_SCOPE_LABELS: Record<
+  GenerateConfig["output_scope"],
+  string
+> = {
   "single-chapter": "单章",
   outline: "大纲",
   "three-chapters": "三章",
 };
-

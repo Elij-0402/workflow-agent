@@ -1,7 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { BookOpen, ChevronDown, ChevronUp, Plus, Trash2, X } from "lucide-react";
+import {
+  BookOpen,
+  ChevronDown,
+  ChevronUp,
+  Plus,
+  Trash2,
+  X,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -32,7 +39,10 @@ function bookLabel(books: BookLookup[], bookId: string): string {
   return b.position === 0 ? "参考书 1" : "参考书 2";
 }
 
-function chapterLabel(chapters: ChapterLookup, chapterId: string | null): string | null {
+function chapterLabel(
+  chapters: ChapterLookup,
+  chapterId: string | null,
+): string | null {
   if (!chapterId) return null;
   const ch = chapters.get(chapterId);
   if (!ch) return null;
@@ -89,7 +99,11 @@ function NotesField({
         className="flex items-center gap-1 font-mono text-[10.5px] uppercase tracking-[0.10em] text-muted-foreground transition-colors hover:text-primary"
         onClick={() => setOpen((o) => !o)}
       >
-        {open ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+        {open ? (
+          <ChevronUp className="h-3 w-3" />
+        ) : (
+          <ChevronDown className="h-3 w-3" />
+        )}
         {"// 备注"}
       </button>
       {open ? (
@@ -355,7 +369,9 @@ export function CharacterCard(props: WithBaseProps<CharacterRow>) {
           value={row.description}
           disabled={disabled}
           placeholder="角色背景与设定…"
-          onChange={(description) => onChange({ description } as Partial<CharacterRow>)}
+          onChange={(description) =>
+            onChange({ description } as Partial<CharacterRow>)
+          }
         />
       }
       notes={row.notes}
@@ -380,7 +396,9 @@ export function RelationshipCard(props: WithBaseProps<RelationshipRow>) {
               value={row.from}
               disabled={disabled}
               placeholder="角色 A"
-              onChange={(e) => onChange({ from: e.target.value } as Partial<RelationshipRow>)}
+              onChange={(e) =>
+                onChange({ from: e.target.value } as Partial<RelationshipRow>)
+              }
               className="w-full rounded-[2px] border border-border bg-background/30 px-2 py-1 font-display text-[16px] italic text-foreground outline-none focus:border-primary/70 focus:bg-background/40"
             />
             <span className="text-primary/70">↔</span>
@@ -388,7 +406,9 @@ export function RelationshipCard(props: WithBaseProps<RelationshipRow>) {
               value={row.to}
               disabled={disabled}
               placeholder="角色 B"
-              onChange={(e) => onChange({ to: e.target.value } as Partial<RelationshipRow>)}
+              onChange={(e) =>
+                onChange({ to: e.target.value } as Partial<RelationshipRow>)
+              }
               className="w-full rounded-[2px] border border-border bg-background/30 px-2 py-1 font-display text-[16px] italic text-foreground outline-none focus:border-primary/70 focus:bg-background/40"
             />
           </div>
@@ -405,7 +425,9 @@ export function RelationshipCard(props: WithBaseProps<RelationshipRow>) {
           value={row.description}
           disabled={disabled}
           placeholder="关系的来龙去脉、张力来源…"
-          onChange={(description) => onChange({ description } as Partial<RelationshipRow>)}
+          onChange={(description) =>
+            onChange({ description } as Partial<RelationshipRow>)
+          }
         />
       }
       notes={row.notes}
@@ -436,7 +458,9 @@ export function WorldRuleCard(props: WithBaseProps<WorldRuleRow>) {
           value={row.description}
           disabled={disabled}
           placeholder="规则细节、边界与代价…"
-          onChange={(description) => onChange({ description } as Partial<WorldRuleRow>)}
+          onChange={(description) =>
+            onChange({ description } as Partial<WorldRuleRow>)
+          }
         />
       }
       notes={row.notes}
@@ -467,7 +491,9 @@ export function ConflictCard(props: WithBaseProps<ConflictRow>) {
           value={row.description}
           disabled={disabled}
           placeholder="冲突双方、张力、转折点…"
-          onChange={(description) => onChange({ description } as Partial<ConflictRow>)}
+          onChange={(description) =>
+            onChange({ description } as Partial<ConflictRow>)
+          }
         />
       }
       notes={row.notes}
@@ -514,7 +540,9 @@ export function PlotBeatCard(props: PlotBeatCardProps) {
           value={row.description}
           disabled={disabled}
           placeholder="这一节点的事件、推进与意义…"
-          onChange={(description) => onChange({ description } as Partial<PlotBeatRow>)}
+          onChange={(description) =>
+            onChange({ description } as Partial<PlotBeatRow>)
+          }
         />
       }
       notes={row.notes}

@@ -2,13 +2,19 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { createClient } from "@/lib/supabase/server";
-import { deleteSessionStorageObjects } from "@/lib/sessions/storage-cleanup";
+import {
+  collectSessionStoragePaths,
+  removeStorageObjects,
+} from "@/lib/sessions/storage-cleanup";
 
 export const runtime = "nodejs";
 
 const paramsSchema = z.object({ id: z.string().uuid() });
 
-export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
   const supabase = await createClient();
   const {
     data: { user },
@@ -24,7 +30,11 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
   const hard = url.searchParams.get("hard") === "true";
 
   if (hard) {
-    await deleteSessionStorageObjects(supabase, [parsed.data.id], user.id);
+    const paths = await collectSessionStoragePaths(
+      supabase,
+      [parsed.data.id],
+      user.id,
+    );
     const { error } = await supabase
       .from("sessions")
       .delete()
@@ -33,6 +43,7 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
     if (error) {
       return NextResponse.json({ error: "永久删除失败。" }, { status: 500 });
     }
+    await removeStorageObjects(supabase, paths);
     return NextResponse.json({ ok: true });
   }
 
@@ -47,7 +58,10 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
   return NextResponse.json({ ok: true });
 }
 
-export async function PATCH(_req: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function PATCH(
+  _req: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
   const supabase = await createClient();
   const {
     data: { user },

@@ -2,7 +2,13 @@
 
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronDown, ChevronUp, FileText, Loader2, UploadCloud } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronUp,
+  FileText,
+  Loader2,
+  UploadCloud,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { MAX_UPLOAD_BYTES } from "@/lib/upload/shared";
@@ -134,7 +140,8 @@ export function UploadForm({
                         {filename}
                       </div>
                       <div className="mt-1 font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
-                        {filesize == null ? "等待读取…" : formatBytes(filesize)} · txt
+                        {filesize == null ? "等待读取…" : formatBytes(filesize)}{" "}
+                        · txt
                       </div>
                     </div>
                   </div>
@@ -143,9 +150,14 @@ export function UploadForm({
                     <InfoStat label="文件格式" value=".txt" />
                     <InfoStat
                       label="文件大小"
-                      value={filesize == null ? "待读取" : formatBytes(filesize, 0)}
+                      value={
+                        filesize == null ? "待读取" : formatBytes(filesize, 0)
+                      }
                     />
-                    <InfoStat label="当前状态" value={pending ? "处理中" : "已就绪"} />
+                    <InfoStat
+                      label="当前状态"
+                      value={pending ? "处理中" : "已就绪"}
+                    />
                   </div>
                 </div>
               ) : (
@@ -232,13 +244,16 @@ export function UploadForm({
           <p className="eyebrow-label">流程</p>
           <ol className="mt-4 flex flex-col gap-2.5 font-mono text-[12px] text-muted-foreground">
             <li>
-              <span className="text-primary/80">01 →</span> 直传原始文本到私有存储
+              <span className="text-primary/80">01 →</span>{" "}
+              直传原始文本到私有存储
             </li>
             <li>
-              <span className="text-primary/80">02 →</span> 服务端整理正文并生成导入体检
+              <span className="text-primary/80">02 →</span>{" "}
+              服务端整理正文并生成导入体检
             </li>
             <li>
-              <span className="text-primary/80">03 →</span> 创建项目并跳转到详情页继续处理
+              <span className="text-primary/80">03 →</span>{" "}
+              创建项目并跳转到详情页继续处理
             </li>
           </ol>
         </section>

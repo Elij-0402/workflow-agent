@@ -35,14 +35,20 @@ export function DetailBlock({
   );
 }
 
-export function SectionTitle({ title, token }: { title: string; token?: string }) {
+export function SectionTitle({
+  title,
+  token,
+}: {
+  title: string;
+  token?: string;
+}) {
   return (
     <div className="flex items-baseline gap-3">
-      <h4 className="font-display text-[16px] italic text-foreground">{title}</h4>
+      <h4 className="font-display text-[16px] italic text-foreground">
+        {title}
+      </h4>
       {token ? (
-        <span className="text-[11px] text-primary/75">
-          {token}
-        </span>
+        <span className="text-[11px] text-primary/75">{token}</span>
       ) : null}
     </div>
   );
@@ -52,7 +58,13 @@ export function EmptyText({ text }: { text: string }) {
   return <p className="text-[13px] text-muted-foreground">{text}</p>;
 }
 
-export function OverflowTable({ headers, rows }: { headers: string[]; rows: string[][] }) {
+export function OverflowTable({
+  headers,
+  rows,
+}: {
+  headers: string[];
+  rows: string[][];
+}) {
   return (
     <div className="overflow-x-auto rounded-[3px] border border-border bg-background/30">
       <Table className="text-[13px]">
@@ -67,7 +79,10 @@ export function OverflowTable({ headers, rows }: { headers: string[]; rows: stri
           {rows.map((row, index) => (
             <TableRow key={`${row[0]}-${index}`}>
               {row.map((cell, cellIndex) => (
-                <TableCell key={`${row[0]}-${cellIndex}`} className="align-top text-foreground">
+                <TableCell
+                  key={`${row[0]}-${cellIndex}`}
+                  className="align-top text-foreground"
+                >
                   {cell}
                 </TableCell>
               ))}

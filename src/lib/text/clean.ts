@@ -47,9 +47,7 @@ type CleanTextOptions = {
 const ADULT_EXPLICIT_PATTERNS = [
   /(?:性交|做爱|交媾|肉棒|阴茎|阴道|乳房|胸部|下体|呻吟|插入|抽插)/u,
 ];
-const SEXUAL_COERCION_PATTERNS = [
-  /(?:强奸|迷奸|下药|轮奸|奸淫|被迫献身)/u,
-];
+const SEXUAL_COERCION_PATTERNS = [/(?:强奸|迷奸|下药|轮奸|奸淫|被迫献身)/u];
 const GRAPHIC_VIOLENCE_PATTERNS = [
   /(?:开膛|斩首|碎尸|血肉模糊|肠子|爆头|凌迟)/u,
 ];
@@ -81,7 +79,10 @@ function normalizeText(input: string) {
       replacedFullWidthSpaces: beforeFullWidthSpaces,
       replacedNbsp: beforeNbsp,
       removedZeroWidthChars: beforeZeroWidth,
-      collapsedBlankLineGroups: Math.max(0, (input.match(THREE_PLUS_NEWLINES_RE) ?? []).length),
+      collapsedBlankLineGroups: Math.max(
+        0,
+        (input.match(THREE_PLUS_NEWLINES_RE) ?? []).length,
+      ),
     },
   };
 }
@@ -100,15 +101,17 @@ function stripHighConfidenceNoise(text: string) {
       continue;
     }
 
-    const highConfidencePattern = HIGH_CONFIDENCE_NOISE_PATTERNS.find((pattern) =>
-      pattern.test(trimmed),
+    const highConfidencePattern = HIGH_CONFIDENCE_NOISE_PATTERNS.find(
+      (pattern) => pattern.test(trimmed),
     );
     if (highConfidencePattern) {
       removedNoiseLines += 1;
       continue;
     }
 
-    const suspiciousPattern = SUSPICIOUS_NOISE_PATTERNS.find((pattern) => pattern.test(trimmed));
+    const suspiciousPattern = SUSPICIOUS_NOISE_PATTERNS.find((pattern) =>
+      pattern.test(trimmed),
+    );
     if (suspiciousPattern) {
       suspiciousNoiseLines += 1;
       issues.push({
@@ -159,11 +162,17 @@ function dedupeRepeatedShortLines(text: string, options: CleanTextOptions) {
       .replace(/\s+/g, "")
       .toLowerCase();
     const looksLikeHeading =
-      /^第[\d一二三四五六七八九十百千零〇两\s]+[章卷回节折部篇]/u.test(trimmed) ||
-      /^chapter\s+\d+/iu.test(trimmed);
-    const shortEnough = trimmed.length <= (options.aggressiveChapterCleanup ? 80 : 48);
+      /^第[\d一二三四五六七八九十百千零〇两\s]+[章卷回节折部篇]/u.test(
+        trimmed,
+      ) || /^chapter\s+\d+/iu.test(trimmed);
+    const shortEnough =
+      trimmed.length <= (options.aggressiveChapterCleanup ? 80 : 48);
 
-    if (shortEnough && previousNonEmptyKey === normalizedKey && (looksLikeHeading || options.aggressiveChapterCleanup)) {
+    if (
+      shortEnough &&
+      previousNonEmptyKey === normalizedKey &&
+      (looksLikeHeading || options.aggressiveChapterCleanup)
+    ) {
       repeatedShortLineCount += 1;
       continue;
     }
@@ -206,7 +215,10 @@ function scoreTextQuality(input: {
   score -= Math.min((input.summary.suspiciousNoiseLines ?? 0) * 6, 18);
   score -= Math.min((input.summary.removedNoiseLines ?? 0) * 2, 10);
   score -= Math.min((input.summary.repeatedShortLineCount ?? 0) * 2, 14);
-  score -= Math.min(input.issues.filter((issue) => issue.severity === "warning").length * 4, 16);
+  score -= Math.min(
+    input.issues.filter((issue) => issue.severity === "warning").length * 4,
+    16,
+  );
   if (input.cleaned.length < 1_000) {
     score -= 8;
   }
@@ -219,12 +231,16 @@ export function countWords(text: string) {
   if (compact.length === 0) return 0;
 
   const cjkMatches = compact.match(/[\p{Script=Han}]/gu) ?? [];
-  const latinMatches = compact.match(/[A-Za-z0-9]+(?:['_-][A-Za-z0-9]+)*/g) ?? [];
+  const latinMatches =
+    compact.match(/[A-Za-z0-9]+(?:['_-][A-Za-z0-9]+)*/g) ?? [];
 
   return cjkMatches.length + latinMatches.length;
 }
 
-export function cleanNovelText(input: string, options: CleanTextOptions = {}): CleanTextResult {
+export function cleanNovelText(
+  input: string,
+  options: CleanTextOptions = {},
+): CleanTextResult {
   const normalized = normalizeText(input);
   const denoised = stripHighConfidenceNoise(normalized.cleaned);
   const deduped = dedupeRepeatedShortLines(denoised.cleaned, options);

@@ -44,8 +44,5 @@ test("content helpers surface provider incompatibility and blocked gate reason",
     getBookProviderCompatibility(metadata, "openai").status,
     "incompatible",
   );
-  assert.match(
-    getBookAnalysisBlockingReason(metadata) ?? "",
-    /编码置信度过低/,
-  );
+  assert.match(getBookAnalysisBlockingReason(metadata) ?? "", /编码置信度过低/);
 });

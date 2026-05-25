@@ -3,7 +3,13 @@
 import { detectChapters } from "@/lib/text/chapters";
 import { diffStructure } from "@/lib/diff/variant-diff";
 
-export function VariantDiffStructure({ left, right }: { left: string; right: string }) {
+export function VariantDiffStructure({
+  left,
+  right,
+}: {
+  left: string;
+  right: string;
+}) {
   const leftTitles = detectChapters(left).map((c) => c.title);
   const rightTitles = detectChapters(right).map((c) => c.title);
   const d = diffStructure(leftTitles, rightTitles);
@@ -32,7 +38,9 @@ export function VariantDiffStructure({ left, right }: { left: string; right: str
                     : "px-2 py-1 text-foreground"
                 }
               >
-                <span className="mr-2 text-primary/60">{String(i + 1).padStart(2, "0")}</span>
+                <span className="mr-2 text-primary/60">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
                 {t}
               </li>
             );
@@ -55,7 +63,9 @@ export function VariantDiffStructure({ left, right }: { left: string; right: str
                     : "px-2 py-1 text-foreground"
                 }
               >
-                <span className="mr-2 text-primary/60">{String(i + 1).padStart(2, "0")}</span>
+                <span className="mr-2 text-primary/60">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
                 {t}
               </li>
             );

@@ -35,18 +35,32 @@ export type IngestIssue = {
   sample?: string;
 };
 
-export type ContentProfile = "normal" | "noisy" | "duplicated" | "adult" | "mixed";
-export type ChapterGateStatus = "pass" | "retryable" | "fallback_only" | "blocked";
+export type ContentProfile =
+  | "normal"
+  | "noisy"
+  | "duplicated"
+  | "adult"
+  | "mixed";
+export type ChapterGateStatus =
+  | "pass"
+  | "retryable"
+  | "fallback_only"
+  | "blocked";
 export type AnalysisMode = "chaptered" | "block-fallback";
 export type ContentRiskTag =
   | "adult_explicit"
   | "sexual_coercion_risk"
   | "graphic_violence"
   | "abuse_or_incest_risk";
-export type ProviderCompatibilityStatus = "supported" | "risky" | "incompatible";
+export type ProviderCompatibilityStatus =
+  | "supported"
+  | "risky"
+  | "incompatible";
 
 export type IngestErrorReport = {
-  stage: Exclude<IngestStage, "raw_uploaded" | "processing" | "ready"> | "download_raw";
+  stage:
+    | Exclude<IngestStage, "raw_uploaded" | "processing" | "ready">
+    | "download_raw";
   code: string;
   message: string;
   retryable: boolean;
@@ -92,7 +106,10 @@ export type IngestReport = {
   content_profile?: ContentProfile;
   content_risk_tags?: ContentRiskTag[];
   provider_compatibility?: Partial<
-    Record<LLMProvider | "default", { status: ProviderCompatibilityStatus; reason?: string }>
+    Record<
+      LLMProvider | "default",
+      { status: ProviderCompatibilityStatus; reason?: string }
+    >
   >;
   dedupe_summary?: {
     repeated_short_line_count: number;
@@ -133,10 +150,18 @@ type BookContentRecord = {
   storage_path?: string | null;
 };
 
-const READY_INGEST_STATUSES = new Set<IngestStatus>(["ready", "ready_with_warnings"]);
-const COMPATIBLE_ANALYSIS_MODES = new Set<AnalysisMode>(["chaptered", "block-fallback"]);
+const READY_INGEST_STATUSES = new Set<IngestStatus>([
+  "ready",
+  "ready_with_warnings",
+]);
+const COMPATIBLE_ANALYSIS_MODES = new Set<AnalysisMode>([
+  "chaptered",
+  "block-fallback",
+]);
 
-export function getBookIngestMetadata(metadata?: Record<string, unknown> | null): BookIngestMetadata {
+export function getBookIngestMetadata(
+  metadata?: Record<string, unknown> | null,
+): BookIngestMetadata {
   if (!metadata || typeof metadata !== "object") {
     return {};
   }
@@ -144,7 +169,9 @@ export function getBookIngestMetadata(metadata?: Record<string, unknown> | null)
   return metadata as BookIngestMetadata;
 }
 
-export function getBookIngestStatus(metadata?: Record<string, unknown> | null): IngestStatus {
+export function getBookIngestStatus(
+  metadata?: Record<string, unknown> | null,
+): IngestStatus {
   return getBookIngestMetadata(metadata).ingest_status ?? "raw_uploaded";
 }
 
@@ -152,23 +179,34 @@ export function isBookIngestReady(metadata?: Record<string, unknown> | null) {
   return READY_INGEST_STATUSES.has(getBookIngestStatus(metadata));
 }
 
-export function getBookAnalysisMode(metadata?: Record<string, unknown> | null): AnalysisMode {
+export function getBookAnalysisMode(
+  metadata?: Record<string, unknown> | null,
+): AnalysisMode {
   const value = getBookIngestMetadata(metadata).analysis_mode;
   return value && COMPATIBLE_ANALYSIS_MODES.has(value) ? value : "chaptered";
 }
 
-export function getBookContentProfile(metadata?: Record<string, unknown> | null): ContentProfile {
+export function getBookContentProfile(
+  metadata?: Record<string, unknown> | null,
+): ContentProfile {
   return getBookIngestMetadata(metadata).content_profile ?? "normal";
 }
 
-export function getBookContentRiskTags(metadata?: Record<string, unknown> | null): ContentRiskTag[] {
+export function getBookContentRiskTags(
+  metadata?: Record<string, unknown> | null,
+): ContentRiskTag[] {
   const tags = getBookIngestMetadata(metadata).content_risk_tags;
   return Array.isArray(tags) ? tags : [];
 }
 
 export function getBookChapterGate(metadata?: Record<string, unknown> | null) {
   const report = getBookIngestMetadata(metadata).ingest_report;
-  return report?.chapter_gate ?? { status: "pass" as ChapterGateStatus, reasons: [] as string[] };
+  return (
+    report?.chapter_gate ?? {
+      status: "pass" as ChapterGateStatus,
+      reasons: [] as string[],
+    }
+  );
 }
 
 export function getBookProviderCompatibility(
@@ -194,7 +232,9 @@ export function getBookProviderCompatibility(
   return { status: "supported" as ProviderCompatibilityStatus, reason: null };
 }
 
-export function getBookAnalysisBlockingReason(metadata?: Record<string, unknown> | null) {
+export function getBookAnalysisBlockingReason(
+  metadata?: Record<string, unknown> | null,
+) {
   const gate = getBookChapterGate(metadata);
   if (gate.status === "blocked") {
     return gate.reasons[0] ?? "当前文本结构风险较高，请先修复导入体检。";
@@ -209,7 +249,9 @@ function getCleanedStoragePath(metadata?: Record<string, unknown> | null) {
 
 function normalizeNovelStoragePath(storagePath?: string | null) {
   if (!storagePath) return null;
-  return storagePath.startsWith("novels/") ? storagePath.slice("novels/".length) : storagePath;
+  return storagePath.startsWith("novels/")
+    ? storagePath.slice("novels/".length)
+    : storagePath;
 }
 
 async function downloadText(
@@ -217,7 +259,9 @@ async function downloadText(
   storageObjectPath: string,
   mode: "cleaned" | "raw",
 ) {
-  const { data, error } = await supabase.storage.from("novels").download(storageObjectPath);
+  const { data, error } = await supabase.storage
+    .from("novels")
+    .download(storageObjectPath);
   if (error || !data) return null;
 
   if (mode === "cleaned") {

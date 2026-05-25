@@ -27,7 +27,9 @@ import {
   type StyleDirective,
 } from "@/lib/types/creative-brief";
 
-type Mode = { kind: "create"; sessionId: string } | { kind: "edit"; briefId: string };
+type Mode =
+  | { kind: "create"; sessionId: string }
+  | { kind: "edit"; briefId: string };
 
 type Props = {
   mode: Mode;
@@ -149,37 +151,51 @@ export function BriefEditor({ mode, initial }: Props) {
 
       <Tabs defaultValue="persona" className="space-y-4">
         <TabsList className="flex-wrap">
-          <TabsTrigger value="persona">人设 ({brief.persona_directives.length})</TabsTrigger>
-          <TabsTrigger value="plot">情节 ({brief.plot_directives.length})</TabsTrigger>
+          <TabsTrigger value="persona">
+            人设 ({brief.persona_directives.length})
+          </TabsTrigger>
+          <TabsTrigger value="plot">
+            情节 ({brief.plot_directives.length})
+          </TabsTrigger>
           <TabsTrigger value="style">文风</TabsTrigger>
-          <TabsTrigger value="retention">保留 ({brief.retention_rules.length})</TabsTrigger>
+          <TabsTrigger value="retention">
+            保留 ({brief.retention_rules.length})
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="persona">
           <PersonaTab
             value={brief.persona_directives}
-            onChange={(next) => setBrief((b) => ({ ...b, persona_directives: next }))}
+            onChange={(next) =>
+              setBrief((b) => ({ ...b, persona_directives: next }))
+            }
           />
         </TabsContent>
 
         <TabsContent value="plot">
           <PlotTab
             value={brief.plot_directives}
-            onChange={(next) => setBrief((b) => ({ ...b, plot_directives: next }))}
+            onChange={(next) =>
+              setBrief((b) => ({ ...b, plot_directives: next }))
+            }
           />
         </TabsContent>
 
         <TabsContent value="style">
           <StyleTab
             value={brief.style_directives}
-            onChange={(next) => setBrief((b) => ({ ...b, style_directives: next }))}
+            onChange={(next) =>
+              setBrief((b) => ({ ...b, style_directives: next }))
+            }
           />
         </TabsContent>
 
         <TabsContent value="retention">
           <RetentionTab
             value={brief.retention_rules}
-            onChange={(next) => setBrief((b) => ({ ...b, retention_rules: next }))}
+            onChange={(next) =>
+              setBrief((b) => ({ ...b, retention_rules: next }))
+            }
           />
         </TabsContent>
       </Tabs>
@@ -192,7 +208,11 @@ export function BriefEditor({ mode, initial }: Props) {
         ) : null}
         <Button onClick={handleSave} disabled={pending}>
           <Save />
-          {pending ? "保存中…" : mode.kind === "create" ? "创建简报" : "保存修改"}
+          {pending
+            ? "保存中…"
+            : mode.kind === "create"
+              ? "创建简报"
+              : "保存修改"}
         </Button>
       </div>
     </div>
@@ -237,7 +257,9 @@ function PersonaTab({
                 onChange={(e) =>
                   onChange(
                     value.map((x) =>
-                      x.id === d.id ? { ...x, character_name: e.target.value } : x,
+                      x.id === d.id
+                        ? { ...x, character_name: e.target.value }
+                        : x,
                     ),
                   )
                 }
@@ -250,7 +272,9 @@ function PersonaTab({
                 onValueChange={(v) =>
                   onChange(
                     value.map((x) =>
-                      x.id === d.id ? { ...x, change_type: v as typeof d.change_type } : x,
+                      x.id === d.id
+                        ? { ...x, change_type: v as typeof d.change_type }
+                        : x,
                     ),
                   )
                 }
@@ -272,7 +296,9 @@ function PersonaTab({
               onChange={(v) =>
                 onChange(
                   value.map((x) =>
-                    x.id === d.id ? { ...x, fields: { ...x.fields, gender: v } } : x,
+                    x.id === d.id
+                      ? { ...x, fields: { ...x.fields, gender: v } }
+                      : x,
                   ),
                 )
               }
@@ -282,7 +308,11 @@ function PersonaTab({
               value={d.fields.age ?? ""}
               onChange={(v) =>
                 onChange(
-                  value.map((x) => (x.id === d.id ? { ...x, fields: { ...x.fields, age: v } } : x)),
+                  value.map((x) =>
+                    x.id === d.id
+                      ? { ...x, fields: { ...x.fields, age: v } }
+                      : x,
+                  ),
                 )
               }
             />
@@ -292,7 +322,9 @@ function PersonaTab({
               onChange={(v) =>
                 onChange(
                   value.map((x) =>
-                    x.id === d.id ? { ...x, fields: { ...x.fields, personality: v } } : x,
+                    x.id === d.id
+                      ? { ...x, fields: { ...x.fields, personality: v } }
+                      : x,
                   ),
                 )
               }
@@ -303,7 +335,9 @@ function PersonaTab({
               onChange={(v) =>
                 onChange(
                   value.map((x) =>
-                    x.id === d.id ? { ...x, fields: { ...x.fields, motivation: v } } : x,
+                    x.id === d.id
+                      ? { ...x, fields: { ...x.fields, motivation: v } }
+                      : x,
                   ),
                 )
               }
@@ -316,7 +350,10 @@ function PersonaTab({
                   onChange(
                     value.map((x) =>
                       x.id === d.id
-                        ? { ...x, fields: { ...x.fields, background: e.target.value } }
+                        ? {
+                            ...x,
+                            fields: { ...x.fields, background: e.target.value },
+                          }
                         : x,
                     ),
                   )
@@ -327,7 +364,11 @@ function PersonaTab({
           </div>
         </div>
       ))}
-      <Button type="button" variant="outline" onClick={() => onChange([...value, emptyPersona()])}>
+      <Button
+        type="button"
+        variant="outline"
+        onClick={() => onChange([...value, emptyPersona()])}
+      >
         <Plus />
         新增人设指令
       </Button>
@@ -365,7 +406,8 @@ function PlotTab({
   return (
     <div className="space-y-3">
       <p className="text-[13px] leading-6 text-muted-foreground">
-        引用蓝图 plot_beat 的 id（如 <code className="font-mono text-primary">beat-3</code>
+        引用蓝图 plot_beat 的 id（如{" "}
+        <code className="font-mono text-primary">beat-3</code>
         ），或留空插入新节点。
       </p>
       {value.map((d, idx) => (
@@ -390,7 +432,11 @@ function PlotTab({
                 value={d.action}
                 onValueChange={(v) =>
                   onChange(
-                    value.map((x) => (x.id === d.id ? { ...x, action: v as typeof d.action } : x)),
+                    value.map((x) =>
+                      x.id === d.id
+                        ? { ...x, action: v as typeof d.action }
+                        : x,
+                    ),
                   )
                 }
               >
@@ -414,7 +460,9 @@ function PlotTab({
                 onChange={(e) =>
                   onChange(
                     value.map((x) =>
-                      x.id === d.id ? { ...x, target_beat_id: e.target.value || undefined } : x,
+                      x.id === d.id
+                        ? { ...x, target_beat_id: e.target.value || undefined }
+                        : x,
                     ),
                   )
                 }
@@ -429,7 +477,10 @@ function PlotTab({
                   onChange(
                     value.map((x) =>
                       x.id === d.id
-                        ? { ...x, new_beat: { ...x.new_beat, title: e.target.value } }
+                        ? {
+                            ...x,
+                            new_beat: { ...x.new_beat, title: e.target.value },
+                          }
                         : x,
                     ),
                   )
@@ -444,7 +495,13 @@ function PlotTab({
                   onChange(
                     value.map((x) =>
                       x.id === d.id
-                        ? { ...x, new_beat: { ...x.new_beat, description: e.target.value } }
+                        ? {
+                            ...x,
+                            new_beat: {
+                              ...x.new_beat,
+                              description: e.target.value,
+                            },
+                          }
                         : x,
                     ),
                   )
@@ -457,14 +514,22 @@ function PlotTab({
               <Input
                 value={d.note ?? ""}
                 onChange={(e) =>
-                  onChange(value.map((x) => (x.id === d.id ? { ...x, note: e.target.value } : x)))
+                  onChange(
+                    value.map((x) =>
+                      x.id === d.id ? { ...x, note: e.target.value } : x,
+                    ),
+                  )
                 }
               />
             </div>
           </div>
         </div>
       ))}
-      <Button type="button" variant="outline" onClick={() => onChange([...value, emptyPlot()])}>
+      <Button
+        type="button"
+        variant="outline"
+        onClick={() => onChange([...value, emptyPlot()])}
+      >
         <Plus />
         新增情节指令
       </Button>
@@ -488,7 +553,9 @@ function StyleTab({
         <SelectField
           label="语调"
           value={value.tone}
-          onChange={(v) => onChange({ ...value, tone: v as StyleDirective["tone"] })}
+          onChange={(v) =>
+            onChange({ ...value, tone: v as StyleDirective["tone"] })
+          }
           options={[
             { value: "keep", label: "保留原作" },
             { value: "lyrical", label: "抒情" },
@@ -502,7 +569,9 @@ function StyleTab({
         <SelectField
           label="节奏"
           value={value.rhythm}
-          onChange={(v) => onChange({ ...value, rhythm: v as StyleDirective["rhythm"] })}
+          onChange={(v) =>
+            onChange({ ...value, rhythm: v as StyleDirective["rhythm"] })
+          }
           options={[
             { value: "keep", label: "保留" },
             { value: "slow", label: "慢" },
@@ -514,7 +583,10 @@ function StyleTab({
           label="对话比例"
           value={value.dialogue_ratio}
           onChange={(v) =>
-            onChange({ ...value, dialogue_ratio: v as StyleDirective["dialogue_ratio"] })
+            onChange({
+              ...value,
+              dialogue_ratio: v as StyleDirective["dialogue_ratio"],
+            })
           }
           options={[
             { value: "keep", label: "保留" },
@@ -526,7 +598,10 @@ function StyleTab({
           label="感官密度"
           value={value.sensory_density}
           onChange={(v) =>
-            onChange({ ...value, sensory_density: v as StyleDirective["sensory_density"] })
+            onChange({
+              ...value,
+              sensory_density: v as StyleDirective["sensory_density"],
+            })
           }
           options={[
             { value: "keep", label: "保留" },
@@ -538,7 +613,10 @@ function StyleTab({
           label="文体"
           value={value.prose_register}
           onChange={(v) =>
-            onChange({ ...value, prose_register: v as StyleDirective["prose_register"] })
+            onChange({
+              ...value,
+              prose_register: v as StyleDirective["prose_register"],
+            })
           }
           options={[
             { value: "keep", label: "保留" },
@@ -553,7 +631,12 @@ function StyleTab({
         <Label>补充自由指令（≤800 字）</Label>
         <Textarea
           value={value.extra_instructions}
-          onChange={(e) => onChange({ ...value, extra_instructions: e.target.value.slice(0, 800) })}
+          onChange={(e) =>
+            onChange({
+              ...value,
+              extra_instructions: e.target.value.slice(0, 800),
+            })
+          }
           rows={4}
           placeholder="例如：第三人称受限视角，多用比喻，避免直接心理描写"
         />
@@ -632,7 +715,9 @@ function RetentionTab({
               onChange={(v) =>
                 onChange(
                   value.map((x) =>
-                    x.id === r.id ? { ...x, section: v as RetentionRule["section"] } : x,
+                    x.id === r.id
+                      ? { ...x, section: v as RetentionRule["section"] }
+                      : x,
                   ),
                 )
               }
@@ -651,7 +736,9 @@ function RetentionTab({
               onChange={(v) =>
                 onChange(
                   value.map((x) =>
-                    x.id === r.id ? { ...x, strictness: v as RetentionRule["strictness"] } : x,
+                    x.id === r.id
+                      ? { ...x, strictness: v as RetentionRule["strictness"] }
+                      : x,
                   ),
                 )
               }
@@ -688,7 +775,11 @@ function RetentionTab({
               <Input
                 value={r.note ?? ""}
                 onChange={(e) =>
-                  onChange(value.map((x) => (x.id === r.id ? { ...x, note: e.target.value } : x)))
+                  onChange(
+                    value.map((x) =>
+                      x.id === r.id ? { ...x, note: e.target.value } : x,
+                    ),
+                  )
                 }
               />
             </div>

@@ -4,10 +4,18 @@ import dynamic from "next/dynamic";
 
 import { SuspenseGridResultSchema } from "@/lib/types";
 
-import { InvalidResultNotice, OverflowTable, SectionTitle, Separator } from "./shared";
+import {
+  InvalidResultNotice,
+  OverflowTable,
+  SectionTitle,
+  Separator,
+} from "./shared";
 
 const SuspenseGridChart = dynamic(
-  () => import("@/components/charts/suspense-grid-chart").then((m) => m.SuspenseGridChart),
+  () =>
+    import("@/components/charts/suspense-grid-chart").then(
+      (m) => m.SuspenseGridChart,
+    ),
   { ssr: false, loading: () => <ChartSkeleton /> },
 );
 
@@ -17,7 +25,10 @@ function ChartSkeleton() {
   );
 }
 
-const KIND_LABEL: Record<"foreshadow" | "mystery" | "deferred_promise" | "red_herring", string> = {
+const KIND_LABEL: Record<
+  "foreshadow" | "mystery" | "deferred_promise" | "red_herring",
+  string
+> = {
   foreshadow: "伏笔",
   mystery: "谜团",
   deferred_promise: "延迟承诺",
@@ -62,7 +73,9 @@ export function SuspenseGridPanel({ result }: { result: unknown }) {
           <Separator />
           <div className="space-y-3">
             <SectionTitle title="未回收" token="unresolved" />
-            <p className="font-mono text-[12px] text-foreground">{data.unresolved.join(" · ")}</p>
+            <p className="font-mono text-[12px] text-foreground">
+              {data.unresolved.join(" · ")}
+            </p>
           </div>
         </>
       ) : null}

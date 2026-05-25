@@ -2,7 +2,13 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronDown, ChevronUp, Loader2, RefreshCw, Sparkles } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronUp,
+  Loader2,
+  RefreshCw,
+  Sparkles,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { AnalysisDetail } from "@/components/sessions/analysis-detail";
@@ -46,7 +52,10 @@ const EXTENDED_HELP: Record<ExtendedAnalysisDimension, string> = {
   suspense_grid: "伏笔 / 谜团 / 延迟承诺 / 红鲱鱼的设置与回收点 → 悬念格。",
 };
 
-function summarizeLegacyResult(dimension: LegacyAnalysisDimension, result: unknown) {
+function summarizeLegacyResult(
+  dimension: LegacyAnalysisDimension,
+  result: unknown,
+) {
   if (!result || typeof result !== "object") {
     return "还没有可用结果。";
   }
@@ -77,7 +86,11 @@ function getLegacyStatusCopy(state: AnalysisState) {
     return { label: "完成", className: "text-flash", glyph: "●" };
   }
   if (state === "loading") {
-    return { label: "分析中", className: "text-primary animate-pulse", glyph: "◐" };
+    return {
+      label: "分析中",
+      className: "text-primary animate-pulse",
+      glyph: "◐",
+    };
   }
   if (state === "error") {
     return { label: "失败", className: "text-destructive", glyph: "✕" };
@@ -86,20 +99,31 @@ function getLegacyStatusCopy(state: AnalysisState) {
 }
 
 function getExtendedStatusCopy(state: AnalysisState) {
-  if (state === "done") return { label: "已完成", className: "text-flash", glyph: "●" };
+  if (state === "done")
+    return { label: "已完成", className: "text-flash", glyph: "●" };
   if (state === "loading") {
-    return { label: "分析中", className: "text-primary animate-pulse", glyph: "◐" };
+    return {
+      label: "分析中",
+      className: "text-primary animate-pulse",
+      glyph: "◐",
+    };
   }
-  if (state === "error") return { label: "失败", className: "text-destructive", glyph: "✕" };
+  if (state === "error")
+    return { label: "失败", className: "text-destructive", glyph: "✕" };
   return { label: "待开始", className: "text-muted-foreground", glyph: "○" };
 }
 
-function getLegacyDimensionSummary(dimension: LegacyAnalysisDimension, item: DimensionStatus) {
+function getLegacyDimensionSummary(
+  dimension: LegacyAnalysisDimension,
+  item: DimensionStatus,
+) {
   if (item.state === "loading") {
     return `正在生成${DIMENSION_LABELS[dimension]}分析，请稍候。`;
   }
   if (item.state === "error") {
-    return item.result ? "重试失败，保留上次结果" : "本维度分析失败，可单独重试";
+    return item.result
+      ? "重试失败，保留上次结果"
+      : "本维度分析失败，可单独重试";
   }
   if (item.state === "done") {
     return summarizeLegacyResult(dimension, item.result);
@@ -140,9 +164,14 @@ function LegacyAnalysisAccordion({
 }: LegacyPanelProps) {
   const router = useRouter();
   const dimensions = ANALYSIS_DIMENSIONS;
-  const initialMap = useMemo<Record<LegacyAnalysisDimension, DimensionStatus>>(() => {
+  const initialMap = useMemo<
+    Record<LegacyAnalysisDimension, DimensionStatus>
+  >(() => {
     const done = new Map(
-      analyses.map((item) => [item.dimension as LegacyAnalysisDimension, item.result]),
+      analyses.map((item) => [
+        item.dimension as LegacyAnalysisDimension,
+        item.result,
+      ]),
     );
     return {
       worldview: done.has("worldview")
@@ -157,7 +186,9 @@ function LegacyAnalysisAccordion({
     };
   }, [analyses]);
   const [items, setItems] = useState(initialMap);
-  const [expanded, setExpanded] = useState<Record<LegacyAnalysisDimension, boolean>>({
+  const [expanded, setExpanded] = useState<
+    Record<LegacyAnalysisDimension, boolean>
+  >({
     worldview: false,
     characters: false,
     narrative: false,
@@ -200,7 +231,8 @@ function LegacyAnalysisAccordion({
         | { error: string | LLMClientError };
 
       if (!response.ok || !("ok" in payload)) {
-        const error = "error" in payload ? payload.error : "分析失败，请稍后重试。";
+        const error =
+          "error" in payload ? payload.error : "分析失败，请稍后重试。";
         setItems((current) => ({
           ...current,
           [dimension]: { ...current[dimension], state: "error" },
@@ -234,20 +266,28 @@ function LegacyAnalysisAccordion({
 
   async function runAll() {
     const pendingDims = dimensions.filter((d) => items[d].state !== "done");
-    await Promise.all(pendingDims.map((d) => runDimension(d, { refresh: false })));
+    await Promise.all(
+      pendingDims.map((d) => runDimension(d, { refresh: false })),
+    );
     router.refresh();
   }
 
-  const hasLoading = dimensions.some((dimension) => items[dimension].state === "loading");
+  const hasLoading = dimensions.some(
+    (dimension) => items[dimension].state === "loading",
+  );
   const blockedByGenerating = sessionStatus === "generating";
-  const doneCount = dimensions.filter((dimension) => items[dimension].state === "done").length;
+  const doneCount = dimensions.filter(
+    (dimension) => items[dimension].state === "done",
+  ).length;
   const allDone = doneCount === dimensions.length;
 
   return (
     <section id="analysis-panel" className="space-y-5">
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div className="space-y-2">
-          <h2 className="text-[20px] font-medium leading-tight text-foreground">分析结果</h2>
+          <h2 className="text-[20px] font-medium leading-tight text-foreground">
+            分析结果
+          </h2>
           <p className="max-w-2xl text-[13px] leading-7 text-muted-foreground">
             {allDone
               ? "三项分析已经完成。需要时可以单独重跑某一项。"
@@ -256,7 +296,9 @@ function LegacyAnalysisAccordion({
           {!llmConfigured ? (
             <p className="text-[12px] text-primary">先完成模型设置再开始。</p>
           ) : blockedByGenerating ? (
-            <p className="text-[12px] text-primary">当前正在生成，暂不可重新分析。</p>
+            <p className="text-[12px] text-primary">
+              当前正在生成，暂不可重新分析。
+            </p>
           ) : null}
         </div>
 
@@ -294,7 +336,12 @@ function LegacyAnalysisAccordion({
                     <h3 className="text-[15px] font-medium text-foreground">
                       {DIMENSION_LABELS[dimension]}
                     </h3>
-                    <span className={cn("font-mono text-[11px]", statusCopy.className)}>
+                    <span
+                      className={cn(
+                        "font-mono text-[11px]",
+                        statusCopy.className,
+                      )}
+                    >
                       {statusCopy.glyph} {statusCopy.label}
                     </span>
                   </div>
@@ -308,7 +355,10 @@ function LegacyAnalysisAccordion({
                     variant="terminal"
                     size="sm"
                     onClick={() => {
-                      if (item.state === "done" && typeof window !== "undefined") {
+                      if (
+                        item.state === "done" &&
+                        typeof window !== "undefined"
+                      ) {
                         const ok = window.confirm(
                           `重新分析「${DIMENSION_LABELS[dimension]}」将消耗模型配额。继续？`,
                         );
@@ -316,7 +366,11 @@ function LegacyAnalysisAccordion({
                       }
                       void runDimension(dimension);
                     }}
-                    disabled={!llmConfigured || blockedByGenerating || item.state === "loading"}
+                    disabled={
+                      !llmConfigured ||
+                      blockedByGenerating ||
+                      item.state === "loading"
+                    }
                   >
                     {item.state === "loading" ? (
                       <>
@@ -379,7 +433,9 @@ function ExtendedAnalysisAccordion({
 }: ExtendedPanelProps) {
   const router = useRouter();
   const dimensions = EXTENDED_ANALYSIS_DIMENSIONS;
-  const initial = useMemo<Record<ExtendedAnalysisDimension, DimensionStatus>>(() => {
+  const initial = useMemo<
+    Record<ExtendedAnalysisDimension, DimensionStatus>
+  >(() => {
     const map = new Map(
       analyses.map((a) => [a.dimension as ExtendedAnalysisDimension, a.result]),
     );
@@ -400,7 +456,9 @@ function ExtendedAnalysisAccordion({
   }, [analyses]);
 
   const [items, setItems] = useState(initial);
-  const [expanded, setExpanded] = useState<Record<ExtendedAnalysisDimension, boolean>>({
+  const [expanded, setExpanded] = useState<
+    Record<ExtendedAnalysisDimension, boolean>
+  >({
     prose_craft: false,
     emotion_arc: false,
     pacing_map: false,
@@ -408,7 +466,10 @@ function ExtendedAnalysisAccordion({
   });
 
   async function runDimension(dimension: ExtendedAnalysisDimension) {
-    setItems((c) => ({ ...c, [dimension]: { ...c[dimension], state: "loading" } }));
+    setItems((c) => ({
+      ...c,
+      [dimension]: { ...c[dimension], state: "loading" },
+    }));
     try {
       const res = await fetch("/api/analyze/extended", {
         method: "POST",
@@ -420,14 +481,23 @@ function ExtendedAnalysisAccordion({
         | { error: string };
       if (!res.ok || !("ok" in payload)) {
         const error = "error" in payload ? payload.error : "扩展分析失败。";
-        setItems((c) => ({ ...c, [dimension]: { ...c[dimension], state: "error" } }));
+        setItems((c) => ({
+          ...c,
+          [dimension]: { ...c[dimension], state: "error" },
+        }));
         toast.error(`${DIMENSION_LABELS[dimension]}：${error}`);
         return;
       }
-      setItems((c) => ({ ...c, [dimension]: { state: "done", result: payload.result } }));
+      setItems((c) => ({
+        ...c,
+        [dimension]: { state: "done", result: payload.result },
+      }));
       router.refresh();
     } catch {
-      setItems((c) => ({ ...c, [dimension]: { ...c[dimension], state: "error" } }));
+      setItems((c) => ({
+        ...c,
+        [dimension]: { ...c[dimension], state: "error" },
+      }));
       toast.error(`${DIMENSION_LABELS[dimension]}：网络异常，请稍后重试。`);
     }
   }
@@ -442,7 +512,8 @@ function ExtendedAnalysisAccordion({
           扩展分析
         </h2>
         <p className="max-w-2xl text-[14px] leading-7 text-muted-foreground">
-          按需启用更深层的写作技法、情感曲线、节奏与悬念分析。这些维度会消耗额外模型调用成本，按需启用即可。已完成 {doneCount} / {dimensions.length}。
+          按需启用更深层的写作技法、情感曲线、节奏与悬念分析。这些维度会消耗额外模型调用成本，按需启用即可。已完成{" "}
+          {doneCount} / {dimensions.length}。
         </p>
       </div>
 
@@ -459,7 +530,9 @@ function ExtendedAnalysisAccordion({
                     <span className="text-[12px] font-medium text-primary/85">
                       {EXTENDED_TOKEN[dimension]}
                     </span>
-                    <span className={cn("font-mono text-[11px]", meta.className)}>
+                    <span
+                      className={cn("font-mono text-[11px]", meta.className)}
+                    >
                       {meta.glyph} {meta.label}
                     </span>
                   </div>
@@ -475,9 +548,14 @@ function ExtendedAnalysisAccordion({
                   <Button
                     variant="terminal"
                     size="sm"
-                    disabled={!llmConfigured || disabled || item.state === "loading"}
+                    disabled={
+                      !llmConfigured || disabled || item.state === "loading"
+                    }
                     onClick={() => {
-                      if (item.state === "done" && typeof window !== "undefined") {
+                      if (
+                        item.state === "done" &&
+                        typeof window !== "undefined"
+                      ) {
                         const ok = window.confirm(
                           `重新分析「${DIMENSION_LABELS[dimension]}」将消耗模型配额。继续？`,
                         );
@@ -508,7 +586,12 @@ function ExtendedAnalysisAccordion({
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => setExpanded((c) => ({ ...c, [dimension]: !c[dimension] }))}
+                      onClick={() =>
+                        setExpanded((c) => ({
+                          ...c,
+                          [dimension]: !c[dimension],
+                        }))
+                      }
                     >
                       {expanded[dimension] ? (
                         <>

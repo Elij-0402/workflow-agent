@@ -81,14 +81,30 @@ export default async function SessionsPage() {
       </section>
 
       <section className="grid gap-4 lg:grid-cols-4">
-        <MetricCard label="活跃项目" value={String(summary?.activeProjectCount ?? 0)} />
-        <MetricCard label="待确认蓝图" value={String(summary?.waitingBlueprintCount ?? 0)} />
-        <MetricCard label="活跃简报" value={String(summary?.activeBriefCount ?? 0)} />
-        <MetricCard label="已生成版本" value={String(summary?.generatedVariantCount ?? 0)} />
+        <MetricCard
+          label="活跃项目"
+          value={String(summary?.activeProjectCount ?? 0)}
+        />
+        <MetricCard
+          label="待确认蓝图"
+          value={String(summary?.waitingBlueprintCount ?? 0)}
+        />
+        <MetricCard
+          label="活跃简报"
+          value={String(summary?.activeBriefCount ?? 0)}
+        />
+        <MetricCard
+          label="已生成版本"
+          value={String(summary?.generatedVariantCount ?? 0)}
+        />
       </section>
 
       {sessions.length > 0 ? (
-        <SessionsClient sessions={sessions} view="active" recentEvents={recentEvents} />
+        <SessionsClient
+          sessions={sessions}
+          view="active"
+          recentEvents={recentEvents}
+        />
       ) : (
         <EmptyState
           icon={BookOpen}
