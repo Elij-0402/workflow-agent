@@ -39,15 +39,24 @@ export function MobileNav() {
           <SheetDescription className="sr-only">产品主导航</SheetDescription>
         </SheetHeader>
 
-        <div className="px-5 py-5">
+        <div className="flex flex-col gap-2 px-5 py-5">
           <Button
             asChild
             variant="default"
+            className="h-10 w-full justify-center gap-2"
+          >
+            <Link href="/upload?mode=dual" onClick={() => setOpen(false)}>
+              <Plus aria-hidden="true" />
+              新建双书项目
+            </Link>
+          </Button>
+          <Button
+            asChild
+            variant="outline"
             className="h-10 w-full justify-center"
           >
-            <Link href="/create" onClick={() => setOpen(false)}>
-              <Plus aria-hidden="true" />
-              新建项目
+            <Link href="/upload?mode=single" onClick={() => setOpen(false)}>
+              单书项目
             </Link>
           </Button>
         </div>

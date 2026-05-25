@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 
+import { ContextualShellTitle } from "@/components/contextual-shell-title";
 import { MobileNav } from "@/components/mobile-nav";
 import { Sidebar } from "@/components/sidebar";
 import { UserMenu } from "@/components/user-menu";
@@ -29,12 +30,7 @@ export default async function AppLayout({
           <header className="sticky top-0 z-30 flex h-16 items-center border-b border-border/70 bg-background/90 px-4 backdrop-blur md:px-6">
             <MobileNav />
             <div className="ml-auto flex items-center gap-3">
-              <div className="hidden text-right md:block">
-                <p className="mono-label-sm">工作台</p>
-                <p className="text-[12px] text-muted-foreground">
-                  项目优先 · 中文界面
-                </p>
-              </div>
+              <ContextualShellTitle />
               <UserMenu email={user.email ?? "anonymous"} />
             </div>
           </header>

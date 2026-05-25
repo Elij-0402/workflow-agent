@@ -19,28 +19,22 @@ export function Sidebar() {
               NovelFusion
             </span>
           </span>
-          <span className="mt-2 block text-[11px] text-muted-foreground">
-            AI 小说创作工作台
+          <span className="mt-2 block type-caption text-muted-foreground">
+            双书蓝图工作台
           </span>
         </div>
       </Link>
 
-      <div className="px-5 pt-5">
+      <div className="flex flex-col gap-2 px-5 pt-5">
         <Button asChild className="h-10 w-full justify-center gap-2">
-          <Link href="/create">
+          <Link href="/upload?mode=dual">
             <Plus className="h-4 w-4" aria-hidden />
-            新建项目
+            新建双书项目
           </Link>
         </Button>
-      </div>
-
-      <div className="px-5 pt-5">
-        <div className="surface-subtle px-4 py-3">
-          <p className="mono-label-sm">当前主线</p>
-          <p className="mt-2 text-[13px] leading-6 text-muted-foreground">
-            从项目总览进入分析、蓝图、简报与结果，不再把页面当孤立工具用。
-          </p>
-        </div>
+        <Button asChild variant="outline" className="h-10 w-full justify-center">
+          <Link href="/upload?mode=single">单书项目</Link>
+        </Button>
       </div>
 
       <div className="flex-1 px-3 py-5">
