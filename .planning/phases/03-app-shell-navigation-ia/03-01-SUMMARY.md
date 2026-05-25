@@ -75,7 +75,7 @@ Each task was committed atomically:
 2. **Task 2: Sidebar / mobile CTAs + contextual header** - `3bfa82d` (feat)
 3. **Task 3: Sessions CTAs + dual redirect + 项目概览** - `64f069d` (feat)
 
-**Plan metadata:** pending docs commit
+**Plan metadata:** `7b89818` (docs: complete shell dual-first plan)
 
 ## Files Created/Modified
 
