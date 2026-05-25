@@ -18,5 +18,7 @@ export const COLOR_TOKENS: ColorToken[] = [
   { name: "muted-foreground", value: "218 12% 66%", role: "次文字 (~20%)" },
   { name: "primary", value: "238 79% 67%", role: "品牌·CTA (≤5%)" },
   { name: "destructive", value: "8 56% 51%", role: "破坏性操作 (≤1%)" },
+  { name: "info", value: "200 70% 55%", role: "进行中" },
+  { name: "warning", value: "38 90% 55%", role: "注意" },
   { name: "flash", value: "154 45% 48%", role: "成功/已锁定" },
 ];

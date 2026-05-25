@@ -54,6 +54,18 @@
     --locked: 132 23% 54%;
     --blocked: 8 30% 45%;
 
+    /* 8px spacing scale — keep in sync with 02-UI-SPEC.md */
+    --space-1: 0.5rem; /* 8px */
+    --space-2: 1rem; /* 16px */
+    --space-3: 1.5rem; /* 24px */
+    --space-4: 2rem; /* 32px */
+    --space-5: 2.5rem; /* 40px */
+    --space-6: 3rem; /* 48px */
+
+    /* Semantic status — keep in sync with theme-tokens.ts */
+    --info: 200 70% 55%;
+    --warning: 38 90% 55%;
+
     --duration-instant: 80ms;
     --duration-fast: 160ms;
     --duration-base: 220ms;
@@ -105,29 +117,67 @@
   }
 
   .app-page {
-    @apply mx-auto flex w-full max-w-[1280px] flex-col gap-7 px-4 py-6 sm:px-6 lg:px-8 lg:py-8;
+    @apply mx-auto flex w-full max-w-[1280px] flex-col gap-10 px-4 py-6 sm:px-6 lg:px-8 lg:py-8;
   }
 
   .surface-panel {
-    @apply relative rounded-[6px] border border-border/90 bg-card;
+    @apply relative rounded-[var(--radius-md)] border border-border/90 bg-card;
   }
 
   .surface-subtle {
-    @apply rounded-[6px] border border-border/70 bg-muted/35;
+    @apply rounded-[var(--radius-md)] border border-border/70 bg-muted/35;
   }
 
   .surface-locked {
-    @apply relative rounded-[6px] border border-dashed border-border bg-card;
+    @apply relative rounded-[var(--radius-md)] border border-dashed border-border bg-card;
+  }
+
+  .type-display {
+    @apply chinese-display text-xl text-foreground;
+  }
+
+  .type-title {
+    @apply text-lg font-semibold text-foreground;
+  }
+
+  .type-body {
+    @apply text-sm text-foreground;
+  }
+
+  .type-caption {
+    @apply text-xs text-muted-foreground;
+  }
+
+  .type-mono-label {
+    font-family: var(--font-mono), "JetBrains Mono", ui-monospace, monospace;
+    @apply text-[10.5px] uppercase tracking-[0.12em] text-muted-foreground;
+  }
+
+  .text-info {
+    color: hsl(var(--info));
+  }
+
+  .bg-info\/10 {
+    background-color: hsl(var(--info) / 0.1);
+  }
+
+  .text-warning {
+    color: hsl(var(--warning));
+  }
+
+  .bg-warning\/10 {
+    background-color: hsl(var(--warning) / 0.1);
   }
 
   .eyebrow-label {
     font-family: var(--font-mono), "JetBrains Mono", ui-monospace, monospace;
     @apply text-[10.5px] uppercase tracking-[0.14em] text-muted-foreground/70;
   }
+  /* Prefer .type-mono-label for new markup; eyebrow-label retained for legacy. */
 
   .data-label {
     font-family: var(--font-mono), "JetBrains Mono", ui-monospace, monospace;
-    @apply text-[10.5px] uppercase tracking-[0.14em] text-primary/80;
+    @apply text-[10.5px] uppercase tracking-[0.14em] text-muted-foreground;
   }
 
   .reading-prose {
