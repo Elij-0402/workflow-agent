@@ -22,8 +22,8 @@
 ### 核心界面
 
 - [x] **WB-01**: 双书工作台：减少同屏面板数，分析/蓝图/生成阶段视觉分段清晰
-- [ ] **WB-02**: 会话列表与项目概览：列表可读、状态一眼可辨，无仪表盘噪声
-- [ ] **WB-03**: 关键操作（confirm 蓝图、生成、批量分析）具备一致的主按钮层级与反馈
+- [x] **WB-02**: 会话列表与项目概览：列表可读、状态一眼可辨，无仪表盘噪声
+- [x] **WB-03**: 关键操作（confirm 蓝图、生成、批量分析）具备一致的主按钮层级与反馈
 
 ### 质量与成功标准
 
@@ -58,11 +58,11 @@
 | IA-02 | Phase 3 | Complete |
 | IA-03 | Phase 3 | Complete |
 | WB-01 | Phase 4 | Complete |
-| WB-02 | Phase 4 | Pending |
-| WB-03 | Phase 4 | Pending |
-| QLT-01 | Phase 5 | Pending |
-| QLT-02 | Phase 5 | Pending |
-| QLT-03 | Phase 5 | Pending |
+| WB-02 | Phase 4 | Complete |
+| WB-03 | Phase 4 | Complete |
+| QLT-01 | Phase 5 | Verified in `05-VERIFICATION.md` (197 tests; smoke SSOT) — checkbox pending milestone close |
+| QLT-02 | Phase 5 | Verified in `05-UAT.md` owner signoff — checkbox pending milestone close |
+| QLT-03 | Phase 5 | Verified Tier A grep + Tier B disposition — checkbox pending milestone close |
 
 **Coverage:**
 
@@ -72,4 +72,4 @@
 
 ---
 *Requirements defined: 2026-05-26*  
-*Last updated: 2026-05-26 after gsd-new-project*
+*Last updated: 2026-05-26 after Phase 5 verification (D-25: QLT checkboxes unchanged until milestone complete)*

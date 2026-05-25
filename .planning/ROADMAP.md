@@ -10,7 +10,7 @@
 - [x] **Phase 2: 极简设计契约** — UI-SPEC 与视觉决策
 - [x] **Phase 3: 应用壳与导航 IA** — 双书英雄旅程
 - [x] **Phase 4: 核心界面密度重构** — 工作台与会话 (completed 2026-05-25)
-- [ ] **Phase 5: 验收与 SaaS 级打磨** — 测试、日用性、一致性
+- [x] **Phase 5: 验收与 SaaS 级打磨** — 测试、日用性、一致性 (completed 2026-05-25)
 
 ## Phase Details
 
@@ -128,12 +128,15 @@ Plans:
 Plans:
 
 **Wave 1**
-- [ ] 05-01-PLAN.md — 自动化回归 + smoke 对齐 + 05-SMOKE.md（QLT-01）
+
+- [x] 05-01-PLAN.md — 自动化回归 + smoke 对齐 + 05-SMOKE.md（QLT-01）
 
 **Wave 2** *(blocked on Wave 1 completion)*
-- [ ] 05-02-PLAN.md — UAT 11 场景 + 05-VERIFICATION + Tier B 债务（QLT-02、QLT-03，depends 05-01）
+
+- [x] 05-02-PLAN.md — UAT 11 场景 + 05-VERIFICATION + Tier B 债务（QLT-02、QLT-03，depends 05-01）
 
 **Cross-cutting constraints:**
+
 - 硬性门禁：每个 plan task 结束前 `npm run type-check && npm test`
 - 所有者本人签署 QLT-02；REQUIREMENTS 复选框由里程碑流程勾选（D-25）
 
@@ -147,4 +150,4 @@ Plans:
 | 2. 极简设计契约 | 2/2 | Complete | 2026-05-26 |
 | 3. 应用壳与导航 IA | 2/2 | Complete | 2026-05-26 |
 | 4. 核心界面密度重构 | 3/3 | Complete    | 2026-05-25 |
-| 5. 验收与 SaaS 级打磨 | 0/2 | Not started | - |
+| 5. 验收与 SaaS 级打磨 | 2/2 | Complete   | 2026-05-25 |

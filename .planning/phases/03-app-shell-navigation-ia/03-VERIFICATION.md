@@ -146,6 +146,10 @@ No orphaned requirement IDs for Phase 3.
 无代码级 BLOCKER。实现与 PLAN `must_haves`、IA-02/IA-03 及双书主路径接线一致；`npm test` 全绿。  
 状态为 **human_needed**：ROADMAP 两条认知/感知成功标准（30 秒理解、噪音显著降低）无法仅凭静态分析闭合。完成上述人工项后，若无回归，可将 status 更新为 `passed`。
 
+### Phase 5 supersession (2026-05-26)
+
+Phase 5 `05-UAT.md` Tests **8–10** 覆盖本阶段 `human_verification` 三项（30 秒主路径、导航噪音、移动 Sheet IA）。所有者已签署 QLT-02；见 `.planning/phases/05-saas/05-VERIFICATION.md`。`03-HUMAN-UAT.md` → **complete**。
+
 ---
 
 _Verified: 2026-05-26T19:10:00Z_  
