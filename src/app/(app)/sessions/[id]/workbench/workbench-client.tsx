@@ -46,6 +46,7 @@ import {
   getBookProviderCompatibility,
   type AnalysisMode,
 } from "@/lib/books/content";
+import { CTA_COPY } from "@/lib/ui/cta-copy";
 import type {
   ChapterBriefResult,
   VariantRow as StoredVariantRow,
@@ -484,7 +485,7 @@ export function WorkbenchClient(props: Props) {
       if (controller.signal.aborted) {
         toast.info("批量分析已中止。");
       } else if (failures.length > 0) {
-        toast.error(`完成了，但还有 ${failures.length} 章失败。`);
+        toast.error(CTA_COPY.batchFailureToast);
       } else {
         toast.success("这本书的章节都分析完成了。");
       }
@@ -550,6 +551,14 @@ export function WorkbenchClient(props: Props) {
   }
 
   function navigateToStep(step: FlowStep) {
+    if (step === "generate" && !compareDone) {
+      toast.error(CTA_COPY.blueprintBlockedToast);
+      setActiveStep("compare");
+      router.replace(
+        `/sessions/${props.session.id}/workbench?step=compare`,
+      );
+      return;
+    }
     if (
       !isStepAllowed(step, {
         hasBothBooks,
@@ -561,6 +570,19 @@ export function WorkbenchClient(props: Props) {
       return;
     setActiveStep(step);
     router.replace(`/sessions/${props.session.id}/workbench?step=${step}`);
+  }
+
+  function openGenerateDrawer() {
+    if (!compareDone) {
+      toast.error(CTA_COPY.blueprintBlockedToast);
+      navigateToStep("compare");
+      return;
+    }
+    if (!blueprintId) {
+      toast.error("请先保存蓝图。");
+      return;
+    }
+    setGenerateOpen(true);
   }
 
   const analysisGrid = (
@@ -860,16 +882,16 @@ export function WorkbenchClient(props: Props) {
                 </p>
               </div>
               <Button
-                onClick={() => setGenerateOpen(true)}
+                onClick={openGenerateDrawer}
                 disabled={!compareDone || !blueprintId}
               >
                 <Sparkles className="h-4 w-4" aria-hidden />
-                生成新版本
+                {CTA_COPY.generateNewVersion}
               </Button>
             </div>
             {!compareDone ? (
-              <p className="type-caption text-warning">
-                需要先在上一步确认蓝图，才能开始生成。
+              <p className="type-caption text-muted-foreground">
+                {CTA_COPY.blueprintBlockedCaption}
               </p>
             ) : null}
             {props.variants.length === 0 ? (

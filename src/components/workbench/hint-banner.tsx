@@ -9,7 +9,7 @@ export function HintBanner({ hint }: { hint: Hint }) {
       role="status"
       aria-live="polite"
     >
-      <p className="text-[12px] leading-6 text-primary/90">{hint.text}</p>
+      <p className="type-caption leading-6 text-muted-foreground">{hint.text}</p>
     </div>
   );
 }

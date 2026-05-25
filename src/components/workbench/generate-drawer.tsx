@@ -18,6 +18,7 @@ import {
 import { toastError } from "@/lib/error-toast";
 import type { LLMClientError } from "@/lib/llm/errors";
 import { GenerateConfigSchema, type GenerateConfig } from "@/lib/types";
+import { CTA_COPY } from "@/lib/ui/cta-copy";
 
 type Props = {
   open: boolean;
@@ -102,7 +103,7 @@ export function GenerateDrawer({
             innovation={innovation}
             variantCount={0}
             footerNote=""
-            submitLabel="生成新版本"
+            submitLabel={CTA_COPY.generateNewVersion}
             advancedToggleClassName="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.10em] text-primary/85 transition-colors hover:text-primary"
             onSubmit={onSubmit}
             footer={
@@ -128,7 +129,7 @@ export function GenerateDrawer({
                     ) : (
                       <>
                         <Sparkles />
-                        生成新版本
+                        {CTA_COPY.generateNewVersion}
                       </>
                     )}
                   </Button>

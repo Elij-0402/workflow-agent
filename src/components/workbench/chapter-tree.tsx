@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { CTA_COPY } from "@/lib/ui/cta-copy";
 import { ChapterCard, type CandidateAddRequest } from "./chapter-card";
 import { FilterBar, type FilterState } from "./filter-bar";
 import type { ChapterBriefResult } from "@/lib/types";
@@ -114,7 +115,9 @@ export function ChapterTree({
 
   const chunkLabel = analysisMode === "block-fallback" ? "个片段" : "章";
   const batchLabel =
-    analysisMode === "block-fallback" ? "批量分析片段" : "批量分析";
+    analysisMode === "block-fallback"
+      ? "批量分析片段"
+      : CTA_COPY.batchAnalysis;
   const synthLabel = synthesisDone ? "重新生成整书汇总" : "整书汇总";
   const positionLabel =
     position === "A" ? "参考书一" : position === "B" ? "参考书二" : null;
@@ -133,7 +136,7 @@ export function ChapterTree({
         <div className="min-w-0 flex-1">
           <div className="flex items-baseline gap-2">
             {position ? (
-              <span className="text-[12px] font-medium text-primary">
+              <span className="type-caption font-medium text-muted-foreground">
                 {positionLabel}
               </span>
             ) : null}

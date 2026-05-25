@@ -13,6 +13,7 @@ import {
   type GenerateConfig,
   type SessionStatus,
 } from "@/lib/types";
+import { CTA_COPY } from "@/lib/ui/cta-copy";
 
 import { GenerateForm } from "./generate-form";
 
@@ -93,7 +94,7 @@ export function GeneratePanel({
   async function onSubmit(values: GenerateConfig) {
     if (variantCount > 0 && typeof window !== "undefined") {
       const ok = window.confirm(
-        `生成新版本将消耗 BYOK 配额。已有 ${variantCount} 个版本，继续？`,
+        CTA_COPY.generateQuotaConfirm(variantCount),
       );
       if (!ok) return;
     }
@@ -144,10 +145,10 @@ export function GeneratePanel({
             : "先用常用参数生成第一个版本，其他设置按需展开。"}
         </p>
         {blockReason ? (
-          <p className="text-[12px] text-primary">{blockReason}</p>
+          <p className="type-caption text-muted-foreground">{blockReason}</p>
         ) : null}
         {pending ? (
-          <p className="font-mono text-[12px] text-primary">
+          <p className="type-caption font-mono text-muted-foreground">
             生成中 · 预计 30-60s · 已用 {elapsedSeconds}s
           </p>
         ) : null}
@@ -165,7 +166,7 @@ export function GeneratePanel({
               ? "每次生成会追加新版本，不会覆盖旧版本。"
               : "结果会保存到当前任务。"
           }
-          submitLabel={variantCount > 0 ? "再生成一版" : "生成变体"}
+          submitLabel={CTA_COPY.generateNewVersion}
           onSubmit={onSubmit}
         />
       </div>
