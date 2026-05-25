@@ -58,3 +58,29 @@
 - `src/lib/upload/actions.ts` — 上传/创建流程
 - `src/app/(app)/settings/actions.ts` — 设置（BYOK 等）
 - `src/app/(auth)/actions.ts` — 登录
+
+---
+
+## 功能矩阵
+
+表头按 D-02。正文中文；路径/API 英文。
+
+| 路由/入口 | 用户目标 | 与双书主路径关系 | 频率 | 关键依赖 | 客观信号 | 备注 |
+|-----------|----------|------------------|------|----------|----------|------|
+| `/sessions` | 查看并进入双书/单书项目 | 主 | 高 | `GET/DELETE sessions/[id]`, `sessions/bulk` | **APP_NAV_ITEMS** 顶栏「项目」；sidebar 一级；登录后 **1 步** | 列表 CTA 指向 `/upload?mode=dual` |
+| `/sessions/[id]` | 打开会话（单书详情或 dual 跳转工作台） | 主 | 高 | `sessions/[id]`, `analyze/*`, `blueprint` | 情境入口；登录后 **2–3 步**（列表→会话） | `mode=dual` 时 **redirect** → `/sessions/[id]/workbench`；单书分支为次要分析面板 |
+| `/sessions/[id]/workbench` | 双书五步：分析→对比/蓝图→确认→生成→阅读 | 主 | 高 | `analyze/chapter`, `analyze/book`, `blueprint`, `blueprint/confirm`, `generate-v2` | 情境深链；登录后 **3–4 步** | P0 英雄 UI；`generate-v2` 为主路径生成 |
+| `/create` · `/upload`（流程型入口） | 新建或上传参考书进入会话 | 主路径支撑 | 高 | `src/lib/upload/actions.ts`, `chapters/parse`, `analyze/chapter`, `analyze/book`, `sessions/[id]` | Sidebar「新建项目」→ `/create`（**2 步**）；双书上传 `/upload?mode=dual`（**2–3 步**，非顶栏四项） | D-03 合并一行；勿拆重复 API 行 |
+| `/studio` | 管理 AI 创作台简报 | 次要 | 中 | `briefs`, `briefs/[id]` | **APP_NAV_ITEMS** 顶栏「创作台」；登录后 **1 步** | 与主路径 **竞争注意力**（同级导航） |
+| `/studio/new` | 创建新简报 | 次要 | 低 | `briefs` | 创作台内 **2 步** | P2 spot-check |
+| `/studio/[briefId]` | 编辑/查看单条简报 | 次要 | 低 | `briefs/[id]` | 创作台内 **2–3 步** | P2 |
+| `/compare` | 跨书/跨章对比洞察 | 次要 | 中 | `compare/insights` | **APP_NAV_ITEMS** 顶栏「对比」；登录后 **1 步** | 竞争注意力点 |
+| `/library` | 浏览归档与资料 | 次要 | 中 | `sessions/bulk`（归档语义） | **APP_NAV_ITEMS** 顶栏「资料库」；登录后 **1 步** | `/sessions/archived` redirect 目标 |
+| `/settings` | 配置 API Key 与账户 | 次要 | 低 | `src/app/(app)/settings/actions.ts` | **APP_NAV_ITEMS** footer「设置」；登录后 **1 步**（底栏分隔） | 非四顶栏同级，但常驻 shell |
+| `/design-system` | 查看设计 token 参考 | 边缘 | 低 | — | 无主导航项；直达 **3+ 步**（需知 URL） | Appendix（D-12）；生产暴露风险记 P3 |
+| `/dashboard` | （遗留）仪表盘入口 | 边缘 | 低 | — | 无导航；**redirect → `/sessions`** | 仅 `redirect("/sessions")` |
+| `/sessions/archived` | （遗留）归档列表 | 边缘 | 低 | — | 无导航；**redirect → `/library`** | 仅 `redirect("/library")` |
+| `/` | 根路径登录分流 | 边缘 | 中 | `src/app/(auth)/actions.ts` | 登录前 **0 步**；已登录 → `/sessions` | 非 `(app)` shell |
+| `/login` | 登录账户 | 边缘 | 中 | `src/app/(auth)/actions.ts` | 认证前入口 | Auth 路由组 |
+
+**导航客观信号摘要（D-08）：** `APP_NAV_ITEMS` 四级顶栏 — 项目 `/sessions`、创作台 `/studio`、对比 `/compare`、资料库 `/library`；footer 设置 `/settings`（见 `src/components/app-nav.tsx`）。Sidebar 品牌区 CTA「新建项目」→ `/create`，与四顶栏并列构成 IA 竞争面。
