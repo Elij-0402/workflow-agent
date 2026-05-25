@@ -71,14 +71,14 @@ export function BatchTracker(props: Props) {
       aria-live="polite"
     >
       <div className="flex items-center justify-between gap-3">
-        <div className="text-[12px] font-medium text-primary/85">
+        <div className="type-caption font-medium text-muted-foreground">
           批量分析 · {bookLabel} · {props.bookTitle}
         </div>
         {!props.finished ? (
           <button
             type="button"
             onClick={props.onAbort}
-            className="text-[12px] text-muted-foreground transition-colors hover:text-destructive"
+            className="type-caption text-muted-foreground transition-colors hover:text-destructive"
             style={{ transitionDuration: "var(--duration-fast)" }}
             aria-label="中止批量分析"
           >
@@ -87,11 +87,11 @@ export function BatchTracker(props: Props) {
         ) : null}
       </div>
 
-      <div className="mt-2 text-[12px] text-muted-foreground">
+      <div className="type-caption mt-2 text-muted-foreground">
         已完成 <span className="text-flash">{props.doneCount}</span>
         {" / "}
         <span className="text-foreground">{props.total}</span> 章 · 正在分析{" "}
-        <span className="text-primary">{props.runningCount}</span> 章 · 等待中{" "}
+        <span className="text-info">{props.runningCount}</span> 章 · 等待中{" "}
         <span>{queued}</span> 章
         {props.errorCount > 0 ? (
           <>
@@ -127,14 +127,14 @@ export function BatchTracker(props: Props) {
             />
           ) : null}
         </div>
-        <div className="shrink-0 text-[12px] text-muted-foreground">
+        <div className="type-caption shrink-0 text-muted-foreground">
           {pct}% · 预计剩余 {etaText}
         </div>
       </div>
 
       {props.failures.length > 0 ? (
         <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-dashed border-border/50 pt-2">
-          <div className="text-[12px] text-destructive/85">
+          <div className="type-caption text-destructive/85">
             失败章节：{" "}
             {props.failures
               .slice(0, 6)
@@ -147,7 +147,7 @@ export function BatchTracker(props: Props) {
               variant="ghost"
               size="sm"
               onClick={props.onRetryFailed}
-              className="text-[12px] text-primary hover:text-primary"
+              className="type-caption text-muted-foreground hover:text-foreground"
             >
               重试失败章节
             </Button>

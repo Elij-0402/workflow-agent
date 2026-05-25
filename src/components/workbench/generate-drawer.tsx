@@ -88,7 +88,7 @@ export function GenerateDrawer({
       >
         <SheetHeader className="border-b border-dashed border-border/60 px-6 py-5">
           <p className="eyebrow-label">generate</p>
-          <SheetTitle className="font-display text-[24px] italic leading-tight">
+          <SheetTitle className="type-display font-display italic leading-tight">
             生成变体参数
           </SheetTitle>
           <SheetDescription>
@@ -104,11 +104,11 @@ export function GenerateDrawer({
             variantCount={0}
             footerNote=""
             submitLabel={CTA_COPY.generateNewVersion}
-            advancedToggleClassName="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.10em] text-primary/85 transition-colors hover:text-primary"
+            advancedToggleClassName="type-mono-label inline-flex items-center gap-2 transition-colors hover:text-foreground"
             onSubmit={onSubmit}
             footer={
               <div className="flex items-center justify-between gap-3 border-t border-dashed border-border/60 bg-card pt-4">
-                <p className="font-mono text-[10.5px] uppercase tracking-[0.08em] text-muted-foreground">
+                <p className="type-mono-label text-muted-foreground">
                   {"// 提交后约 30-60 秒"}
                 </p>
                 <div className="flex items-center gap-2">

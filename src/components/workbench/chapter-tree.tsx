@@ -140,18 +140,18 @@ export function ChapterTree({
                 {positionLabel}
               </span>
             ) : null}
-            <h3 className="truncate font-display text-[16px] italic leading-tight text-foreground">
+            <h3 className="type-title truncate font-display italic leading-tight text-foreground">
               {book.title}
             </h3>
           </div>
-          <div className="mt-1 text-[12px] text-muted-foreground">
+          <div className="mt-1 type-caption text-muted-foreground">
             共 {chapters.length} {chunkLabel}，已分析 {analyzedCount}{" "}
             {chunkLabel}
           </div>
-          <p className="mt-2 max-w-2xl text-[12px] leading-6 text-muted-foreground">
+          <p className="type-caption mt-2 max-w-2xl leading-6 text-muted-foreground">
             {summary}
           </p>
-          <div className="mt-2 flex flex-wrap gap-2 text-[12px] text-muted-foreground">
+          <div className="type-caption mt-2 flex flex-wrap gap-2 text-muted-foreground">
             <span className="rounded-full border border-border/70 px-2 py-0.5">
               分析方式：{getAnalysisModeLabel(analysisMode)}
             </span>
@@ -185,7 +185,7 @@ export function ChapterTree({
           ) : null}
         </div>
       </header>
-      <div className="border-b border-dashed border-border/60 px-4 py-2 text-[12px] text-muted-foreground">
+      <div className="type-caption border-b border-dashed border-border/60 px-4 py-2 text-muted-foreground">
         {analysisMode === "block-fallback"
           ? "批量分析适合先建立整书结构画像，不建议替代人工精读。当前会按片段提取人物、事件、冲突和主题线索。"
           : "批量分析适合先建立整书结构画像，不建议替代人工精读。关键章节建议人工抽查。"}
@@ -194,10 +194,10 @@ export function ChapterTree({
       <div className="flex-1 overflow-auto">
         {visibleChapters.length === 0 ? (
           <div className="flex flex-col gap-1 p-4">
-            <p className="text-[12px] font-medium text-muted-foreground/70">
+            <p className="type-caption font-medium text-muted-foreground/70">
               {chapters.length === 0 ? "暂无章节数据" : "当前筛选没有匹配结果"}
             </p>
-            <p className="text-[13px] leading-7 text-muted-foreground">
+            <p className="type-body leading-7 text-muted-foreground">
               {chapters.length === 0
                 ? "暂无章节数据，等待上传完成或重新解析。"
                 : "没有匹配的章节，调整筛选条件再试。"}

@@ -35,7 +35,7 @@ export function PipelineBar(p: Props) {
         const glyphColor = s.done
           ? "text-flash"
           : isCurrent
-            ? "text-primary"
+            ? "text-info"
             : "text-muted-foreground/55";
         const labelColor =
           s.done || isCurrent ? "text-foreground" : "text-muted-foreground";

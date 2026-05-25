@@ -712,7 +712,7 @@ export function WorkbenchClient(props: Props) {
             )}
           </div>
           <div className="surface-panel flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-[13px] leading-6 text-muted-foreground">
+            <p className="type-body leading-6 text-muted-foreground">
               {hasBothBooks
                 ? uploadSummary.footerText
                 : "还缺 1 本参考小说。补齐后才会开放分析步骤。"}
@@ -1214,7 +1214,7 @@ function UploadBookCard({
 }) {
   if (!book) {
     return (
-      <div className="surface-panel flex min-h-[220px] items-center justify-center p-6 text-[13px] text-muted-foreground">
+      <div className="type-body surface-panel flex min-h-[220px] items-center justify-center p-6 text-muted-foreground">
         还没有导入参考书 {label === "A" ? "1" : "2"}。
       </div>
     );
@@ -1229,11 +1229,11 @@ function UploadBookCard({
       <div className="flex items-center justify-between gap-3">
         <div>
           <p className="eyebrow-label">{bookLabel}</p>
-          <h3 className="mt-2 text-[20px] font-semibold leading-tight text-foreground">
+          <h3 className="type-title mt-2 leading-tight text-foreground">
             {`${bookLabel} · ${book.title}`}
           </h3>
         </div>
-        <span className="font-mono text-[24px] text-primary/50">
+        <span className="type-mono-label text-muted-foreground/50">
           {serialLabel}
         </span>
       </div>
@@ -1342,10 +1342,10 @@ function EmptySlot({
         strokeWidth={1.5}
         aria-hidden
       />
-      <h3 className="text-[20px] font-semibold leading-tight text-foreground">
+      <h3 className="type-title leading-tight text-foreground">
         {`还差参考书 ${position === "A" ? "1" : "2"}`}
       </h3>
-      <p className="max-w-xs text-[13px] leading-7 text-muted-foreground">
+      <p className="type-body max-w-xs leading-7 text-muted-foreground">
         补上缺少的参考小说后，这个任务才会开放完整的分析和对比流程。
       </p>
       <Button asChild>
@@ -1384,14 +1384,14 @@ function CollapsedChaptersBar({
       aria-label="返回分析步骤查看章节"
     >
       <span className="flex min-w-0 flex-wrap items-center gap-3">
-        <span className="text-[11px] uppercase tracking-[0.10em] text-muted-foreground">
+        <span className="type-mono-label text-muted-foreground">
           章节素材
         </span>
-        <span className="truncate text-[12px] text-foreground">
+        <span className="type-caption truncate text-foreground">
           {summary(a, "A")}
         </span>
         <span className="text-muted-foreground/30">·</span>
-        <span className="truncate text-[12px] text-foreground">
+        <span className="type-caption truncate text-foreground">
           {summary(b, "B")}
         </span>
       </span>

@@ -175,7 +175,7 @@ export function BlueprintEditor({
               key={t.key}
               data-active={active === t.key}
               onClick={() => setActive(t.key)}
-              className="rounded-[2px] px-2.5 py-1.5 text-[12.5px] text-muted-foreground transition-colors hover:text-foreground data-[active=true]:bg-accent data-[active=true]:text-foreground"
+              className="type-caption rounded-[2px] px-2.5 py-1.5 text-muted-foreground transition-colors hover:text-foreground data-[active=true]:bg-accent data-[active=true]:text-foreground"
               title={t.label}
             >
               {t.label}
@@ -184,7 +184,7 @@ export function BlueprintEditor({
         </nav>
         <div className="flex shrink-0 items-center gap-2">
           <span
-            className={`font-mono text-[10.5px] uppercase tracking-[0.12em] ${
+            className={`type-mono-label ${
               status === "confirmed" ? "text-flash" : "text-muted-foreground"
             }`}
           >
@@ -530,7 +530,7 @@ function ViewpointEditor({
   onSave: (patch: Partial<Blueprint["viewpoint"]>) => void;
 }) {
   return (
-    <div className="grid gap-3 p-4 text-[13px]">
+    <div className="type-body grid gap-3 p-4">
       <Field
         label="视角模式"
         value={bp.viewpoint.mode}
@@ -566,11 +566,11 @@ function Field({
 }) {
   return (
     <label className="flex items-start gap-3">
-      <span className="w-24 shrink-0 pt-2 text-[12.5px] text-muted-foreground">
+      <span className="type-caption w-24 shrink-0 pt-2 text-muted-foreground">
         {label}
       </span>
       <input
-        className="flex-1 rounded-[2px] border border-border bg-background/40 px-2 py-1.5 text-[13px] text-foreground focus:border-primary focus:outline-none"
+        className="type-body flex-1 rounded-[2px] border border-border bg-background/40 px-2 py-1.5 text-foreground focus:border-primary focus:outline-none"
         value={value}
         disabled={disabled}
         onChange={(e) => onChange(e.target.value)}
@@ -606,7 +606,7 @@ function LockBanner({
     <div className="bg-locked/8 flex items-center justify-between gap-3 border-b border-dashed border-locked/40 px-4 py-2">
       <div className="flex items-center gap-2.5">
         <Lock className="h-3.5 w-3.5 text-locked" aria-hidden />
-        <span className="text-[12px] text-foreground/85">
+        <span className="type-caption text-foreground/85">
           蓝图已锁定
           {stamp ? (
             <span className="ml-2 text-muted-foreground">· {stamp}</span>

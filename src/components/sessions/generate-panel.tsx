@@ -136,10 +136,10 @@ export function GeneratePanel({
   return (
     <section id="generate-panel" className="space-y-5">
       <div className="space-y-2">
-        <h2 className="text-[20px] font-medium leading-tight text-foreground">
+        <h2 className="type-title leading-tight text-foreground">
           生成结果
         </h2>
-        <p className="max-w-2xl text-[13px] leading-7 text-muted-foreground">
+        <p className="type-body max-w-2xl leading-7 text-muted-foreground">
           {variantCount > 0
             ? `当前已保存 ${variantCount} 个版本。常用参数在首屏，其余收进高级设置。`
             : "先用常用参数生成第一个版本，其他设置按需展开。"}
