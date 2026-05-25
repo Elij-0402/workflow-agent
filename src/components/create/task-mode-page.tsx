@@ -13,6 +13,21 @@ export function TaskModePage() {
         description="NovelFusion 现在默认围绕双书融合工作流组织。先选择任务模式，再进入对应的上传与创作入口。"
       />
 
+      <section className="surface-subtle flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0 space-y-1">
+          <p className="type-mono-label">推荐主路径</p>
+          <p className="type-body text-muted-foreground">
+            双书项目请从「新建双书项目」进入，导入两本参考书后直接进入工作台。
+          </p>
+          <p className="type-caption text-muted-foreground">
+            当前页为任务模式选择（高级/兼容入口）。
+          </p>
+        </div>
+        <Button asChild className="h-10 shrink-0 justify-center">
+          <Link href="/upload?mode=dual">新建双书项目</Link>
+        </Button>
+      </section>
+
       <section className="grid gap-6 xl:grid-cols-[minmax(0,1.25fr)_340px]">
         <article className="surface-panel p-6 sm:p-7">
           <div className="flex flex-col gap-4">
