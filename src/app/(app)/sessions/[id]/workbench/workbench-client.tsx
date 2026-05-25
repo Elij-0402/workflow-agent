@@ -687,7 +687,7 @@ export function WorkbenchClient(props: Props) {
             </p>
             {uploadSummary.hasBlocked ? (
               <Button asChild variant="outline">
-                <Link href={`/sessions/${props.session.id}`}>
+                <Link href={`/sessions/${props.session.id}?view=overview`}>
                   {uploadSummary.actionLabel}
                 </Link>
               </Button>

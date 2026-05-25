@@ -3,7 +3,7 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 const MODULES = [
-  { key: "概览", href: (sessionId: string) => `/sessions/${sessionId}` },
+  { key: "概览", href: (sessionId: string) => `/sessions/${sessionId}?view=overview` },
   {
     key: "分析图谱",
     href: (sessionId: string) =>

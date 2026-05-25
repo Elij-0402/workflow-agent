@@ -86,7 +86,7 @@ export function deriveProjectOverview(
       ],
       nextAction: {
         label: "查看项目体检",
-        href: `/sessions/${input.sessionId}`,
+        href: `/sessions/${input.sessionId}?view=overview`,
       },
       keyResults: [
         { label: "参考小说", value: "2 / 2" },

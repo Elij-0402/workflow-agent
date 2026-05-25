@@ -41,7 +41,7 @@ test("deriveProjectOverview stays in import-health mode when one book is not rea
   assert.equal(result.progressLabel, "已准备好 1 / 2 本参考小说");
   assert.deepEqual(result.nextAction, {
     label: "查看项目体检",
-    href: "/sessions/session-1",
+    href: "/sessions/session-1?view=overview",
   });
 });
 
