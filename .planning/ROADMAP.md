@@ -127,8 +127,15 @@ Plans:
 
 Plans:
 
-- [ ] 05-01: 自动化回归 + 主路径 e2e/冒烟
-- [ ] 05-02: UAT 与视觉一致性收尾
+**Wave 1**
+- [ ] 05-01-PLAN.md — 自动化回归 + smoke 对齐 + 05-SMOKE.md（QLT-01）
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 05-02-PLAN.md — UAT 11 场景 + 05-VERIFICATION + Tier B 债务（QLT-02、QLT-03，depends 05-01）
+
+**Cross-cutting constraints:**
+- 硬性门禁：每个 plan task 结束前 `npm run type-check && npm test`
+- 所有者本人签署 QLT-02；REQUIREMENTS 复选框由里程碑流程勾选（D-25）
 
 ## Progress
 
