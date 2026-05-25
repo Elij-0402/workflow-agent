@@ -74,7 +74,7 @@ Each task was committed atomically:
 2. **Task 2: Mobile parity + shell nav regression gates** - `1e296f9` (chore, verify-only)
 3. **Task 3: /create 提示条 + /upload 文案对齐** - `ab97528` (feat)
 
-**Plan metadata:** pending (docs commit after STATE/ROADMAP update)
+**Plan metadata:** `b7dcbe4` (docs: complete collapsible IA plan)
 
 ## Files Created/Modified
 
