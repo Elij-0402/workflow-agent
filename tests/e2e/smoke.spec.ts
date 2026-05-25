@@ -83,7 +83,7 @@ async function finishAnalyses(page: Page) {
 
   await page.reload();
   const compareHeading = page.getByRole("heading", {
-    name: "第 3 步 · 对比并整理骨架",
+    name: "整理融合蓝图",
     exact: true,
   });
   if (await compareHeading.isVisible().catch(() => false)) {
@@ -211,7 +211,7 @@ test("smoke flow: login, configure, upload, analyze, and generate", async ({
   await page.goto(`${overviewUrl}/workbench`);
   await expect(
     page.getByRole("heading", {
-      name: "第 2 步 · 分析两本参考小说",
+      name: "拆解章节",
       exact: true,
     }),
   ).toBeVisible();
@@ -219,7 +219,7 @@ test("smoke flow: login, configure, upload, analyze, and generate", async ({
   await finishAnalyses(page);
 
   const compareHeading = page.getByRole("heading", {
-    name: "第 3 步 · 对比并整理骨架",
+    name: "整理融合蓝图",
     exact: true,
   });
   if (!(await compareHeading.isVisible().catch(() => false))) {
@@ -231,7 +231,7 @@ test("smoke flow: login, configure, upload, analyze, and generate", async ({
   await page.reload();
 
   const generateHeading = page.getByRole("heading", {
-    name: "第 4 步 · 生成新小说",
+    name: "生成变体",
     exact: true,
   });
   if (!(await generateHeading.isVisible().catch(() => false))) {
@@ -239,17 +239,14 @@ test("smoke flow: login, configure, upload, analyze, and generate", async ({
     await expect(generateHeading).toBeVisible();
   }
 
-  await page.getByRole("button", { name: "生成新小说", exact: true }).click();
   await page.getByRole("button", { name: "生成新版本", exact: true }).click();
+  const drawer = page.getByRole("dialog");
+  await expect(drawer).toBeVisible({ timeout: 30_000 });
+  await drawer.getByRole("button", { name: "生成新版本", exact: true }).click();
 
   await expect(
     page.getByRole("heading", { name: "生成结果", exact: true }),
   ).toBeVisible({ timeout: 5 * 60 * 1000 });
-  await expect(
-    page.getByRole("button", { name: "再生成一版", exact: true }),
-  ).toBeVisible({
-    timeout: 5 * 60 * 1000,
-  });
   await page
     .getByRole("button", { name: "阅读全文 →", exact: true })
     .first()
