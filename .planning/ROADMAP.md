@@ -6,7 +6,7 @@
 
 ## Phases
 
-- [ ] **Phase 1: 体验审计与功能矩阵** — 摸清现状与优先级
+- [x] **Phase 1: 体验审计与功能矩阵** — 摸清现状与优先级
 - [ ] **Phase 2: 极简设计契约** — UI-SPEC 与视觉决策
 - [ ] **Phase 3: 应用壳与导航 IA** — 双书英雄旅程
 - [ ] **Phase 4: 核心界面密度重构** — 工作台与会话
@@ -35,7 +35,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 01-02-PLAN.md — P0 gsd-ui-auditor 六柱评分、P1/P2 走查、轻量浏览器冒烟、backlog + Top 15
+- [x] 01-02-PLAN.md — P0 gsd-ui-auditor 六柱评分、P1/P2 走查、轻量浏览器冒烟、backlog + Top 15
 
 ### Phase 2: 极简设计契约
 
@@ -124,7 +124,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. 体验审计与功能矩阵 | 1/2 | In progress | 2026-05-26 |
+| 1. 体验审计与功能矩阵 | 2/2 | Complete | 2026-05-26 |
 | 2. 极简设计契约 | 0/2 | Not started | - |
 | 3. 应用壳与导航 IA | 0/2 | Not started | - |
 | 4. 核心界面密度重构 | 0/3 | Not started | - |

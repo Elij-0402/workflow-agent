@@ -10,7 +10,7 @@
 ### 审计与治理
 
 - [x] **AUD-01**: 产出全站功能矩阵（路由 × 用户目标 × 频率 × 与双书主路径关系）
-- [ ] **AUD-02**: 完成 `/gsd-ui-review` 六柱审计报告，按严重度列出可执行项
+- [x] **AUD-02**: 完成六柱 UI 审计（`01-UI-REVIEW.md`，P0 Overall 14/24）与分级 backlog（`01-AUDIT-BACKLOG.md` Top 15）
 - [ ] **AUD-03**: 基于审计输出决定明/暗色、密度与组件层级原则（设计决策记录）
 
 ### 视觉与信息架构
@@ -52,7 +52,7 @@
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | AUD-01 | Phase 1 | Complete |
-| AUD-02 | Phase 1 | Pending |
+| AUD-02 | Phase 1 | Complete |
 | AUD-03 | Phase 2 | Pending |
 | IA-01 | Phase 2 | Pending |
 | IA-02 | Phase 3 | Pending |
