@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v0.3
 milestone_name: milestone
-status: active
-last_updated: "2026-05-26T23:00:00.000Z"
-last_activity: 2026-05-26
+status: `05-CONTEXT.md` locked — 05-01 automation then 05-02 UAT/visual
+last_updated: "2026-05-25T19:56:33.495Z"
+last_activity: 2026-05-26 — Phase 5 discuss-phase complete (Claude-selected decisions)
 progress:
   total_phases: 5
   completed_phases: 4
-  total_plans: 11
-  completed_plans: 10
-  percent: 91
+  total_plans: 9
+  completed_plans: 9
+  percent: 80
 ---
 
 # Project State
@@ -24,10 +24,10 @@ See: .planning/PROJECT.md (updated 2026-05-26)
 
 ## Current Position
 
-Phase: 05 (acceptance-saas-polish) — Ready to plan
+Phase: 05 (acceptance-saas-polish) — Context gathered, ready to plan
 Plan: Not started (0 of 2)
-Status: Phase 04 UAT complete — all 8 scenarios passed
-Last activity: 2026-05-26 — Phase 4 marked complete
+Status: `05-CONTEXT.md` locked — 05-01 automation then 05-02 UAT/visual
+Last activity: 2026-05-26 — Phase 5 discuss-phase complete (Claude-selected decisions)
 
 Progress: [████████████████░░] 10/11 plans (91%)
 
@@ -66,6 +66,7 @@ Progress: [████████████████░░] 10/11 plans (
 - [Phase 04-01]: StepIntro action titles 拆解章节 / 整理融合蓝图 / 生成变体
 - [Phase 04-02]: Sessions hero merged; metrics Collapsible; no 本页规则 sidebar; overview ≤2 panels
 - [Phase 04-03]: CTA_COPY SSOT; blueprintReadyToConfirm gates confirm; generate blocked toast SSOT
+- [Phase 05 discuss]: npm test hard gate; smoke.spec SSOT + 05-SMOKE.md; 11-scenario UAT (04×8 + 03×3); Tier A/B visual; #13/#14 deferred-v2
 
 ### Pending Todos
 
@@ -73,7 +74,7 @@ None yet.
 
 ### Blockers/Concerns
 
-- Phase 3 `03-HUMAN-UAT.md` / `03-VERIFICATION.md` 仍为 open（若 Phase 4 回归已覆盖，可择机标 complete）
+- Phase 3 `03-HUMAN-UAT.md` — 待 Phase 5 UAT 通过后回填 complete（见 `05-CONTEXT.md` D-16–D-17）
 
 ## Deferred Items
 
