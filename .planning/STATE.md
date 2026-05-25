@@ -9,8 +9,8 @@ progress:
   total_phases: 5
   completed_phases: 3
   total_plans: 11
-  completed_plans: 7
-  percent: 64
+  completed_plans: 8
+  percent: 73
 ---
 
 # Project State
@@ -24,18 +24,18 @@ See: .planning/PROJECT.md (updated 2026-05-26)
 
 ## Current Position
 
-Phase: 04 (core-interface-density) — Planned
-Plan: 0 of 3 complete
-Status: Ready for `/gsd-execute-phase 4` (wave 1: 04-01)
+Phase: 04 (core-interface-density) — In Progress
+Plan: 1 of 3 complete
+Status: Ready for 04-02 (wave 2) or `/gsd-execute-phase 4`
 Last activity: 2026-05-26
 
-Progress: [████████████░░] 64%
+Progress: [█████████████░] 73%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 7 (phase 03 plan 02)
+- Total plans completed: 8 (phase 04 plan 01)
 - Average duration: 23min
 - Total execution time: 71min
 
@@ -47,7 +47,7 @@ Progress: [████████████░░] 64%
 | 02-minimal-design-contract | 2/2 | 35min | 18min |
 | 03-app-shell-navigation-ia | 2/2 | 43min | 22min |
 
-**Recent:** 03-02 — 18min, 3 tasks, 6 files
+**Recent:** 04-01 — 12min, 3 tasks, 3 files
 
 ## Accumulated Context
 
@@ -61,6 +61,8 @@ Progress: [████████████░░] 64%
 - [Phase 03-01]: Shell CTAs primary → /upload?mode=dual; ContextualShellTitle + sessions list hint (IA-02)
 - [Phase 03-02]: Collapsible 更多工具 default closed; primary 项目 active only /sessions and /
 - [Phase 03-02]: NavLink variant controls icon color; secondary never text-primary
+- [Phase 04-01]: AnalysisCapabilityPanel Collapsible default closed; StepActionBar without surface-panel footer
+- [Phase 04-01]: StepIntro action titles 拆解章节 / 整理融合蓝图 / 生成变体
 
 ### Pending Todos
 

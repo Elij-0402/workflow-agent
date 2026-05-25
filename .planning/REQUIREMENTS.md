@@ -21,7 +21,7 @@
 
 ### 核心界面
 
-- [ ] **WB-01**: 双书工作台：减少同屏面板数，分析/蓝图/生成阶段视觉分段清晰
+- [x] **WB-01**: 双书工作台：减少同屏面板数，分析/蓝图/生成阶段视觉分段清晰
 - [ ] **WB-02**: 会话列表与项目概览：列表可读、状态一眼可辨，无仪表盘噪声
 - [ ] **WB-03**: 关键操作（confirm 蓝图、生成、批量分析）具备一致的主按钮层级与反馈
 
@@ -57,7 +57,7 @@
 | IA-01 | Phase 2 | Complete |
 | IA-02 | Phase 3 | Complete |
 | IA-03 | Phase 3 | Complete |
-| WB-01 | Phase 4 | Pending |
+| WB-01 | Phase 4 | Complete |
 | WB-02 | Phase 4 | Pending |
 | WB-03 | Phase 4 | Pending |
 | QLT-01 | Phase 5 | Pending |
