@@ -58,7 +58,7 @@ completed: 2026-05-26
 2. **Task 2: 填满 AUD-01 矩阵列与分类** - `c8a0eb5` (docs)
 3. **Task 3: Mermaid 旅程图与回归门禁** - `f555fa9` (docs)
 
-**Plan metadata:** pending final docs commit
+**Plan metadata:** `c069b71` (docs: complete feature matrix plan)
 
 ## Files Created/Modified
 
