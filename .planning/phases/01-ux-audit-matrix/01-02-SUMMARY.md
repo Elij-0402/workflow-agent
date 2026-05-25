@@ -76,7 +76,7 @@ completed: 2026-05-26
 3. **Task 3: 合成 backlog 与 Top 15** - `8fbb584` (docs)
 4. **Task 4: Checkpoint Phase 2 就绪度** - *(approval recorded in this SUMMARY; no `src/` commit)*
 
-**Plan metadata:** *(final docs commit — SUMMARY + STATE + ROADMAP + REQUIREMENTS)*
+**Plan metadata:** `03697d1` (SUMMARY), `89aabbd` (STATE + ROADMAP + REQUIREMENTS)
 
 ## Files Created/Modified
 
