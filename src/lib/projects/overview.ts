@@ -106,7 +106,7 @@ export function deriveProjectOverview(
         "不要过早进入生成，先把双书理解补齐。",
       ],
       nextAction: {
-        label: "进入工作台继续分析",
+        label: "进入工作台",
         href: `/sessions/${input.sessionId}/workbench`,
       },
       keyResults: [
@@ -127,7 +127,7 @@ export function deriveProjectOverview(
         "确认蓝图后再开始生成，结果会更稳定。",
       ],
       nextAction: {
-        label: "进入工作台确认蓝图",
+        label: "确认蓝图",
         href: `/sessions/${input.sessionId}/workbench`,
       },
       keyResults: [

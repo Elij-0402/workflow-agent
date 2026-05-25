@@ -49,7 +49,6 @@ export function ProjectCard({
 }: ProjectCardProps) {
   const href = session.nextHref || `/sessions/${session.id}`;
   const isDual = session.mode === "dual";
-  const isArchived = Boolean(session.archived_at);
 
   return (
     <div
@@ -68,8 +67,10 @@ export function ProjectCard({
         <div className="min-w-0">
           <p
             className={cn(
-              "mono-label-sm",
-              session.modeTone === "primary" && "text-primary",
+              "type-mono-label",
+              session.modeTone === "primary"
+                ? "text-foreground"
+                : "text-muted-foreground",
             )}
           >
             {session.modeLabel}
@@ -89,7 +90,7 @@ export function ProjectCard({
             />
           ) : null}
           <CardActions
-            isArchived={isArchived}
+            isArchived={Boolean(session.archived_at)}
             onArchive={onArchive ? () => onArchive(session.id) : undefined}
             onRestore={onRestore ? () => onRestore(session.id) : undefined}
             onDelete={onDelete ? () => onDelete(session.id) : undefined}
@@ -97,35 +98,29 @@ export function ProjectCard({
         </div>
       </div>
 
-      <h3 className="relative z-10 mt-3 line-clamp-2 text-[18px] font-semibold leading-tight text-foreground">
+      <h3 className="type-title relative z-10 mt-3 line-clamp-2 leading-tight">
         {session.name}
       </h3>
 
       <div className="relative z-10 mt-3 flex flex-wrap items-center gap-2">
-        <StagePill label={session.stageLabel} tone={session.modeTone} />
-        <span className="text-[12px] text-muted-foreground leading-6">
-          {session.progressLabel}
-        </span>
+        <StagePill label={session.stageLabel} />
+        <span className="type-caption leading-6">{session.progressLabel}</span>
       </div>
 
-      <div className="relative z-10 mt-4 rounded-md border border-border/60 bg-background/40 px-4 py-3">
-        <p className="mono-label-sm">下一步</p>
-        <p className="mt-2 text-[14px] font-medium text-foreground">
-          {session.nextActionLabel}
-        </p>
-        <p className="mt-1 text-[12px] leading-6 text-muted-foreground">
-          {session.lastActivityLabel}
-        </p>
-      </div>
+      <p className="relative z-10 mt-4 line-clamp-2">
+        <span className="type-caption">下一步 </span>
+        <span className="type-body font-medium">{session.nextActionLabel}</span>
+        <span className="type-caption"> · {session.lastActivityLabel}</span>
+      </p>
 
       <div className="relative z-10 mt-auto flex items-end justify-between gap-3 border-t border-border/60 pt-5">
-        <div className="space-y-1 text-[12px] text-muted-foreground">
+        <div className="type-caption space-y-1">
           <div>最近更新 · {formatRelativeTime(session.updated_at)}</div>
           <div className="text-muted-foreground/70">
             创建于 · {formatDate(session.created_at)}
           </div>
         </div>
-        <span className="inline-flex items-center gap-1 text-[12px] text-muted-foreground transition-colors group-hover:text-foreground">
+        <span className="type-caption inline-flex items-center gap-1 transition-colors group-hover:text-foreground">
           进入
           <ArrowRight className="h-3.5 w-3.5" aria-hidden />
         </span>
@@ -134,20 +129,25 @@ export function ProjectCard({
   );
 }
 
-function StagePill({
-  label,
-  tone,
-}: {
-  label: string;
-  tone: "primary" | "muted";
-}) {
+function stagePillClasses(label: string): string {
+  if (label === "待确认蓝图") {
+    return "border-locked/40 bg-locked/10 text-locked";
+  }
+  if (label === "可生成" || label === "已完成首轮") {
+    return "border-flash/40 bg-flash/10 text-flash";
+  }
+  if (label === "进行中" || label === "待补素材") {
+    return "border-info/40 bg-info/10 text-info";
+  }
+  return "border-border bg-muted text-muted-foreground";
+}
+
+function StagePill({ label }: { label: string }) {
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-full border px-2.5 py-1 text-[11px]",
-        tone === "primary"
-          ? "border-primary/30 bg-primary/10 text-primary"
-          : "border-border bg-muted text-muted-foreground",
+        "inline-flex items-center rounded-full border px-2.5 py-1 type-caption",
+        stagePillClasses(label),
       )}
     >
       {label}
