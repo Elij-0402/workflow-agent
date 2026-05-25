@@ -27,8 +27,8 @@
 **Plans**: 2 plans
 
 Plans:
-- [ ] 01-01: 生成功能矩阵与主路径用户旅程图
-- [ ] 01-02: 运行六柱 UI 审计并汇总可执行 backlog
+- [ ] 01-01-PLAN.md — 路由/API 枚举、AUD-01 功能矩阵七列、Mermaid 主路径与附图旅程
+- [ ] 01-02-PLAN.md — P0 gsd-ui-auditor 六柱评分、P1/P2 走查、轻量浏览器冒烟、backlog + Top 15
 
 ### Phase 2: 极简设计契约
 **Goal**: 将「极度克制、大留白」落实为可执行的 UI-SPEC（审计后再锁定明/暗）  
