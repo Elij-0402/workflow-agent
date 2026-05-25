@@ -24,9 +24,9 @@ See: .planning/PROJECT.md (updated 2026-05-26)
 
 ## Current Position
 
-Phase: 04 (core-interface-density) — Context gathered
+Phase: 04 (core-interface-density) — Planned
 Plan: 0 of 3 complete
-Status: Ready for `/gsd-plan-phase 4` (research + plans)
+Status: Ready for `/gsd-execute-phase 4` (wave 1: 04-01)
 Last activity: 2026-05-26
 
 Progress: [████████████░░] 64%
