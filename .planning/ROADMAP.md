@@ -31,7 +31,7 @@
 Plans:
 **Wave 1**
 
-- [ ] 01-01-PLAN.md — 路由/API 枚举、AUD-01 功能矩阵七列、Mermaid 主路径与附图旅程
+- [x] 01-01-PLAN.md — 路由/API 枚举、AUD-01 功能矩阵七列、Mermaid 主路径与附图旅程
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
@@ -124,7 +124,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. 体验审计与功能矩阵 | 0/2 | Not started | - |
+| 1. 体验审计与功能矩阵 | 1/2 | In progress | 2026-05-26 |
 | 2. 极简设计契约 | 0/2 | Not started | - |
 | 3. 应用壳与导航 IA | 0/2 | Not started | - |
 | 4. 核心界面密度重构 | 0/3 | Not started | - |
