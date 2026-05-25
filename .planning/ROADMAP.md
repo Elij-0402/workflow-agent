@@ -9,7 +9,7 @@
 - [x] **Phase 1: 体验审计与功能矩阵** — 摸清现状与优先级
 - [x] **Phase 2: 极简设计契约** — UI-SPEC 与视觉决策
 - [x] **Phase 3: 应用壳与导航 IA** — 双书英雄旅程
-- [ ] **Phase 4: 核心界面密度重构** — 工作台与会话
+- [x] **Phase 4: 核心界面密度重构** — 工作台与会话 (completed 2026-05-25)
 - [ ] **Phase 5: 验收与 SaaS 级打磨** — 测试、日用性、一致性
 
 ## Phase Details
@@ -107,8 +107,8 @@ Plans:
 Plans:
 
 - [x] 04-01-PLAN.md — 工作台布局分段与面板收敛（WB-01，wave 1） — 2026-05-26
-- [ ] 04-02-PLAN.md — 会话列表与概览留白（WB-02，wave 2，depends 04-01）
-- [ ] 04-03-PLAN.md — 主 CTA 与反馈统一（WB-03，wave 2，depends 04-01）
+- [x] 04-02-PLAN.md — 会话列表与概览留白（WB-02，wave 2，depends 04-01） — 2026-05-26
+- [x] 04-03-PLAN.md — 主 CTA 与反馈统一（WB-03，wave 2，depends 04-01） — 2026-05-26
 
 ### Phase 5: 验收与 SaaS 级打磨
 
@@ -139,5 +139,5 @@ Plans:
 | 1. 体验审计与功能矩阵 | 2/2 | Complete    | 2026-05-25 |
 | 2. 极简设计契约 | 2/2 | Complete | 2026-05-26 |
 | 3. 应用壳与导航 IA | 2/2 | Complete | 2026-05-26 |
-| 4. 核心界面密度重构 | 0/3 | Not started | - |
+| 4. 核心界面密度重构 | 3/3 | Complete    | 2026-05-25 |
 | 5. 验收与 SaaS 级打磨 | 0/2 | Not started | - |

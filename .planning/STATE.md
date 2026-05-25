@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v0.3
 milestone_name: milestone
 status: active
-last_updated: "2026-05-26T20:00:00.000Z"
+last_updated: "2026-05-26T23:00:00.000Z"
 last_activity: 2026-05-26
 progress:
   total_phases: 5
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 11
-  completed_plans: 8
-  percent: 73
+  completed_plans: 10
+  percent: 91
 ---
 
 # Project State
@@ -20,22 +20,22 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-26)
 
 **Core value:** 双书蓝图主路径顺畅且令人愿意每天用  
-**Current focus:** Phase 04 — core-interface-density (discuss complete → planning)
+**Current focus:** Phase 05 — 验收与 SaaS 级打磨
 
 ## Current Position
 
-Phase: 04 (core-interface-density) — In Progress
-Plan: 1 of 3 complete
-Status: Ready for 04-02 (wave 2) or `/gsd-execute-phase 4`
-Last activity: 2026-05-26
+Phase: 05 (acceptance-saas-polish) — Ready to plan
+Plan: Not started (0 of 2)
+Status: Phase 04 UAT complete — all 8 scenarios passed
+Last activity: 2026-05-26 — Phase 4 marked complete
 
-Progress: [█████████████░] 73%
+Progress: [████████████████░░] 10/11 plans (91%)
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 8 (phase 04 plan 01)
+- Total plans completed: 13 (phase 04 complete)
 - Average duration: 23min
 - Total execution time: 71min
 
@@ -46,8 +46,9 @@ Progress: [█████████████░] 73%
 | 01-ux-audit-matrix | 2/2 | 46min | 23min |
 | 02-minimal-design-contract | 2/2 | 35min | 18min |
 | 03-app-shell-navigation-ia | 2/2 | 43min | 22min |
+| 4 | 3 | - | - |
 
-**Recent:** 04-01 — 12min, 3 tasks, 3 files
+**Recent:** 04-02 + 04-03 — wave 2 parallel; 197 tests green
 
 ## Accumulated Context
 
@@ -63,6 +64,8 @@ Progress: [█████████████░] 73%
 - [Phase 03-02]: NavLink variant controls icon color; secondary never text-primary
 - [Phase 04-01]: AnalysisCapabilityPanel Collapsible default closed; StepActionBar without surface-panel footer
 - [Phase 04-01]: StepIntro action titles 拆解章节 / 整理融合蓝图 / 生成变体
+- [Phase 04-02]: Sessions hero merged; metrics Collapsible; no 本页规则 sidebar; overview ≤2 panels
+- [Phase 04-03]: CTA_COPY SSOT; blueprintReadyToConfirm gates confirm; generate blocked toast SSOT
 
 ### Pending Todos
 
@@ -70,7 +73,7 @@ None yet.
 
 ### Blockers/Concerns
 
-- Phase 3–4 须消费 `02-UI-SPEC.md`；workbench 任意 px 迁移在 Phase 4
+- Phase 3 `03-HUMAN-UAT.md` / `03-VERIFICATION.md` 仍为 open（若 Phase 4 回归已覆盖，可择机标 complete）
 
 ## Deferred Items
 
