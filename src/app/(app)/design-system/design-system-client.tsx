@@ -128,6 +128,11 @@ export function DesignSystemClient() {
         <EmptySection />
         <KeyboardSection />
         <CopySection />
+        <footer className="border-t border-border pt-8 text-center">
+          <p className="type-caption">
+            实现标准页，非用户功能；生产路由 guard 属 Phase 3（D-24）。
+          </p>
+        </footer>
       </main>
     </div>
   );
@@ -172,18 +177,18 @@ function Section({ id, children }: { id: string; children: React.ReactNode }) {
 const PRINCIPLES = [
   {
     n: "01",
-    t: "每个像素都有功能",
-    d: "视觉元素必须服务于信息层级、状态或品牌识别。不为氛围装饰。",
+    t: "极度克制",
+    d: "每个像素服务信息层级或状态。不为氛围装饰。",
   },
   {
     n: "02",
-    t: "静默优先",
-    d: "默认低对比、低饱和。仅在需要注意时让主色发声。",
+    t: "大留白",
+    d: "页面级纵向节奏 ≥40px；区块用留白分隔，少叠 panel。",
   },
   {
     n: "03",
     t: "一屏一焦点",
-    d: "每个路由解决一类任务。多面板堆砌应拆分为可切换视图。",
+    d: "每视口最多 1 个主 CTA（primary Button）。",
   },
   {
     n: "04",
@@ -238,6 +243,18 @@ function ColorSection() {
         title="颜色 token"
         hint="一屏内主色实色填充元素 ≤ 1"
       />
+      <div className="mb-4 flex h-3 overflow-hidden rounded-[var(--radius-md)] border border-border">
+        <div
+          className="flex-[85] bg-background"
+          title="背景+正文 ≥85%"
+        />
+        <div className="flex-[10] bg-muted" title="结构 ≤10%" />
+        <div
+          className="flex-[5] bg-primary"
+          title="primary CTA ≤5%"
+        />
+      </div>
+      <p className="type-caption mb-4">60 / 30 / 10 视觉权重示意</p>
       <div className="surface-panel divide-y divide-border">
         {COLOR_TOKENS.map((c) => (
           <div key={c.name} className="flex items-center gap-4 px-4 py-3">
@@ -273,26 +290,22 @@ function TypeSection() {
         hint="display 仅 h1·情感页 / mono 仅数据·键盘"
       />
       <div className="surface-panel divide-y divide-border">
-        <TypeRow size="text-[28px]" label="H1 · 页面主标题">
-          <span className="font-display italic">导入你的小说</span>
+        <TypeRow utility="type-display" label="display · 页面主标题">
+          <span className="type-display">导入你的小说</span>
         </TypeRow>
-        <TypeRow size="text-[22px]" label="H2 · 页面副标题">
-          <span className="font-medium">配置语言模型</span>
+        <TypeRow utility="type-title" label="title · 区块标题">
+          <span className="type-title">最近变体</span>
         </TypeRow>
-        <TypeRow size="text-[18px]" label="H3 · 区块标题">
-          <span className="font-medium">最近变体</span>
+        <TypeRow utility="type-body" label="body · 正文">
+          <span className="type-body">
+            导入小说，拆解世界、人物与叙事，再生成新的原创变体文本。
+          </span>
         </TypeRow>
-        <TypeRow size="text-[14px]" label="正文">
-          导入小说，拆解世界、人物与叙事，再生成新的原创变体文本。
+        <TypeRow utility="type-caption" label="caption · 辅助">
+          <span className="type-caption">已生成 · 12 字</span>
         </TypeRow>
-        <TypeRow size="text-[13px]" label="UI · 默认">
-          按钮、输入、菜单
-        </TypeRow>
-        <TypeRow size="text-[12px]" label="次要 · 徽章">
-          已生成 · 12 字
-        </TypeRow>
-        <TypeRow size="text-[11px] font-mono" label="mono · 数据">
-          17,432 tokens · 2026-05-22
+        <TypeRow utility="type-mono-label" label="mono-label · 眉标">
+          <span className="type-mono-label">17,432 tokens · 2026-05-22</span>
         </TypeRow>
       </div>
     </Section>
@@ -300,31 +313,29 @@ function TypeSection() {
 }
 
 function TypeRow({
-  size,
+  utility,
   label,
   children,
 }: {
-  size: string;
+  utility: string;
   label: string;
   children: React.ReactNode;
 }) {
   return (
-    <div className="grid grid-cols-[140px_minmax(0,1fr)] items-baseline gap-6 px-4 py-4">
-      <p className="font-mono text-[10.5px] uppercase tracking-[0.12em] text-muted-foreground/60">
-        {label}
-      </p>
-      <p className={`${size} text-foreground`}>{children}</p>
+    <div className="grid grid-cols-[160px_minmax(0,1fr)] items-baseline gap-6 px-4 py-4">
+      <p className="type-mono-label text-muted-foreground/60">{label}</p>
+      <div>{children}</div>
     </div>
   );
 }
 
 const SPACING = [
-  { token: "gap-1", px: "4px" },
-  { token: "gap-2", px: "8px" },
-  { token: "gap-3", px: "12px" },
-  { token: "gap-4", px: "16px" },
-  { token: "gap-6", px: "24px" },
-  { token: "gap-9", px: "36px" },
+  { token: "--space-1", px: "8px", tw: "gap-2" },
+  { token: "--space-2", px: "16px", tw: "gap-4" },
+  { token: "--space-3", px: "24px", tw: "gap-6 / space-y-6" },
+  { token: "--space-4", px: "32px", tw: "gap-8" },
+  { token: "--space-5", px: "40px", tw: "gap-10 / .app-page" },
+  { token: "--space-6", px: "48px", tw: "gap-12 / space-y-10" },
 ];
 
 function SpacingSection() {
@@ -334,7 +345,7 @@ function SpacingSection() {
         id="spacing"
         num="04"
         title="间距尺度"
-        hint="页面内只用这 6 档"
+        hint="8px 基准栅格 · 与 02-UI-SPEC 一致"
       />
       <div className="surface-panel divide-y divide-border">
         {SPACING.map((s) => {
@@ -342,7 +353,7 @@ function SpacingSection() {
           return (
             <div
               key={s.token}
-              className="grid grid-cols-[100px_60px_minmax(0,1fr)] items-center gap-4 px-4 py-3"
+              className="grid grid-cols-[120px_56px_100px_minmax(0,1fr)] items-center gap-4 px-4 py-3"
             >
               <span className="font-mono text-[12px] text-foreground">
                 {s.token}
@@ -350,9 +361,12 @@ function SpacingSection() {
               <span className="font-mono text-[11px] text-muted-foreground">
                 {s.px}
               </span>
+              <span className="font-mono text-[11px] text-muted-foreground/80">
+                {s.tw}
+              </span>
               <div
                 className="h-3 bg-primary/60"
-                style={{ width: `${px * 4}px` }}
+                style={{ width: `${px}px` }}
               />
             </div>
           );
@@ -369,16 +383,16 @@ function SurfaceSection() {
         id="surface"
         num="05"
         title="Surface 三层级"
-        hint="禁止嵌套 3 层及以上"
+        hint="同屏 1 主 panel + 最多 1 subtle · 圆角 5px"
       />
-      <div className="rounded-[3px] border border-border/40 bg-background p-6">
+      <div className="rounded-[var(--radius-md)] border border-border/40 bg-background p-6">
         <p className="eyebrow-label mb-3">background</p>
         <div className="surface-panel p-5">
           <p className="eyebrow-label mb-3">surface-panel · 一级容器</p>
           <div className="surface-subtle p-4">
-            <p className="eyebrow-label mb-2">surface-subtle · 二级容器</p>
-            <p className="text-[13px] text-muted-foreground">
-              嵌套不超过 2 层。
+            <p className="eyebrow-label mb-2">surface-subtle · 二级辅助</p>
+            <p className="type-caption">
+              禁止第三层 panel；圆角 var(--radius-md) = 5px。
             </p>
           </div>
         </div>
