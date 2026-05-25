@@ -68,6 +68,7 @@
 | 主路径 = 双书蓝图工作台 | 用户明确选择 1=2 | — Pending |
 | 先审计后做减法 | 用户选择 3=4，避免误砍仍有价值的模块 | — Pending |
 | 美学目标 = 极度克制留白简洁 | 用户拒绝预设痛点列表，要整体气质而非局部修补 | — Pending |
+| 明/暗色不预先锁定 | 用户选 3＝先审计再定 | — Pending |
 | 成功 = 日用性 + 成熟 SaaS 观感，功能清单暂不变 | 用户 4=1,3 | — Pending |
 | GSD 规划层此前缺失 | 仅有 codebase map，无 ROADMAP/REQUIREMENTS | — Pending |
 
