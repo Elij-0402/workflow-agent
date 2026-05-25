@@ -67,7 +67,7 @@ completed: 2026-05-26
 2. **Task 2: Compare + generate steps — layout + StepIntro + tokens** — `07ba903`, `d8311f1` (feat)
 3. **Task 3: Workbench loading skeleton** — `6775f3a` (feat)
 
-**Plan metadata:** see final docs commit in git log
+**Plan metadata:** `5360034` (docs)
 
 ## Files Created/Modified
 

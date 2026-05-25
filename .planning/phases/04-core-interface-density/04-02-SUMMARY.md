@@ -72,7 +72,7 @@ completed: 2026-05-26
 2. **Task 2: SessionsClient — full-width list + single-book Collapsible** - `4a88d75` (feat)
 3. **Task 3: Project cards + overview panel budget** - `5398474` (feat)
 
-**Plan metadata:** `0452c19` (docs)
+**Plan metadata:** `77fc73a` (docs)
 
 ## Files Created/Modified
 
