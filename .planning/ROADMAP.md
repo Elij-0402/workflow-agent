@@ -124,7 +124,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. 体验审计与功能矩阵 | 2/2 | Complete | 2026-05-26 |
+| 1. 体验审计与功能矩阵 | 2/2 | Complete    | 2026-05-25 |
 | 2. 极简设计契约 | 0/2 | Not started | - |
 | 3. 应用壳与导航 IA | 0/2 | Not started | - |
 | 4. 核心界面密度重构 | 0/3 | Not started | - |
