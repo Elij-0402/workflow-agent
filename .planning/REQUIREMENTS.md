@@ -115,52 +115,53 @@ Explicitly excluded in v0.4. Documented to prevent scope creep.
 
 ## Traceability
 
-Which phases cover which requirements. Updated during roadmap creation (Step 10).
+Which phases cover which requirements. Updated during roadmap creation.
 
-| Requirement | Phase | Status |
-|-------------|-------|--------|
-| FND-01 | Phase 1 | Pending |
-| FND-02 | Phase 1 | Pending |
-| FND-03 | Phase 1 | Pending |
-| WBS-01 | Phase 2 | Pending |
-| WBS-02 | Phase 2 | Pending |
-| WBS-03 | Phase 2 | Pending |
-| WBS-04 | Phase 2 | Pending |
-| WBS-05 | Phase 2 | Pending |
-| WBS-06 | Phase 2 | Pending |
-| PAL-01 | Phase 3 | Pending |
-| PAL-02 | Phase 3 | Pending |
-| PAL-03 | Phase 3 | Pending |
-| PAL-04 | Phase 3 | Pending |
-| IBE-01 | Phase 3 | Pending |
-| IBE-02 | Phase 3 | Pending |
-| IBE-03 | Phase 3 | Pending |
-| IBE-04 | Phase 3 | Pending |
-| IBE-05 | Phase 3 | Pending |
-| STR-01 | Phase 4 | Pending |
-| STR-02 | Phase 4 | Pending |
-| STR-03 | Phase 4 | Pending |
-| STR-04 | Phase 4 | Pending |
-| STR-05 | Phase 4 | Pending |
-| DIF-01 | Phase 4 | Pending |
-| DIF-02 | Phase 4 | Pending |
-| DIF-03 | Phase 4 | Pending |
-| DIF-04 | Phase 4 | Pending |
-| CRB-01 | Phase 4 | Pending |
-| CRB-02 | Phase 4 | Pending |
-| CRB-03 | Phase 4 | Pending |
-| POL-01 | Phase 5 | Pending |
-| POL-02 | Phase 5 | Pending |
-| POL-03 | Phase 5 | Pending |
-| POL-04 | Phase 5 | Pending |
-| POL-05 | Phase 5 | Pending |
-| POL-06 | Phase 5 | Pending |
+| Requirement | Phase | Phase Slug | Status |
+|-------------|-------|------------|--------|
+| FND-01 | Phase 1 | 01-foundation-url-state | Pending |
+| FND-02 | Phase 1 | 01-foundation-url-state | Pending |
+| FND-03 | Phase 1 | 01-foundation-url-state | Pending |
+| WBS-01 | Phase 2 | 02-workbench-multi-route | Pending |
+| WBS-02 | Phase 2 | 02-workbench-multi-route | Pending |
+| WBS-03 | Phase 2 | 02-workbench-multi-route | Pending |
+| WBS-04 | Phase 2 | 02-workbench-multi-route | Pending |
+| WBS-05 | Phase 2 | 02-workbench-multi-route | Pending |
+| WBS-06 | Phase 2 | 02-workbench-multi-route | Pending |
+| PAL-01 | Phase 3 | 03-palette-and-inline-editor | Pending |
+| PAL-02 | Phase 3 | 03-palette-and-inline-editor | Pending |
+| PAL-03 | Phase 3 | 03-palette-and-inline-editor | Pending |
+| PAL-04 | Phase 3 | 03-palette-and-inline-editor | Pending |
+| IBE-01 | Phase 3 | 03-palette-and-inline-editor | Pending |
+| IBE-02 | Phase 3 | 03-palette-and-inline-editor | Pending |
+| IBE-03 | Phase 3 | 03-palette-and-inline-editor | Pending |
+| IBE-04 | Phase 3 | 03-palette-and-inline-editor | Pending |
+| IBE-05 | Phase 3 | 03-palette-and-inline-editor | Pending |
+| STR-01 | Phase 4 | 04-streaming-diff-semantic-brief | Pending |
+| STR-02 | Phase 4 | 04-streaming-diff-semantic-brief | Pending |
+| STR-03 | Phase 4 | 04-streaming-diff-semantic-brief | Pending |
+| STR-04 | Phase 4 | 04-streaming-diff-semantic-brief | Pending |
+| STR-05 | Phase 4 | 04-streaming-diff-semantic-brief | Pending |
+| DIF-01 | Phase 4 | 04-streaming-diff-semantic-brief | Pending |
+| DIF-02 | Phase 4 | 04-streaming-diff-semantic-brief | Pending |
+| DIF-03 | Phase 4 | 04-streaming-diff-semantic-brief | Pending |
+| DIF-04 | Phase 4 | 04-streaming-diff-semantic-brief | Pending |
+| CRB-01 | Phase 4 | 04-streaming-diff-semantic-brief | Pending |
+| CRB-02 | Phase 4 | 04-streaming-diff-semantic-brief | Pending |
+| CRB-03 | Phase 4 | 04-streaming-diff-semantic-brief | Pending |
+| POL-01 | Phase 5 | 05-polish-and-verify | Pending |
+| POL-02 | Phase 5 | 05-polish-and-verify | Pending |
+| POL-03 | Phase 5 | 05-polish-and-verify | Pending |
+| POL-04 | Phase 5 | 05-polish-and-verify | Pending |
+| POL-05 | Phase 5 | 05-polish-and-verify | Pending |
+| POL-06 | Phase 5 | 05-polish-and-verify | Pending |
 
 **Coverage:**
 - v1 requirements: 36 total (3 + 6 + 4 + 5 + 5 + 4 + 3 + 6)
 - Mapped to phases: 36
 - Unmapped: 0 ✓
+- Double-mapped: 0 ✓
 
 ---
 *Requirements defined: 2026-05-26*
-*Last updated: 2026-05-26 after v0.4 UX Foundation research + scope decisions*
+*Last updated: 2026-05-26 after v0.4 ROADMAP.md creation (5 phases, slug-annotated)*
