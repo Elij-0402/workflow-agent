@@ -8,6 +8,20 @@
 
 **双书蓝图主路径必须顺畅且令人愿意每天用**：两本上传 → 章节分析 → 编辑并确认蓝图 → 生成变体；整条链路在视觉与交互上清晰、安静、可预期。
 
+## Current Milestone: v0.4 UX Foundation
+
+**Goal:** 在 v0.3 UX 收敛基础上，将双书蓝图主路径从「功能可用」推到「商业 SaaS 级精品体验」，让用户每天愿意打开。
+
+**Target features:**
+
+- 信息架构与导航深化（⌘K 命令面板、统一新建 CTA、深化壳层）
+- 工作台分步重构（拆 workbench-client 巨型组件、每步独立路由、URL 即状态）
+- 蓝图编辑器重做（卡片列表 + inline 编辑 + 节点级键盘快捷键）
+- Studio 生成与 Diff 重做（语义化简报、流式双栏、Diff 染色直渲）
+- 设计 Token 收尾与视觉打磨（字号违规清零、统一状态色、过渡动画、骨架态）
+
+**风格基线**：现代深色极简（Linear / Vercel 风）；保持 Next.js 15 + Supabase + Shadcn/Tailwind 栈不变；砍单书入口、Compare/Library 推到 v0.5+。
+
 ## Requirements
 
 ### Validated
@@ -28,7 +42,9 @@
 
 ### Active
 
-（无 — 下一里程碑由 `/gsd-new-milestone` 定义新需求集）
+<!-- v0.4 UX Foundation 需求集由 REQUIREMENTS.md 定义，将由 Phase 1–5 实施 -->
+
+- [ ] v0.4 UX Foundation requirements — see `.planning/REQUIREMENTS.md`
 
 ### Deferred (v2)
 
@@ -82,4 +98,4 @@
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-26 after v0.3 UX 收敛 milestone*
+*Last updated: 2026-05-26 after v0.4 UX Foundation milestone start*
