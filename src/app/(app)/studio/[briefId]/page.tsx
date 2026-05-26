@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { OutlineSchema } from "@/lib/prompts/preview-outline";
 import { createClient } from "@/lib/supabase/server";
 import {
-  CreativeBriefSchema,
+  parseSafeBriefRow,
   type CreativeBrief,
 } from "@/lib/types/creative-brief";
 
@@ -36,15 +36,7 @@ export default async function StudioBriefPage({ params }: Props) {
     .maybeSingle();
   if (!row) notFound();
 
-  const briefParsed = CreativeBriefSchema.safeParse({
-    title: row.title,
-    persona_directives: row.persona_directives,
-    plot_directives: row.plot_directives,
-    style_directives: row.style_directives,
-    retention_rules: row.retention_rules,
-  });
-  if (!briefParsed.success) notFound();
-  const initial: CreativeBrief = briefParsed.data;
+  const initial: CreativeBrief = parseSafeBriefRow(row);
 
   const [{ data: session }, { data: variants }] = await Promise.all([
     supabase

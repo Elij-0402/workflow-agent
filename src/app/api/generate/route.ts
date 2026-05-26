@@ -1,36 +1,10 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { asLLMClientError } from "@/lib/llm/errors";
-import { runLLMObject } from "@/lib/llm/runtime";
-import { assertWithinRateLimit } from "@/lib/rate-limit";
-import {
-  buildGenerateUserPrompt,
-  GENERATE_SYSTEM_PROMPT,
-  GENERATE_PROMPT_VERSION,
-  GENERATE_SCHEMA_VERSION,
-  GENERATE_TEXT_CHAR_LIMIT,
-  GENERATE_TITLE_FALLBACK,
-  scopeToMaxTokens,
-} from "@/lib/prompts/generate";
-import { loadActiveSession } from "@/lib/sessions/guard";
-import {
-  getSessionStatusAfterGenerateFailure,
-  getSessionStatusAfterGenerateSuccess,
-  shouldEnterGeneratingStatus,
-} from "@/lib/session-status";
 import { createClient } from "@/lib/supabase/server";
-import { countWords } from "@/lib/text/clean";
-import {
-  ANALYSIS_DIMENSIONS,
-  CharactersResultSchema,
-  GenerateConfigSchema,
-  NarrativeResultSchema,
-  VariantResultSchema,
-  WorldviewResultSchema,
-  type AnalysisDimension,
-  type GenerateAnalyses,
-} from "@/lib/types";
+import { asLLMClientError } from "@/lib/llm/errors";
+import { executeVariantGeneration, ServiceError } from "@/lib/services/generation-service";
+import { GenerateConfigSchema } from "@/lib/types";
 
 export const runtime = "nodejs";
 export const maxDuration = 300;
@@ -40,45 +14,7 @@ const requestSchema = z.object({
   config: GenerateConfigSchema,
 });
 
-class RouteError extends Error {
-  constructor(
-    message: string,
-    readonly status: number,
-  ) {
-    super(message);
-    this.name = "RouteError";
-  }
-}
-
-function jsonError(message: string, status: number) {
-  return NextResponse.json({ error: message }, { status });
-}
-
-function parseAnalyses(
-  rows: Array<{ dimension: AnalysisDimension; result: unknown }>,
-): GenerateAnalyses | null {
-  const byDimension = new Map(rows.map((row) => [row.dimension, row.result]));
-
-  const worldview = WorldviewResultSchema.safeParse(
-    byDimension.get("worldview"),
-  );
-  const characters = CharactersResultSchema.safeParse(
-    byDimension.get("characters"),
-  );
-  const narrative = NarrativeResultSchema.safeParse(
-    byDimension.get("narrative"),
-  );
-
-  if (!worldview.success || !characters.success || !narrative.success) {
-    return null;
-  }
-
-  return {
-    worldview: worldview.data,
-    characters: characters.data,
-    narrative: narrative.data,
-  };
-}
+const GENERATE_GENERIC_FAILURE = "生成失败，请稍后重试。";
 
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -87,214 +23,40 @@ export async function POST(request: Request) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return jsonError("请先登录。", 401);
+    return NextResponse.json({ error: "请先登录。" }, { status: 401 });
   }
 
   let parsedBody: z.infer<typeof requestSchema>;
   try {
     parsedBody = requestSchema.parse(await request.json());
   } catch {
-    return jsonError("请求参数不正确。", 400);
+    return NextResponse.json({ error: "请求参数不正确。" }, { status: 400 });
   }
-
-  const { session, guard } = await loadActiveSession(
-    supabase,
-    parsedBody.sessionId,
-    user.id,
-  );
-  if (!guard.ok) {
-    return jsonError(guard.message, guard.status);
-  }
-  if (!session) {
-    return jsonError("未找到对应会话。", 404);
-  }
-
-  if (session.mode === "dual") {
-    return jsonError("双书任务请使用蓝图生成入口。", 409);
-  }
-
-  if (session.status !== "analyzed" && session.status !== "done") {
-    return jsonError("请先完成三维度分析。", 409);
-  }
-
-  const { data: book, error: bookError } = await supabase
-    .from("books")
-    .select("id, cleaned_content")
-    .eq("session_id", session.id)
-    .eq("user_id", user.id)
-    .maybeSingle();
-
-  if (bookError) {
-    return jsonError("读取书籍内容失败，请稍后再试。", 500);
-  }
-
-  if (!book?.cleaned_content?.trim()) {
-    return jsonError("当前书籍内容不可用。", 400);
-  }
-
-  const [
-    { data: analyses, error: analysesError },
-    { count: variantCount, error: variantCountError },
-  ] = await Promise.all([
-    supabase
-      .from("analyses")
-      .select("dimension, result")
-      .eq("user_id", user.id)
-      .eq("book_id", book.id),
-    supabase
-      .from("variants")
-      .select("*", { count: "exact", head: true })
-      .eq("session_id", session.id)
-      .eq("user_id", user.id),
-  ]);
-
-  if (analysesError) {
-    return jsonError("读取分析结果失败，请稍后再试。", 500);
-  }
-
-  if (variantCountError) {
-    return jsonError("读取变体列表失败，请稍后再试。", 500);
-  }
-
-  if ((analyses?.length ?? 0) !== ANALYSIS_DIMENSIONS.length) {
-    return jsonError("请先完成三维度分析。", 409);
-  }
-
-  const parsedAnalyses = parseAnalyses(
-    (analyses ?? []) as Array<{
-      dimension: AnalysisDimension;
-      result: unknown;
-    }>,
-  );
-
-  if (!parsedAnalyses) {
-    return jsonError("请先完成三维度分析。", 409);
-  }
-
-  const excerpt = book.cleaned_content.slice(0, GENERATE_TEXT_CHAR_LIMIT);
-  const existingVariantCount = variantCount ?? 0;
-  let statusFlipped = false;
-  let variantCreated = false;
 
   try {
-    if (shouldEnterGeneratingStatus(session.status)) {
-      const { error: statusError } = await supabase
-        .from("sessions")
-        .update({ status: "generating" })
-        .eq("id", session.id)
-        .eq("user_id", user.id)
-        .eq("status", "analyzed");
-
-      if (statusError) {
-        throw new RouteError("更新会话状态失败，请稍后再试。", 500);
-      }
-
-      statusFlipped = true;
-    }
-
-    const rateLimit = await assertWithinRateLimit(supabase, user.id);
-    if (!rateLimit.ok) {
-      throw new RouteError(rateLimit.message, rateLimit.status);
-    }
-
-    const prompt = buildGenerateUserPrompt({
-      analyses: parsedAnalyses,
+    const result = await executeVariantGeneration(supabase, {
+      sessionId: parsedBody.sessionId,
       config: parsedBody.config,
-      excerpt,
+      userId: user.id,
     });
-    const result = await runLLMObject({
-      supabase,
-      route: "/api/generate",
-      operation: "generate_variant",
-      schema: VariantResultSchema,
-      system: GENERATE_SYSTEM_PROMPT,
-      prompt,
-      promptVersion: GENERATE_PROMPT_VERSION,
-      schemaVersion: GENERATE_SCHEMA_VERSION,
-      maxTokens: scopeToMaxTokens(parsedBody.config.output_scope),
-      cacheSeed: {
-        sessionId: session.id,
-        analyses: parsedAnalyses,
-        config: parsedBody.config,
-        excerpt,
-      },
-    });
-    const { object } = result;
-
-    const title = object.title.trim() || GENERATE_TITLE_FALLBACK;
-    const content = object.content.trim();
-
-    if (!content) {
-      throw new RouteError("生成失败，请稍后重试。", 502);
-    }
-
-    const wordCount = countWords(content);
-    const { data: insertedVariant, error: insertError } = await supabase
-      .from("variants")
-      .insert({
-        session_id: session.id,
-        user_id: user.id,
-        title,
-        config: parsedBody.config,
-        content,
-        word_count: wordCount,
-        llm_config_id: result.llm.configId,
-        prompt_version: GENERATE_PROMPT_VERSION,
-        schema_version: GENERATE_SCHEMA_VERSION,
-        prompt_tokens: result.usage.promptTokens,
-        completion_tokens: result.usage.completionTokens,
-        estimated_cost_cny: result.estimatedCostCNY,
-        cache_key: result.cacheKey,
-      })
-      .select("id")
-      .single();
-
-    if (insertError || !insertedVariant) {
-      throw new RouteError("保存变体失败，请稍后再试。", 500);
-    }
-
-    variantCreated = true;
-
-    if (shouldEnterGeneratingStatus(session.status)) {
-      const { error: doneError } = await supabase
-        .from("sessions")
-        .update({ status: getSessionStatusAfterGenerateSuccess() })
-        .eq("id", session.id)
-        .eq("user_id", user.id);
-
-      if (doneError) {
-        throw new RouteError("更新会话状态失败，请稍后再试。", 500);
-      }
-    }
 
     return NextResponse.json({
       ok: true,
-      variantId: insertedVariant.id,
-      title,
-      wordCount,
+      variantId: result.variantId,
+      title: result.title,
+      wordCount: result.wordCount,
     });
   } catch (error) {
-    if (statusFlipped) {
-      const restoreStatus = getSessionStatusAfterGenerateFailure(
-        existingVariantCount + (variantCreated ? 1 : 0),
-      );
-
-      await supabase
-        .from("sessions")
-        .update({ status: restoreStatus })
-        .eq("id", session.id)
-        .eq("user_id", user.id);
-    }
-
-    if (error instanceof RouteError) {
-      return jsonError(error.message, error.status);
+    if (error instanceof ServiceError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
     }
 
     const clientError = asLLMClientError(error, {
       code: "llm_request_failed",
-      userMessage: "生成失败，请稍后重试。",
+      userMessage: GENERATE_GENERIC_FAILURE,
       retryable: true,
     });
+
     return NextResponse.json({ error: clientError }, { status: 502 });
   }
 }

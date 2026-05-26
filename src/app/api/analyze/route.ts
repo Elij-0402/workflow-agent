@@ -1,27 +1,9 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import {
-  getBookAnalysisBlockingReason,
-  getBookProviderCompatibility,
-  resolveBookAnalysisView,
-} from "@/lib/books/content";
-import { saveAnalysis } from "@/lib/analysis-store";
-import { asLLMClientError } from "@/lib/llm/errors";
-import { runLLMObject } from "@/lib/llm/runtime";
-import { assertWithinRateLimit } from "@/lib/rate-limit";
-import { getUserLLMClient } from "@/lib/llm/dispatch";
-import {
-  ANALYSIS_TEXT_CHAR_LIMIT,
-  ANALYSIS_DIMENSION_CONFIG,
-} from "@/lib/prompts";
-import { wrapUntrustedNovel } from "@/lib/prompts/safety";
-import { loadActiveSession } from "@/lib/sessions/guard";
 import { createClient } from "@/lib/supabase/server";
-import {
-  getSessionStatusAfterAnalysis,
-  shouldEnterAnalyzingStatus,
-} from "@/lib/session-status";
+import { asLLMClientError } from "@/lib/llm/errors";
+import { executeBookAnalysis, ServiceError } from "@/lib/services/analysis-service";
 import {
   LEGACY_ANALYSIS_DIMENSIONS,
   type LegacyAnalysisDimension,
@@ -40,22 +22,7 @@ const requestSchema = z.object({
   ),
 });
 
-const ANALYSIS_LOCKED_MESSAGE = "当前正在生成，暂不可重新分析。";
 const ANALYSIS_GENERIC_FAILURE = "分析失败，请稍后重试。";
-
-class RouteError extends Error {
-  constructor(
-    message: string,
-    readonly status: number,
-  ) {
-    super(message);
-    this.name = "RouteError";
-  }
-}
-
-function jsonError(message: string, status: number) {
-  return NextResponse.json({ error: message }, { status });
-}
 
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -64,195 +31,31 @@ export async function POST(request: Request) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return jsonError("请先登录。", 401);
+    return NextResponse.json({ error: "请先登录。" }, { status: 401 });
   }
 
   let parsedBody: z.infer<typeof requestSchema>;
   try {
     parsedBody = requestSchema.parse(await request.json());
   } catch {
-    return jsonError("请求参数不正确。", 400);
+    return NextResponse.json({ error: "请求参数不正确。" }, { status: 400 });
   }
-
-  const { session, guard } = await loadActiveSession(
-    supabase,
-    parsedBody.sessionId,
-    user.id,
-  );
-  if (!guard.ok) {
-    return jsonError(guard.message, guard.status);
-  }
-  if (!session) {
-    return jsonError("未找到对应会话。", 404);
-  }
-
-  if (session.mode === "dual") {
-    return jsonError("双书任务请使用工作台的章节分析入口。", 409);
-  }
-
-  if (session.status === "generating") {
-    return jsonError(ANALYSIS_LOCKED_MESSAGE, 409);
-  }
-
-  const { data: book, error: bookError } = await supabase
-    .from("books")
-    .select("id, cleaned_content, metadata, storage_path")
-    .eq("session_id", session.id)
-    .eq("user_id", user.id)
-    .maybeSingle();
-
-  if (bookError) {
-    return jsonError("读取书籍内容失败，请稍后再试。", 500);
-  }
-
-  if (!book) {
-    return jsonError("当前书籍内容不可用。", 400);
-  }
-
-  const blockingReason = getBookAnalysisBlockingReason(book.metadata);
-  if (blockingReason) {
-    return jsonError(blockingReason, 409);
-  }
-
-  const llm = await getUserLLMClient(supabase);
-  const providerCompatibility = getBookProviderCompatibility(
-    book.metadata,
-    llm.provider,
-  );
-  if (providerCompatibility.status === "incompatible") {
-    return jsonError(
-      providerCompatibility.reason ??
-        "当前模型不兼容该内容类型，请切换模型后再试。",
-      409,
-    );
-  }
-
-  const promptConfig = ANALYSIS_DIMENSION_CONFIG[parsedBody.dimension];
-  const analysisView = await resolveBookAnalysisView(supabase, book);
-  if (!analysisView) {
-    return jsonError("当前书籍内容不可用。", 400);
-  }
-  const excerpt = analysisView.slice(0, ANALYSIS_TEXT_CHAR_LIMIT);
-  let currentStatus = session.status;
-  let statusFlipped = false;
-  let analysisSaved = false;
 
   try {
-    if (shouldEnterAnalyzingStatus(currentStatus)) {
-      const { error: statusError } = await supabase
-        .from("sessions")
-        .update({ status: "analyzing" })
-        .eq("id", session.id)
-        .eq("user_id", user.id)
-        .eq("status", "uploaded");
-
-      if (statusError) {
-        throw new RouteError("更新会话状态失败，请稍后再试。", 500);
-      }
-
-      currentStatus = "analyzing";
-      statusFlipped = true;
-    }
-
-    const rateLimit = await assertWithinRateLimit(supabase, user.id);
-    if (!rateLimit.ok) {
-      throw new RouteError(rateLimit.message, rateLimit.status);
-    }
-
-    const result = await runLLMObject({
-      supabase,
-      route: "/api/analyze",
-      operation: `analysis:${parsedBody.dimension}`,
-      schema: promptConfig.schema,
-      system: promptConfig.systemPrompt,
-      prompt: wrapUntrustedNovel(excerpt),
-      promptVersion: promptConfig.promptVersion,
-      schemaVersion: promptConfig.schemaVersion,
-      cacheSeed: {
-        bookId: book.id,
-        dimension: parsedBody.dimension,
-        excerpt,
-      },
-    });
-
-    const { error: upsertError } = await saveAnalysis({
-      supabase,
-      userId: user.id,
-      bookId: book.id,
-      scope: "book",
+    const result = await executeBookAnalysis(supabase, {
+      sessionId: parsedBody.sessionId,
       dimension: parsedBody.dimension,
-      result: result.object,
-      llmConfigId: result.llm.configId,
-      promptTokens: result.usage.promptTokens,
-      completionTokens: result.usage.completionTokens,
-      promptVersion: promptConfig.promptVersion,
-      schemaVersion: promptConfig.schemaVersion,
-      estimatedCostCNY: result.estimatedCostCNY,
-      cacheKey: result.cacheKey,
+      userId: user.id,
     });
-
-    if (upsertError) {
-      throw new RouteError("保存分析结果失败，请稍后再试。", 500);
-    }
-
-    analysisSaved = true;
-
-    const [
-      { count: analysisCount, error: analysisCountError },
-      { count: variantCount, error: variantCountError },
-    ] = await Promise.all([
-      supabase
-        .from("analyses")
-        .select("*", { count: "exact", head: true })
-        .eq("book_id", book.id)
-        .eq("user_id", user.id),
-      supabase
-        .from("variants")
-        .select("*", { count: "exact", head: true })
-        .eq("session_id", session.id)
-        .eq("user_id", user.id),
-    ]);
-
-    if (analysisCountError || variantCountError) {
-      throw new RouteError("更新会话状态失败，请稍后再试。", 500);
-    }
-
-    const nextStatus = getSessionStatusAfterAnalysis({
-      analysisCount: analysisCount ?? 0,
-      totalAnalyses: LEGACY_ANALYSIS_DIMENSIONS.length,
-      variantCount: variantCount ?? 0,
-    });
-
-    if (nextStatus !== currentStatus) {
-      const { error: statusError } = await supabase
-        .from("sessions")
-        .update({ status: nextStatus })
-        .eq("id", session.id)
-        .eq("user_id", user.id);
-
-      if (statusError) {
-        throw new RouteError("更新会话状态失败，请稍后再试。", 500);
-      }
-    }
 
     return NextResponse.json({
       ok: true,
-      dimension: parsedBody.dimension,
-      result: result.object,
+      dimension: result.dimension,
+      result: result.result,
     });
   } catch (error) {
-    // Restore session.status if we flipped it but never saved an analysis row.
-    // Mirrors the rollback pattern in src/app/api/generate/route.ts.
-    if (statusFlipped && !analysisSaved) {
-      await supabase
-        .from("sessions")
-        .update({ status: "uploaded" })
-        .eq("id", session.id)
-        .eq("user_id", user.id);
-    }
-
-    if (error instanceof RouteError) {
-      return jsonError(error.message, error.status);
+    if (error instanceof ServiceError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
     }
 
     const clientError = asLLMClientError(error, {
@@ -260,6 +63,7 @@ export async function POST(request: Request) {
       userMessage: ANALYSIS_GENERIC_FAILURE,
       retryable: true,
     });
+
     return NextResponse.json(
       { error: clientError },
       {
